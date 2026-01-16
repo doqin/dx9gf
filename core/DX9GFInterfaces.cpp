@@ -1,5 +1,10 @@
 ﻿#include "DX9GFInterfaces.h"
 
+HWND DX9GF::IGame::GetHwnd() const
+{
+	return hwnd;
+}
+
 DX9GF::IGame::~IGame()
 {
 	this->Dispose();
@@ -31,25 +36,20 @@ HRESULT DX9GF::IGame::Init()
 		hwnd, // Cửa sổ ứng dụng
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 		&d3dpp, // Các tham số thể hiện của thiết bị
-		&d3ddev // đối tượng dev được tạo ra
+		&graphicsDevice.GetDevice() // đối tượng dev được tạo ra
 	);
 
-	if (d3ddev == NULL) {
+	if (graphicsDevice.GetDevice() == NULL) {
 		MessageBox(hwnd, L"Error creating Direct3D device", L"Error", MB_OK | MB_ICONEXCLAMATION);
 		return 0;
 	}
 
-	// clear the backbuffer to black
-	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-
 	// create pointer to the back buffer
-	d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backbuffer);
+	graphicsDevice.GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice.GetBackBuffer());
 	return 1;
 }
 
 void DX9GF::IGame::Dispose()
 {
-	if (d3ddev != NULL) d3ddev->Release();
-
 	if (d3d != NULL) d3d->Release();
 }

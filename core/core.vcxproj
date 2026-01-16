@@ -142,7 +142,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -187,11 +187,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DX9GFApplication.cpp" />
+    <ClCompile Include="DX9GFGraphicsDevice.cpp" />
     <ClCompile Include="DX9GFInterfaces.cpp" />
+    <ClCompile Include="DX9GFSprite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GFApplication.h" />
+    <ClInclude Include="DX9GFGraphicsDevice.h" />
     <ClInclude Include="DX9GFInterfaces.h" />
+    <ClInclude Include="DX9GFSprite.h" />
     <ClInclude Include="framework.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
