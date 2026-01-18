@@ -5,7 +5,8 @@
 class ExampleGame : public DX9GF::IGame
 {
 private:
-	DX9GF::StaticSprite obj1;
+	DX9GF::StaticSprite colorRec;
+	DX9GF::StaticSprite textureRec;
 public:
 	ExampleGame(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : IGame(hwnd, screenWidth, screenHeight) {};
 	HRESULT Init() override;

@@ -15,7 +15,7 @@ HRESULT DX9GF::IGame::Init()
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 	if (d3d == NULL) {
 		MessageBox(hwnd, L"Error initializing Direct3D", L"Error", MB_OK | MB_ICONEXCLAMATION);
-		return 0;
+		return E_FAIL;
 	}
 
 	D3DPRESENT_PARAMETERS d3dpp;
@@ -41,12 +41,12 @@ HRESULT DX9GF::IGame::Init()
 
 	if (graphicsDevice.GetDevice() == NULL) {
 		MessageBox(hwnd, L"Error creating Direct3D device", L"Error", MB_OK | MB_ICONEXCLAMATION);
-		return 0;
+		return E_FAIL;
 	}
 
 	// create pointer to the back buffer
 	graphicsDevice.GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice.GetBackBuffer());
-	return 1;
+	return S_OK;
 }
 
 void DX9GF::IGame::Dispose()

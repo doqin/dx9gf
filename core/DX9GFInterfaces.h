@@ -42,5 +42,15 @@ namespace DX9GF {
 		/// </summary>
 		virtual void Dispose();
 	};
+
+	class ISprite {
+	protected:
+		GraphicsDevice* graphicsDevice;
+	public:
+		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
+		ISprite() {}
+
+		virtual void Draw() = 0;
+	};
 };
 

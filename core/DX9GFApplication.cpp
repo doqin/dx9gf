@@ -53,8 +53,8 @@ void DX9GF::Application::AttachGame(IGame* game)
 
 HRESULT DX9GF::Application::Run()
 {
-	if (!p_game->Init()) {
-		return 0;
+	if (p_game->Init() != S_OK) {
+		return E_FAIL;
 	}
 
 	MSG msg;
