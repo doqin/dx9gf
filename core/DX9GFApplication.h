@@ -27,10 +27,10 @@ namespace DX9GF {
 			screenHeight(screenHeight) {}
 
 		/// <summary>
-		/// Creates the application and window handle
+		/// Initialization.
 		/// </summary>
-		/// <returns>An HRESULT indicating success or failure of the operation.</returns>
-		HRESULT Create();
+		/// <returns>An expected object containing either success or an error message string on failure.</returns>
+		std::expected<void, std::wstring> Create();
 
 		/// <summary>
 		/// Gets the window handle associated with this object.
@@ -45,10 +45,10 @@ namespace DX9GF {
 		static void AttachGame(IGame* game);
 
 		/// <summary>
-		/// Executes the application
+		/// Executes the run operation.
 		/// </summary>
-		/// <returns>An HRESULT indicating success (S_OK) or failure of the operation.</returns>
-		HRESULT Run();
+		/// <returns>An expected object containing either success (void) or an error message string.</returns>
+		std::expected<void, std::wstring> Run();
 	private:
 		ATOM AppRegisterClass();
 	};

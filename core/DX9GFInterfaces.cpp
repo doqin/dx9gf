@@ -10,12 +10,11 @@ DX9GF::IGame::~IGame()
 	this->Dispose();
 }
 
-HRESULT DX9GF::IGame::Init()
+std::expected<void, std::wstring> DX9GF::IGame::Init()
 {
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 	if (d3d == NULL) {
-		MessageBox(hwnd, L"Error initializing Direct3D", L"Error", MB_OK | MB_ICONEXCLAMATION);
-		return E_FAIL;
+		return std::unexpected(L"Error initializing Direct3D");
 	}
 
 	D3DPRESENT_PARAMETERS d3dpp;
@@ -40,16 +39,31 @@ HRESULT DX9GF::IGame::Init()
 	);
 
 	if (graphicsDevice.GetDevice() == NULL) {
-		MessageBox(hwnd, L"Error creating Direct3D device", L"Error", MB_OK | MB_ICONEXCLAMATION);
-		return E_FAIL;
+		return std::unexpected(L"Error creating Direct3D device");
 	}
 
 	// create pointer to the back buffer
 	graphicsDevice.GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice.GetBackBuffer());
-	return S_OK;
+	return {};
 }
 
 void DX9GF::IGame::Dispose()
 {
 	if (d3d != NULL) d3d->Release();
+}
+
+void
+DX9GF::ISprite::Translate(
+	float x,
+	float y
+)
+{
+	pos.x += x;
+	pos.y += y;
+}
+
+void DX9GF::ISprite::SetPosition(float x, float y)
+{
+	pos.x = x;
+	pos.y = y;
 }

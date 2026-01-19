@@ -1,5 +1,8 @@
 ﻿#pragma once
 #include "DX9GFGraphicsDevice.h"
+#include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h"
+#include <expected>
+#include <string>
 
 namespace DX9GF {
 	class IGame
@@ -22,10 +25,10 @@ namespace DX9GF {
 		~IGame();
 
 		/// <summary>
-		/// Initializes the game graphics device and resources.
+		/// Initializes the object.
 		/// </summary>
-		/// <returns>An HRESULT indicating success or failure of the initialization.</returns>
-		virtual HRESULT Init();
+		/// <returns>An expected value containing void on success, or a wide string error message on failure.</returns>
+		virtual std::expected<void, std::wstring> Init();
 
 		/// <summary>
 		/// Updates the game's state.
@@ -46,11 +49,28 @@ namespace DX9GF {
 	class ISprite {
 	protected:
 		GraphicsDevice* graphicsDevice;
+		ID3DXSprite* p_sprite = nullptr;
+		D3DXVECTOR3 pos;
+		D3DCOLOR color = 0xFFFFFFFF;
 	public:
 		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
 		ISprite() {}
 
-		virtual void Draw() = 0;
+		virtual std::expected<void, std::wstring> Draw() = 0;
+
+		/// <summary>
+		/// Translates the current position by the specified x and y offsets.
+		/// </summary>
+		/// <param name="x">The horizontal offset to translate by.</param>
+		/// <param name="y">The vertical offset to translate by.</param>
+		void Translate(float x, float y);
+
+		/// <summary>
+		/// Sets the position of the sprite
+		/// </summary>
+		/// <param name="x">The position in the horizontal coordinate</param>
+		/// <param name="y">The position in the vertical coordinate</param>
+		void SetPosition(float x, float y);
 	};
 };
 

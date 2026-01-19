@@ -15,7 +15,7 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-HRESULT DX9GF::Application::Create()
+std::expected<void, std::wstring> DX9GF::Application::Create()
 {
 	// Very important =)))
 	AppRegisterClass();
@@ -36,9 +36,9 @@ HRESULT DX9GF::Application::Create()
 	);
 
 	if (!hwnd) {
-		MessageBox(NULL, L"Error creating window", L"Error", MB_OK | MB_ICONEXCLAMATION);
-		return 0;
+		return std::unexpected(L"Error creating window");
 	}
+	return {};
 }
 
 HWND DX9GF::Application::GetHWnd() const
@@ -51,10 +51,10 @@ void DX9GF::Application::AttachGame(IGame* game)
 	p_game = game;
 }
 
-HRESULT DX9GF::Application::Run()
+std::expected<void, std::wstring> DX9GF::Application::Run()
 {
-	if (p_game->Init() != S_OK) {
-		return E_FAIL;
+	if (auto result = p_game->Init(); !result.has_value()) {
+		return std::unexpected(result.error());
 	}
 
 	MSG msg;
@@ -73,7 +73,7 @@ HRESULT DX9GF::Application::Run()
 		}
 	}
 
-	return msg.wParam;
+	return {};
 }
 
 ATOM DX9GF::Application::AppRegisterClass()

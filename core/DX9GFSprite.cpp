@@ -57,7 +57,7 @@ DX9GF::StaticSprite::New(
 	return sprite;
 }
 
-HRESULT DX9GF::StaticSprite::CreatePlainTexture(D3DCOLOR color, UINT width, UINT height)
+std::expected<void, std::wstring> DX9GF::StaticSprite::CreatePlainTexture(D3DCOLOR color, UINT width, UINT height)
 {
 	if (p_texture != nullptr) p_texture->Release();
 	HRESULT result = graphicsDevice->GetDevice()->CreateTexture(
@@ -68,14 +68,14 @@ HRESULT DX9GF::StaticSprite::CreatePlainTexture(D3DCOLOR color, UINT width, UINT
 		&p_texture,
 		nullptr
 	);
-	if (result != S_OK) return E_FAIL;
+	if (result != S_OK) return std::unexpected(DXGetErrorDescription(result));
 	// Lock the texture
 	D3DLOCKED_RECT lockedRect;
 	result = p_texture->LockRect(0, &lockedRect, nullptr, 0);
 	if (FAILED(result))
 	{
 		p_texture->Release();
-		return E_FAIL;
+		return std::unexpected(DXGetErrorDescription(result));
 	}
 
 	// Fill the texture with the color
@@ -94,10 +94,11 @@ HRESULT DX9GF::StaticSprite::CreatePlainTexture(D3DCOLOR color, UINT width, UINT
 	p_texture->UnlockRect(0);
 	this->width = width;
 	this->height = height;
-	return S_OK;
+
+	return {};
 }
 
-HRESULT DX9GF::StaticSprite::SetColor(D3DCOLOR color)
+std::expected<void, std::wstring> DX9GF::StaticSprite::SetColor(D3DCOLOR color)
 {
 	// Lock the texture
 	D3DLOCKED_RECT lockedRect;
@@ -105,7 +106,7 @@ HRESULT DX9GF::StaticSprite::SetColor(D3DCOLOR color)
 	if (FAILED(result))
 	{
 		p_texture->Release();
-		return E_FAIL;
+		return std::unexpected(DXGetErrorDescription(result));
 	}
 
 	// Fill the texture with the color
@@ -124,15 +125,16 @@ HRESULT DX9GF::StaticSprite::SetColor(D3DCOLOR color)
 	p_texture->UnlockRect(0);
 }
 
-HRESULT 
+std::expected<void, std::wstring>
 DX9GF::StaticSprite::LoadTexture(
 	std::wstring filePath, 
-	UINT width = D3DX_DEFAULT, 
-	UINT height = D3DX_DEFAULT
+	UINT width, 
+	UINT height
 )
 {
 	if (this->p_texture != nullptr) p_texture->Release();
-	return D3DXCreateTextureFromFileExW(
+	if (graphicsDevice->GetDevice() == nullptr) return std::unexpected(L"Graphics device is null");
+	auto result = D3DXCreateTextureFromFileExW(
 		graphicsDevice->GetDevice(),
 		filePath.c_str(),
 		width,
@@ -148,9 +150,11 @@ DX9GF::StaticSprite::LoadTexture(
 		nullptr,
 		&p_texture
 	);
+	if (result != D3D_OK) return std::unexpected(DXGetErrorDescription(result));
+	return {};
 }
 
-void 
+std::expected<void, std::wstring>
 DX9GF::StaticSprite::Draw()
 {
 	p_sprite->Begin(D3DXSPRITE_ALPHABLEND);
@@ -162,22 +166,7 @@ DX9GF::StaticSprite::Draw()
 		color
 	);
 	p_sprite->End();
-}
-
-void 
-DX9GF::StaticSprite::Translate(
-	float x, 
-	float y
-)
-{
-	pos.x += x;
-	pos.y += y;
-}
-
-void DX9GF::StaticSprite::SetPosition(float x, float y)
-{
-	pos.x = x;
-	pos.y = y;
+	return {};
 }
 
 void 
@@ -187,4 +176,112 @@ DX9GF::StaticSprite::SetSrcRect(
 {
 	if (this->p_src != nullptr) delete p_src;
 	this->p_src = new RECT(srcRect);
+}
+
+DX9GF::AnimatedSprite::AnimatedSprite(GraphicsDevice* graphicsDevice) : ISprite(graphicsDevice) {}
+
+DX9GF::AnimatedSprite::~AnimatedSprite()
+{
+	if (p_texture != nullptr) p_texture->Release();
+	if (p_sprite != nullptr) p_sprite->Release();
+}
+
+DX9GF::AnimatedSprite::AnimatedSprite(AnimatedSprite&& other) noexcept : ISprite(other.graphicsDevice)
+{
+	p_sprite = other.p_sprite;
+	p_texture = other.p_texture;
+	color = other.color;
+	pos = other.pos;
+	srcs = std::move(other.srcs);
+
+	other.p_sprite = nullptr;
+	other.p_texture = nullptr;
+}
+
+DX9GF::AnimatedSprite& 
+DX9GF::AnimatedSprite::operator=(AnimatedSprite&& other) noexcept
+{
+	if (this != &other)
+	{
+		if (p_texture != nullptr) p_texture->Release();
+		if (p_sprite != nullptr) p_sprite->Release();
+
+		graphicsDevice = other.graphicsDevice;
+		p_sprite = other.p_sprite;
+		p_texture = other.p_texture;
+		color = other.color;
+		pos = other.pos;
+		srcs = std::move(other.srcs);
+
+		other.p_sprite = nullptr;
+		other.p_texture = nullptr;
+	}
+	return *this;
+}
+
+std::expected<DX9GF::AnimatedSprite, std::wstring> 
+DX9GF::AnimatedSprite::New(GraphicsDevice* graphicsDevice)
+{
+	AnimatedSprite sprite(graphicsDevice);
+	HRESULT result = D3DXCreateSprite(graphicsDevice->GetDevice(), &sprite.p_sprite);
+
+	if (result != D3D_OK) return std::unexpected(DXGetErrorDescription(result));
+	return sprite;
+}
+
+std::expected<void, std::wstring> 
+DX9GF::AnimatedSprite::LoadSpriteSheet(
+	std::wstring filePath, 
+	std::vector<RECT> frames, 
+	UINT width, 
+	UINT height
+)
+{
+	if (this->p_texture != nullptr) p_texture->Release();
+	if (graphicsDevice->GetDevice() == nullptr) return std::unexpected(L"Graphics device is null");
+	auto result = D3DXCreateTextureFromFileExW(
+		graphicsDevice->GetDevice(),
+		filePath.c_str(),
+		width,
+		height,
+		1,
+		0,
+		D3DFMT_A8R8G8B8,
+		D3DPOOL_MANAGED,
+		D3DX_FILTER_LINEAR,
+		D3DX_FILTER_LINEAR,
+		0,
+		nullptr,
+		nullptr,
+		&p_texture
+	);
+	if (result != D3D_OK) return std::unexpected(DXGetErrorDescription(result));
+	this->srcs = frames;
+	return {};
+}
+
+std::expected<void, std::wstring> 
+DX9GF::AnimatedSprite::Draw()
+{
+	if (srcs.size() == 0) return std::unexpected(L"Sprite frames are not set!");
+	frame_index++;
+	if (frame_index >= srcs.size()) frame_index = 0;
+	try {
+		auto p_src = &srcs.at(frame_index);
+		if (p_sprite->Begin(D3DXSPRITE_ALPHABLEND)) {
+			p_sprite->Draw(
+				p_texture,
+				p_src,
+				nullptr,
+				&pos,
+				color
+			);
+			p_sprite->End();
+		}
+	}
+	catch (std::exception e) {
+		std::string what_str = e.what();
+		std::wstring w_what(what_str.begin(), what_str.end());
+		return std::unexpected(w_what);
+	}
 }

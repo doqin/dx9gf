@@ -2,22 +2,18 @@
 #include "DX9GFInterfaces.h"
 #include <expected>
 #include <string>
-#include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h"
+#include <vector>
 
 namespace DX9GF {
 	class StaticSprite : public ISprite {
 	private:
 		RECT* p_src;
-		typedef D3DXVECTOR3 Vec3;
-
-		ID3DXSprite* p_sprite = nullptr;
 		IDirect3DTexture9* p_texture = nullptr;
-		D3DCOLOR color = 0xFFFFFFFF;
-		Vec3 pos;
-
+		
 		UINT width, height;
 
 		StaticSprite(GraphicsDevice* graphicsDevice);
+
 	public:
 		StaticSprite() {};
 		~StaticSprite();
@@ -32,37 +28,66 @@ namespace DX9GF {
 		static std::expected<StaticSprite, std::wstring> New(GraphicsDevice* graphicsDevice);
 
 		/// <summary>
-		/// Creates a plain texture with the specified color and dimensions.
+		/// Creates a plain texture with a solid color and specified dimensions.
 		/// </summary>
-		/// <param name="color">The color to fill the texture with.</param>
+		/// <param name="color">The solid color for the texture.</param>
 		/// <param name="width">The width of the texture in pixels.</param>
 		/// <param name="height">The height of the texture in pixels.</param>
-		/// <returns>An HRESULT indicating success or failure of the operation.</returns>
-		HRESULT CreatePlainTexture(D3DCOLOR color, UINT width, UINT height);
-
-		HRESULT SetColor(D3DCOLOR color);
+		/// <returns>Returns void on success, or an error message string on failure.</returns>
+		std::expected<void, std::wstring> CreatePlainTexture(D3DCOLOR color, UINT width, UINT height);
 
 		/// <summary>
-		/// Load sprite with a texture
+		/// Sets the current color.
 		/// </summary>
-		/// <param name="filePath">Path to the texture file</param>
-		/// <returns>An HRESULT of the load</returns>
-		HRESULT LoadTexture(std::wstring filePath, UINT width, UINT height);
+		/// <param name="color">The Direct3D color value to set.</param>
+		/// <returns>An expected object containing void on success, or an error message on failure.</returns>
+		std::expected<void, std::wstring> SetColor(D3DCOLOR color);
+
+		/// <summary>
+		/// Loads a texture from a file with the specified dimensions.
+		/// </summary>
+		/// <param name="filePath">The path to the texture file to load.</param>
+		/// <param name="width">The width of the texture in pixels.</param>
+		/// <param name="height">The height of the texture in pixels.</param>
+		/// <returns>An expected value that is empty on success, or contains an error message on failure.</returns>
+		std::expected<void, std::wstring> LoadTexture(std::wstring filePath, UINT width = D3DX_DEFAULT, UINT height = D3DX_DEFAULT);
 
 		/// <summary>
 		/// Draws the object.
 		/// </summary>
-		void Draw() override;
+		/// <returns>An expected value that is empty on success, or contains an error message on failure.</returns>
+		std::expected<void, std::wstring> Draw() override;
 
 		/// <summary>
-		/// Translates the current position by the specified x and y offsets.
+		/// Sets the source rectangle.
 		/// </summary>
-		/// <param name="x">The horizontal offset to translate by.</param>
-		/// <param name="y">The vertical offset to translate by.</param>
-		void Translate(float x, float y);
-
-		void SetPosition(float x, float y);
-
+		/// <param name="srcRect">The source rectangle to set.</param>
 		void SetSrcRect(RECT srcRect);
+	};
+
+	class AnimatedSprite : public ISprite {
+	private:
+		std::vector<RECT> srcs;
+		IDirect3DTexture9* p_texture = nullptr;
+
+		UINT frame_index = 0;
+
+		AnimatedSprite(GraphicsDevice* graphicsDevice);
+	public:
+		AnimatedSprite() {};
+		~AnimatedSprite();
+		AnimatedSprite(AnimatedSprite&& other) noexcept;
+		AnimatedSprite& operator=(AnimatedSprite&& other) noexcept;
+
+		/// <summary>
+		/// Creates a new AnimatedSprite instance.
+		/// </summary>
+		/// <param name="graphicsDevice">A pointer to the graphics device used to create the sprite.</param>
+		/// <returns>An AnimatedSprite on success, or an error message string on failure.</returns>
+		static std::expected<AnimatedSprite, std::wstring> New(GraphicsDevice* graphicsDevice);
+
+		std::expected<void, std::wstring> LoadSpriteSheet(std::wstring filePath, std::vector<RECT> frames, UINT width = D3DX_DEFAULT, UINT height = D3DX_DEFAULT);
+
+		std::expected<void, std::wstring> Draw() override;
 	};
 };
