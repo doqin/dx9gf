@@ -11,7 +11,7 @@ private:
 public:
 	ExampleGame(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : IGame(hwnd, screenWidth, screenHeight) {};
 	std::expected<void, std::wstring> Init() override;
-	void Update() override;
-	void Draw() override;
+	void Update(ULONGLONG deltaTime) override;
+	void Draw(ULONGLONG deltaTime) override;
 };
 

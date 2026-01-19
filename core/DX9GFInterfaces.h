@@ -31,14 +31,16 @@ namespace DX9GF {
 		virtual std::expected<void, std::wstring> Init();
 
 		/// <summary>
-		/// Updates the game's state.
+		/// Updates the object's state
 		/// </summary>
-		virtual void Update() = 0;
+		/// <param name="deltaTime">The time elapsed since the last frame in milliseconds</param>
+		virtual void Update(ULONGLONG deltaTime) = 0;
 
 		/// <summary>
-		/// Draws the object. This pure virtual function must be implemented by derived classes.
+		/// Draws the frame
 		/// </summary>
-		virtual void Draw() = 0;
+		/// <param name="deltaTime">The time elapsed since the last frame in milliseconds</param>
+		virtual void Draw(ULONGLONG deltaTime) = 0;
 
 		/// <summary>
 		/// Releases all resources used by the object.

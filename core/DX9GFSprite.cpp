@@ -268,16 +268,16 @@ DX9GF::AnimatedSprite::Draw()
 	if (frame_index >= srcs.size()) frame_index = 0;
 	try {
 		auto p_src = &srcs.at(frame_index);
-		if (p_sprite->Begin(D3DXSPRITE_ALPHABLEND)) {
-			p_sprite->Draw(
-				p_texture,
-				p_src,
-				nullptr,
-				&pos,
-				color
-			);
-			p_sprite->End();
-		}
+		p_sprite->Begin(D3DXSPRITE_ALPHABLEND);
+		p_sprite->Draw(
+			p_texture,
+			p_src,
+			nullptr,
+			&pos,
+			color
+		);
+		p_sprite->End();
+		return {};
 	}
 	catch (std::exception e) {
 		std::string what_str = e.what();

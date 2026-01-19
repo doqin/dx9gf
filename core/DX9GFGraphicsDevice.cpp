@@ -7,7 +7,6 @@ DX9GF::GraphicsDevice::GraphicsDevice(IDirect3DDevice9* d3ddev, IDirect3DSurface
 
 DX9GF::GraphicsDevice::~GraphicsDevice() {
 	if (d3ddev != NULL) d3ddev->Release();
-	if (backbuffer != NULL) backbuffer->Release();
 }
 
 IDirect3DDevice9*& DX9GF::GraphicsDevice::GetDevice() {
@@ -32,6 +31,11 @@ HRESULT DX9GF::GraphicsDevice::SetViewport(DWORD x, DWORD y, DWORD width, DWORD 
 HRESULT DX9GF::GraphicsDevice::BeginDraw()
 {
 	return d3ddev->BeginScene();
+}
+
+HRESULT DX9GF::GraphicsDevice::Clear()
+{
+	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 }
 
 HRESULT DX9GF::GraphicsDevice::EndDraw()

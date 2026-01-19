@@ -59,6 +59,8 @@ std::expected<void, std::wstring> DX9GF::Application::Run()
 
 	MSG msg;
 	int done = 0;
+	ULONGLONG start = GetTickCount64();
+	const DWORD FRAMERATE = 60;
 	while (!done) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -68,8 +70,12 @@ std::expected<void, std::wstring> DX9GF::Application::Run()
 			DispatchMessage(&msg);
 		}
 		else {
-			p_game->Update();
-			p_game->Draw();
+			if (GetTickCount64() - start >= 1000 / FRAMERATE) {
+				ULONGLONG deltaTime = GetTickCount64() - start;
+				start = GetTickCount64();
+				p_game->Update(deltaTime);
+				p_game->Draw(deltaTime);
+			}
 		}
 	}
 

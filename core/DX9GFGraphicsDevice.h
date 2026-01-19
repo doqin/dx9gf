@@ -49,6 +49,8 @@ namespace DX9GF {
 		/// <returns>Returns S_OK if successful, or an error code otherwise.</returns>
 		HRESULT BeginDraw();
 
+		HRESULT Clear();
+
 		/// <summary>
 		/// Ends a drawing operation and returns the result of any drawing operations performed since the last call to BeginDraw.
 		/// </summary>

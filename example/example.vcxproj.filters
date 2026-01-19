@@ -34,5 +34,8 @@
     <Image Include="Resources\mario_full.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\spritesheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

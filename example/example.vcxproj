@@ -147,6 +147,7 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="Resources\mario_full.png" />
+    <Image Include="Resources\spritesheet.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
