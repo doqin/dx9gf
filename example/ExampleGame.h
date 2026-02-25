@@ -5,13 +5,14 @@
 class ExampleGame : public DX9GF::IGame
 {
 private:
-	DX9GF::StaticSprite colorRec;
-	DX9GF::StaticSprite textureRec;
-	DX9GF::AnimatedSprite mario;
+	DX9GF::StaticSprite* colorRec;
+	DX9GF::StaticSprite* textureRec;
+	DX9GF::AnimatedSprite* mario;
 public:
 	ExampleGame(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : IGame(hwnd, screenWidth, screenHeight) {};
-	std::expected<void, std::wstring> Init() override;
+	void Init() override;
 	void Update(ULONGLONG deltaTime) override;
 	void Draw(ULONGLONG deltaTime) override;
+	void Dispose() override;
 };
 

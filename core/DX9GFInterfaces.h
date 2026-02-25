@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "DX9GFGraphicsDevice.h"
 #include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h"
-#include <expected>
 #include <string>
 
 namespace DX9GF {
@@ -27,8 +26,7 @@ namespace DX9GF {
 		/// <summary>
 		/// Initializes the object.
 		/// </summary>
-		/// <returns>An expected value containing void on success, or a wide string error message on failure.</returns>
-		virtual std::expected<void, std::wstring> Init();
+		virtual void Init();
 
 		/// <summary>
 		/// Updates the object's state
@@ -45,7 +43,7 @@ namespace DX9GF {
 		/// <summary>
 		/// Releases all resources used by the object.
 		/// </summary>
-		virtual void Dispose();
+		virtual void Dispose() = 0;
 	};
 
 	class ISprite {
@@ -58,7 +56,7 @@ namespace DX9GF {
 		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
 		ISprite() {}
 
-		virtual std::expected<void, std::wstring> Draw() = 0;
+		virtual void Draw() = 0;
 
 		/// <summary>
 		/// Translates the current position by the specified x and y offsets.

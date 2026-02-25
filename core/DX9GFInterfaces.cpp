@@ -1,4 +1,5 @@
 ﻿#include "DX9GFInterfaces.h"
+#include <stdexcept>
 
 HWND DX9GF::IGame::GetHwnd() const
 {
@@ -10,12 +11,10 @@ DX9GF::IGame::~IGame()
 	this->Dispose();
 }
 
-std::expected<void, std::wstring> DX9GF::IGame::Init()
+void DX9GF::IGame::Init()
 {
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
-	if (d3d == NULL) {
-		return std::unexpected(L"Error initializing Direct3D");
-	}
+	if (d3d == NULL) throw std::runtime_error("Error initializing Direct3D");
 
 	D3DPRESENT_PARAMETERS d3dpp;
 	ZeroMemory(&d3dpp, sizeof(d3dpp)); // Xóa mọi thứ về 0 trước khi sử dụng
@@ -38,13 +37,10 @@ std::expected<void, std::wstring> DX9GF::IGame::Init()
 		&graphicsDevice.GetDevice() // đối tượng dev được tạo ra
 	);
 
-	if (graphicsDevice.GetDevice() == NULL) {
-		return std::unexpected(L"Error creating Direct3D device");
-	}
+	if (graphicsDevice.GetDevice() == NULL) throw std::runtime_error("Error creating Direct3D device");
 
 	// create pointer to the back buffer
 	graphicsDevice.GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice.GetBackBuffer());
-	return {};
 }
 
 void DX9GF::IGame::Dispose()

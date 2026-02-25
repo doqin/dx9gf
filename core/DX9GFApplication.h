@@ -29,8 +29,7 @@ namespace DX9GF {
 		/// <summary>
 		/// Initialization.
 		/// </summary>
-		/// <returns>An expected object containing either success or an error message string on failure.</returns>
-		std::expected<void, std::wstring> Create();
+		void Create();
 
 		/// <summary>
 		/// Gets the window handle associated with this object.
@@ -47,8 +46,7 @@ namespace DX9GF {
 		/// <summary>
 		/// Executes the run operation.
 		/// </summary>
-		/// <returns>An expected object containing either success (void) or an error message string.</returns>
-		std::expected<void, std::wstring> Run();
+		void Run();
 	private:
 		ATOM AppRegisterClass();
 	};
