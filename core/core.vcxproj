@@ -189,15 +189,22 @@
   <ItemGroup>
     <ClCompile Include="DX9GFApplication.cpp" />
     <ClCompile Include="DX9GFGraphicsDevice.cpp" />
-    <ClCompile Include="DX9GFInterfaces.cpp" />
-    <ClCompile Include="DX9GFSprite.cpp" />
+    <ClCompile Include="DX9GFIGame.cpp" />
+    <ClCompile Include="DX9GFIScene.cpp" />
+    <ClCompile Include="DX9GFISprite.cpp" />
+    <ClCompile Include="DX9GFSceneManager.cpp" />
+    <ClCompile Include="DX9GFSprites.cpp" />
     <ClCompile Include="DX9GFUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DX9GF.h" />
     <ClInclude Include="DX9GFApplication.h" />
     <ClInclude Include="DX9GFGraphicsDevice.h" />
-    <ClInclude Include="DX9GFInterfaces.h" />
-    <ClInclude Include="DX9GFSprite.h" />
+    <ClInclude Include="DX9GFIGame.h" />
+    <ClInclude Include="DX9GFIScene.h" />
+    <ClInclude Include="DX9GFISprite.h" />
+    <ClInclude Include="DX9GFSceneManager.h" />
+    <ClInclude Include="DX9GFSprites.h" />
     <ClInclude Include="DX9GFUtils.h" />
     <ClInclude Include="framework.h" />
   </ItemGroup>

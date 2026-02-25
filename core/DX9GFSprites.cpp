@@ -1,4 +1,5 @@
-#include "DX9GFSprite.h"
+#include "DX9GFSprites.h"
+#include "DX9GFGraphicsDevice.h"
 #include <DxErr.h>
 #include <d3dx9.h>
 #include <stdexcept>

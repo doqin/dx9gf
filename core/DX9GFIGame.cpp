@@ -1,14 +1,34 @@
-﻿#include "DX9GFInterfaces.h"
-#include <stdexcept>
+#include "DX9GFIGame.h"
+#include "DX9GFSceneManager.h"
+#include "DX9GFGraphicsDevice.h"
+
+DX9GF::IGame::~IGame()
+{
+}
 
 HWND DX9GF::IGame::GetHwnd() const
 {
 	return hwnd;
 }
 
-DX9GF::IGame::~IGame()
+DX9GF::GraphicsDevice* DX9GF::IGame::GetGraphicsDevice()
 {
-	this->Dispose();
+	return graphicsDevice;
+}
+
+DX9GF::SceneManager* DX9GF::IGame::GetSceneManager()
+{
+	return sceneManager;
+}
+
+void DX9GF::IGame::Update(unsigned long long deltaTime)
+{
+	sceneManager->Update(deltaTime);
+}
+
+void DX9GF::IGame::Draw(unsigned long long deltaTime)
+{
+	sceneManager->Draw(deltaTime);
 }
 
 void DX9GF::IGame::Init()
@@ -27,6 +47,8 @@ void DX9GF::IGame::Init()
 	d3dpp.BackBufferHeight = SCREEN_HEIGHT;
 	d3dpp.hDeviceWindow = hwnd;
 
+	graphicsDevice = new GraphicsDevice();
+	sceneManager = new SceneManager();
 	// Create Direct3D device
 	d3d->CreateDevice(
 		D3DADAPTER_DEFAULT, // Dùng card màn hình mặc định
@@ -34,32 +56,18 @@ void DX9GF::IGame::Init()
 		hwnd, // Cửa sổ ứng dụng
 		D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 		&d3dpp, // Các tham số thể hiện của thiết bị
-		&graphicsDevice.GetDevice() // đối tượng dev được tạo ra
+		&graphicsDevice->GetDevice() // đối tượng dev được tạo ra
 	);
 
-	if (graphicsDevice.GetDevice() == NULL) throw std::runtime_error("Error creating Direct3D device");
+	if (graphicsDevice->GetDevice() == NULL) throw std::runtime_error("Error creating Direct3D device");
 
 	// create pointer to the back buffer
-	graphicsDevice.GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice.GetBackBuffer());
+	graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
 }
 
 void DX9GF::IGame::Dispose()
 {
-	if (d3d != NULL) d3d->Release();
-}
-
-void
-DX9GF::ISprite::Translate(
-	float x,
-	float y
-)
-{
-	pos.x += x;
-	pos.y += y;
-}
-
-void DX9GF::ISprite::SetPosition(float x, float y)
-{
-	pos.x = x;
-	pos.y = y;
+	if (d3d != nullptr) d3d->Release();
+	if (graphicsDevice != nullptr) delete graphicsDevice;
+	if (sceneManager != nullptr) delete sceneManager;
 }

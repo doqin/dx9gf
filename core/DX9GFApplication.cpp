@@ -1,7 +1,7 @@
 ﻿#include "DX9GFApplication.h"
 #include <stdexcept>
 
-DX9GF::IGame* p_game = NULL;
+DX9GF::IGame* p_game = nullptr;
 
 LRESULT CALLBACK WinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -57,7 +57,7 @@ void DX9GF::Application::Run()
 
 	MSG msg;
 	int done = 0;
-	ULONGLONG start = GetTickCount64();
+	unsigned long long start = GetTickCount64();
 	const DWORD FRAMERATE = 60;
 	while (!done) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -69,7 +69,7 @@ void DX9GF::Application::Run()
 		}
 		else {
 			if (GetTickCount64() - start >= 1000 / FRAMERATE) {
-				ULONGLONG deltaTime = GetTickCount64() - start;
+				unsigned long long deltaTime = GetTickCount64() - start;
 				start = GetTickCount64();
 				p_game->Update(deltaTime);
 				p_game->Draw(deltaTime);

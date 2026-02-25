@@ -1,0 +1,30 @@
+#pragma once
+
+namespace DX9GF {
+
+	class IScene {
+	protected:
+		/// <summary>
+		/// Releases all resources used by the object.
+		/// </summary>
+		virtual void Dispose();
+	public:
+		IScene() {}
+		~IScene();
+		/// <summary>
+		/// Initializes the object.
+		/// </summary>
+		virtual void Init() = 0;
+		/// <summary>
+		/// Updates the object's state
+		/// </summary>
+		/// <param name="deltaTime">The time elapsed since the last frame in milliseconds</param>
+		virtual void Update(unsigned long long deltaTime) = 0;
+
+		/// <summary>
+		/// Draws the frame
+		/// </summary>
+		/// <param name="deltaTime">The time elapsed since the last frame in milliseconds</param>
+		virtual void Draw(unsigned long long deltaTime) = 0;
+	};
+};

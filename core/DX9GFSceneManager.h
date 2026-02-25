@@ -1,0 +1,20 @@
+#pragma once
+#include <stack>
+
+namespace DX9GF {
+	class IScene;
+
+	class SceneManager {
+	private:
+		std::stack<IScene*> scenes;
+	protected:
+		void Dispose();
+	public:
+		~SceneManager();
+		void ChangeScene(IScene*);
+		void PushScene(IScene*);
+		void PopScene();
+		void Update(unsigned long long deltaTime);
+		void Draw(unsigned long long deltaTime);
+	};
+}

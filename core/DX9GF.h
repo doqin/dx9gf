@@ -1,0 +1,9 @@
+#pragma once
+#include "DX9GFApplication.h"
+#include "DX9GFGraphicsDevice.h"
+#include "DX9GFIGame.h"
+#include "DX9GFIScene.h"
+#include "DX9GFISprite.h"
+#include "DX9GFSceneManager.h"
+#include "DX9GFSprites.h"
+#include "DX9GFUtils.h"

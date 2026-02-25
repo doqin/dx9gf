@@ -18,23 +18,29 @@
     <ClCompile Include="DX9GFApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DX9GFInterfaces.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DX9GFGraphicsDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DX9GFSprite.cpp">
+    <ClCompile Include="DX9GFSprites.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DX9GFUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DX9GFSceneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFISprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFIGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFIScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DX9GFInterfaces.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DX9GFApplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -44,10 +50,25 @@
     <ClInclude Include="DX9GFGraphicsDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DX9GFSprite.h">
+    <ClInclude Include="DX9GFSprites.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DX9GFUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFSceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFIGame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFISprite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFIScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GF.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

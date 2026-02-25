@@ -1,9 +1,10 @@
 #pragma once
-#include "DX9GFInterfaces.h"
 #include <string>
 #include <vector>
+#include "DX9GFISprite.h"
 
 namespace DX9GF {
+
 	class StaticSprite : public ISprite {
 	private:
 		RECT* p_src = nullptr;

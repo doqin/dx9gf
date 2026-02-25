@@ -1,0 +1,33 @@
+#pragma once
+#include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h"
+
+namespace DX9GF {
+	class GraphicsDevice;
+
+	class ISprite {
+	protected:
+		GraphicsDevice* graphicsDevice = nullptr;
+		ID3DXSprite* p_sprite = nullptr;
+		D3DXVECTOR3 pos;
+		D3DCOLOR color = 0xFFFFFFFF;
+	public:
+		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
+		ISprite() {}
+
+		virtual void Draw() = 0;
+
+		/// <summary>
+		/// Translates the current position by the specified x and y offsets.
+		/// </summary>
+		/// <param name="x">The horizontal offset to translate by.</param>
+		/// <param name="y">The vertical offset to translate by.</param>
+		void Translate(float x, float y);
+
+		/// <summary>
+		/// Sets the position of the sprite
+		/// </summary>
+		/// <param name="x">The position in the horizontal coordinate</param>
+		/// <param name="y">The position in the vertical coordinate</param>
+		void SetPosition(float x, float y);
+	};
+}

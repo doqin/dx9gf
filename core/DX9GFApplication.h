@@ -1,7 +1,7 @@
 #pragma once
 #include "framework.h"
+#include "DX9GFIGame.h"
 #include <string>
-#include "DX9GFInterfaces.h"
 
 namespace DX9GF {
 	class Application {
