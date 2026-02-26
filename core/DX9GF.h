@@ -7,3 +7,4 @@
 #include "DX9GFSceneManager.h"
 #include "DX9GFSprites.h"
 #include "DX9GFUtils.h"
+#include "DX9GFInputManager.h"

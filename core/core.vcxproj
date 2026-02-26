@@ -151,7 +151,7 @@
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;DxErr.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d9.lib;d3dx9.lib;DxErr.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;DxErr.lib;legacy_stdio_definitions.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -190,6 +190,7 @@
     <ClCompile Include="DX9GFApplication.cpp" />
     <ClCompile Include="DX9GFGraphicsDevice.cpp" />
     <ClCompile Include="DX9GFIGame.cpp" />
+    <ClCompile Include="DX9GFInputManager.cpp" />
     <ClCompile Include="DX9GFIScene.cpp" />
     <ClCompile Include="DX9GFISprite.cpp" />
     <ClCompile Include="DX9GFSceneManager.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="DX9GFApplication.h" />
     <ClInclude Include="DX9GFGraphicsDevice.h" />
     <ClInclude Include="DX9GFIGame.h" />
+    <ClInclude Include="DX9GFInputManager.h" />
     <ClInclude Include="DX9GFIScene.h" />
     <ClInclude Include="DX9GFISprite.h" />
     <ClInclude Include="DX9GFSceneManager.h" />

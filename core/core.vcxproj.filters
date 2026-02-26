@@ -39,6 +39,9 @@
     <ClCompile Include="DX9GFIScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DX9GFInputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GFApplication.h">
@@ -69,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DX9GF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFInputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

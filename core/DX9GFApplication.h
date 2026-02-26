@@ -6,48 +6,30 @@
 namespace DX9GF {
 	class Application {
 	private:
-		HINSTANCE hInstance;
+		HINSTANCE hInstance = nullptr;
 		std::wstring appTitle;
-		UINT screenWidth;
-		UINT screenHeight;
+		UINT screenWidth = 0;
+		UINT screenHeight = 0;
 
 		HWND hwnd = nullptr;
+		static Application* instance;
 	public:
 		/// <summary>
-		/// Constructs an Application instance with the specified window parameters.
+		/// Initialize an Application instance with the specified window parameters.
 		/// </summary>
 		/// <param name="hInstance">The handle to the application instance provided by Windows.</param>
 		/// <param name="appTitle">The title to display in the application window's title bar.</param>
 		/// <param name="screenWidth">The width of the application window in pixels.</param>
 		/// <param name="screenHeight">The height of the application window in pixels.</param>
-		Application(HINSTANCE hInstance, std::wstring appTitle, UINT screenWidth, UINT screenHeight) 
-			: hInstance(hInstance), 
-			appTitle(appTitle), 
-			screenWidth(screenWidth), 
-			screenHeight(screenHeight) {}
-
-		/// <summary>
-		/// Initialization.
-		/// </summary>
-		void Create();
-
-		/// <summary>
-		/// Gets the window handle associated with this object.
-		/// </summary>
-		/// <returns>The window handle (HWND) associated with this object.</returns>
-		HWND GetHWnd() const;
-
-		/// <summary>
-		/// Attaches a game instance to the system.
-		/// </summary>
-		/// <param name="game">A pointer to the game instance to attach.</param>
-		static void AttachGame(IGame* game);
-
-		/// <summary>
-		/// Executes the run operation.
-		/// </summary>
+		void Init(HINSTANCE hInstance, std::wstring appTitle, UINT screenWidth, UINT screenHeight);
+		void AttachGame(IGame* game);
 		void Run();
+
+		HWND GetHWnd() const;
+		static Application* GetInstance();
 	private:
+		Application() {}
+		~Application() {}
 		ATOM AppRegisterClass();
 	};
 };

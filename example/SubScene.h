@@ -5,6 +5,7 @@
 class SubScene : public DX9GF::IScene {
 private:
 	ExampleGame* game;
+	DX9GF::InputManager* inputManager;
 public:
 	SubScene(ExampleGame* game) : game(game) {}
 	void Init() override;

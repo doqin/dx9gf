@@ -1,5 +1,5 @@
 ﻿#include <Windows.h>
-#include "DX9GFApplication.h"
+#include "DX9GF.h"
 #include "ExampleGame.h"
 #include <format>
 
@@ -10,16 +10,16 @@ int WINAPI WinMain(
 	int nCmdShow
 )
 {
-	// Create the DX9GF Application
-	DX9GF::Application app(hInstance, L"Example game", 620, 480);
+	// Get the DX9GF Application
+	DX9GF::Application* app = DX9GF::Application::GetInstance();
 	try {
-		app.Create();
+		app->Init(hInstance, L"Example game", 620, 480);
 		// Create your game that interfaces with IGame
-		ExampleGame game(app.GetHWnd(), 620, 480);
+		ExampleGame game(app->GetHWnd(), 620, 480);
 		// Attach your game to the application
-		DX9GF::Application::AttachGame(&game);
+		app->AttachGame(&game);
 		// Run the application
-		app.Run();
+		app->Run();
 	}
 	catch (std::exception e) {
 		MessageBox(
