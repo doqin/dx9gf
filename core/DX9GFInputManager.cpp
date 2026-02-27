@@ -1,12 +1,28 @@
 #include "DX9GFInputManager.h"
 #include <stdexcept>
 #include <DxErr.h>
+#include "DX9GFApplication.h"
 
 DX9GF::InputManager* DX9GF::InputManager::instance = nullptr;
 
-bool DX9GF::InputManager::CheckBuffer(int DIKey) const
+bool DX9GF::InputManager::CheckKeysBuffer(int DIKey) const
 {
-    return buffer[DIKey] & 0x80;
+    return keysBuffer[DIKey] & 0x80;
+}
+
+bool DX9GF::InputManager::CheckMouseBuffer(MouseButton button)
+{
+    return mouseBuffer[button] & 0x80;
+}
+
+void DX9GF::InputManager::UpdateMouseBuffer(int buttonIndex)
+{
+    if (firstMouseCheck && (diMouseState.rgbButtons[buttonIndex] != mouseBuffer[buttonIndex])) {
+        lastMouseBufferPressed = lastMouseButtonPressed;
+        lastMouseButtonPressed = buttonIndex;
+        mouseDelta = 0;
+        firstMouseCheck = false;
+    }
 }
 
 DX9GF::InputManager* DX9GF::InputManager::GetInstance()
@@ -56,30 +72,30 @@ void DX9GF::InputManager::Init(HWND hWnd, HINSTANCE hInstance)
     }
 }
 
-void DX9GF::InputManager::KeySnapShot(unsigned long long deltaTime)
+void DX9GF::InputManager::ReadKeyboard(unsigned long long deltaTime)
 {
-    delta += deltaTime;
-    if (delta > KEYBOARD_LAST_PRESS_TIME) {
+    keysDelta += deltaTime;
+    if (keysDelta > KEYBOARD_LAST_PRESS_TIME) {
         ReleaseLastPressed();
     }
     for (int i = 0; i < 256; i++) {
-        buffer[i] = keys[i];
+        keysBuffer[i] = keys[i];
     }
     HRESULT result = diKeyboard->GetDeviceState(sizeof(keys), (LPVOID)&keys);
     while (result != DI_OK && (result == DIERR_INPUTLOST || result == DIERR_NOTACQUIRED)) {
         result = diKeyboard->Acquire();
     }
-    firstCheck = true;
+    firstKeyCheck = true;
 }
 
 bool DX9GF::InputManager::KeyPress(int DIKey)
 {
     if (keys[DIKey] & 0x80) {
-        if (firstCheck && buffer[DIKey] != keys[DIKey]) {
+        if (firstKeyCheck && keysBuffer[DIKey] != keys[DIKey]) {
             lastBufferPressed = lastKeyPressed;
             lastKeyPressed = DIKey;
-            delta = 0;
-            firstCheck = false;
+            keysDelta = 0;
+            firstKeyCheck = false;
         }
         return true;
     }
@@ -88,19 +104,89 @@ bool DX9GF::InputManager::KeyPress(int DIKey)
 
 bool DX9GF::InputManager::KeyDown(int DIKey)
 {
-    return KeyPress(DIKey) && !CheckBuffer(DIKey);
+    return KeyPress(DIKey) && !CheckKeysBuffer(DIKey);
 }
 
 bool DX9GF::InputManager::KeyUp(int DIKey)
 {
-    return !KeyPress(DIKey) && CheckBuffer(DIKey);
+    return !KeyPress(DIKey) && CheckKeysBuffer(DIKey);
 }
 
 void DX9GF::InputManager::ReleaseLastPressed()
 {
-    delta = 0;
+    keysDelta = 0;
     lastKeyPressed = -1;
     lastBufferPressed = -1;
+}
+
+void DX9GF::InputManager::ReadMouse(unsigned long long deltaTime)
+{
+    mouseDelta += deltaTime;
+    if (mouseDelta > MOUSE_LAST_PRESS_TIME) {
+        mouseDelta = 0;
+        lastMouseButtonPressed = -1;
+        lastMouseBufferPressed = -1;
+    }
+    for (int i = 0; i < 4; i++) {
+        mouseBuffer[i] = diMouseState.rgbButtons[i];
+    }
+    GetCursorPos(&mousePos);
+    ScreenToClient(DX9GF::Application::GetInstance()->GetHWnd(), &mousePos);
+    HRESULT result = diMouse->GetDeviceState(sizeof(diMouseState), (LPVOID)&diMouseState);
+    while (result != DI_OK && (result == DIERR_INPUTLOST || result == DIERR_NOTACQUIRED)) {
+        result = diMouse->Acquire();
+    }
+    firstMouseCheck = true;
+}
+
+bool DX9GF::InputManager::MousePress(MouseButton button)
+{
+    if (diMouseState.rgbButtons[button] & 0x80) {
+        UpdateMouseBuffer(button);
+        return true;
+    }
+    return false;
+}
+
+bool DX9GF::InputManager::MouseDown(MouseButton button)
+{
+    return MousePress(button) && !CheckMouseBuffer(button);
+}
+
+bool DX9GF::InputManager::MouseUp(MouseButton button)
+{
+    return !MousePress(button) && CheckMouseBuffer(button);
+}
+
+long DX9GF::InputManager::GetRelativeMouseX() const
+{
+    return diMouseState.lX;
+}
+
+long DX9GF::InputManager::GetRelativeMouseY() const
+{
+    return diMouseState.lY;
+}
+
+POINT DX9GF::InputManager::GetRelativeMousePos() const
+{
+    POINT point = { diMouseState.lX, diMouseState.lY };
+    return point;
+}
+
+long DX9GF::InputManager::GetAbsoluteMouseX() const
+{
+    return mousePos.x;
+}
+
+long DX9GF::InputManager::GetAbsoluteMouseY() const
+{
+    return mousePos.y;
+}
+
+POINT DX9GF::InputManager::GetAbsoluteMousePos() const
+{
+    return mousePos;
 }
 
 void DX9GF::InputManager::Dispose()

@@ -25,7 +25,7 @@ void MainScene::Init()
 
 void MainScene::Update(unsigned long long deltaTime)
 {
-	inputManager->KeySnapShot(deltaTime);
+	inputManager->ReadKeyboard(deltaTime);
 	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
 	float xDir = 0;
 	float yDir = 0;

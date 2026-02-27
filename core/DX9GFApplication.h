@@ -27,6 +27,8 @@ namespace DX9GF {
 
 		HWND GetHWnd() const;
 		static Application* GetInstance();
+		unsigned int GetScreenWidth() const;
+		unsigned int GetScreenHeight() const;
 	private:
 		Application() {}
 		~Application() {}

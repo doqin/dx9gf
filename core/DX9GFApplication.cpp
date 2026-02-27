@@ -63,6 +63,16 @@ DX9GF::Application* DX9GF::Application::GetInstance()
 	return instance;
 }
 
+unsigned int DX9GF::Application::GetScreenWidth() const
+{
+	return screenWidth;
+}
+
+unsigned int DX9GF::Application::GetScreenHeight() const
+{
+	return screenHeight;
+}
+
 void DX9GF::Application::AttachGame(IGame* game)
 {
 	p_game = game;
@@ -75,7 +85,7 @@ void DX9GF::Application::Run()
 	MSG msg;
 	int done = 0;
 	unsigned long long start = GetTickCount64();
-	const DWORD FRAMERATE = 60;
+	const DWORD FRAMERATE = -1;
 	while (!done) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -85,7 +95,7 @@ void DX9GF::Application::Run()
 			DispatchMessage(&msg);
 		}
 		else {
-			if (GetTickCount64() - start >= 1000 / FRAMERATE) {
+			if (FRAMERATE == -1 || GetTickCount64() - start >= 1000 / FRAMERATE) {
 				unsigned long long deltaTime = GetTickCount64() - start;
 				start = GetTickCount64();
 				p_game->Update(deltaTime);

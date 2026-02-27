@@ -12,7 +12,6 @@ namespace DX9GF {
 		D3DCOLOR color = 0xFFFFFFFF;
 	public:
 		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
-		ISprite() {}
 
 		virtual void Draw() = 0;
 
@@ -29,5 +28,14 @@ namespace DX9GF {
 		/// <param name="x">The position in the horizontal coordinate</param>
 		/// <param name="y">The position in the vertical coordinate</param>
 		void SetPosition(float x, float y);
+		void SetPosition(float x, float y, float z);
+		void SetPositionX(float x);
+		void SetPositionY(float y);
+		void SetPositionZ(float z);
+
+		float GetPositionX() const;
+		float GetPositionY() const;
+		float GetPositionZ() const;
+		D3DXVECTOR3 GetPosition() const;
 	};
 }
