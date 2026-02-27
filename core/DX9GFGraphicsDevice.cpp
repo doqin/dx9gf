@@ -1,5 +1,10 @@
 #include "DX9GFGraphicsDevice.h"
 
+struct Vertex {
+	float x, y, z, rhw; // rhw is reciprocal of homogenous w
+	DWORD color;
+};
+
 DX9GF::GraphicsDevice::GraphicsDevice(IDirect3DDevice9* d3ddev, IDirect3DSurface9* backbuffer) : d3ddev(d3ddev), backbuffer(backbuffer)
 {
 	d3ddev->GetViewport(&viewport);
@@ -52,6 +57,16 @@ HRESULT DX9GF::GraphicsDevice::IsValid()
 {
 	if (d3ddev == NULL)
 		return E_FAIL;
-	
+
 	return d3ddev->TestCooperativeLevel();
+}
+
+void DX9GF::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color)
+{
+	Vertex vertices[] = {
+		{ .x=x1, .y=y1, .z=0.0f, .rhw=1.0f, .color=color },
+		{ .x=x2, .y=y2, .z=0.0f, .rhw=1.0f, .color=color }
+	};
+	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3ddev->DrawPrimitiveUP(D3DPT_LINELIST, 1, vertices, sizeof(Vertex));
 }

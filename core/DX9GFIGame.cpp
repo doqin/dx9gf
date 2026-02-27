@@ -36,7 +36,6 @@ void DX9GF::IGame::Init()
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 	if (d3d == NULL) throw std::runtime_error("Error initializing Direct3D");
 
-	D3DPRESENT_PARAMETERS d3dpp;
 	ZeroMemory(&d3dpp, sizeof(d3dpp)); // Xóa mọi thứ về 0 trước khi sử dụng
 
 	d3dpp.Windowed = TRUE;
@@ -63,6 +62,25 @@ void DX9GF::IGame::Init()
 
 	// create pointer to the back buffer
 	graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
+}
+
+void DX9GF::IGame::OnResize(UINT width, UINT height)
+{
+	if (graphicsDevice == nullptr || graphicsDevice->GetDevice() == nullptr) return;
+	if (width == 0 || height == 0) return;
+
+	if (graphicsDevice->GetBackBuffer() != nullptr) {
+		graphicsDevice->GetBackBuffer()->Release();
+		graphicsDevice->GetBackBuffer() = nullptr;
+	}
+
+	d3dpp.BackBufferWidth = width;
+	d3dpp.BackBufferHeight = height;
+
+	if (SUCCEEDED(graphicsDevice->GetDevice()->Reset(&d3dpp))) {
+		graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
+		graphicsDevice->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+	}
 }
 
 void DX9GF::IGame::Dispose()

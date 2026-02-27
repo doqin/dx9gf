@@ -31,6 +31,8 @@ namespace DX9GF {
 		static Application* GetInstance();
 		unsigned int GetScreenWidth() const;
 		unsigned int GetScreenHeight() const;
+
+		void OnResize(UINT width, UINT height);
 	private:
 		Application() {}
 		~Application() {}

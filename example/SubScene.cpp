@@ -12,7 +12,7 @@ void SubScene::Init()
 	whiteSquare = new DX9GF::StaticSprite(game->GetGraphicsDevice());
 	whiteSquare->CreatePlainTexture(0xFFFFFFFF, 100, 100);
 	auto app = DX9GF::Application::GetInstance();
-	whiteSquare->SetPosition(app->GetScreenWidth() / 2 - 50, app->GetScreenHeight() / 2 - 50);
+	whiteSquare->SetPosition(app->GetScreenWidth() / 2.0 - 50, app->GetScreenHeight() / 2.0 - 50);
 }
 
 void SubScene::Update(unsigned long long deltaTime)
@@ -52,7 +52,20 @@ void SubScene::Draw(unsigned long long deltaTime)
 {
 	auto dev = game->GetGraphicsDevice();
 	dev->Clear();
-	if (dev->BeginDraw()) {
+	if (SUCCEEDED(dev->BeginDraw())) {
+		auto app = DX9GF::Application::GetInstance();
+		auto width = app->GetScreenWidth();
+		auto height = app->GetScreenHeight();
+		DX9GF::Debug::DrawGrid(
+			dev,
+			0,
+			0,
+			width,
+			height,
+			32,
+			32,
+			0xFFFF0000
+		);
 		whiteSquare->Draw();
 		dev->EndDraw();
 	}

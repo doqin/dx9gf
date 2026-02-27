@@ -11,6 +11,7 @@ namespace DX9GF {
 	private:
 		LPDIRECT3D9 d3d = nullptr; // Biến "tổng" của toàn bộ thư viện Direct3D
 		HWND hwnd = NULL;
+		D3DPRESENT_PARAMETERS d3dpp;
 	protected:
 		const UINT SCREEN_WIDTH;
 		const UINT SCREEN_HEIGHT;
@@ -26,6 +27,7 @@ namespace DX9GF {
 		SceneManager* GetSceneManager();
 
 		virtual void Init();
+		virtual void OnResize(UINT width, UINT height);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
 		virtual void Dispose();

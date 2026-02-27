@@ -38,5 +38,7 @@ namespace DX9GF {
 		HRESULT EndDraw();
 		HRESULT Present();
 		HRESULT IsValid();
+
+		void DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color);
 	};
 };
