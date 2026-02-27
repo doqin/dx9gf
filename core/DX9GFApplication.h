@@ -10,6 +10,7 @@ namespace DX9GF {
 		std::wstring appTitle;
 		UINT screenWidth = 0;
 		UINT screenHeight = 0;
+		int frameRate = -1;
 
 		HWND hwnd = nullptr;
 		static Application* instance;
@@ -25,6 +26,7 @@ namespace DX9GF {
 		void AttachGame(IGame* game);
 		void Run();
 
+		void SetFramerate(int fps);
 		HWND GetHWnd() const;
 		static Application* GetInstance();
 		unsigned int GetScreenWidth() const;

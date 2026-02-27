@@ -132,6 +132,14 @@ void DX9GF::InputManager::ReadMouse(unsigned long long deltaTime)
     }
     GetCursorPos(&mousePos);
     ScreenToClient(DX9GF::Application::GetInstance()->GetHWnd(), &mousePos);
+	if (!hasMousePos) {
+		lastMousePos = mousePos;
+		relativeMousePos = { 0, 0 };
+		hasMousePos = true;
+	} else {
+		relativeMousePos = { mousePos.x - lastMousePos.x, mousePos.y - lastMousePos.y };
+		lastMousePos = mousePos;
+	}
     HRESULT result = diMouse->GetDeviceState(sizeof(diMouseState), (LPVOID)&diMouseState);
     while (result != DI_OK && (result == DIERR_INPUTLOST || result == DIERR_NOTACQUIRED)) {
         result = diMouse->Acquire();
@@ -160,18 +168,17 @@ bool DX9GF::InputManager::MouseUp(MouseButton button)
 
 long DX9GF::InputManager::GetRelativeMouseX() const
 {
-    return diMouseState.lX;
+	return relativeMousePos.x;
 }
 
 long DX9GF::InputManager::GetRelativeMouseY() const
 {
-    return diMouseState.lY;
+	return relativeMousePos.y;
 }
 
 POINT DX9GF::InputManager::GetRelativeMousePos() const
 {
-    POINT point = { diMouseState.lX, diMouseState.lY };
-    return point;
+	return relativeMousePos;
 }
 
 long DX9GF::InputManager::GetAbsoluteMouseX() const

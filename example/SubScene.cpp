@@ -21,10 +21,11 @@ void SubScene::Update(unsigned long long deltaTime)
 	inputManager->ReadMouse(deltaTime);
 	if (inputManager->KeyDown(DIK_F)) {
 		game->GetSceneManager()->PopScene();
-		return;
+		return; // return otherwise we get a use after free situation
 	}
 	if (isDragging && inputManager->MouseUp(DX9GF::InputManager::MouseButton::Left)) {
 		isDragging = false;
+		whiteSquare->SetColor(0xFFFFFFFF);
 	}
 	if (!isDragging
 		&& inputManager->MouseDown(DX9GF::InputManager::MouseButton::Left) 
@@ -36,6 +37,7 @@ void SubScene::Update(unsigned long long deltaTime)
 			100,
 			100)) {
 		isDragging = true;
+		whiteSquare->SetColor(0xFF00FF00);
 	}
 	
 	if (isDragging) {

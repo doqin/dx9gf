@@ -21,6 +21,9 @@ namespace DX9GF {
 		DIMOUSESTATE diMouseState;
 		BYTE mouseBuffer[4];
 		POINT mousePos = {0, 0};
+		POINT lastMousePos = {0, 0};
+		POINT relativeMousePos = {0, 0};
+		bool hasMousePos = false;
 
 		InputManager() {}
 		~InputManager() {}

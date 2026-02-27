@@ -50,6 +50,11 @@ void DX9GF::Application::Init(HINSTANCE hInstance, std::wstring appTitle, UINT s
 	DX9GF::InputManager::GetInstance()->Init(GetHWnd(), hInstance);
 }
 
+void DX9GF::Application::SetFramerate(int fps)
+{
+	frameRate = fps;
+}
+
 HWND DX9GF::Application::GetHWnd() const
 {
 	return hwnd;
@@ -85,7 +90,6 @@ void DX9GF::Application::Run()
 	MSG msg;
 	int done = 0;
 	unsigned long long start = GetTickCount64();
-	const DWORD FRAMERATE = -1;
 	while (!done) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -95,7 +99,7 @@ void DX9GF::Application::Run()
 			DispatchMessage(&msg);
 		}
 		else {
-			if (FRAMERATE == -1 || GetTickCount64() - start >= 1000 / FRAMERATE) {
+			if (frameRate == -1 || GetTickCount64() - start >= 1000 / frameRate) {
 				unsigned long long deltaTime = GetTickCount64() - start;
 				start = GetTickCount64();
 				p_game->Update(deltaTime);
