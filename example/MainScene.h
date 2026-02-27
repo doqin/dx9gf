@@ -9,6 +9,7 @@ private:
 	DX9GF::StaticSprite* colorRec;
 	DX9GF::StaticSprite* textureRec;
 	DX9GF::AnimatedSprite* mario;
+	DX9GF::InputManager* inputManager;
 public:
 	MainScene(ExampleGame* game) : game(game) {}
 	void Init() override;

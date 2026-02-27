@@ -1,6 +1,8 @@
 ﻿#include "DX9GFApplication.h"
 #include <stdexcept>
+#include "DX9GFInputManager.h"
 
+DX9GF::Application* DX9GF::Application::instance = nullptr;
 DX9GF::IGame* p_game = nullptr;
 
 LRESULT CALLBACK WinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -16,8 +18,13 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-void DX9GF::Application::Create()
+void DX9GF::Application::Init(HINSTANCE hInstance, std::wstring appTitle, UINT screenWidth, UINT screenHeight)
 {
+	this->hInstance = hInstance;
+	this->appTitle = appTitle;
+	this->screenWidth = screenWidth;
+	this->screenHeight = screenHeight;
+
 	// Very important =)))
 	AppRegisterClass();
 
@@ -39,11 +46,36 @@ void DX9GF::Application::Create()
 	if (!hwnd) {
 		throw std::runtime_error("Error creating window");
 	}
+
+	DX9GF::InputManager::GetInstance()->Init(GetHWnd(), hInstance);
+}
+
+void DX9GF::Application::SetFramerate(int fps)
+{
+	frameRate = fps;
 }
 
 HWND DX9GF::Application::GetHWnd() const
 {
 	return hwnd;
+}
+
+DX9GF::Application* DX9GF::Application::GetInstance()
+{
+	if (instance == nullptr) {
+		instance = new Application();
+	}
+	return instance;
+}
+
+unsigned int DX9GF::Application::GetScreenWidth() const
+{
+	return screenWidth;
+}
+
+unsigned int DX9GF::Application::GetScreenHeight() const
+{
+	return screenHeight;
 }
 
 void DX9GF::Application::AttachGame(IGame* game)
@@ -58,7 +90,6 @@ void DX9GF::Application::Run()
 	MSG msg;
 	int done = 0;
 	unsigned long long start = GetTickCount64();
-	const DWORD FRAMERATE = 60;
 	while (!done) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -68,7 +99,7 @@ void DX9GF::Application::Run()
 			DispatchMessage(&msg);
 		}
 		else {
-			if (GetTickCount64() - start >= 1000 / FRAMERATE) {
+			if (frameRate == -1 || GetTickCount64() - start >= 1000 / frameRate) {
 				unsigned long long deltaTime = GetTickCount64() - start;
 				start = GetTickCount64();
 				p_game->Update(deltaTime);

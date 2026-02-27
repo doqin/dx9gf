@@ -12,7 +12,6 @@ namespace DX9GF {
 		UINT width, height;
 	public:
 		StaticSprite(GraphicsDevice* graphicsDevice);
-		StaticSprite() {};
 		~StaticSprite();
 
 		void CreatePlainTexture(D3DCOLOR color, UINT width, UINT height);
@@ -29,7 +28,6 @@ namespace DX9GF {
 
 		UINT frame_index = 0;
 	public:
-		AnimatedSprite() {};
 		AnimatedSprite(GraphicsDevice* graphicsDevice);
 		~AnimatedSprite();
 

@@ -4,11 +4,9 @@
 #include "DX9GFSceneManager.h"
 #include "SubScene.h"
 
-#define KEY_DOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
-#define KEY_UP(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
-
 void MainScene::Init()
 {
+	inputManager = DX9GF::InputManager::GetInstance();
 	// Creating colorRec
 	colorRec = new DX9GF::StaticSprite(game->GetGraphicsDevice());
 	colorRec->CreatePlainTexture(0xFFFFFFFF, 500, 500);
@@ -27,15 +25,16 @@ void MainScene::Init()
 
 void MainScene::Update(unsigned long long deltaTime)
 {
-	if (KEY_DOWN(VK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
+	inputManager->ReadKeyboard(deltaTime);
+	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
 	float xDir = 0;
 	float yDir = 0;
 	const float velocity = 200;
-	if (KEY_DOWN('A')) xDir -= 1;
-	if (KEY_DOWN('D')) xDir += 1;
-	if (KEY_DOWN('W')) yDir -= 1;
-	if (KEY_DOWN('S')) yDir += 1;
-	if (KEY_DOWN('F')) game->GetSceneManager()->PushScene(new SubScene(game));
+	if (inputManager->KeyPress(DIK_A)) xDir -= 1;
+	if (inputManager->KeyPress(DIK_D)) xDir += 1;
+	if (inputManager->KeyPress(DIK_W)) yDir -= 1;
+	if (inputManager->KeyPress(DIK_S)) yDir += 1;
+	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->PushScene(new SubScene(game));
 	mario->Translate(xDir * velocity * deltaTime / 1000, yDir * velocity * deltaTime / 1000);
 }
 
