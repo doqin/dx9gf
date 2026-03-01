@@ -2,7 +2,7 @@
 #include <d3d9.h>
 
 namespace DX9GF {
-	class GraphicsDevice {
+	class GraphicsDevice final {
 	private:
 		IDirect3DDevice9* d3ddev = NULL; // Đại diện cho card đồ họa máy tính
 		IDirect3DSurface9* backbuffer = NULL;
@@ -40,5 +40,7 @@ namespace DX9GF {
 		HRESULT IsValid();
 
 		void DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color);
+		void DrawRectangle(float x, float y, float width, float height, D3DCOLOR color, bool isFilled);
+		void DrawCircle(float centerX, float centerY, float radius, D3DCOLOR color, bool isFilled);
 	};
 };

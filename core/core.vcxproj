@@ -189,6 +189,8 @@
   <ItemGroup>
     <ClCompile Include="DX9GFApplication.cpp" />
     <ClCompile Include="DX9GFDebug.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFDynamicGameObject.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
     <ClCompile Include="DX9GFGraphicsDevice.cpp" />
     <ClCompile Include="DX9GFIGame.cpp" />
     <ClCompile Include="DX9GFInputManager.cpp" />
@@ -202,6 +204,8 @@
     <ClInclude Include="DX9GF.h" />
     <ClInclude Include="DX9GFApplication.h" />
     <ClInclude Include="DX9GFDebug.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFDynamicGameObject.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h" />
     <ClInclude Include="DX9GFGraphicsDevice.h" />
     <ClInclude Include="DX9GFIGame.h" />
     <ClInclude Include="DX9GFInputManager.h" />

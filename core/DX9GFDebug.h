@@ -2,7 +2,7 @@
 #include "DX9GFGraphicsDevice.h"
 
 namespace DX9GF {
-	class Debug {
+	class Debug final {
 	private:
 		Debug() {}
 		~Debug() {}

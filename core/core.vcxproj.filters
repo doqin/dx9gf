@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Extras">
+      <UniqueIdentifier>{c67b83ca-08f6-4053-a966-9e3d53bc6e2b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX9GFApplication.cpp">
@@ -43,6 +46,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DX9GFDebug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFDynamicGameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -82,6 +91,12 @@
     </ClInclude>
     <ClInclude Include="DX9GFDebug.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFDynamicGameObject.h">
+      <Filter>Header Files\Extras</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

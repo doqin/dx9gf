@@ -1,18 +1,22 @@
 #include "SubScene.h"
 #include "DX9GFSceneManager.h"
 
-bool SubScene::IsWithinBound(float srcX, float srcY, float dstX, float dstY, float dstW, float dstH)
+bool SubScene::IsWithinBoundRectangle(float srcX, float srcY, float dstX, float dstY, float dstW, float dstH)
 {
 	return srcX > dstX && srcX < dstX + dstW && srcY > dstY && srcY < dstY + dstH;
+}
+
+bool SubScene::IsWithinBoundCircle(float srcX, float srcY, float centerX, float centerY, float radius)
+{
+	return pow(centerX - srcX, 2) + pow(centerY - srcY, 2) < pow(radius, 2);
 }
 
 void SubScene::Init()
 {
 	inputManager = DX9GF::InputManager::GetInstance();
-	whiteSquare = new DX9GF::StaticSprite(game->GetGraphicsDevice());
-	whiteSquare->CreatePlainTexture(0xFFFFFFFF, 100, 100);
 	auto app = DX9GF::Application::GetInstance();
-	whiteSquare->SetPosition(app->GetScreenWidth() / 2.0 - 50, app->GetScreenHeight() / 2.0 - 50);
+	squareX = app->GetScreenWidth() / 2.0 - 50;
+	squareY = app->GetScreenHeight() / 2.0 - 50;
 }
 
 void SubScene::Update(unsigned long long deltaTime)
@@ -23,28 +27,46 @@ void SubScene::Update(unsigned long long deltaTime)
 		game->GetSceneManager()->PopScene();
 		return; // return otherwise we get a use after free situation
 	}
-	if (isDragging && inputManager->MouseUp(DX9GF::InputManager::MouseButton::Left)) {
-		isDragging = false;
-		whiteSquare->SetColor(0xFFFFFFFF);
+	if (isDraggingSquare && inputManager->MouseUp(DX9GF::InputManager::MouseButton::Left)) {
+		isDraggingSquare = false;
 	}
-	if (!isDragging
+	bool isWithinBound = IsWithinBoundRectangle(
+		inputManager->GetAbsoluteMouseX(),
+		inputManager->GetAbsoluteMouseY(),
+		squareX,
+		squareY,
+		100,
+		100);
+	if (!isDraggingSquare
 		&& inputManager->MouseDown(DX9GF::InputManager::MouseButton::Left) 
-		&& IsWithinBound(
-			inputManager->GetAbsoluteMouseX(),
-			inputManager->GetAbsoluteMouseY(),
-			whiteSquare->GetPositionX(),
-			whiteSquare->GetPositionY(),
-			100,
-			100)) {
-		isDragging = true;
-		whiteSquare->SetColor(0xFF00FF00);
+		&& isWithinBound) {
+		isDraggingSquare = true;
 	}
 	
-	if (isDragging) {
-		whiteSquare->Translate(
-			inputManager->GetRelativeMouseX(), 
-			inputManager->GetRelativeMouseY()
-		);
+	if (isDraggingSquare) {
+		squareX += inputManager->GetRelativeMouseX();
+		squareY += inputManager->GetRelativeMouseY();
+	}
+
+	if (isDraggingCircle 
+		&& inputManager->MouseUp(DX9GF::InputManager::MouseButton::Left
+	)) {
+		isDraggingCircle = false;
+	}
+	if (!isDraggingCircle
+		&& inputManager->MouseDown(DX9GF::InputManager::MouseButton::Left)
+		&& IsWithinBoundCircle(
+			inputManager->GetAbsoluteMouseX(),
+			inputManager->GetAbsoluteMouseY(),
+			circleX,
+			circleY,
+			50
+	)) {
+		isDraggingCircle = true;
+	}
+	if (isDraggingCircle) {
+		circleX += inputManager->GetRelativeMouseX();
+		circleY += inputManager->GetRelativeMouseY();
 	}
 }
 
@@ -66,7 +88,8 @@ void SubScene::Draw(unsigned long long deltaTime)
 			32,
 			0xFFFF0000
 		);
-		whiteSquare->Draw();
+		game->GetGraphicsDevice()->DrawRectangle(squareX, squareY, 100, 100, 0xFF0000FF, isDraggingSquare);
+		game->GetGraphicsDevice()->DrawCircle(circleX, circleY, 50, 0xFFFFFF00, isDraggingCircle);
 		dev->EndDraw();
 	}
 	dev->Present();
@@ -74,5 +97,4 @@ void SubScene::Draw(unsigned long long deltaTime)
 
 void SubScene::Dispose()
 {
-	delete whiteSquare;
 }

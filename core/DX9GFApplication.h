@@ -4,7 +4,7 @@
 #include <string>
 
 namespace DX9GF {
-	class Application {
+	class Application final {
 	private:
 		HINSTANCE hInstance = nullptr;
 		std::wstring appTitle;

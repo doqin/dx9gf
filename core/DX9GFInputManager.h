@@ -5,7 +5,7 @@
 #define MOUSE_LAST_PRESS_TIME 125
 
 namespace DX9GF {
-	class InputManager {
+	class InputManager final {
 	public:
 		enum MouseButton {
 			Left = 0,
