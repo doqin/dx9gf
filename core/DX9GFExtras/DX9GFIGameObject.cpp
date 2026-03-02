@@ -3,8 +3,9 @@
 void DX9GF::IGameObject::UpdateAbsoluteX()
 {
     if (parent.has_value()) {
-        auto ptr = parent.value();
-        absoluteX = ptr->GetAbsoluteX() + relativeX;
+        if (auto lock = parent.value().lock()) {
+            absoluteX = lock->GetAbsoluteX() + relativeX;
+        }  
     }
     else {
         absoluteX = relativeX;
@@ -14,8 +15,9 @@ void DX9GF::IGameObject::UpdateAbsoluteX()
 void DX9GF::IGameObject::UpdateAbsoluteY()
 {
     if (parent.has_value()) {
-        auto ptr = parent.value();
-        absoluteY = ptr->GetAbsoluteY() + relativeY;
+        if (auto lock = parent.value().lock()) {
+            absoluteY = lock->GetAbsoluteY() + relativeY;
+        }
     }
     else {
         absoluteY = relativeY;
@@ -31,8 +33,10 @@ void DX9GF::IGameObject::UpdateAbsolutePosition()
 void DX9GF::IGameObject::UpdateRelativeX()
 {
     if (parent.has_value()) {
-        auto ptr = parent.value();
-        relativeX = ptr->GetAbsoluteX() - absoluteX;
+        if (auto lock = parent.value().lock()) {
+            relativeX = lock->GetAbsoluteX() - absoluteX;
+        }
+        
     }
     else {
         relativeX = absoluteX;
@@ -42,8 +46,9 @@ void DX9GF::IGameObject::UpdateRelativeX()
 void DX9GF::IGameObject::UpdateRelativeY()
 {
     if (parent.has_value()) {
-        auto ptr = parent.value();
-        relativeY = ptr->GetAbsoluteY() - absoluteY;
+        if (auto lock = parent.value().lock()) {
+            relativeY = lock->GetAbsoluteY() - absoluteY;
+        }
     }
     else {
         relativeY = absoluteY;
@@ -56,43 +61,43 @@ void DX9GF::IGameObject::UpdateRelativePosition()
     UpdateRelativeY();
 }
 
-void DX9GF::IGameObject::UpdateChildren(unsigned long long deltaTime)
+DX9GF::IGameObject::IGameObject(std::weak_ptr<IGameObject> parent, float x, float y, bool useAbsoluteCoords)
 {
-    for (int i = 0; i < children.size(); i++) {
-        children[i].Update(deltaTime);
+    this->parent = parent;
+    if (auto lock = parent.lock()) {
+        auto [parentX, parentY] = lock->GetAbsolutePosition();
+        if (useAbsoluteCoords) {
+            absoluteX = x;
+            absoluteY = y;
+            relativeX = parentX - absoluteX;
+            relativeY = parentY - absoluteY;
+        }
+        else {
+            relativeX = x;
+            relativeY = y;
+            absoluteX = parentX + relativeX;
+            absoluteY = parentY + relativeY;
+        }
     }
 }
 
-DX9GF::IGameObject::IGameObject(IGameObject* parent, float x, float y, bool useAbsoluteCoords)
+void DX9GF::IGameObject::MainUpdate(unsigned long long deltaTime)
 {
-    auto [parentX, parentY] = parent->GetAbsolutePosition();
-    if (useAbsoluteCoords) {
-        absoluteX = x;
-        absoluteY = y;
-        relativeX = parentX - absoluteX;
-        relativeY = parentY - absoluteY;
-    }
-    else {
-        relativeX = x;
-        relativeY = y;
-        absoluteX = parentX + relativeX;
-        absoluteY = parentY + relativeY;
-    }
 }
 
-std::vector<DX9GF::IGameObject*> DX9GF::IGameObject::Flatten()
+DX9GF::IGameObject::~IGameObject()
 {
-    std::vector<IGameObject*> array;
-    array.push_back(this);
-    for (int i = 0; i < children.size(); i++) {
-        array.push_back(&children[i]);
-    }
-    return array;
+    this->Dispose();
 }
 
-const std::mutex& DX9GF::IGameObject::GetMutex()
+std::mutex& DX9GF::IGameObject::GetMutex()
 {
     return this->objectMutex;
+}
+
+std::optional<std::weak_ptr<DX9GF::IGameObject>> DX9GF::IGameObject::GetParent() const
+{
+    return parent;
 }
 
 void DX9GF::IGameObject::SetRelativeX(float x)
@@ -165,19 +170,12 @@ void DX9GF::IGameObject::Update(unsigned long long deltaTime)
 {
     UpdateAbsolutePosition();
     MainUpdate(deltaTime);
-    UpdateChildren(deltaTime);
 }
 
 void DX9GF::IGameObject::Draw(unsigned long long deltaTime)
 {
-    for (int i = 0; i < children.size(); i++) {
-        children[i].Draw(deltaTime);
-    }
 }
 
 void DX9GF::IGameObject::Dispose()
 {
-    for (int i = 0; i < children.size(); i++) {
-        children[i].Dispose();
-    }
 }

@@ -51,7 +51,10 @@
     <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DX9GFExtras\DX9GFDynamicGameObject.cpp">
+    <ClCompile Include="DX9GFExtras\DX9GFITrigger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,8 +98,14 @@
     <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFDynamicGameObject.h">
+    <ClInclude Include="DX9GFExtras\DX9GFITrigger.h">
       <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

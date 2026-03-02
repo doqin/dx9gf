@@ -1,10 +1,7 @@
 #include "SubScene.h"
-#include "DX9GFSceneManager.h"
-
-bool SubScene::IsWithinBoundRectangle(float srcX, float srcY, float dstX, float dstY, float dstW, float dstH)
-{
-	return srcX > dstX && srcX < dstX + dstW && srcY > dstY && srcY < dstY + dstH;
-}
+#include "DX9GF.h"
+#include "DX9GFExtras.h"
+#include <utility>
 
 bool SubScene::IsWithinBoundCircle(float srcX, float srcY, float centerX, float centerY, float radius)
 {
@@ -15,8 +12,9 @@ void SubScene::Init()
 {
 	inputManager = DX9GF::InputManager::GetInstance();
 	auto app = DX9GF::Application::GetInstance();
-	squareX = app->GetScreenWidth() / 2.0 - 50;
-	squareY = app->GetScreenHeight() / 2.0 - 50;
+	auto graphicsDevice = game->GetGraphicsDevice();
+	square = std::make_shared<GO::Rectangle>(game->GetGraphicsDevice(), app->GetScreenWidth() / 2, app->GetScreenHeight() / 2, 100, 100);
+	square->Init();
 }
 
 void SubScene::Update(unsigned long long deltaTime)
@@ -27,27 +25,7 @@ void SubScene::Update(unsigned long long deltaTime)
 		game->GetSceneManager()->PopScene();
 		return; // return otherwise we get a use after free situation
 	}
-	if (isDraggingSquare && inputManager->MouseUp(DX9GF::InputManager::MouseButton::Left)) {
-		isDraggingSquare = false;
-	}
-	bool isWithinBound = IsWithinBoundRectangle(
-		inputManager->GetAbsoluteMouseX(),
-		inputManager->GetAbsoluteMouseY(),
-		squareX,
-		squareY,
-		100,
-		100);
-	if (!isDraggingSquare
-		&& inputManager->MouseDown(DX9GF::InputManager::MouseButton::Left) 
-		&& isWithinBound) {
-		isDraggingSquare = true;
-	}
-	
-	if (isDraggingSquare) {
-		squareX += inputManager->GetRelativeMouseX();
-		squareY += inputManager->GetRelativeMouseY();
-	}
-
+	square->Update(deltaTime);
 	if (isDraggingCircle 
 		&& inputManager->MouseUp(DX9GF::InputManager::MouseButton::Left
 	)) {
@@ -88,7 +66,7 @@ void SubScene::Draw(unsigned long long deltaTime)
 			32,
 			0xFFFF0000
 		);
-		game->GetGraphicsDevice()->DrawRectangle(squareX, squareY, 100, 100, 0xFF0000FF, isDraggingSquare);
+		square->Draw(deltaTime);
 		game->GetGraphicsDevice()->DrawCircle(circleX, circleY, 50, 0xFFFFFF00, isDraggingCircle);
 		dev->EndDraw();
 	}
