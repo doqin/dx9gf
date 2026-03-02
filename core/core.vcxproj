@@ -189,6 +189,7 @@
   <ItemGroup>
     <ClCompile Include="DX9GFApplication.cpp" />
     <ClCompile Include="DX9GFDebug.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFITrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="DX9GFApplication.h" />
     <ClInclude Include="DX9GFDebug.h" />
     <ClInclude Include="DX9GFExtras.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h" />
     <ClInclude Include="DX9GFExtras\DX9GFITrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h" />

@@ -136,6 +136,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Ellipse.cpp" />
     <ClCompile Include="ExampleGame.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainScene.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="SubScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Ellipse.h" />
     <ClInclude Include="ExampleGame.h" />
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="Rectangle.h" />

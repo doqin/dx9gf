@@ -89,17 +89,21 @@ void DX9GF::GraphicsDevice::DrawRectangle(float x, float y, float width, float h
 	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
 }
 
-void DX9GF::GraphicsDevice::DrawCircle(float centerX, float centerY, float radius, D3DCOLOR color, bool isFilled)
+void DX9GF::GraphicsDevice::DrawEllipse(float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled)
 {
 	const int SAMPLES = 36; // Number of segments to approximate the circle
 	std::vector<Vertex> vertices;
 
+	float a = width / 2.0f;
+	float b = height / 2.0f;
+
 	if (isFilled) vertices.push_back({ .x = centerX, .y = centerY, .z = 0.0f, .rhw = 1.0f, .color = color }); // Center vertex for triangle fan
 	for (int i = 0; i <= SAMPLES; ++i) {
-		float angle = (2.0f * D3DX_PI * i) / SAMPLES;
+		float theta = i * (2.0f * D3DX_PI / SAMPLES);
+
 		vertices.push_back({
-			.x = centerX + radius * cosf(angle),
-			.y = centerY + radius * sinf(angle),
+			.x = centerX + cosf(theta) * a,
+			.y = centerY + sinf(theta) * b,
 			.z = 0.0f,
 			.rhw = 1.0f,
 			.color = color

@@ -41,6 +41,6 @@ namespace DX9GF {
 
 		void DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color);
 		void DrawRectangle(float x, float y, float width, float height, D3DCOLOR color, bool isFilled);
-		void DrawCircle(float centerX, float centerY, float radius, D3DCOLOR color, bool isFilled);
+		void DrawEllipse(float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled);
 	};
 };

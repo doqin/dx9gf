@@ -3,11 +3,6 @@
 #include "DX9GFExtras.h"
 #include <utility>
 
-bool SubScene::IsWithinBoundCircle(float srcX, float srcY, float centerX, float centerY, float radius)
-{
-	return pow(centerX - srcX, 2) + pow(centerY - srcY, 2) < pow(radius, 2);
-}
-
 void SubScene::Init()
 {
 	inputManager = DX9GF::InputManager::GetInstance();
@@ -15,6 +10,8 @@ void SubScene::Init()
 	auto graphicsDevice = game->GetGraphicsDevice();
 	square = std::make_shared<GO::Rectangle>(game->GetGraphicsDevice(), app->GetScreenWidth() / 2, app->GetScreenHeight() / 2, 100, 100);
 	square->Init();
+	circle = std::make_shared<GO::Ellipse>(game->GetGraphicsDevice(), 0, 0, 100, 100);
+	circle->Init();
 }
 
 void SubScene::Update(unsigned long long deltaTime)
@@ -26,26 +23,7 @@ void SubScene::Update(unsigned long long deltaTime)
 		return; // return otherwise we get a use after free situation
 	}
 	square->Update(deltaTime);
-	if (isDraggingCircle 
-		&& inputManager->MouseUp(DX9GF::InputManager::MouseButton::Left
-	)) {
-		isDraggingCircle = false;
-	}
-	if (!isDraggingCircle
-		&& inputManager->MouseDown(DX9GF::InputManager::MouseButton::Left)
-		&& IsWithinBoundCircle(
-			inputManager->GetAbsoluteMouseX(),
-			inputManager->GetAbsoluteMouseY(),
-			circleX,
-			circleY,
-			50
-	)) {
-		isDraggingCircle = true;
-	}
-	if (isDraggingCircle) {
-		circleX += inputManager->GetRelativeMouseX();
-		circleY += inputManager->GetRelativeMouseY();
-	}
+	circle->Update(deltaTime);
 }
 
 void SubScene::Draw(unsigned long long deltaTime)
@@ -67,7 +45,7 @@ void SubScene::Draw(unsigned long long deltaTime)
 			0xFFFF0000
 		);
 		square->Draw(deltaTime);
-		game->GetGraphicsDevice()->DrawCircle(circleX, circleY, 50, 0xFFFFFF00, isDraggingCircle);
+		circle->Draw(deltaTime);
 		dev->EndDraw();
 	}
 	dev->Present();

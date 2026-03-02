@@ -3,15 +3,14 @@
 #include "DX9GFExtras.h"
 #include "ExampleGame.h"
 #include "Rectangle.h"
+#include "Ellipse.h"
 
 class SubScene : public DX9GF::IScene {
 private:
 	ExampleGame* game;
 	DX9GF::InputManager* inputManager;
 	std::shared_ptr<GO::Rectangle> square;
-	bool isDraggingCircle = false;
-	float circleX, circleY;
-	bool IsWithinBoundCircle(float srcX, float srcY, float centerX, float centerY, float radius);
+	std::shared_ptr<GO::Ellipse> circle;
 public:
 	SubScene(ExampleGame* game) : game(game) {}
 	void Init() override;

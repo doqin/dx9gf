@@ -57,6 +57,9 @@
     <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GFApplication.h">
@@ -106,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="DX9GFExtras.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h">
+      <Filter>Header Files\Extras</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,22 +1,21 @@
 #pragma once
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
-
 namespace GO {
-	class Rectangle : public DX9GF::IGameObject {
+	class Ellipse : public DX9GF::IGameObject {
 	private:
 		DX9GF::GraphicsDevice* graphicsDevice;
-		std::shared_ptr<DX9GF::RectangleTrigger> trigger;
+		std::shared_ptr<DX9GF::EllipseTrigger> trigger;
 		float width, height;
 	protected:
 		void MainUpdate(unsigned long long deltaTime) override;
 	public:
-		Rectangle(DX9GF::GraphicsDevice* graphicsDevice, float x, float y, float width, float height)
+		Ellipse(DX9GF::GraphicsDevice* graphicsDevice, float x, float y, float width, float height)
 			: IGameObject(x, y),
 			width(width),
 			height(height),
 			graphicsDevice(graphicsDevice) { }
-		Rectangle(DX9GF::GraphicsDevice* graphicsDevice, std::weak_ptr<IGameObject> parent, float x, float y, float width, float height, bool useAbsoluteCoords = false)
+		Ellipse(DX9GF::GraphicsDevice* graphicsDevice, std::weak_ptr<IGameObject> parent, float x, float y, float width, float height, bool useAbsoluteCoords = false)
 			: IGameObject(parent, x, y, useAbsoluteCoords),
 			width(width),
 			height(height),

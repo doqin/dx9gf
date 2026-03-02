@@ -1,21 +1,5 @@
 #include "Rectangle.h"
 
-GO::Rectangle::Rectangle(DX9GF::GraphicsDevice* graphicsDevice, float x, float y, float width, float height) 
-	: IGameObject(x, y), 
-	width(width), 
-	height(height), 
-	graphicsDevice(graphicsDevice)
-{ 
-}
-
-GO::Rectangle::Rectangle(DX9GF::GraphicsDevice* graphicsDevice, std::weak_ptr<IGameObject> parent, float x, float y, float width, float height, bool useAbsoluteCoords) 
-	: IGameObject(parent, x, y, useAbsoluteCoords), 
-	width(width), 
-	height(height), 
-	graphicsDevice(graphicsDevice)
-{
-}
-
 void GO::Rectangle::Init()
 {
 	trigger = std::make_shared<DX9GF::RectangleTrigger>(
