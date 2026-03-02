@@ -4,7 +4,7 @@
 #include <string>
 
 namespace DX9GF {
-	class Application {
+	class Application final {
 	private:
 		HINSTANCE hInstance = nullptr;
 		std::wstring appTitle;
@@ -31,6 +31,8 @@ namespace DX9GF {
 		static Application* GetInstance();
 		unsigned int GetScreenWidth() const;
 		unsigned int GetScreenHeight() const;
+
+		void OnResize(UINT width, UINT height);
 	private:
 		Application() {}
 		~Application() {}

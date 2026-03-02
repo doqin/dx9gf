@@ -9,6 +9,14 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+	case WM_SIZE:
+		if (p_game != nullptr) {
+			p_game->OnResize(LOWORD(lParam), HIWORD(lParam));
+		}
+		if (DX9GF::Application::GetInstance() != nullptr) {
+			DX9GF::Application::GetInstance()->OnResize(LOWORD(lParam), HIWORD(lParam));
+		}
+		return 0;
 	case WM_DESTROY:
 		p_game->Dispose();
 		PostQuitMessage(0);
@@ -28,6 +36,9 @@ void DX9GF::Application::Init(HINSTANCE hInstance, std::wstring appTitle, UINT s
 	// Very important =)))
 	AppRegisterClass();
 
+	RECT windowRect = { 0, 0, static_cast<LONG>(screenWidth), static_cast<LONG>(screenHeight) };
+	AdjustWindowRect(&windowRect, WS_VISIBLE | WS_OVERLAPPEDWINDOW, FALSE);
+
 	// Tạo một cửa sổ
 	hwnd = CreateWindow(
 		appTitle.c_str(),
@@ -35,8 +46,8 @@ void DX9GF::Application::Init(HINSTANCE hInstance, std::wstring appTitle, UINT s
 		WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		screenWidth, // chiều rộng
-		screenHeight, // chiều cao
+		windowRect.right - windowRect.left, // chiều rộng
+		windowRect.bottom - windowRect.top, // chiều cao
 		NULL, // cửa sổ cha
 		NULL, // menu
 		hInstance, // instance
@@ -76,6 +87,12 @@ unsigned int DX9GF::Application::GetScreenWidth() const
 unsigned int DX9GF::Application::GetScreenHeight() const
 {
 	return screenHeight;
+}
+
+void DX9GF::Application::OnResize(UINT width, UINT height)
+{
+	this->screenWidth = width;
+	this->screenHeight = height;
 }
 
 void DX9GF::Application::AttachGame(IGame* game)

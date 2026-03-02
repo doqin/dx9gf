@@ -1,0 +1,27 @@
+#pragma once
+#include "DX9GF.h"
+#include "DX9GFExtras.h"
+namespace GO {
+	class Ellipse : public DX9GF::IGameObject {
+	private:
+		DX9GF::GraphicsDevice* graphicsDevice;
+		std::shared_ptr<DX9GF::EllipseTrigger> trigger;
+		float width, height;
+	protected:
+		void MainUpdate(unsigned long long deltaTime) override;
+	public:
+		Ellipse(DX9GF::GraphicsDevice* graphicsDevice, float x, float y, float width, float height)
+			: IGameObject(x, y),
+			width(width),
+			height(height),
+			graphicsDevice(graphicsDevice) { }
+		Ellipse(DX9GF::GraphicsDevice* graphicsDevice, std::weak_ptr<IGameObject> parent, float x, float y, float width, float height, bool useAbsoluteCoords = false)
+			: IGameObject(parent, x, y, useAbsoluteCoords),
+			width(width),
+			height(height),
+			graphicsDevice(graphicsDevice) { }
+		void Init();
+		void Draw(unsigned long long deltaTime) override;
+		void Dispose() override;
+	};
+}

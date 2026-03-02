@@ -4,7 +4,7 @@
 namespace DX9GF {
 	class IScene;
 
-	class SceneManager {
+	class SceneManager final {
 	private:
 		std::stack<IScene*> scenes;
 	protected:

@@ -47,10 +47,10 @@ void MainScene::Dispose()
 
 void MainScene::Draw(unsigned long long deltaTime)
 {
-	
-	game->GetGraphicsDevice()->Clear();
+	auto dev = game->GetGraphicsDevice();
+	dev->Clear();
 
-	if (game->GetGraphicsDevice()->BeginDraw()) {
+	if (dev->BeginDraw()) {
 		//int r, g, b;
 		//r = rand() % 255;
 		//g = rand() % 255;
@@ -64,11 +64,23 @@ void MainScene::Draw(unsigned long long deltaTime)
 		//colorRec.SetPosition(rect.left, rect.top);
 		//colorRec.SetColor(D3DCOLOR_XRGB(r,g,b));
 		//colorRec.Draw();
-
+		auto app = DX9GF::Application::GetInstance();
+		auto width = app->GetScreenWidth();
+		auto height = app->GetScreenHeight();
+		DX9GF::Debug::DrawGrid(
+			dev, 
+			0, 
+			0, 
+			width, 
+			height, 
+			32, 
+			32, 
+			0xFFFF0000
+		);
 		textureRec->Draw();
 		mario->Draw();
-		game->GetGraphicsDevice()->EndDraw();
+		dev->EndDraw();
 	}
 
-	game->GetGraphicsDevice()->Present();
+	dev->Present();
 }

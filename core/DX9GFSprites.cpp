@@ -130,15 +130,18 @@ void DX9GF::StaticSprite::LoadTexture(
 
 void DX9GF::StaticSprite::Draw()
 {
-	p_sprite->Begin(D3DXSPRITE_ALPHABLEND);
-	p_sprite->Draw(
-		p_texture,
-		p_src,
-		nullptr,
-		&pos,
-		color
-	);
-	p_sprite->End();
+	p_sprite->OnLostDevice();
+	p_sprite->OnResetDevice();
+	if (SUCCEEDED(p_sprite->Begin(D3DXSPRITE_ALPHABLEND))) {
+		p_sprite->Draw(
+			p_texture,
+			p_src,
+			nullptr,
+			&pos,
+			color
+		);
+		p_sprite->End();
+	}
 }
 
 void DX9GF::StaticSprite::SetSrcRect(RECT srcRect)
@@ -200,13 +203,16 @@ void DX9GF::AnimatedSprite::Draw()
 	frame_index++;
 	if (frame_index >= srcs.size()) frame_index = 0;
 	auto p_src = &srcs.at(frame_index);
-	p_sprite->Begin(D3DXSPRITE_ALPHABLEND);
-	p_sprite->Draw(
-		p_texture,
-		p_src,
-		nullptr,
-		&pos,
-		color
-	);
-	p_sprite->End();
+	p_sprite->OnLostDevice();
+	p_sprite->OnResetDevice();
+	if (SUCCEEDED(p_sprite->Begin(D3DXSPRITE_ALPHABLEND))) {
+		p_sprite->Draw(
+			p_texture,
+			p_src,
+			nullptr,
+			&pos,
+			color
+		);
+		p_sprite->End();
+	}
 }

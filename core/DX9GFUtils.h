@@ -3,7 +3,7 @@
 #include <vector>
 
 namespace DX9GF {
-	class Utils {
+	class Utils final {
 	public:
 		/// <summary>
 		/// Creates a collection of rectangular frames from a sprite sheet.
