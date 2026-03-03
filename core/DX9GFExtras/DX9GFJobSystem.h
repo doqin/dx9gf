@@ -3,16 +3,17 @@
 #include <atomic>
 #include "DX9GFThreadPool.h"
 
-constexpr auto DEFAULT_BATCH_SIZE = 64;
-
 namespace DX9GF {
 	struct Job {
-		std::function<void(void*)> function;
+		std::function<void(void* data)> function;
 		void* data;
 	};
+
 	struct BatchJob {
-		std::function<void(void*)> function;
-		std::vector<void*>* batch;
+		std::function<void(void* batch, size_t index)> function;
+		void* batch;
+		size_t startIdx;
+		size_t endIdx;
 	};
 
 	class JobSystem {
@@ -22,7 +23,7 @@ namespace DX9GF {
 	public:
 		JobSystem(size_t threadPoolSize) : pool(threadPoolSize) {}
 		void Dispatch(Job job);
-		void DispatchBatch(BatchJob batch, size_t batchSize = DEFAULT_BATCH_SIZE);
+		void DispatchBatch(BatchJob batch, size_t batchSize);
 		bool IsBusy();
 		void Wait();
 	};
