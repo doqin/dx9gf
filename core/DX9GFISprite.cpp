@@ -56,3 +56,63 @@ D3DXVECTOR3 DX9GF::ISprite::GetPosition() const
 {
 	return pos;
 }
+
+//scale
+void DX9GF::ISprite::SetScale(float s)
+{
+	scale.x = s;
+	scale.y = s;
+}
+
+void DX9GF::ISprite::SetScale(float sx, float sy)
+{
+	scale.x = sx;
+	scale.y = sy;
+}
+
+void DX9GF::ISprite::SetScaleX(float sx)
+{
+	scale.x = sx;
+}
+
+void DX9GF::ISprite::SetScaleY(float sy)
+{
+	scale.y = sy;
+}
+
+D3DXVECTOR2 DX9GF::ISprite::GetScale() const
+{
+	return scale;
+}
+
+//rotate
+void DX9GF::ISprite::SetRotation(float radians)
+{
+	rotation = radians;
+}
+
+void DX9GF::ISprite::Rotate(float radians)
+{
+	rotation += radians;
+}
+
+float DX9GF::ISprite::GetRotation() const
+{
+	return rotation;
+}
+//flip
+void DX9GF::ISprite::FlipHorizontal()
+{
+	scale.x *= -1;
+}
+
+void DX9GF::ISprite::FlipVertical()
+{
+	scale.y *= -1;
+}
+//origin
+void DX9GF::ISprite::SetOrigin(float x, float y)
+{
+	origin.x = x;
+	origin.y = y;
+}
