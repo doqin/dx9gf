@@ -7,16 +7,18 @@ DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager
     }
 }
 
-DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager, std::optional<std::weak_ptr<IGameObject>> parent, float x, float y, float rotation, float scaleX, float scaleY)
+DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager, float x, float y, float rotation, float scaleX, float scaleY) : transformManager(transformManager)
 {
     if (auto lock = transformManager.lock()) {
-        if (parent.has_value()) {
-            if (auto parentLock = parent.value().lock()) {
-                this->transformHandle = lock->CreateTransform(parentLock->GetTransformHandle().slotIndex, x, y, rotation, scaleX, scaleY);
-            }
-        }
-        else {
-            this->transformHandle = lock->CreateTransform(NO_PARENT, x, y, rotation, scaleX, scaleY);
+        this->transformHandle = lock->CreateTransform(NO_PARENT, x, y, rotation, scaleX, scaleY);
+    }
+}
+
+DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<IGameObject> parent, float x, float y, float rotation, float scaleX, float scaleY) : transformManager(transformManager)
+{
+    if (auto lock = transformManager.lock()) {
+        if (auto parentLock = parent.lock()) {
+            this->transformHandle = lock->CreateTransform(parentLock->GetTransformHandle().slotIndex, x, y, rotation, scaleX, scaleY);
         }
     }
     this->parent = parent;
@@ -59,6 +61,9 @@ void DX9GF::IGameObject::SetLocalPosition(float x, float y)
         auto& transformData = lock->GetTransform(transformHandle.slotIndex);
         transformData.localX = x;
         transformData.localY = y;
+    }
+    else {
+        throw std::runtime_error("Could not get lock");
     }
 }
 
