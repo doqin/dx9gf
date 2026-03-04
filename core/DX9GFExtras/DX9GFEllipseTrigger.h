@@ -7,11 +7,29 @@ namespace DX9GF {
 		float height;
 	protected:
 	public:
-		EllipseTrigger() : ITrigger(), width(0), height(0) {}
-		EllipseTrigger(float width, float height) : width(width), height(height), ITrigger() {}
-		EllipseTrigger(float x, float y, float width, float height) : width(width), height(height), ITrigger(x, y) {}
-		EllipseTrigger(std::weak_ptr<IGameObject> parent, float x, float y, float width, float height, bool useAbsoluteCoords = false)
-			: width(width), height(height), ITrigger(parent, x, y, useAbsoluteCoords) {
+		EllipseTrigger(std::weak_ptr<TransformManager> transformManager) : width(0), height(0), ITrigger(transformManager) {}
+		EllipseTrigger(
+			std::weak_ptr<TransformManager> transformManager,
+			float width,
+			float height,
+			float x = 0,
+			float y = 0,
+			float rotation = 0,
+			float scaleX = 1,
+			float scaleY = 1
+		) : width(width), height(height), ITrigger(transformManager, x, y, rotation, scaleX, scaleY) {
+		}
+		EllipseTrigger(
+			std::weak_ptr<TransformManager> transformManager,
+			std::weak_ptr<IGameObject> parent,
+			float width,
+			float height,
+			float x = 0,
+			float y = 0,
+			float rotation = 0,
+			float scaleX = 1,
+			float scaleY = 1
+		) : width(width), height(height), ITrigger(transformManager, parent, x, y, rotation, scaleX, scaleY) {
 		}
 		bool IsHovering(unsigned long long deltaTime) override;
 	};
