@@ -21,7 +21,7 @@ void SubScene::Update(unsigned long long deltaTime)
 	inputManager->ReadKeyboard(deltaTime);
 	inputManager->ReadMouse(deltaTime);
 	if (inputManager->KeyDown(DIK_F)) {
-		game->GetSceneManager()->PopScene();
+		game->GetSceneManager()->GoToPrevious();
 		return; // return otherwise we get a use after free situation
 	}
 	auto& js = game->GetJobSystem();

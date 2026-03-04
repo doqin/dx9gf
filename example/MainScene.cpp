@@ -21,11 +21,12 @@ void MainScene::Init()
 		156,
 		7497
 	);
+	auto app = DX9GF::Application::GetInstance();
+	game->GetSceneManager()->PushScene(new SubScene(game, app->GetScreenWidth(), app->GetScreenHeight()));
 }
 
 void MainScene::Update(unsigned long long deltaTime)
-{
-	auto app = DX9GF::Application::GetInstance();
+{	
 	inputManager->ReadKeyboard(deltaTime);
 	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
 	float xDir = 0;
@@ -35,7 +36,7 @@ void MainScene::Update(unsigned long long deltaTime)
 	if (inputManager->KeyPress(DIK_D)) xDir += 1;
 	if (inputManager->KeyPress(DIK_W)) yDir -= 1;
 	if (inputManager->KeyPress(DIK_S)) yDir += 1;
-	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->PushScene(new SubScene(game, app->GetScreenWidth(), app->GetScreenHeight()));
+	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->GoToNext();
 	mario->Translate(xDir * velocity * deltaTime / 1000, yDir * velocity * deltaTime / 1000);
 	
 	float cameraXDir = 0;
