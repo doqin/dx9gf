@@ -11,7 +11,7 @@ private:
 	DX9GF::AnimatedSprite* mario;
 	DX9GF::InputManager* inputManager;
 public:
-	MainScene(ExampleGame* game) : game(game) {}
+	MainScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;
 	void Draw(unsigned long long deltaTime) override;
 	void Update(unsigned long long deltaTime) override;

@@ -17,7 +17,7 @@ namespace DX9GF {
 		void CreatePlainTexture(D3DCOLOR color, UINT width, UINT height);
 		void SetColor(D3DCOLOR color);
 		void LoadTexture(std::wstring filePath, UINT width = D3DX_DEFAULT, UINT height = D3DX_DEFAULT);
-		void Draw() override;
+		void Draw(const Camera& camera) override;
 		void SetSrcRect(RECT srcRect);
 	};
 
@@ -32,6 +32,6 @@ namespace DX9GF {
 		~AnimatedSprite();
 
 		void LoadSpriteSheet(std::wstring filePath, std::vector<RECT> frames, UINT width = D3DX_DEFAULT, UINT height = D3DX_DEFAULT);
-		void Draw() override;
+		void Draw(const Camera& camera) override;
 	};
 };

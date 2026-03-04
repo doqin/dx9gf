@@ -7,6 +7,6 @@ namespace DX9GF {
 		Debug() {}
 		~Debug() {}
 	public:
-		static void DrawGrid(GraphicsDevice* graphicsDevice, float offsetX, float offsetY, float screenWidth, float screenHeight, float spacingX, float spacingY, D3DCOLOR lineColor);
+		static void DrawGrid(GraphicsDevice* graphicsDevice, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY, D3DCOLOR lineColor);
 	};
 }
