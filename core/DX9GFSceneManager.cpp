@@ -11,9 +11,9 @@ DX9GF::SceneManager::~SceneManager()
 void DX9GF::SceneManager::ChangeScene(IScene* scene)
 {
 	if (!scenes.empty()) {
-		PopScene();
+		delete scenes[index];
 	}
-	scenes.push_back(scene);
+	scenes[index] = scene;
 	scene->Init();
 }
 
@@ -35,7 +35,7 @@ void DX9GF::SceneManager::Update(unsigned long long deltaTime)
 	if (scenes.empty()) {
 		throw std::runtime_error("No scene to update!");
 	}
-	scenes.back()->Update(deltaTime);
+	scenes[index]->Update(deltaTime);
 }
 
 void DX9GF::SceneManager::Draw(unsigned long long deltaTime)
@@ -43,7 +43,7 @@ void DX9GF::SceneManager::Draw(unsigned long long deltaTime)
 	if (scenes.empty()) {
 		throw std::runtime_error("No scene to draw!");
 	}
-	scenes.back()->Draw(deltaTime);
+	scenes[index]->Draw(deltaTime);
 }
 
 void DX9GF::SceneManager::OnResize(int width, int height)
@@ -55,6 +55,24 @@ void DX9GF::SceneManager::OnResize(int width, int height)
 		auto previousHeight = app->GetScreenHeight();
 		scene->GetCamera().SetScreenResolution(cameraWidth * width / previousWidth, cameraHeight * height / previousHeight);
 	}
+}
+
+void DX9GF::SceneManager::GoToNext()
+{
+	index++;
+	if (index >= scenes.size()) throw std::runtime_error("Attempted to switch to a scene out of bound");
+}
+
+void DX9GF::SceneManager::GoToPrevious()
+{
+	index--;
+	if (index < 0) throw std::runtime_error("Attempted to switch to a scene out of bound");
+}
+
+void DX9GF::SceneManager::GoToScene(size_t index)
+{
+	this->index = index;
+	if (index < 0 || index >= scenes.size()) throw std::runtime_error("Attempted to switch to a scene out of bound");
 }
 
 void DX9GF::SceneManager::Dispose()
