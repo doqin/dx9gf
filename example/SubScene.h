@@ -7,8 +7,9 @@
 
 class SubScene : public DX9GF::IScene {
 private:
-	ExampleGame* game;
-	DX9GF::InputManager* inputManager;
+	ExampleGame* game = nullptr;
+	DX9GF::InputManager* inputManager = nullptr;
+	std::shared_ptr<DX9GF::TransformManager> transformManager;
 	std::shared_ptr<GO::Rectangle> square;
 	std::shared_ptr<GO::Ellipse> circle;
 public:

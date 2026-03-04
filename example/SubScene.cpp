@@ -8,10 +8,12 @@ void SubScene::Init()
 	inputManager = DX9GF::InputManager::GetInstance();
 	auto app = DX9GF::Application::GetInstance();
 	auto graphicsDevice = game->GetGraphicsDevice();
-	square = std::make_shared<GO::Rectangle>(game->GetGraphicsDevice(), app->GetScreenWidth() / 2, app->GetScreenHeight() / 2, 100, 100);
+	transformManager = std::make_shared<DX9GF::TransformManager>();
+	square = std::make_shared<GO::Rectangle>(game->GetGraphicsDevice(), transformManager, 100, 100, app->GetScreenWidth() / 2 - 50, app->GetScreenHeight() / 2 - 50);
 	square->Init();
-	circle = std::make_shared<GO::Ellipse>(game->GetGraphicsDevice(), 0, 0, 100, 100);
+	circle = std::make_shared<GO::Ellipse>(game->GetGraphicsDevice(), transformManager, 100, 100, 0, 0);
 	circle->Init();
+	transformManager->RebuildHierarchy();
 }
 
 void SubScene::Update(unsigned long long deltaTime)
@@ -22,8 +24,21 @@ void SubScene::Update(unsigned long long deltaTime)
 		game->GetSceneManager()->PopScene();
 		return; // return otherwise we get a use after free situation
 	}
-	square->Update(deltaTime);
-	circle->Update(deltaTime);
+	auto& js = game->GetJobSystem();
+	js.Dispatch({
+		.function = [deltaTime](void* data) {
+			static_cast<GO::Rectangle*>(data)->Update(deltaTime);
+		},
+		.data=static_cast<void*>(square.get())
+	});
+	js.Dispatch({
+		.function = [deltaTime](void* data) {
+			static_cast<GO::Ellipse*>(data)->Update(deltaTime);
+		},
+		.data = static_cast<void*>(circle.get())
+	});
+	js.Wait();
+	transformManager->UpdateAll(js);
 }
 
 void SubScene::Draw(unsigned long long deltaTime)

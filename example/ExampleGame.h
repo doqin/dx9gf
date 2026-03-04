@@ -1,11 +1,14 @@
 #pragma once
 #include "DX9GF.h"
+#include "DX9GFExtras.h"
 
 class ExampleGame : public DX9GF::IGame
 {
 private:
+	DX9GF::JobSystem jobSystem;
 public:
-	ExampleGame(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : IGame(hwnd, screenWidth, screenHeight) {};
+	ExampleGame(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : IGame(hwnd, screenWidth, screenHeight), jobSystem(5) {};
 	void Init() override;
+	DX9GF::JobSystem& GetJobSystem();
 };
 

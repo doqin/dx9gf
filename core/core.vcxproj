@@ -192,7 +192,10 @@
     <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFITrigger.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFJobSystem.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFThreadPool.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp" />
     <ClCompile Include="DX9GFGraphicsDevice.cpp" />
     <ClCompile Include="DX9GFIGame.cpp" />
     <ClCompile Include="DX9GFInputManager.cpp" />
@@ -210,7 +213,10 @@
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h" />
     <ClInclude Include="DX9GFExtras\DX9GFITrigger.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFJobSystem.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFThreadPool.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFTransformManager.h" />
     <ClInclude Include="DX9GFGraphicsDevice.h" />
     <ClInclude Include="DX9GFIGame.h" />
     <ClInclude Include="DX9GFInputManager.h" />
