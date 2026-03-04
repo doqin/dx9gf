@@ -12,8 +12,8 @@ void GO::Ellipse::Init()
 		shared_from_this(), 
 		width, 
 		height,
-		0, 
-		0
+		-width / 2, 
+		-height / 2
 	);
 	trigger->SetOnHeld([](DX9GF::ITrigger* thisObject) {
 		if (auto parent = thisObject->GetParent().value().lock()) {
@@ -37,7 +37,7 @@ void GO::Ellipse::Init()
 
 void GO::Ellipse::Draw(unsigned long long deltaTime)
 {
-	graphicsDevice->DrawEllipse(GetWorldX() + width / 2, GetWorldY() + height / 2, width, height, 0xFF00FF00, trigger->IsHeld(deltaTime));
+	graphicsDevice->DrawEllipse(GetWorldX(), GetWorldY(), width, height, 0xFF00FF00, trigger->IsHeld(deltaTime));
 	graphicsDevice->DrawEllipse(trigger->GetWorldX() + width / 2, trigger->GetWorldY() + height / 2, width, height, 0x550000FF, false);
 }
 

@@ -24,10 +24,10 @@ DX9GF::ThreadPool::~ThreadPool()
 	{
 		std::unique_lock<std::mutex> lock(queueMutex);
 		stop = true;
-		condition.notify_all();
-		for (auto& worker : workers) {
-			worker.join(); // blocks the main thread until the thread is over
-		}
+	}
+	condition.notify_all();
+	for (auto& worker : workers) {
+		worker.join();
 	}
 }
 

@@ -7,8 +7,8 @@ void GO::Rectangle::Init()
 		shared_from_this(),
 		width,
 		height,
-		0,
-		0
+		-width / 2,
+		-height / 2
 	);
 	trigger->SetOnHeld([](DX9GF::ITrigger* thisObject) {
 		if (auto parent = thisObject->GetParent().value().lock()) {
@@ -37,7 +37,7 @@ void GO::Rectangle::Update(unsigned long long deltaTime)
 
 void GO::Rectangle::Draw(unsigned long long deltaTime)
 {
-	graphicsDevice->DrawRectangle(GetWorldX(), GetWorldY(), width, height, 0xFFFF0000, trigger->IsHeld(deltaTime));
+	graphicsDevice->DrawRectangle(GetWorldX() - width / 2, GetWorldY() - height / 2, width, height, 0xFFFF0000, trigger->IsHeld(deltaTime));
 	graphicsDevice->DrawRectangle(trigger->GetWorldX(), trigger->GetWorldY(), width, height, 0x550000FF, false);
 }
 
