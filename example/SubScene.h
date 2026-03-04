@@ -13,7 +13,7 @@ private:
 	std::shared_ptr<GO::Rectangle> square;
 	std::shared_ptr<GO::Ellipse> circle;
 public:
-	SubScene(ExampleGame* game) : game(game) {}
+	SubScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;
 	void Update(unsigned long long deltaTime) override;
 	void Draw(unsigned long long deltaTime) override;

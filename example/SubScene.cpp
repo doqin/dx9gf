@@ -57,8 +57,7 @@ void SubScene::Draw(unsigned long long deltaTime)
 			height,
 			32,
 			32,
-			0xFFFF0000
-		);
+			0xFFFF0000);
 		square->Draw(deltaTime);
 		circle->Draw(deltaTime);
 		dev->EndDraw();

@@ -1,5 +1,6 @@
 #pragma once
 #include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h"
+#include "DX9GFCamera.h"
 
 namespace DX9GF {
 	class GraphicsDevice;
@@ -13,7 +14,7 @@ namespace DX9GF {
 	public:
 		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
 
-		virtual void Draw() = 0;
+		virtual void Draw(const Camera& camera) = 0;
 
 		/// <summary>
 		/// Translates the current position by the specified x and y offsets.

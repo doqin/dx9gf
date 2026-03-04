@@ -25,6 +25,7 @@ void MainScene::Init()
 
 void MainScene::Update(unsigned long long deltaTime)
 {
+	auto app = DX9GF::Application::GetInstance();
 	inputManager->ReadKeyboard(deltaTime);
 	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
 	float xDir = 0;
@@ -34,8 +35,23 @@ void MainScene::Update(unsigned long long deltaTime)
 	if (inputManager->KeyPress(DIK_D)) xDir += 1;
 	if (inputManager->KeyPress(DIK_W)) yDir -= 1;
 	if (inputManager->KeyPress(DIK_S)) yDir += 1;
-	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->PushScene(new SubScene(game));
+	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->PushScene(new SubScene(game, app->GetScreenWidth(), app->GetScreenHeight()));
 	mario->Translate(xDir * velocity * deltaTime / 1000, yDir * velocity * deltaTime / 1000);
+	
+	float cameraXDir = 0;
+	float cameraYDir = 0;
+	const float cameraVelocity = 200;
+	if (inputManager->KeyPress(DIK_LEFT)) cameraXDir -= 1;
+	if (inputManager->KeyPress(DIK_RIGHT)) cameraXDir += 1;
+	if (inputManager->KeyPress(DIK_UP)) cameraYDir -= 1;
+	if (inputManager->KeyPress(DIK_DOWN)) cameraYDir += 1;
+	if (cameraXDir != 0 || cameraYDir != 0) {
+		auto cameraPos = camera.GetPosition();
+		cameraPos.x += cameraXDir * cameraVelocity * deltaTime / 1000;
+		cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
+		camera.SetPosition(cameraPos);
+	}
+	camera.Update();
 }
 
 void MainScene::Dispose()
@@ -51,34 +67,21 @@ void MainScene::Draw(unsigned long long deltaTime)
 	dev->Clear();
 
 	if (dev->BeginDraw()) {
-		//int r, g, b;
-		//r = rand() % 255;
-		//g = rand() % 255;
-		//b = rand() % 255;
-		//RECT rect;
-		//rect.left = rand() % SCREEN_WIDTH / 2;
-		//rect.right = rect.left + rand() % SCREEN_WIDTH / 2;
-		//rect.top = rand() % SCREEN_HEIGHT;
-		//rect.bottom = rect.top + rand() % SCREEN_HEIGHT / 2;
-		//colorRec.SetSrcRect(rect);
-		//colorRec.SetPosition(rect.left, rect.top);
-		//colorRec.SetColor(D3DCOLOR_XRGB(r,g,b));
-		//colorRec.Draw();
 		auto app = DX9GF::Application::GetInstance();
 		auto width = app->GetScreenWidth();
 		auto height = app->GetScreenHeight();
+		auto cameraOffsets = camera.GetPosition();
 		DX9GF::Debug::DrawGrid(
-			dev, 
-			0, 
-			0, 
-			width, 
-			height, 
-			32, 
-			32, 
-			0xFFFF0000
-		);
-		textureRec->Draw();
-		mario->Draw();
+			dev,
+			-cameraOffsets.x,
+			-cameraOffsets.y,
+			width,
+			height,
+			32,
+			32,
+			0xFFFF0000);
+		textureRec->Draw(camera);
+		mario->Draw(camera);
 		dev->EndDraw();
 	}
 

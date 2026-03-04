@@ -188,6 +188,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DX9GFApplication.cpp" />
+    <ClCompile Include="DX9GFCamera.cpp" />
     <ClCompile Include="DX9GFDebug.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
@@ -208,6 +209,7 @@
   <ItemGroup>
     <ClInclude Include="DX9GF.h" />
     <ClInclude Include="DX9GFApplication.h" />
+    <ClInclude Include="DX9GFCamera.h" />
     <ClInclude Include="DX9GFDebug.h" />
     <ClInclude Include="DX9GFExtras.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h" />

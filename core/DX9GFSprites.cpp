@@ -128,11 +128,13 @@ void DX9GF::StaticSprite::LoadTexture(
 	}
 }
 
-void DX9GF::StaticSprite::Draw()
+void DX9GF::StaticSprite::Draw(const Camera& camera)
 {
 	p_sprite->OnLostDevice();
 	p_sprite->OnResetDevice();
 	if (SUCCEEDED(p_sprite->Begin(D3DXSPRITE_ALPHABLEND))) {
+		auto matWorld = camera.GetTransformMatrix();
+		p_sprite->SetTransform(&matWorld);
 		p_sprite->Draw(
 			p_texture,
 			p_src,
@@ -197,7 +199,7 @@ void DX9GF::AnimatedSprite::LoadSpriteSheet(std::wstring filePath,
 	this->srcs = frames;
 }
 
-void DX9GF::AnimatedSprite::Draw()
+void DX9GF::AnimatedSprite::Draw(const Camera& camera)
 {
 	if (srcs.size() == 0) throw std::runtime_error("Sprite frames are not set!");
 	frame_index++;
@@ -206,6 +208,8 @@ void DX9GF::AnimatedSprite::Draw()
 	p_sprite->OnLostDevice();
 	p_sprite->OnResetDevice();
 	if (SUCCEEDED(p_sprite->Begin(D3DXSPRITE_ALPHABLEND))) {
+		auto matWorld = camera.GetTransformMatrix();
+		p_sprite->SetTransform(&matWorld);
 		p_sprite->Draw(
 			p_texture,
 			p_src,
