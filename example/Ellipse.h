@@ -4,13 +4,13 @@
 namespace GO {
 	class Ellipse : public DX9GF::IGameObject {
 	private:
-		DX9GF::GraphicsDevice* graphicsDevice;
-		std::shared_ptr<DX9GF::EllipseTrigger> trigger;
+		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
+		DX9GF::Camera* camera = nullptr;
+		std::shared_ptr<DX9GF::EllipseTrigger> trigger = nullptr;
 		float width, height;
 	protected:
 	public:
 		Ellipse(
-			DX9GF::GraphicsDevice* graphicsDevice, 
 			std::weak_ptr<DX9GF::TransformManager> transformManager, 
 			float width, 
 			float height, 
@@ -21,10 +21,8 @@ namespace GO {
 			float scaleY = 1
 		) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY),
 			width(width),
-			height(height),
-			graphicsDevice(graphicsDevice) { }
+			height(height) { }
 		Ellipse(
-			DX9GF::GraphicsDevice* graphicsDevice, 
 			std::weak_ptr<DX9GF::TransformManager> transformManager, 
 			std::weak_ptr<IGameObject> parent, 
 			float width, 
@@ -36,9 +34,8 @@ namespace GO {
 			float scaleY = 1
 		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY),
 			width(width),
-			height(height),
-			graphicsDevice(graphicsDevice) { }
-		void Init();
+			height(height) { }
+		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
 		void Dispose();

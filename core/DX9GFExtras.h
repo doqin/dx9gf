@@ -6,3 +6,5 @@
 #include "DX9GFExtras/DX9GFThreadPool.h"
 #include "DX9GFExtras/DX9GFJobSystem.h"
 #include "DX9GFExtras/DX9GFTransformManager.h"
+#include "DX9GFExtras/DX9GFICollider.h"
+#include "DX9GFExtras/DX9GFRectangleCollider.h"

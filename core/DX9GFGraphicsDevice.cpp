@@ -1,6 +1,8 @@
 #include "DX9GFGraphicsDevice.h"
 #include <vector>
 #include <d3dx9math.h>
+#include "DX9GFApplication.h"
+#include "DX9GFUtils.h"
 
 struct Vertex {
 	float x, y, z, rhw; // rhw is reciprocal of homogenous w
@@ -89,6 +91,13 @@ void DX9GF::GraphicsDevice::DrawRectangle(float x, float y, float width, float h
 	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
 }
 
+void DX9GF::GraphicsDevice::DrawRectangle(const DX9GF::Camera& camera, float x, float y, float width, float height, D3DCOLOR color, bool isFilled)
+{
+	auto app = DX9GF::Application::GetInstance();
+	auto [windowX, windowY] = DX9GF::Utils::WorldToWindowCoords(camera, x, y);
+	DrawRectangle(windowX, windowY, width, height, color, isFilled);
+}
+
 void DX9GF::GraphicsDevice::DrawEllipse(float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled)
 {
 	const int SAMPLES = 36; // Number of segments to approximate the circle
@@ -112,4 +121,11 @@ void DX9GF::GraphicsDevice::DrawEllipse(float centerX, float centerY, float widt
 	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
 	d3ddev->DrawPrimitiveUP(primitiveType, SAMPLES, vertices.data(), sizeof(Vertex));
+}
+
+void DX9GF::GraphicsDevice::DrawEllipse(const DX9GF::Camera& camera, float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled)
+{
+	auto app = DX9GF::Application::GetInstance();
+	auto [windowX, windowY] = DX9GF::Utils::WorldToWindowCoords(camera, centerX, centerY);
+	DrawEllipse(windowX, windowY, width, height, color, isFilled);
 }

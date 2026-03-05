@@ -9,7 +9,7 @@ namespace DX9GF {
 	private:
 		RECT* p_src = nullptr;
 		IDirect3DTexture9* p_texture = nullptr;
-		UINT width, height;
+		UINT width = 0, height = 0;
 	public:
 		StaticSprite(GraphicsDevice* graphicsDevice);
 		~StaticSprite();

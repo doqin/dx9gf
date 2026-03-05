@@ -9,10 +9,13 @@ void SubScene::Init()
 	auto app = DX9GF::Application::GetInstance();
 	auto graphicsDevice = game->GetGraphicsDevice();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
-	square = std::make_shared<GO::Rectangle>(game->GetGraphicsDevice(), transformManager, 100, 100, app->GetScreenWidth() / 2 - 50, app->GetScreenHeight() / 2 - 50);
-	square->Init();
-	circle = std::make_shared<GO::Ellipse>(game->GetGraphicsDevice(), transformManager, 100, 100, 0, 0);
-	circle->Init();
+	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 100, 100, 200, 200));
+	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 50, 200, -200, 200));
+	for (auto& rect : rects) {
+		rect->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+	}
+	circle = std::make_shared<GO::Ellipse>(transformManager, 100, 100, 0, 0);
+	circle->Init(game->GetGraphicsDevice(), &camera);
 	transformManager->RebuildHierarchy();
 }
 
@@ -25,12 +28,14 @@ void SubScene::Update(unsigned long long deltaTime)
 		return; // return otherwise we get a use after free situation
 	}
 	auto& js = game->GetJobSystem();
-	js.Dispatch({
-		.function = [deltaTime](void* data) {
-			static_cast<GO::Rectangle*>(data)->Update(deltaTime);
+	js.DispatchBatch({
+		.function = [deltaTime](void* batch, size_t idx) {
+			static_cast<std::shared_ptr<GO::Rectangle>*>(batch)[idx]->Update(deltaTime);
 		},
-		.data=static_cast<void*>(square.get())
-	});
+		.batch=rects.data(),
+		.startIdx = 0,
+		.endIdx = 2 // for some reason this is +1 than intended :P
+	}, 1);
 	js.Dispatch({
 		.function = [deltaTime](void* data) {
 			static_cast<GO::Ellipse*>(data)->Update(deltaTime);
@@ -39,6 +44,7 @@ void SubScene::Update(unsigned long long deltaTime)
 	});
 	js.Wait();
 	transformManager->UpdateAll(js);
+	camera.Update();
 }
 
 void SubScene::Draw(unsigned long long deltaTime)
@@ -58,7 +64,9 @@ void SubScene::Draw(unsigned long long deltaTime)
 			32,
 			32,
 			0xFFFF0000);
-		square->Draw(deltaTime);
+		for (auto& rect : rects) {
+			rect->Draw(deltaTime);
+		}
 		circle->Draw(deltaTime);
 		dev->EndDraw();
 	}

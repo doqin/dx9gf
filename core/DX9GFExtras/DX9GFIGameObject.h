@@ -14,7 +14,7 @@ namespace DX9GF {
 		IGameObject(std::weak_ptr<TransformManager> transformManager, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1);
 		IGameObject(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<IGameObject> parent, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1);
 	public:
-		~IGameObject();
+		virtual ~IGameObject();
 		std::optional<std::weak_ptr<IGameObject>> GetParent() const;
 		TransformHandle GetTransformHandle() const;
 		void SetLocalX(float x);
