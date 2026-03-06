@@ -1,4 +1,5 @@
 #include "DX9GFRectangleCollider.h"
+#include "DX9GFEllipseCollider.h"
 #include "../DX9GFUtils.h"
 #include <algorithm>
 #include <cmath>
@@ -136,6 +137,9 @@ std::optional<std::tuple<float, float>> DX9GF::RectangleCollider::IsIntersecting
         }
 
         return std::nullopt;
+    }
+    else if (auto ellipseCollider = dynamic_pointer_cast<EllipseCollider>(lock)) {
+        return ICollider::IsIntersecting(dynamic_pointer_cast<RectangleCollider>(shared_from_this()), ellipseCollider, newX, newY);
     }
     else {
         throw std::runtime_error("Unknown collider, method has not implemented logic");

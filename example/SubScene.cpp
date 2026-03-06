@@ -14,8 +14,11 @@ void SubScene::Init()
 	for (auto& rect : rects) {
 		rect->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
 	}
-	circle = std::make_shared<GO::Ellipse>(transformManager, 100, 100, 0, 0);
-	circle->Init(game->GetGraphicsDevice(), &camera);
+	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 100, 100, 0, 0));
+	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 200, 50, 0, -200));
+	for (auto& ellipse : ellipses) {
+		ellipse->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+	}
 	transformManager->RebuildHierarchy();
 }
 
@@ -34,14 +37,16 @@ void SubScene::Update(unsigned long long deltaTime)
 		},
 		.batch=rects.data(),
 		.startIdx = 0,
-		.endIdx = 2 // for some reason this is +1 than intended :P
+		.endIdx = rects.size() // for some reason this is +1 than intended :P
 	}, 1);
-	js.Dispatch({
-		.function = [deltaTime](void* data) {
-			static_cast<GO::Ellipse*>(data)->Update(deltaTime);
+	js.DispatchBatch({
+		.function = [deltaTime](void* batch, size_t idx) {
+			static_cast<std::shared_ptr<GO::Ellipse>*>(batch)[idx]->Update(deltaTime);
 		},
-		.data = static_cast<void*>(circle.get())
-	});
+		.batch = static_cast<void*>(ellipses.data()),
+		.startIdx = 0,
+		.endIdx = ellipses.size()
+	}, 1);
 	js.Wait();
 	transformManager->UpdateAll(js);
 	camera.Update();
@@ -67,7 +72,9 @@ void SubScene::Draw(unsigned long long deltaTime)
 		for (auto& rect : rects) {
 			rect->Draw(deltaTime);
 		}
-		circle->Draw(deltaTime);
+		for (auto& ellipse : ellipses) {
+			ellipse->Draw(deltaTime);
+		}
 		dev->EndDraw();
 	}
 	dev->Present();

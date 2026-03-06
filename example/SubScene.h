@@ -12,7 +12,7 @@ private:
 	std::shared_ptr<DX9GF::TransformManager> transformManager;
 	std::vector<std::weak_ptr<DX9GF::ICollider>> worldColliders;
 	std::vector<std::shared_ptr<GO::Rectangle>> rects;
-	std::shared_ptr<GO::Ellipse> circle;
+	std::vector<std::shared_ptr<GO::Ellipse>> ellipses;
 public:
 	SubScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;

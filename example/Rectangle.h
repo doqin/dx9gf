@@ -5,10 +5,10 @@
 namespace GO {
 	class Rectangle : public DX9GF::IGameObject {
 	private:
-		DX9GF::GraphicsDevice* graphicsDevice;
-		DX9GF::Camera* camera;
-		std::shared_ptr<DX9GF::RectangleTrigger> trigger;
-		std::shared_ptr<DX9GF::RectangleCollider> collider;
+		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
+		DX9GF::Camera* camera = nullptr;
+		std::shared_ptr<DX9GF::RectangleTrigger> trigger = nullptr;
+		std::shared_ptr<DX9GF::RectangleCollider> collider = nullptr;
 		float width, height;
 	protected:
 	public:

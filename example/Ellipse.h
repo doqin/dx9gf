@@ -7,6 +7,7 @@ namespace GO {
 		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
 		DX9GF::Camera* camera = nullptr;
 		std::shared_ptr<DX9GF::EllipseTrigger> trigger = nullptr;
+		std::shared_ptr<DX9GF::EllipseCollider> collider = nullptr;
 		float width, height;
 	protected:
 	public:
@@ -35,7 +36,8 @@ namespace GO {
 		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY),
 			width(width),
 			height(height) { }
-		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera);
+		std::weak_ptr<DX9GF::EllipseCollider> GetCollider();
+		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::weak_ptr<DX9GF::ICollider>>* worldColliders);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
 		void Dispose();

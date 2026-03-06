@@ -4,6 +4,9 @@
 #include <tuple>
 
 namespace DX9GF {
+	class RectangleCollider;
+	class EllipseCollider;
+
 	class ICollider : public IGameObject {
 	private:
 	protected:
@@ -13,5 +16,7 @@ namespace DX9GF {
 	public:
 		virtual bool IsCollided(std::weak_ptr<ICollider> other) = 0;
 		virtual std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<ICollider> other, float newX, float newY) = 0;
+		static std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<RectangleCollider> targetCollider, std::weak_ptr<EllipseCollider> otherCollider, float newX, float newY);
+		static std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<EllipseCollider> targetCollider, std::weak_ptr<RectangleCollider> otherCollider, float newX, float newY);
 	};
 }

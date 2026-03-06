@@ -63,11 +63,11 @@ void MainScene::Draw(unsigned long long deltaTime)
 		auto app = DX9GF::Application::GetInstance();
 		auto width = app->GetScreenWidth();
 		auto height = app->GetScreenHeight();
-		auto cameraOffsets = camera.GetPosition();
 		DX9GF::Debug::DrawGrid(
 			dev,
-			-cameraOffsets.x,
-			-cameraOffsets.y,
+			camera,
+			0,
+			0,
 			width,
 			height,
 			32,
