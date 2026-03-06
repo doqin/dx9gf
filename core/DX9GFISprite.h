@@ -9,7 +9,7 @@ namespace DX9GF {
 	protected:
 		GraphicsDevice* graphicsDevice = nullptr;
 		ID3DXSprite* p_sprite = nullptr;
-		D3DXVECTOR3 pos;
+		D3DXVECTOR3 pos = { 0.0f, 0.0f, 0.0f };
 		D3DCOLOR color = 0xFFFFFFFF;
 	public:
 		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}

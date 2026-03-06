@@ -31,5 +31,7 @@ namespace DX9GF {
 			float scaleY = 1
 		) : width(width), height(height), ITrigger(transformManager, parent, x, y, rotation, scaleX, scaleY) {}
 		bool IsHovering(unsigned long long deltaTime) override;
+		float GetWidth() const;
+		float GetHeight() const;
 	};
 }

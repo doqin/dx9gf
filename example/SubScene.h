@@ -10,8 +10,9 @@ private:
 	ExampleGame* game = nullptr;
 	DX9GF::InputManager* inputManager = nullptr;
 	std::shared_ptr<DX9GF::TransformManager> transformManager;
-	std::shared_ptr<GO::Rectangle> square;
-	std::shared_ptr<GO::Ellipse> circle;
+	std::vector<std::weak_ptr<DX9GF::ICollider>> worldColliders;
+	std::vector<std::shared_ptr<GO::Rectangle>> rects;
+	std::vector<std::shared_ptr<GO::Ellipse>> ellipses;
 public:
 	SubScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;

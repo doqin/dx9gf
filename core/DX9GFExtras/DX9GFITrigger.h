@@ -1,11 +1,13 @@
 #pragma once
 #include "DX9GFIGameObject.h"
 #include <functional>
+#include "../DX9GFCamera.h"
 
 namespace DX9GF {
 	class ITrigger : public IGameObject {
 	private:
 	protected:
+		Camera* camera;
 		bool isHeld = false;
 		std::function<void(ITrigger*)> onHover = [](ITrigger*) {};
 		std::function<void(ITrigger*)> onClick = [](ITrigger*) {};
@@ -14,6 +16,7 @@ namespace DX9GF {
 		ITrigger(std::weak_ptr<TransformManager> transformManager, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY) {}
 		ITrigger(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<IGameObject> parent, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY) {}
 	public:
+		void Init(Camera* camera);
 		virtual bool IsHovering(unsigned long long deltaTime) = 0;
 		bool IsClicked(unsigned long long deltaTime);
 		bool IsHeld(unsigned long long deltaTime);

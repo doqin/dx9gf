@@ -5,13 +5,14 @@
 namespace GO {
 	class Rectangle : public DX9GF::IGameObject {
 	private:
-		DX9GF::GraphicsDevice* graphicsDevice;
-		std::shared_ptr<DX9GF::RectangleTrigger> trigger;
+		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
+		DX9GF::Camera* camera = nullptr;
+		std::shared_ptr<DX9GF::RectangleTrigger> trigger = nullptr;
+		std::shared_ptr<DX9GF::RectangleCollider> collider = nullptr;
 		float width, height;
 	protected:
 	public:
 		Rectangle(
-			DX9GF::GraphicsDevice* graphicsDevice,
 			std::weak_ptr<DX9GF::TransformManager> transformManager,
 			float width,
 			float height,
@@ -22,11 +23,8 @@ namespace GO {
 			float scaleY = 1
 		) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY),
 			width(width),
-			height(height),
-			graphicsDevice(graphicsDevice) {
-		}
+			height(height) {}
 		Rectangle(
-			DX9GF::GraphicsDevice* graphicsDevice,
 			std::weak_ptr<DX9GF::TransformManager> transformManager,
 			std::weak_ptr<IGameObject> parent,
 			float width,
@@ -38,10 +36,9 @@ namespace GO {
 			float scaleY = 1
 		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY),
 			width(width),
-			height(height),
-			graphicsDevice(graphicsDevice) {
-		}
-		void Init();
+			height(height) {}
+		std::weak_ptr<DX9GF::RectangleCollider> GetCollider();
+		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::weak_ptr<DX9GF::ICollider>>* worldColliders);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
 		void Dispose();

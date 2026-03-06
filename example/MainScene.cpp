@@ -7,38 +7,28 @@
 void MainScene::Init()
 {
 	inputManager = DX9GF::InputManager::GetInstance();
+	transformManager = std::make_shared<DX9GF::TransformManager>();
+	player = std::make_shared<GO::Player>(transformManager);
+	player->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+	rect = std::make_shared<GO::Rectangle>(transformManager, 64, 128, 64, 128);
+	rect->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
 	// Creating colorRec
 	colorRec = new DX9GF::StaticSprite(game->GetGraphicsDevice());
 	colorRec->CreatePlainTexture(0xFFFFFFFF, 500, 500);
 	// Creating textureRec
 	textureRec = new DX9GF::StaticSprite(game->GetGraphicsDevice());
 	textureRec->LoadTexture(L".\\Resources\\dawg.jpg", 100, 100);
-	// Creating mario
-	mario = new DX9GF::AnimatedSprite(game->GetGraphicsDevice());
-	mario->LoadSpriteSheet(
-		L".\\Resources\\spritesheet.png",
-		DX9GF::Utils::CreateFrames(156, 7497, 39, 51, 3),
-		156,
-		7497
-	);
 	auto app = DX9GF::Application::GetInstance();
 	game->GetSceneManager()->PushScene(new SubScene(game, app->GetScreenWidth(), app->GetScreenHeight()));
+	transformManager->RebuildHierarchy();
 }
 
 void MainScene::Update(unsigned long long deltaTime)
 {	
 	inputManager->ReadKeyboard(deltaTime);
+	inputManager->ReadMouse(deltaTime);
 	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
-	float xDir = 0;
-	float yDir = 0;
-	const float velocity = 200;
-	if (inputManager->KeyPress(DIK_A)) xDir -= 1;
-	if (inputManager->KeyPress(DIK_D)) xDir += 1;
-	if (inputManager->KeyPress(DIK_W)) yDir -= 1;
-	if (inputManager->KeyPress(DIK_S)) yDir += 1;
 	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->GoToNext();
-	mario->Translate(xDir * velocity * deltaTime / 1000, yDir * velocity * deltaTime / 1000);
-	
 	float cameraXDir = 0;
 	float cameraYDir = 0;
 	const float cameraVelocity = 200;
@@ -52,14 +42,16 @@ void MainScene::Update(unsigned long long deltaTime)
 		cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
 		camera.SetPosition(cameraPos);
 	}
+	player->Update(deltaTime);
+	rect->Update(deltaTime);
 	camera.Update();
+	transformManager->UpdateAll(game->GetJobSystem());
 }
 
 void MainScene::Dispose()
 {
 	delete colorRec;
 	delete textureRec;
-	delete mario;
 }
 
 void MainScene::Draw(unsigned long long deltaTime)
@@ -67,22 +59,23 @@ void MainScene::Draw(unsigned long long deltaTime)
 	auto dev = game->GetGraphicsDevice();
 	dev->Clear();
 
-	if (dev->BeginDraw()) {
+	if (SUCCEEDED(dev->BeginDraw())) {
 		auto app = DX9GF::Application::GetInstance();
 		auto width = app->GetScreenWidth();
 		auto height = app->GetScreenHeight();
-		auto cameraOffsets = camera.GetPosition();
 		DX9GF::Debug::DrawGrid(
 			dev,
-			-cameraOffsets.x,
-			-cameraOffsets.y,
+			camera,
+			0,
+			0,
 			width,
 			height,
 			32,
 			32,
 			0xFFFF0000);
 		textureRec->Draw(camera);
-		mario->Draw(camera);
+		rect->Draw(deltaTime);
+		player->Draw(deltaTime);
 		dev->EndDraw();
 	}
 

@@ -14,6 +14,11 @@ void DX9GF::ITrigger::Update(unsigned long long deltaTime)
 	}
 }
 
+void DX9GF::ITrigger::Init(Camera* camera)
+{
+	this->camera = camera;
+}
+
 bool DX9GF::ITrigger::IsClicked(unsigned long long deltaTime)
 {
 	auto input = DX9GF::InputManager::GetInstance();
