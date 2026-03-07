@@ -14,7 +14,9 @@ namespace DX9GF {
 	public:
 		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
 
-		virtual void Draw(const Camera& camera) = 0;
+		virtual void Begin() = 0;
+		virtual void Draw(const Camera& camera, unsigned long long deltaTime) = 0;
+		virtual void End() = 0;
 
 		/// <summary>
 		/// Translates the current position by the specified x and y offsets.

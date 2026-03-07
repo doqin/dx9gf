@@ -9,7 +9,8 @@ void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* came
 		L".\\Resources\\spritesheet.png",
 		DX9GF::Utils::CreateFrames(156, 7497, 39, 51, 3),
 		156,
-		7497
+		7497,
+		12
 	);
 	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 39, 51, -39 / 2, -51 / 2);
 	worldColliders->push_back(collider);
@@ -32,9 +33,13 @@ void GO::Player::Update(unsigned long long deltaTime)
 		if (otherCollider.lock() == collider) continue;
 		auto colliderWorldX = collider->GetWorldX();
 		auto colliderWorldY = collider->GetWorldY();
-		if (auto pos = collider->IsIntersecting(otherCollider, colliderWorldX + dX, colliderWorldY + dY); pos.has_value()) {
+		// handle x and y per axis to prevent getting stuck instead of sliding
+		if (auto pos = collider->IsIntersecting(otherCollider, colliderWorldX + dX, colliderWorldY); pos.has_value()) {
 			auto& [correctedX, correctedY] = pos.value();
 			dX = correctedX - colliderWorldX;
+		}
+		if (auto pos = collider->IsIntersecting(otherCollider, colliderWorldX, colliderWorldY + dY); pos.has_value()) {
+			auto& [correctedX, correctedY] = pos.value();
 			dY = correctedY - colliderWorldY;
 		}
 	}
@@ -49,6 +54,8 @@ void GO::Player::Draw(unsigned long long deltaTime)
 	auto worldX = GetWorldX();
 	auto worldY = GetWorldY();
 	mario->SetPosition(worldX - 39 / 2, worldY - 51 / 2);
-	mario->Draw(*camera);
+	mario->Begin();
+	mario->Draw(*camera, deltaTime);
+	mario->End();
 	this->graphicsDevice->DrawRectangle(*camera, collider->GetWorldX(), collider->GetWorldY(), collider->GetWidth(), collider->GetHeight(), 0xFF00FF00, false);
 }

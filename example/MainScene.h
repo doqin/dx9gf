@@ -8,6 +8,8 @@ class MainScene : public DX9GF::IScene
 {
 private:
 	ExampleGame* game;
+	std::shared_ptr<DX9GF::Font> fontArial;
+	std::shared_ptr<DX9GF::FontSprite> fontSpriteArial;
 	std::shared_ptr<GO::Player> player;
 	std::shared_ptr<GO::Rectangle> rect;
 	std::shared_ptr<DX9GF::TransformManager> transformManager;
