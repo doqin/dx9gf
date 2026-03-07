@@ -8,6 +8,10 @@ void MainScene::Init()
 {
 	inputManager = DX9GF::InputManager::GetInstance();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
+	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
+	fontSpriteArial = std::make_shared<DX9GF::FontSprite>(fontArial.get());
+	fontSpriteArial->SetPosition(64, -64);
+	fontSpriteArial->SetText(L"Hello world!");
 	player = std::make_shared<GO::Player>(transformManager);
 	player->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
 	rect = std::make_shared<GO::Rectangle>(transformManager, 64, 128, 64, 128);
@@ -73,9 +77,14 @@ void MainScene::Draw(unsigned long long deltaTime)
 			32,
 			32,
 			0xFFFF0000);
-		textureRec->Draw(camera);
+		textureRec->Begin();
+		textureRec->Draw(camera, deltaTime);
+		textureRec->End();
 		rect->Draw(deltaTime);
 		player->Draw(deltaTime);
+		fontSpriteArial->Begin();
+		fontSpriteArial->Draw(camera, deltaTime);
+		fontSpriteArial->End();
 		dev->EndDraw();
 	}
 
