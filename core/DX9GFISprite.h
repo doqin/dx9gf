@@ -14,8 +14,11 @@ namespace DX9GF {
 		D3DXVECTOR2 scale = D3DXVECTOR2(1.0f, 1.0f);
 		float rotation = 0.0f; 
 		D3DXVECTOR2 origin = D3DXVECTOR2(0.0f, 0.0f);
+		bool needUpdate = true;
+		D3DXMATRIX localTransformMatrix;
+		D3DXMATRIX GetTransformMatrix();
 	public:
-		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
+		ISprite(GraphicsDevice* graphicsDevice);
 
 		virtual void Begin() = 0;
 		virtual void Draw(const Camera& camera, unsigned long long deltaTime) = 0;

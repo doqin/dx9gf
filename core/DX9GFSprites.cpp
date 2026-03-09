@@ -141,13 +141,16 @@ void DX9GF::StaticSprite::Begin()
 
 void DX9GF::StaticSprite::Draw(const Camera& camera, unsigned long long deltaTime)
 {
-	auto matWorld = camera.GetTransformMatrix();
-	p_sprite->SetTransform(&matWorld);
+	auto matWorld = GetTransformMatrix();
+	auto matCamera = camera.GetTransformMatrix();
+	auto matFinal = matWorld * matCamera;
+	D3DXVECTOR3 zeroPos(0.0f, 0.0f, 0.0f);
+	p_sprite->SetTransform(&matFinal);
 	p_sprite->Draw(
 		p_texture,
 		p_src,
 		nullptr,
-		&pos,
+		&zeroPos,
 		color
 	);
 }
@@ -238,13 +241,16 @@ void DX9GF::AnimatedSprite::Draw(const Camera& camera, unsigned long long deltaT
 	}
 	frame_index %= srcs.size();
 	auto p_src = &srcs.at(frame_index);
-	auto matWorld = camera.GetTransformMatrix();
-	p_sprite->SetTransform(&matWorld);
+	auto matWorld = GetTransformMatrix();
+	auto matCamera = camera.GetTransformMatrix();
+	auto matFinal = matWorld * matCamera;
+	D3DXVECTOR3 zeroPos(0.0f, 0.0f, 0.0f);
+	p_sprite->SetTransform(&matFinal);
 	p_sprite->Draw(
 		p_texture,
 		p_src,
 		nullptr,
-		&pos,
+		&zeroPos,
 		color
 	);
 }
@@ -295,19 +301,24 @@ void DX9GF::FontSprite::Begin()
 
 void DX9GF::FontSprite::Draw(const Camera& camera, unsigned long long deltaTime)
 {
-	auto matWorld = camera.GetTransformMatrix();
-	p_sprite->SetTransform(&matWorld);
+	auto matWorld = GetTransformMatrix();
+	auto matCamera = camera.GetTransformMatrix();
+	auto matFinal = matWorld * matCamera;
+	p_sprite->SetTransform(&matFinal);
 	RECT rect{};
+	DWORD format = 0;
 	if (p_src == nullptr) {
-		rect.left = pos.x;
-		rect.top = pos.y;
-		rect.right = pos.x;
-		rect.bottom = pos.y;
+		rect.left = 0;
+		rect.top = 0;
+		rect.right = 0;
+		rect.bottom = 0;
+		format = DT_NOCLIP;
 	}
 	else {
 		rect = *p_src;
+		format = DT_TOP | DT_LEFT;
 	}
-	font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, DT_NOCLIP, color);
+	font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, color);
 }
 
 void DX9GF::FontSprite::End()

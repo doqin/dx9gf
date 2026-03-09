@@ -10,6 +10,7 @@ void MainScene::Init()
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
 	fontSpriteArial = std::make_shared<DX9GF::FontSprite>(fontArial.get());
+	fontSpriteArial->SetOrigin(16, 16);
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
 	player = std::make_shared<GO::Player>(transformManager);
@@ -46,6 +47,7 @@ void MainScene::Update(unsigned long long deltaTime)
 		cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
 		camera.SetPosition(cameraPos);
 	}
+	fontSpriteArial->Rotate(D3DXToRadian(0.1f * deltaTime));
 	player->Update(deltaTime);
 	rect->Update(deltaTime);
 	camera.Update();
