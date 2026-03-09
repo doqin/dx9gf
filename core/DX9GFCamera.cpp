@@ -5,7 +5,7 @@ DX9GF::Camera::Camera(int screenWidth, int screenHeight) : screenWidth(screenWid
 	D3DXMatrixIdentity(&transformMatrix);
 }
 
-void DX9GF::Camera::Update()
+void DX9GF::Camera::Update() const
 {
 	if (!needUpdate) return;
 	D3DXMATRIX matTranslation;
@@ -85,5 +85,6 @@ float DX9GF::Camera::GetZoom() const
 
 D3DXMATRIX DX9GF::Camera::GetTransformMatrix() const
 {
+	Update();
 	return transformMatrix;
 }
