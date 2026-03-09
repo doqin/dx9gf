@@ -1,7 +1,7 @@
 #include "DX9GFITrigger.h"
 #include "../DX9GFInputManager.h"
 
-void DX9GF::ITrigger::MainUpdate(unsigned long long deltaTime)
+void DX9GF::ITrigger::Update(unsigned long long deltaTime)
 {
 	if (IsHovering(deltaTime)) {
 		this->onHover(this);
@@ -12,6 +12,11 @@ void DX9GF::ITrigger::MainUpdate(unsigned long long deltaTime)
 	if (IsHeld(deltaTime)) {
 		this->onHeld(this);
 	}
+}
+
+void DX9GF::ITrigger::Init(Camera* camera)
+{
+	this->camera = camera;
 }
 
 bool DX9GF::ITrigger::IsClicked(unsigned long long deltaTime)
@@ -31,16 +36,6 @@ bool DX9GF::ITrigger::IsHeld(unsigned long long deltaTime)
 		return isHeld = true;
 	}
 	return isHeld;
-}
-
-void DX9GF::ITrigger::Draw(unsigned long long deltaTime)
-{
-	IGameObject::Draw(deltaTime);
-}
-
-void DX9GF::ITrigger::Dispose()
-{
-	IGameObject::Dispose();
 }
 
 void DX9GF::ITrigger::SetOnHover(std::function<void(ITrigger*)> onHover)

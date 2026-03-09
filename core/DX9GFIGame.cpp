@@ -1,6 +1,7 @@
 #include "DX9GFIGame.h"
 #include "DX9GFSceneManager.h"
 #include "DX9GFGraphicsDevice.h"
+#include <stdexcept>
 
 DX9GF::IGame::~IGame()
 {
@@ -81,6 +82,7 @@ void DX9GF::IGame::OnResize(UINT width, UINT height)
 		graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
 		graphicsDevice->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 	}
+	sceneManager->OnResize(width, height);
 }
 
 void DX9GF::IGame::Dispose()

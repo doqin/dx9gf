@@ -1,98 +1,24 @@
 #include "DX9GFIGameObject.h"
 
-void DX9GF::IGameObject::UpdateAbsoluteX()
+DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager) : transformManager(transformManager)
 {
-    if (parent.has_value()) {
-        if (auto lock = parent.value().lock()) {
-            absoluteX = lock->GetAbsoluteX() + relativeX;
-        }  
-    }
-    else {
-        absoluteX = relativeX;
-    }
+    this->transformHandle = transformManager.lock()->CreateTransform();
 }
 
-void DX9GF::IGameObject::UpdateAbsoluteY()
+DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager, float x, float y, float rotation, float scaleX, float scaleY) : transformManager(transformManager)
 {
-    if (parent.has_value()) {
-        if (auto lock = parent.value().lock()) {
-            absoluteY = lock->GetAbsoluteY() + relativeY;
-        }
-    }
-    else {
-        absoluteY = relativeY;
-    }
+    this->transformHandle = transformManager.lock()->CreateTransform(NO_PARENT, x, y, rotation, scaleX, scaleY);
 }
 
-void DX9GF::IGameObject::UpdateAbsolutePosition()
+DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<IGameObject> parent, float x, float y, float rotation, float scaleX, float scaleY) : transformManager(transformManager)
 {
-    UpdateAbsoluteX();
-    UpdateAbsoluteY();
-}
-
-void DX9GF::IGameObject::UpdateRelativeX()
-{
-    if (parent.has_value()) {
-        if (auto lock = parent.value().lock()) {
-            relativeX = lock->GetAbsoluteX() - absoluteX;
-        }
-        
-    }
-    else {
-        relativeX = absoluteX;
-    }
-}
-
-void DX9GF::IGameObject::UpdateRelativeY()
-{
-    if (parent.has_value()) {
-        if (auto lock = parent.value().lock()) {
-            relativeY = lock->GetAbsoluteY() - absoluteY;
-        }
-    }
-    else {
-        relativeY = absoluteY;
-    }
-}
-
-void DX9GF::IGameObject::UpdateRelativePosition()
-{
-    UpdateRelativeX();
-    UpdateRelativeY();
-}
-
-DX9GF::IGameObject::IGameObject(std::weak_ptr<IGameObject> parent, float x, float y, bool useAbsoluteCoords)
-{
+    this->transformHandle = transformManager.lock()->CreateTransform(parent.lock()->GetTransformHandle().slotIndex, x, y, rotation, scaleX, scaleY);
     this->parent = parent;
-    if (auto lock = parent.lock()) {
-        auto [parentX, parentY] = lock->GetAbsolutePosition();
-        if (useAbsoluteCoords) {
-            absoluteX = x;
-            absoluteY = y;
-            relativeX = parentX - absoluteX;
-            relativeY = parentY - absoluteY;
-        }
-        else {
-            relativeX = x;
-            relativeY = y;
-            absoluteX = parentX + relativeX;
-            absoluteY = parentY + relativeY;
-        }
-    }
-}
-
-void DX9GF::IGameObject::MainUpdate(unsigned long long deltaTime)
-{
 }
 
 DX9GF::IGameObject::~IGameObject()
 {
-    this->Dispose();
-}
-
-std::mutex& DX9GF::IGameObject::GetMutex()
-{
-    return this->objectMutex;
+    
 }
 
 std::optional<std::weak_ptr<DX9GF::IGameObject>> DX9GF::IGameObject::GetParent() const
@@ -100,82 +26,71 @@ std::optional<std::weak_ptr<DX9GF::IGameObject>> DX9GF::IGameObject::GetParent()
     return parent;
 }
 
-void DX9GF::IGameObject::SetRelativeX(float x)
+DX9GF::TransformHandle DX9GF::IGameObject::GetTransformHandle() const
 {
-    relativeX = x;
-    UpdateAbsoluteX();
+    return transformHandle;
 }
 
-void DX9GF::IGameObject::SetRelativeY(float y)
+void DX9GF::IGameObject::SetLocalX(float x)
 {
-    relativeY = y;
-    UpdateAbsoluteY();
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    transformData.localX = x;
 }
 
-void DX9GF::IGameObject::SetRelativePosition(float x, float y)
+void DX9GF::IGameObject::SetLocalY(float y)
 {
-    SetRelativeX(x);
-    SetRelativeY(y);
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    transformData.localY = y;
 }
 
-void DX9GF::IGameObject::SetAbsoluteX(float x)
+void DX9GF::IGameObject::SetLocalPosition(float x, float y)
 {
-    absoluteX = x;
-    UpdateRelativeX();
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    transformData.localX = x;
+    transformData.localY = y;
 }
 
-void DX9GF::IGameObject::SetAbsoluteY(float y)
+float DX9GF::IGameObject::GetLocalX() const
 {
-    absoluteY = y;
-    UpdateRelativeY();
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    return transformData.localX;
 }
 
-void DX9GF::IGameObject::SetAbsolutePosition(float x, float y)
+float DX9GF::IGameObject::GetLocalY() const
 {
-    SetAbsoluteX(x);
-    SetAbsoluteY(y);
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    return transformData.localY;
 }
 
-float DX9GF::IGameObject::GetRelativeX() const
+std::tuple<float, float> DX9GF::IGameObject::GetLocalPosition()
 {
-    return relativeX;
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    return std::tuple<float, float>(transformData.localX, transformData.localY);
 }
 
-float DX9GF::IGameObject::GetRelativeY() const
+float DX9GF::IGameObject::GetWorldX() const
 {
-    return relativeY;
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    return transformData.worldX;
 }
 
-std::tuple<float, float> DX9GF::IGameObject::GetRelativePosition()
+float DX9GF::IGameObject::GetWorldY() const
 {
-    return std::tuple<float, float>(relativeX, relativeY);
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    return transformData.worldY;
 }
 
-float DX9GF::IGameObject::GetAbsoluteX() const
+std::tuple<float, float> DX9GF::IGameObject::GetWorldPosition()
 {
-    return absoluteX;
-}
-
-float DX9GF::IGameObject::GetAbsoluteY() const
-{
-    return absoluteY;
-}
-
-std::tuple<float, float> DX9GF::IGameObject::GetAbsolutePosition()
-{
-    return std::tuple<float, float>(absoluteX, absoluteY);
-}
-
-void DX9GF::IGameObject::Update(unsigned long long deltaTime)
-{
-    UpdateAbsolutePosition();
-    MainUpdate(deltaTime);
-}
-
-void DX9GF::IGameObject::Draw(unsigned long long deltaTime)
-{
-}
-
-void DX9GF::IGameObject::Dispose()
-{
+    auto lock = transformManager.lock();
+    auto& transformData = lock->GetTransform(transformHandle.slotIndex);
+    return std::tuple<float, float>(transformData.worldX, transformData.worldY);
 }

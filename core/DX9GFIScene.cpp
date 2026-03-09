@@ -7,3 +7,8 @@ void DX9GF::IScene::Dispose()
 DX9GF::IScene::~IScene() {
 	Dispose();
 }
+
+DX9GF::Camera& DX9GF::IScene::GetCamera()
+{
+	return camera;
+}

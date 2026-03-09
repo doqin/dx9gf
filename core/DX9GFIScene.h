@@ -1,16 +1,19 @@
 #pragma once
+#include "DX9GFCamera.h"
 
 namespace DX9GF {
 
 	class IScene {
 	protected:
+		Camera camera;
 		/// <summary>
 		/// Releases all resources used by the object.
 		/// </summary>
 		virtual void Dispose();
 	public:
-		IScene() {}
+		IScene(int screenWidth, int screenHeight) : camera(screenWidth, screenHeight) {}
 		~IScene();
+		Camera& GetCamera();
 		/// <summary>
 		/// Initializes the object.
 		/// </summary>

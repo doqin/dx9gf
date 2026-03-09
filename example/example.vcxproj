@@ -145,6 +145,7 @@
     <ClCompile Include="ExampleGame.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainScene.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="SubScene.cpp" />
   </ItemGroup>
@@ -152,6 +153,7 @@
     <ClInclude Include="Ellipse.h" />
     <ClInclude Include="ExampleGame.h" />
     <ClInclude Include="MainScene.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Rectangle.h" />
     <ClInclude Include="SubScene.h" />
   </ItemGroup>

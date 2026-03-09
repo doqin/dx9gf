@@ -1,12 +1,15 @@
 #pragma once
-#include <stack>
+#include <vector>
 
 namespace DX9GF {
 	class IScene;
 
+	constexpr auto NO_INDEX = -1;
+
 	class SceneManager final {
 	private:
-		std::stack<IScene*> scenes;
+		int index = NO_INDEX;
+		std::vector<IScene*> scenes;
 	protected:
 		void Dispose();
 	public:
@@ -16,5 +19,9 @@ namespace DX9GF {
 		void PopScene();
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
+		void OnResize(int width, int height);
+		void GoToNext();
+		void GoToPrevious();
+		void GoToScene(size_t index);
 	};
 }

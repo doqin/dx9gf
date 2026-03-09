@@ -1,37 +1,55 @@
 #include "Rectangle.h"
 
-void GO::Rectangle::Init()
+std::weak_ptr<DX9GF::RectangleCollider> GO::Rectangle::GetCollider()
 {
-	trigger = std::make_shared<DX9GF::RectangleTrigger>(
-		shared_from_this(),
-		-width / 2,
-		-height / 2,
-		width,
-		height
-	);
-	trigger->SetOnHeld([](DX9GF::ITrigger* thisObject) {
-			if (auto parent = thisObject->GetParent().value().lock()) {
-				auto input = DX9GF::InputManager::GetInstance();
-				{
-					std::scoped_lock lock(parent->GetMutex());
-					parent->SetRelativePosition(
-						parent->GetRelativeX() + input->GetRelativeMouseX(),
-						parent->GetRelativeY() + input->GetRelativeMouseY()
-					);
-				}
-			}
-		}
-	);
+	return collider;
 }
 
-void GO::Rectangle::MainUpdate(unsigned long long deltaTime)
+void GO::Rectangle::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::weak_ptr<DX9GF::ICollider>>* worldColliders)
+{
+	this->camera = camera;
+	this->graphicsDevice = graphicsDevice;
+	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), width, height, -width / 2, -height / 2);
+	worldColliders->push_back(collider);
+	trigger = std::make_shared<DX9GF::RectangleTrigger>(transformManager, shared_from_this(), width, height, -width / 2, -height / 2);
+	trigger->Init(camera);
+	trigger->SetOnHeld([worldColliders](DX9GF::ITrigger* thisObject) {
+		auto parent = dynamic_pointer_cast<Rectangle>(thisObject->GetParent().value().lock());
+		auto input = DX9GF::InputManager::GetInstance();
+		auto deltaX = input->GetRelativeMouseX();
+		auto deltaY = input->GetRelativeMouseY();
+		auto localX = parent->GetLocalX();
+		auto localY = parent->GetLocalY();
+		auto parentCollider = parent->GetCollider().lock();
+		for (auto& collider : *worldColliders) {
+			if (auto rectCollider = dynamic_pointer_cast<DX9GF::RectangleCollider>(collider.lock());
+				rectCollider == parentCollider) continue; // skip if it's our collider
+			if (auto pos = parentCollider->IsIntersecting(
+				collider,
+				parentCollider->GetWorldX() + deltaX,
+				parentCollider->GetWorldY() + deltaY); pos.has_value()) {
+				auto& [posX, posY] = pos.value();
+				deltaX = posX - parentCollider->GetWorldX();
+				deltaY = posY - parentCollider->GetWorldY();
+			}
+		}
+		parent->SetLocalPosition(
+			localX + deltaX,
+			localY + deltaY
+		);
+	});
+}
+
+void GO::Rectangle::Update(unsigned long long deltaTime)
 {
 	trigger->Update(deltaTime);
 }
 
 void GO::Rectangle::Draw(unsigned long long deltaTime)
 {
-	graphicsDevice->DrawRectangle(absoluteX - width / 2, absoluteY - height / 2, width, height, 0xFFFF0000, trigger->IsHeld(deltaTime));
+	graphicsDevice->DrawRectangle(*camera, GetWorldX() - width / 2, GetWorldY() - height / 2, width, height, 0xFFFF0000, trigger->IsHeld(deltaTime));
+	graphicsDevice->DrawRectangle(*camera, trigger->GetWorldX(), trigger->GetWorldY(), trigger->GetWidth(), trigger->GetHeight(), 0x550000FF, false);
+	graphicsDevice->DrawRectangle(*camera, collider->GetWorldX(), collider->GetWorldY(), collider->GetWidth(), collider->GetHeight(), 0x5500FF00, false);
 }
 
 void GO::Rectangle::Dispose()

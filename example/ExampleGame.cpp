@@ -4,5 +4,12 @@
 void ExampleGame::Init()
 {
 	IGame::Init();
-	sceneManager->PushScene(new MainScene(this));
+	auto app = DX9GF::Application::GetInstance();
+	sceneManager->PushScene(new MainScene(this, app->GetScreenWidth(), app->GetScreenHeight()));
+	sceneManager->GoToNext();
+}
+
+DX9GF::JobSystem& ExampleGame::GetJobSystem()
+{
+	return jobSystem;
 }

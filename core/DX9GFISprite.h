@@ -1,5 +1,6 @@
 #pragma once
 #include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h"
+#include "DX9GFCamera.h"
 
 namespace DX9GF {
 	class GraphicsDevice;
@@ -8,7 +9,7 @@ namespace DX9GF {
 	protected:
 		GraphicsDevice* graphicsDevice = nullptr;
 		ID3DXSprite* p_sprite = nullptr;
-		D3DXVECTOR3 pos;
+		D3DXVECTOR3 pos = { 0.0f, 0.0f, 0.0f };
 		D3DCOLOR color = 0xFFFFFFFF;
 		D3DXVECTOR2 scale = D3DXVECTOR2(1.0f, 1.0f);
 		float rotation = 0.0f; 
@@ -16,7 +17,9 @@ namespace DX9GF {
 	public:
 		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
 
-		virtual void Draw() = 0;
+		virtual void Begin() = 0;
+		virtual void Draw(const Camera& camera, unsigned long long deltaTime) = 0;
+		virtual void End() = 0;
 
 		/// <summary>
 		/// Translates the current position by the specified x and y offsets.
