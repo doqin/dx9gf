@@ -1,20 +1,62 @@
 #include "DX9GFDebug.h"
 #include "DX9GFUtils.h"
+#include <algorithm>
+#include <cmath>
 
 void DX9GF::Debug::DrawGrid(GraphicsDevice* graphicsDevice, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY, 
 	D3DCOLOR lineColor) {
 	// Horizontal lines
 	for (int i = offsetY % spacingY - spacingY; i < screenHeight; i += spacingY) {
-		graphicsDevice->DrawLine(offsetX % spacingX - spacingX, i, screenWidth, i, 0xFFFF0000);
+		graphicsDevice->DrawLine(offsetX % spacingX - spacingX, i, screenWidth, i, lineColor);
 	}
 	// Vertical lines
 	for (int i = offsetX % spacingX - spacingX; i < screenWidth; i += spacingX) {
-		graphicsDevice->DrawLine(i, offsetY % spacingY - spacingY, i, screenHeight, 0xFFFF0000);
+		graphicsDevice->DrawLine(i, offsetY % spacingY - spacingY, i, screenHeight, lineColor);
 	}
 }
 
 void DX9GF::Debug::DrawGrid(GraphicsDevice* graphicsDevice, const Camera& camera, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY, D3DCOLOR lineColor)
 {
-	auto [x, y] = DX9GF::Utils::WorldToWindowCoords(camera, offsetX, offsetY);
-	DrawGrid(graphicsDevice, x, y, screenWidth, screenHeight, spacingX, spacingY, lineColor);
+	if (spacingX <= 0 || spacingY <= 0) return;
+
+	auto matCamera = camera.GetTransformMatrix();
+	D3DXMATRIX matInv;
+	if (D3DXMatrixInverse(&matInv, nullptr, &matCamera) == nullptr) return;
+
+	auto TransformPoint = [&matInv](float x, float y) {
+		D3DXVECTOR4 v(x, y, 0.0f, 1.0f);
+		D3DXVec4Transform(&v, &v, &matInv);
+		if (v.w != 0.0f) {
+			v.x /= v.w;
+			v.y /= v.w;
+		}
+		return D3DXVECTOR2(v.x, v.y);
+	};
+
+	// Convert screen rect to a world-space AABB (works fine even with camera rotation; the AABB just becomes a conservative bound).
+	auto w0 = TransformPoint(0.0f, 0.0f);
+	auto w1 = TransformPoint((float)screenWidth, 0.0f);
+	auto w2 = TransformPoint(0.0f, (float)screenHeight);
+	auto w3 = TransformPoint((float)screenWidth, (float)screenHeight);
+
+	float minX = (std::min)((std::min)(w0.x, w1.x), (std::min)(w2.x, w3.x));
+	float maxX = (std::max)((std::max)(w0.x, w1.x), (std::max)(w2.x, w3.x));
+	float minY = (std::min)((std::min)(w0.y, w1.y), (std::min)(w2.y, w3.y));
+	float maxY = (std::max)((std::max)(w0.y, w1.y), (std::max)(w2.y, w3.y));
+
+	// Expand a bit so lines cover the full screen when the view is rotated.
+	minX -= spacingX;
+	maxX += spacingX;
+	minY -= spacingY;
+	maxY += spacingY;
+
+	float startX = std::floor((minX - offsetX) / (float)spacingX) * spacingX + offsetX;
+	float startY = std::floor((minY - offsetY) / (float)spacingY) * spacingY + offsetY;
+
+	for (float y = startY; y <= maxY; y += spacingY) {
+		graphicsDevice->DrawLine(camera, minX, y, maxX, y, lineColor);
+	}
+	for (float x = startX; x <= maxX; x += spacingX) {
+		graphicsDevice->DrawLine(camera, x, minY, x, maxY, lineColor);
+	}
 }

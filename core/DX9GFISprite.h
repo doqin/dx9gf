@@ -11,8 +11,14 @@ namespace DX9GF {
 		ID3DXSprite* p_sprite = nullptr;
 		D3DXVECTOR3 pos = { 0.0f, 0.0f, 0.0f };
 		D3DCOLOR color = 0xFFFFFFFF;
+		D3DXVECTOR2 scale = D3DXVECTOR2(1.0f, 1.0f);
+		float rotation = 0.0f; 
+		D3DXVECTOR2 origin = D3DXVECTOR2(0.0f, 0.0f);
+		bool needUpdate = true;
+		D3DXMATRIX localTransformMatrix;
+		D3DXMATRIX GetTransformMatrix();
 	public:
-		ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
+		ISprite(GraphicsDevice* graphicsDevice);
 
 		virtual void Begin() = 0;
 		virtual void Draw(const Camera& camera, unsigned long long deltaTime) = 0;
@@ -40,5 +46,20 @@ namespace DX9GF {
 		float GetPositionY() const;
 		float GetPositionZ() const;
 		D3DXVECTOR3 GetPosition() const;
+		//scale
+		void SetScale(float s);
+		void SetScale(float sx, float sy); //stretch
+		void SetScaleX(float sx);
+		void SetScaleY(float sy);
+		D3DXVECTOR2 GetScale() const;
+		//rotate
+		void SetRotation(float radians);
+		void Rotate(float radians);
+		float GetRotation() const;
+		//flip
+		void FlipHorizontal();
+		void FlipVertical();
+		//origin
+		void SetOrigin(float x, float y);
 	};
 }

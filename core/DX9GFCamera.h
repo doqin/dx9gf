@@ -9,14 +9,14 @@ namespace DX9GF {
 		float zoom; // scale
 		int screenWidth;
 		int screenHeight;
-		D3DXMATRIX transformMatrix;
-		bool needUpdate;
+		mutable D3DXMATRIX transformMatrix;
+		mutable bool needUpdate;
 	protected:
 	public:
 		Camera(int screenWidth, int screenHeight);
 		~Camera() {}
 
-		void Update();
+		void Update() const;
 		void SetScreenWidth(int width);
 		void SetScreenHeight(int height);
 		void SetScreenResolution(int width, int height);

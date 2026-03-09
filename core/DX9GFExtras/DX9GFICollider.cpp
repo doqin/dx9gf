@@ -2,10 +2,180 @@
 #include "DX9GFEllipseCollider.h"
 #include "DX9GFRectangleCollider.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <limits>
 
 namespace {
     constexpr float collisionEpsilon = 0.001f;
+    constexpr float floatEpsilon = 0.000001f;
+    constexpr float pi = 3.14159265358979323846f;
+    constexpr int overlapSamples = 48;
+
+    struct Vec2 {
+        float x;
+        float y;
+    };
+
+    Vec2 operator+(const Vec2& a, const Vec2& b) { return { a.x + b.x, a.y + b.y }; }
+    Vec2 operator-(const Vec2& a, const Vec2& b) { return { a.x - b.x, a.y - b.y }; }
+    Vec2 operator*(const Vec2& v, float s) { return { v.x * s, v.y * s }; }
+
+    float Dot(const Vec2& a, const Vec2& b)
+    {
+        return a.x * b.x + a.y * b.y;
+    }
+
+    float LengthSq(const Vec2& v)
+    {
+        return v.x * v.x + v.y * v.y;
+    }
+
+    Vec2 Normalize(const Vec2& v)
+    {
+        float lenSq = LengthSq(v);
+        if (lenSq <= floatEpsilon) {
+            return { 1.0f, 0.0f };
+        }
+        float invLen = 1.0f / std::sqrt(lenSq);
+        return { v.x * invLen, v.y * invLen };
+    }
+
+    Vec2 Rotate(const Vec2& v, float radians)
+    {
+        float c = std::cos(radians);
+        float s = std::sin(radians);
+        return { v.x * c - v.y * s, v.x * s + v.y * c };
+    }
+
+    Vec2 GetCenter(const std::array<Vec2, 4>& corners)
+    {
+        return (corners[0] + corners[1] + corners[2] + corners[3]) * 0.25f;
+    }
+
+    std::array<Vec2, 4> BuildRectangleCorners(DX9GF::RectangleCollider& collider, float originWorldX, float originWorldY)
+    {
+        float r = collider.GetWorldRotation();
+        float sx = collider.GetWorldScaleX();
+        float sy = collider.GetWorldScaleY();
+        float ox = collider.GetOriginX();
+        float oy = collider.GetOriginY();
+
+        std::array<Vec2, 4> local = {
+            Vec2{ 0.0f, 0.0f },
+            Vec2{ collider.GetWidth(), 0.0f },
+            Vec2{ collider.GetWidth(), collider.GetHeight() },
+            Vec2{ 0.0f, collider.GetHeight() }
+        };
+
+        std::array<Vec2, 4> world;
+        for (size_t i = 0; i < local.size(); i++) {
+            Vec2 p = { (local[i].x - ox) * sx, (local[i].y - oy) * sy };
+            p = Rotate(p, r);
+            world[i] = { originWorldX + p.x, originWorldY + p.y };
+        }
+        return world;
+    }
+
+    bool PointInOrientedRectangle(const std::array<Vec2, 4>& corners, const Vec2& p)
+    {
+        Vec2 axisX = corners[1] - corners[0];
+        Vec2 axisY = corners[3] - corners[0];
+        float lenX = std::sqrt((std::max)(floatEpsilon, LengthSq(axisX)));
+        float lenY = std::sqrt((std::max)(floatEpsilon, LengthSq(axisY)));
+        axisX = axisX * (1.0f / lenX);
+        axisY = axisY * (1.0f / lenY);
+
+        Vec2 center = GetCenter(corners);
+        Vec2 d = p - center;
+        float px = std::abs(Dot(d, axisX));
+        float py = std::abs(Dot(d, axisY));
+        return px <= (lenX * 0.5f + floatEpsilon) && py <= (lenY * 0.5f + floatEpsilon);
+    }
+
+    Vec2 GetEllipseCenter(DX9GF::EllipseCollider& collider, float originWorldX, float originWorldY)
+    {
+        float rx = collider.GetWidth() * 0.5f;
+        float ry = collider.GetHeight() * 0.5f;
+        float r = collider.GetWorldRotation();
+        float sx = collider.GetWorldScaleX();
+        float sy = collider.GetWorldScaleY();
+        float ox = collider.GetOriginX();
+        float oy = collider.GetOriginY();
+        Vec2 centerOffset = Rotate({ (rx - ox) * sx, (ry - oy) * sy }, r);
+        return { originWorldX + centerOffset.x, originWorldY + centerOffset.y };
+    }
+
+    Vec2 TransformEllipseLocalPointToWorld(DX9GF::EllipseCollider& collider, float originWorldX, float originWorldY, const Vec2& localPoint)
+    {
+        float r = collider.GetWorldRotation();
+        float sx = collider.GetWorldScaleX();
+        float sy = collider.GetWorldScaleY();
+        float ox = collider.GetOriginX();
+        float oy = collider.GetOriginY();
+        Vec2 p = Rotate({ (localPoint.x - ox) * sx, (localPoint.y - oy) * sy }, r);
+        return { originWorldX + p.x, originWorldY + p.y };
+    }
+
+    bool EllipseContainsPoint(DX9GF::EllipseCollider& collider, float originWorldX, float originWorldY, const Vec2& worldPoint)
+    {
+        float rx = collider.GetWidth() * 0.5f;
+        float ry = collider.GetHeight() * 0.5f;
+        if (rx <= floatEpsilon || ry <= floatEpsilon) {
+            return false;
+        }
+
+        float r = collider.GetWorldRotation();
+        float sx = collider.GetWorldScaleX();
+        float sy = collider.GetWorldScaleY();
+        if (std::abs(sx) <= floatEpsilon || std::abs(sy) <= floatEpsilon) {
+            return false;
+        }
+
+        Vec2 centerWorld = GetEllipseCenter(collider, originWorldX, originWorldY);
+        Vec2 d = worldPoint - centerWorld;
+        Vec2 localScaled = Rotate(d, -r);
+        Vec2 local = { localScaled.x / sx, localScaled.y / sy };
+
+        float nx = local.x / rx;
+        float ny = local.y / ry;
+        return (nx * nx + ny * ny) <= (1.0f + floatEpsilon);
+    }
+
+    bool IsRectEllipseOverlappingTransformed(
+        DX9GF::RectangleCollider& rect,
+        float rectOriginX,
+        float rectOriginY,
+        DX9GF::EllipseCollider& ellipse,
+        float ellipseOriginX,
+        float ellipseOriginY
+    )
+    {
+        auto rectCorners = BuildRectangleCorners(rect, rectOriginX, rectOriginY);
+        for (const auto& corner : rectCorners) {
+            if (EllipseContainsPoint(ellipse, ellipseOriginX, ellipseOriginY, corner)) {
+                return true;
+            }
+        }
+
+        float rx = ellipse.GetWidth() * 0.5f;
+        float ry = ellipse.GetHeight() * 0.5f;
+        if (rx <= floatEpsilon || ry <= floatEpsilon) {
+            return false;
+        }
+
+        for (int i = 0; i < overlapSamples; i++) {
+            float t = static_cast<float>(i) / static_cast<float>(overlapSamples);
+            float theta = t * 2.0f * pi;
+            Vec2 localPoint = { rx + std::cos(theta) * rx, ry + std::sin(theta) * ry };
+            Vec2 worldPoint = TransformEllipseLocalPointToWorld(ellipse, ellipseOriginX, ellipseOriginY, localPoint);
+            if (PointInOrientedRectangle(rectCorners, worldPoint)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     float Clamp(float value, float min, float max)
     {
@@ -105,67 +275,63 @@ std::optional<std::tuple<float, float>> DX9GF::ICollider::IsIntersecting(std::we
 
     float currentX = target->GetWorldX();
     float currentY = target->GetWorldY();
-    float targetWidth = target->GetWidth();
-    float targetHeight = target->GetHeight();
+    float otherX = other->GetWorldX();
+    float otherY = other->GetWorldY();
 
-    float otherWidth = other->GetWidth();
-    float otherHeight = other->GetHeight();
-    float ellipseRadiusX = otherWidth / 2.0f;
-    float ellipseRadiusY = otherHeight / 2.0f;
-    if (targetWidth <= 0.0f || targetHeight <= 0.0f || ellipseRadiusX <= 0.0f || ellipseRadiusY <= 0.0f) {
-        return std::nullopt;
-    }
+    auto IsOverlappingAt = [&](float testX, float testY) {
+        return IsRectEllipseOverlappingTransformed(*target, testX, testY, *other, otherX, otherY);
+    };
 
-    float ellipseCenterX = other->GetWorldX() + ellipseRadiusX;
-    float ellipseCenterY = other->GetWorldY() + ellipseRadiusY;
-
-    bool isCurrentlyOverlapping = IsRectEllipseOverlapping(
-        currentX,
-        currentY,
-        targetWidth,
-        targetHeight,
-        ellipseCenterX,
-        ellipseCenterY,
-        ellipseRadiusX,
-        ellipseRadiusY
-    );
-
+    bool isCurrentlyOverlapping = IsOverlappingAt(currentX, currentY);
     if (isCurrentlyOverlapping) {
-        bool isOverlappingAtNewPosition = IsRectEllipseOverlapping(
-            newX,
-            newY,
-            targetWidth,
-            targetHeight,
-            ellipseCenterX,
-            ellipseCenterY,
-            ellipseRadiusX,
-            ellipseRadiusY
-        );
-
+        bool isOverlappingAtNewPosition = IsOverlappingAt(newX, newY);
         if (!isOverlappingAtNewPosition) {
             return std::nullopt;
         }
 
-        return ResolveInitialOverlap(
-            newX,
-            newY,
-            targetWidth,
-            targetHeight,
-            ellipseCenterX,
-            ellipseCenterY,
-            ellipseRadiusX,
-            ellipseRadiusY
-        );
+        auto rectCorners = BuildRectangleCorners(*target, newX, newY);
+        Vec2 rectCenter = GetCenter(rectCorners);
+        Vec2 ellipseCenter = GetEllipseCenter(*other, otherX, otherY);
+        Vec2 dir = rectCenter - ellipseCenter;
+        if (LengthSq(dir) <= floatEpsilon) {
+            dir = { newX - currentX, newY - currentY };
+        }
+        dir = Normalize(dir);
+
+        float rectFeature = (std::max)(target->GetWidth() * std::abs(target->GetWorldScaleX()), target->GetHeight() * std::abs(target->GetWorldScaleY()));
+        float ellipseFeature = (std::max)(other->GetWidth() * std::abs(other->GetWorldScaleX()), other->GetHeight() * std::abs(other->GetWorldScaleY()));
+        float high = (std::max)(10.0f, (rectFeature + ellipseFeature) * 0.5f + 10.0f);
+        for (int tries = 0; tries < 6 && IsOverlappingAt(newX + dir.x * high, newY + dir.y * high); tries++) {
+            high *= 2.0f;
+        }
+        if (IsOverlappingAt(newX + dir.x * high, newY + dir.y * high)) {
+            return std::nullopt;
+        }
+
+        float low = 0.0f;
+        for (int i = 0; i < 16; i++) {
+            float mid = (low + high) * 0.5f;
+            if (IsOverlappingAt(newX + dir.x * mid, newY + dir.y * mid)) {
+                low = mid;
+            }
+            else {
+                high = mid;
+            }
+        }
+
+        return std::make_tuple(newX + dir.x * (high + collisionEpsilon), newY + dir.y * (high + collisionEpsilon));
     }
 
-    float deltaX = newX - currentX;
-    float deltaY = newY - currentY;
-    if (deltaX == 0.0f && deltaY == 0.0f) {
+    float dx = newX - currentX;
+    float dy = newY - currentY;
+    if (dx == 0.0f && dy == 0.0f) {
         return std::nullopt;
     }
 
-    float distance = std::sqrt(deltaX * deltaX + deltaY * deltaY);
-    float minimumFeature = (std::min)((std::min)(targetWidth, targetHeight), (std::min)(ellipseRadiusX, ellipseRadiusY));
+    float distance = std::sqrt(dx * dx + dy * dy);
+    float rectMin = (std::min)(target->GetWidth() * std::abs(target->GetWorldScaleX()), target->GetHeight() * std::abs(target->GetWorldScaleY()));
+    float ellipseMin = (std::min)(other->GetWidth() * std::abs(other->GetWorldScaleX()), other->GetHeight() * std::abs(other->GetWorldScaleY())) * 0.5f;
+    float minimumFeature = (std::min)(rectMin, ellipseMin);
     int steps = 16;
     if (minimumFeature > 0.0f) {
         steps = (std::max)(steps, static_cast<int>(std::ceil((distance / minimumFeature) * 4.0f)));
@@ -175,34 +341,16 @@ std::optional<std::tuple<float, float>> DX9GF::ICollider::IsIntersecting(std::we
     float previousT = 0.0f;
     for (int i = 1; i <= steps; i++) {
         float t = static_cast<float>(i) / static_cast<float>(steps);
-        float testX = currentX + deltaX * t;
-        float testY = currentY + deltaY * t;
-        if (IsRectEllipseOverlapping(
-            testX,
-            testY,
-            targetWidth,
-            targetHeight,
-            ellipseCenterX,
-            ellipseCenterY,
-            ellipseRadiusX,
-            ellipseRadiusY
-        )) {
+        float testX = currentX + dx * t;
+        float testY = currentY + dy * t;
+        if (IsOverlappingAt(testX, testY)) {
             float low = previousT;
             float high = t;
             for (int j = 0; j < 12; j++) {
-                float mid = (low + high) / 2.0f;
-                float midX = currentX + deltaX * mid;
-                float midY = currentY + deltaY * mid;
-                if (IsRectEllipseOverlapping(
-                    midX,
-                    midY,
-                    targetWidth,
-                    targetHeight,
-                    ellipseCenterX,
-                    ellipseCenterY,
-                    ellipseRadiusX,
-                    ellipseRadiusY
-                )) {
+                float mid = (low + high) * 0.5f;
+                float midX = currentX + dx * mid;
+                float midY = currentY + dy * mid;
+                if (IsOverlappingAt(midX, midY)) {
                     high = mid;
                 }
                 else {
@@ -211,7 +359,7 @@ std::optional<std::tuple<float, float>> DX9GF::ICollider::IsIntersecting(std::we
             }
 
             float correctedT = (std::max)(0.0f, high - collisionEpsilon);
-            return std::make_tuple(currentX + deltaX * correctedT, currentY + deltaY * correctedT);
+            return std::make_tuple(currentX + dx * correctedT, currentY + dy * correctedT);
         }
 
         previousT = t;

@@ -2,27 +2,152 @@
 #include "DX9GFEllipseCollider.h"
 #include "../DX9GFUtils.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 
+namespace {
+	constexpr float collisionEpsilon = 0.001f;
+	constexpr float floatEpsilon = 0.000001f;
+
+	struct Vec2 {
+		float x;
+		float y;
+	};
+
+	Vec2 operator+(const Vec2& a, const Vec2& b) { return { a.x + b.x, a.y + b.y }; }
+	Vec2 operator-(const Vec2& a, const Vec2& b) { return { a.x - b.x, a.y - b.y }; }
+	Vec2 operator*(const Vec2& v, float s) { return { v.x * s, v.y * s }; }
+
+	float Dot(const Vec2& a, const Vec2& b)
+	{
+		return a.x * b.x + a.y * b.y;
+	}
+
+	float LengthSq(const Vec2& v)
+	{
+		return v.x * v.x + v.y * v.y;
+	}
+
+	Vec2 Normalize(const Vec2& v)
+	{
+		float lenSq = LengthSq(v);
+		if (lenSq <= floatEpsilon) {
+			return { 0.0f, 0.0f };
+		}
+		float invLen = 1.0f / std::sqrt(lenSq);
+		return { v.x * invLen, v.y * invLen };
+	}
+
+	Vec2 Rotate(const Vec2& v, float radians)
+	{
+		float c = std::cos(radians);
+		float s = std::sin(radians);
+		return { v.x * c - v.y * s, v.x * s + v.y * c };
+	}
+
+	Vec2 GetCenter(const std::array<Vec2, 4>& corners)
+	{
+		return (corners[0] + corners[1] + corners[2] + corners[3]) * 0.25f;
+	}
+
+	void ProjectOntoAxis(const std::array<Vec2, 4>& corners, const Vec2& axis, float& outMin, float& outMax)
+	{
+		float p0 = Dot(corners[0], axis);
+		outMin = p0;
+		outMax = p0;
+		for (size_t i = 1; i < corners.size(); i++) {
+			float p = Dot(corners[i], axis);
+			outMin = (std::min)(outMin, p);
+			outMax = (std::max)(outMax, p);
+		}
+	}
+
+	bool ComputeObbMtv(
+		const std::array<Vec2, 4>& a,
+		const std::array<Vec2, 4>& b,
+		Vec2& outMtv
+	)
+	{
+		Vec2 axes[4] = {
+			Normalize(a[1] - a[0]),
+			Normalize(a[3] - a[0]),
+			Normalize(b[1] - b[0]),
+			Normalize(b[3] - b[0])
+		};
+
+		float bestOverlap = (std::numeric_limits<float>::infinity)();
+		Vec2 bestAxis = { 0.0f, 0.0f };
+
+		for (const auto& axisRaw : axes) {
+			if (LengthSq(axisRaw) <= floatEpsilon) {
+				continue;
+			}
+
+			Vec2 axis = axisRaw;
+			float minA, maxA, minB, maxB;
+			ProjectOntoAxis(a, axis, minA, maxA);
+			ProjectOntoAxis(b, axis, minB, maxB);
+
+			float overlap = (std::min)(maxA, maxB) - (std::max)(minA, minB);
+			if (overlap <= floatEpsilon) {
+				return false;
+			}
+
+			if (overlap < bestOverlap) {
+				bestOverlap = overlap;
+				bestAxis = axis;
+			}
+		}
+
+		Vec2 centerA = GetCenter(a);
+		Vec2 centerB = GetCenter(b);
+		Vec2 delta = centerB - centerA;
+		if (Dot(delta, bestAxis) < 0.0f) {
+			bestAxis = bestAxis * -1.0f;
+		}
+
+		// bestAxis points from A to B, so push A away from B
+		outMtv = bestAxis * (-(bestOverlap + collisionEpsilon));
+		return true;
+	}
+}
+
 bool DX9GF::RectangleCollider::IsCollidedRectangle(std::weak_ptr<RectangleCollider> other, bool checkOther)
 {
-    auto lock = other.lock();
-    auto otherX = lock->GetWorldX();
-    auto otherY = lock->GetWorldY();
-    auto otherWidth = lock->GetWidth();
-    auto otherHeight = lock->GetHeight();
-    auto isCollided =
-        Utils::IsWithinRectangle(GetWorldX(), GetWorldY(), otherX, otherY, otherWidth, otherHeight) // top left corner
-        && Utils::IsWithinRectangle(GetWorldX() + width, GetWorldY(), otherX, otherY, otherWidth, otherHeight) // top right corner
-        && Utils::IsWithinRectangle(GetWorldX() + width, GetWorldY() + height, otherX, otherY, otherWidth, otherHeight) // bottom right corner
-        && Utils::IsWithinRectangle(GetWorldX(), GetWorldY() + height, otherX, otherY, otherWidth, otherHeight); // bottom left corner
-    if (checkOther) {
-        return isCollided && other.lock()->IsCollidedRectangle(dynamic_pointer_cast<RectangleCollider>(shared_from_this()), false);
-    }
-    else {
-        return isCollided;
-    }
+	auto lock = other.lock();
+	if (!lock) {
+		return false;
+	}
+
+	auto BuildCorners = [](DX9GF::RectangleCollider& collider, float worldX, float worldY) {
+		float r = collider.GetWorldRotation();
+		float sx = collider.GetWorldScaleX();
+		float sy = collider.GetWorldScaleY();
+		float ox = collider.GetOriginX();
+		float oy = collider.GetOriginY();
+
+		std::array<Vec2, 4> local = {
+			Vec2{ 0.0f, 0.0f },
+			Vec2{ collider.GetWidth(), 0.0f },
+			Vec2{ collider.GetWidth(), collider.GetHeight() },
+			Vec2{ 0.0f, collider.GetHeight() }
+		};
+
+		std::array<Vec2, 4> worldCorners;
+		for (size_t i = 0; i < local.size(); i++) {
+			Vec2 p = { (local[i].x - ox) * sx, (local[i].y - oy) * sy };
+			p = Rotate(p, r);
+			worldCorners[i] = { worldX + p.x, worldY + p.y };
+		}
+		return worldCorners;
+	};
+
+	auto a = BuildCorners(*this, GetWorldX(), GetWorldY());
+	auto b = BuildCorners(*lock, lock->GetWorldX(), lock->GetWorldY());
+
+	Vec2 mtv;
+	return ComputeObbMtv(a, b, mtv);
 }
 
 bool DX9GF::RectangleCollider::IsCollided(std::weak_ptr<ICollider> other)
@@ -59,84 +184,100 @@ std::optional<std::tuple<float, float>> DX9GF::RectangleCollider::IsIntersecting
 {
     auto lock = other.lock();
     if (auto rectangleCollider = dynamic_pointer_cast<RectangleCollider>(lock)) {
-        float currentX = GetWorldX();
-        float currentY = GetWorldY();
+		float currentX = GetWorldX();
+		float currentY = GetWorldY();
 
-        float otherX = rectangleCollider->GetWorldX();
-        float otherY = rectangleCollider->GetWorldY();
-        float otherWidth = rectangleCollider->GetWidth();
-        float otherHeight = rectangleCollider->GetHeight();
+		float otherX = rectangleCollider->GetWorldX();
+		float otherY = rectangleCollider->GetWorldY();
 
-        float dx = newX - currentX;
-        float dy = newY - currentY;
+		auto BuildCorners = [](DX9GF::RectangleCollider& collider, float worldX, float worldY) {
+			float r = collider.GetWorldRotation();
+			float sx = collider.GetWorldScaleX();
+			float sy = collider.GetWorldScaleY();
+			float ox = collider.GetOriginX();
+			float oy = collider.GetOriginY();
 
-        bool isOverlappingNow =
-            currentX < otherX + otherWidth
-            && currentX + width > otherX
-            && currentY < otherY + otherHeight
-            && currentY + height > otherY;
+			std::array<Vec2, 4> local = {
+				Vec2{ 0.0f, 0.0f },
+				Vec2{ collider.GetWidth(), 0.0f },
+				Vec2{ collider.GetWidth(), collider.GetHeight() },
+				Vec2{ 0.0f, collider.GetHeight() }
+			};
 
-        if (isOverlappingNow) {
-            float pushLeft = (currentX + width) - otherX;
-            float pushRight = (otherX + otherWidth) - currentX;
-            float pushUp = (currentY + height) - otherY;
-            float pushDown = (otherY + otherHeight) - currentY;
+			std::array<Vec2, 4> worldCorners;
+			for (size_t i = 0; i < local.size(); i++) {
+				Vec2 p = { (local[i].x - ox) * sx, (local[i].y - oy) * sy };
+				p = Rotate(p, r);
+				worldCorners[i] = { worldX + p.x, worldY + p.y };
+			}
+			return worldCorners;
+		};
 
-            float correctionX = -pushLeft;
-            float correctionY = 0.0f;
-            float shortest = pushLeft;
+		auto otherCorners = BuildCorners(*rectangleCollider, otherX, otherY);
+		auto IsOverlappingAt = [&](float testX, float testY) {
+			auto selfCorners = BuildCorners(*this, testX, testY);
+			Vec2 mtv;
+			return ComputeObbMtv(selfCorners, otherCorners, mtv);
+		};
 
-            if (pushRight < shortest) {
-                shortest = pushRight;
-                correctionX = pushRight;
-                correctionY = 0.0f;
-            }
-            if (pushUp < shortest) {
-                shortest = pushUp;
-                correctionX = 0.0f;
-                correctionY = -pushUp;
-            }
-            if (pushDown < shortest) {
-                correctionX = 0.0f;
-                correctionY = pushDown;
-            }
+		bool isOverlappingNow = IsOverlappingAt(currentX, currentY);
+		if (isOverlappingNow) {
+			bool isOverlappingAtNewPosition = IsOverlappingAt(newX, newY);
+			if (!isOverlappingAtNewPosition) {
+				return std::nullopt;
+			}
 
-            float epsilon = 0.001f;
-            if (correctionX != 0.0f) {
-                correctionX += (correctionX > 0 ? epsilon : -epsilon);
-            }
-            if (correctionY != 0.0f) {
-                correctionY += (correctionY > 0 ? epsilon : -epsilon);
-            }
+			auto selfCornersAtNew = BuildCorners(*this, newX, newY);
+			Vec2 mtv;
+			if (!ComputeObbMtv(selfCornersAtNew, otherCorners, mtv)) {
+				return std::nullopt;
+			}
 
-            return std::make_tuple(currentX + correctionX, currentY + correctionY);
-        }
+			return std::make_tuple(newX + mtv.x, newY + mtv.y);
+		}
 
-        float expandedX = otherX - width;
-        float expandedY = otherY - height;
-        float expandedWidth = otherWidth + width;
-        float expandedHeight = otherHeight + height;
+		float dx = newX - currentX;
+		float dy = newY - currentY;
+		if (dx == 0.0f && dy == 0.0f) {
+			return std::nullopt;
+		}
 
-        float tNear = -std::numeric_limits<float>::infinity();
-        float tFar = std::numeric_limits<float>::infinity();
+		float distance = std::sqrt(dx * dx + dy * dy);
+		float minFeature = (std::min)(width * std::abs(GetWorldScaleX()), height * std::abs(GetWorldScaleY()));
+		int steps = 16;
+		if (minFeature > 0.0f) {
+			steps = (std::max)(steps, static_cast<int>(std::ceil((distance / minFeature) * 4.0f)));
+		}
+		steps = (std::min)(steps, 512);
 
-        if (!CheckAxisIntersection(currentX, dx, expandedX, expandedX + expandedWidth, tNear, tFar)) {
-            return std::nullopt;
-        }
+		float previousT = 0.0f;
+		for (int i = 1; i <= steps; i++) {
+			float t = static_cast<float>(i) / static_cast<float>(steps);
+			float testX = currentX + dx * t;
+			float testY = currentY + dy * t;
+			if (IsOverlappingAt(testX, testY)) {
+				float low = previousT;
+				float high = t;
+				for (int j = 0; j < 12; j++) {
+					float mid = (low + high) / 2.0f;
+					float midX = currentX + dx * mid;
+					float midY = currentY + dy * mid;
+					if (IsOverlappingAt(midX, midY)) {
+						high = mid;
+					}
+					else {
+						low = mid;
+					}
+				}
 
-        if (!CheckAxisIntersection(currentY, dy, expandedY, expandedY + expandedHeight, tNear, tFar)) {
-            return std::nullopt;
-        }
+				float correctedT = (std::max)(0.0f, high - collisionEpsilon);
+				return std::make_tuple(currentX + dx * correctedT, currentY + dy * correctedT);
+			}
 
-        if (tNear <= 1 && tFar >= 0) {
-            float epsilon = 0.001f;
-            float t = (std::max)(0.0f, tNear - epsilon);
-            float correctedX = currentX + dx * t;
-            float correctedY = currentY + dy * t;
-            return std::make_tuple(correctedX, correctedY);
-        }
+			previousT = t;
+		}
 
-        return std::nullopt;
+		return std::nullopt;
     }
     else if (auto ellipseCollider = dynamic_pointer_cast<EllipseCollider>(lock)) {
         return ICollider::IsIntersecting(dynamic_pointer_cast<RectangleCollider>(shared_from_this()), ellipseCollider, newX, newY);
@@ -144,6 +285,28 @@ std::optional<std::tuple<float, float>> DX9GF::RectangleCollider::IsIntersecting
     else {
         throw std::runtime_error("Unknown collider, method has not implemented logic");
     }
+}
+
+void DX9GF::RectangleCollider::SetOrigin(float x, float y)
+{
+	originX = x;
+	originY = y;
+}
+
+void DX9GF::RectangleCollider::SetOriginCenter()
+{
+	originX = width * 0.5f;
+	originY = height * 0.5f;
+}
+
+float DX9GF::RectangleCollider::GetOriginX() const
+{
+	return originX;
+}
+
+float DX9GF::RectangleCollider::GetOriginY() const
+{
+	return originY;
 }
 
 float DX9GF::RectangleCollider::GetWidth() const

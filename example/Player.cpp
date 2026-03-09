@@ -12,7 +12,10 @@ void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* came
 		7497,
 		12
 	);
-	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 39, 51, -39 / 2, -51 / 2);
+	mario->SetOrigin(17.0f, 51.0f / 3.0f);
+	mario->SetScale(2, 2);
+	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 39, 51, 0, 0);
+	collider->SetOriginCenter();
 	worldColliders->push_back(collider);
 	this->worldColliders = worldColliders;
 }
@@ -27,6 +30,8 @@ void GO::Player::Update(unsigned long long deltaTime)
 	if (inputManager->KeyPress(DIK_D)) xDir += 1;
 	if (inputManager->KeyPress(DIK_W)) yDir -= 1;
 	if (inputManager->KeyPress(DIK_S)) yDir += 1;
+	if (inputManager->KeyPress(DIK_E)) SetLocalRotation(GetLocalRotation() + 25.f * deltaTime / 1000);
+	if (inputManager->KeyPress(DIK_Q)) SetLocalRotation(GetLocalRotation() - 25.f * deltaTime / 1000);
 	auto dX = xDir * velocity * deltaTime / 1000;
 	auto dY = yDir * velocity * deltaTime / 1000;
 	for (auto& otherCollider : *worldColliders) {
@@ -53,9 +58,24 @@ void GO::Player::Draw(unsigned long long deltaTime)
 {
 	auto worldX = GetWorldX();
 	auto worldY = GetWorldY();
-	mario->SetPosition(worldX - 39 / 2, worldY - 51 / 2);
+	auto worldRotation = GetWorldRotation();
+	mario->SetPosition(worldX, worldY);
+	mario->SetRotation(worldRotation);
 	mario->Begin();
 	mario->Draw(*camera, deltaTime);
 	mario->End();
-	this->graphicsDevice->DrawRectangle(*camera, collider->GetWorldX(), collider->GetWorldY(), collider->GetWidth(), collider->GetHeight(), 0xFF00FF00, false);
+	this->graphicsDevice->DrawRectangle(
+		*camera,
+		collider->GetWorldX(),
+		collider->GetWorldY(),
+		collider->GetWidth(),
+		collider->GetHeight(),
+		collider->GetWorldRotation(),
+		collider->GetWorldScaleX(),
+		collider->GetWorldScaleY(),
+		collider->GetOriginX(),
+		collider->GetOriginY(),
+		0xFF00FF00,
+		false
+	);
 }
