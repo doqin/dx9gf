@@ -18,6 +18,9 @@ namespace DX9GF {
 		void CreatePlainTexture(D3DCOLOR color, UINT width, UINT height);
 		void SetColor(D3DCOLOR color);
 		void LoadTexture(std::wstring filePath, UINT width = D3DX_DEFAULT, UINT height = D3DX_DEFAULT);
+		IDirect3DTexture9* GetTexture();
+		UINT GetWidth() const;
+		UINT GetHeight() const;
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;
 		void End() override;
@@ -38,6 +41,7 @@ namespace DX9GF {
 
 		void SetFrameRate(unsigned int frameRate);
 		void LoadSpriteSheet(std::wstring filePath, std::vector<RECT> frames, UINT width = D3DX_DEFAULT, UINT height = D3DX_DEFAULT, UINT frameRate = 24);
+		IDirect3DTexture9* GetTexture();
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;
 		void End() override;

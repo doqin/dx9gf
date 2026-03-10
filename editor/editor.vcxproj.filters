@@ -48,10 +48,16 @@
     <ClCompile Include="Editor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MainScene.cpp">
+    <ClCompile Include="TilemapEditorScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TilesetEditorScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tileset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,10 +89,16 @@
     <ClInclude Include="Editor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainScene.h">
+    <ClInclude Include="TilemapEditorScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Win32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TilesetEditorScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tileset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,5 @@
-#include "MainScene.h"
+#include "TilemapEditorScene.h"
+#include "TilesetEditorScene.h"
 #include "imgui/imgui.h"
 #include "imgui_impl_dx9.h"
 #include "imgui_impl_win32.h"
@@ -6,11 +7,11 @@
 #include <stdexcept>
 #include "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Include/DxErr.h"
 
-void Editor::MainScene::Init()
+void Editor::TilemapEditorScene::Init()
 {
 }
 
-void Editor::MainScene::Update(unsigned long long deltaTime)
+void Editor::TilemapEditorScene::Update(unsigned long long deltaTime)
 {
 	// ImGui stuff
 	ImGui_ImplDX9_NewFrame();
@@ -18,7 +19,34 @@ void Editor::MainScene::Update(unsigned long long deltaTime)
 	ImGui::NewFrame();
 	if (ImGui::Begin("Tilemap Tools")) {
 		if (ImGui::Button("Load spritesheets")) { // returns true when you click it
-			Win32::OpenFileDialog(L"Images (*.png;*.jpg;*.jpeg)\0*.png;*.jpg;*.jpeg\0All Files\0*.*\0\0");
+			auto file = Win32::OpenFileDialog(L"Images (*.png;*.jpg;*.jpeg)\0*.png;*.jpg;*.jpeg\0All Files\0*.*\0\0");
+			if (file.has_value()) {
+				spritesheet = std::make_shared<DX9GF::StaticSprite>(editor->GetGraphicsDevice());
+				spritesheet->LoadTexture(file.value());
+				tileset = std::make_shared<Tileset>();
+				tileset->spritesheet = spritesheet;
+			}
+		}
+		if (spritesheet.get() != nullptr) {
+			float width = spritesheet->GetWidth();
+			float height = spritesheet->GetHeight();
+			float ratio = width / height;
+			float size = 3;
+			float scale = 1 / (ratio * size);
+			float correctedWidth = width * scale;
+			float correctedHeight = height * scale;
+			if (ImGui::ImageButton(
+				"Spritesheet",
+				(ImTextureID)(intptr_t)spritesheet->GetTexture(),
+				ImVec2(correctedWidth, correctedHeight)
+			)) {
+				auto app = DX9GF::Application::GetInstance();
+				editor->GetSceneManager()->PushScene(new TilesetEditorScene(editor, tileset, app->GetScreenWidth(), app->GetScreenHeight()));
+				editor->GetSceneManager()->GoToNext();
+				ImGui::End();
+				ImGui::EndFrame();
+				return;
+			}
 		}
 		ImGui::InputInt("Grid Spacing X", &gridSpacingX);
 		ImGui::InputInt("Grid Spacing Y", &gridSpacingY);
@@ -49,7 +77,7 @@ void Editor::MainScene::Update(unsigned long long deltaTime)
 	camera.Update();
 }
 
-void Editor::MainScene::Draw(unsigned long long deltaTime)
+void Editor::TilemapEditorScene::Draw(unsigned long long deltaTime)
 {
 	auto dev = editor->GetGraphicsDevice();
 	dev->Clear();

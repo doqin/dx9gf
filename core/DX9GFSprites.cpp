@@ -105,6 +105,12 @@ void DX9GF::StaticSprite::LoadTexture(
 	if (graphicsDevice->GetDevice() == nullptr) {
 		throw std::runtime_error("Graphics device is null");
 	}
+	D3DXIMAGE_INFO imageInfo{};
+	if (auto infoResult = D3DXGetImageInfoFromFileW(filePath.c_str(), &imageInfo); FAILED(infoResult)) {
+		auto error = DXGetErrorDescription(infoResult);
+		std::string what = std::string(error, error + wcslen(error));
+		throw std::runtime_error(what);
+	}
 	auto result = D3DXCreateTextureFromFileExW(
 		graphicsDevice->GetDevice(),
 		filePath.c_str(),
@@ -126,6 +132,28 @@ void DX9GF::StaticSprite::LoadTexture(
 		std::string what = std::string(error, error + wcslen(error));
 		throw std::runtime_error(what);
 	}
+	// D3DX may resize textures to meet device constraints (e.g., power-of-two/square).
+	// Keep the original image dimensions for UI/layout and default source rect.
+	this->width = imageInfo.Width;
+	this->height = imageInfo.Height;
+	if (width == D3DX_DEFAULT && height == D3DX_DEFAULT) {
+		SetSrcRect(RECT{ 0, 0, static_cast<LONG>(this->width), static_cast<LONG>(this->height) });
+	}
+}
+
+IDirect3DTexture9* DX9GF::StaticSprite::GetTexture()
+{
+	return p_texture;
+}
+
+UINT DX9GF::StaticSprite::GetWidth() const
+{
+	return width;
+}
+
+UINT DX9GF::StaticSprite::GetHeight() const
+{
+	return height;
 }
 
 void DX9GF::StaticSprite::Begin()
@@ -218,6 +246,11 @@ void DX9GF::AnimatedSprite::LoadSpriteSheet(std::wstring filePath,
 	}
 	this->srcs = frames;
 	this->frameRate = frameRate;
+}
+
+IDirect3DTexture9* DX9GF::AnimatedSprite::GetTexture()
+{
+	return p_texture;
 }
 
 void DX9GF::AnimatedSprite::Begin()

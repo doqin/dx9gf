@@ -1,5 +1,5 @@
 #include "Editor.h"
-#include "MainScene.h"
+#include "TilemapEditorScene.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx9.h"
 #include "imgui/imgui_impl_win32.h"
@@ -14,7 +14,7 @@ void Editor::Editor::Init()
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(app->GetHWnd());
 	ImGui_ImplDX9_Init(GetGraphicsDevice()->GetDevice());
-	this->sceneManager->PushScene(new MainScene(this, app->GetScreenWidth(), app->GetScreenHeight()));
+	this->sceneManager->PushScene(new TilemapEditorScene(this, app->GetScreenWidth(), app->GetScreenHeight()));
 	this->sceneManager->GoToNext();
 }
 
