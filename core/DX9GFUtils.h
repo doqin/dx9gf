@@ -3,6 +3,7 @@
 #include <vector>
 #include <tuple>
 #include "DX9GFCamera.h"
+#include <string>
 
 namespace DX9GF {
 	class Utils final {
@@ -22,5 +23,6 @@ namespace DX9GF {
 		static void SetMousePos(int x, int y);
 		static std::tuple<float, float> WindowToWorldCoords(const DX9GF::Camera& camera, float windowX, float windowY);
 		static std::tuple<float, float> WorldToWindowCoords(const DX9GF::Camera& camera, float worldX, float worldY);
+		static std::wstring ToWide(const char* s);
 	};
 };

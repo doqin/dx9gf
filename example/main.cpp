@@ -2,6 +2,8 @@
 #include "DX9GF.h"
 #include "ExampleGame.h"
 #include <format>
+#include <stacktrace>
+#include <filesystem>
 
 int WINAPI WinMain(
 	HINSTANCE hInstance,
@@ -21,12 +23,19 @@ int WINAPI WinMain(
 		// Run the application
 		app->Run();
 	}
-	catch (std::exception e) {
+	catch (const std::exception& e) {
+		auto st = std::stacktrace::current();
+		auto ststr = std::to_string(st);
 		MessageBox(
 			NULL,
-			std::wstring(e.what(), e.what() + strlen(e.what())).c_str(),
-			L"Error", MB_OK | MB_ICONEXCLAMATION
+			DX9GF::Utils::ToWide(ststr.c_str()).c_str(),
+			DX9GF::Utils::ToWide(e.what()).c_str(),
+			MB_OK | MB_ICONEXCLAMATION
 		);
+		return E_FAIL;
+	}
+	catch (...) {
+		MessageBox(NULL, L"Unknown error", L"Example game", MB_OK | MB_ICONEXCLAMATION);
 		return E_FAIL;
 	}
 	return 0;

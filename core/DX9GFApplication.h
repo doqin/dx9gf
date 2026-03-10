@@ -2,6 +2,8 @@
 #include "framework.h"
 #include "DX9GFIGame.h"
 #include <string>
+#include <functional>
+#include <optional>
 
 namespace DX9GF {
 	class Application final {
@@ -24,6 +26,7 @@ namespace DX9GF {
 		/// <param name="screenHeight">The height of the application window in pixels.</param>
 		void Init(HINSTANCE hInstance, std::wstring appTitle, UINT screenWidth, UINT screenHeight);
 		void AttachGame(IGame* game);
+		void SetWndProc(std::function<std::optional<LRESULT>(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)> wndProc);
 		void Run();
 
 		void SetFramerate(int fps);

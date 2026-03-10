@@ -61,3 +61,22 @@ std::tuple<float, float> DX9GF::Utils::WorldToWindowCoords(const DX9GF::Camera& 
 	float windowY = worldY - cameraY + app->GetScreenHeight() / 2;
 	return std::make_tuple(windowX, windowY);
 }
+
+std::wstring DX9GF::Utils::ToWide(const char* s)
+{
+	if (s == nullptr) return L"";
+
+	int required = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, nullptr, 0);
+	UINT codePage = CP_UTF8;
+	DWORD flags = MB_ERR_INVALID_CHARS;
+	if (required == 0) {
+		codePage = CP_ACP;
+		flags = 0;
+		required = MultiByteToWideChar(codePage, flags, s, -1, nullptr, 0);
+	}
+	if (required == 0) return L"";
+
+	std::wstring result(static_cast<size_t>(required - 1), L'\0');
+	MultiByteToWideChar(codePage, flags, s, -1, result.data(), required);
+	return result;
+}

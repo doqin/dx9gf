@@ -2,6 +2,7 @@
 #include "DX9GFSceneManager.h"
 #include "DX9GFGraphicsDevice.h"
 #include <stdexcept>
+#include <DxErr.h>
 
 DX9GF::IGame::~IGame()
 {
@@ -78,9 +79,14 @@ void DX9GF::IGame::OnResize(UINT width, UINT height)
 	d3dpp.BackBufferWidth = width;
 	d3dpp.BackBufferHeight = height;
 
-	if (SUCCEEDED(graphicsDevice->GetDevice()->Reset(&d3dpp))) {
+	if (auto result = graphicsDevice->GetDevice()->Reset(&d3dpp); SUCCEEDED(result)) {
 		graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
 		graphicsDevice->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+	}
+	else {
+		auto error = DXGetErrorDescription(result);
+		std::string what = std::string(error, error + wcslen(error));
+		throw std::runtime_error("Failed to reset graphics device: " + what);
 	}
 	sceneManager->OnResize(width, height);
 }
