@@ -5,6 +5,8 @@
 #include <d3dx9math.h>
 #include "DX9GFApplication.h"
 #include "DX9GFUtils.h"
+#include "DX9GFExtras/DX9GFICollider.h"
+#include "DX9GFExtras/DX9GFITrigger.h"
 
 struct Vertex {
 	float x, y, z, rhw; // rhw is reciprocal of homogenous w
@@ -129,54 +131,61 @@ void DX9GF::GraphicsDevice::DrawRectangle(const DX9GF::Camera& camera, float x, 
 
 void DX9GF::GraphicsDevice::DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled)
 {
-	auto p0 = TransformRectanglePoint(x, y, 0.0f, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto p1 = TransformRectanglePoint(x, y, width, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto p2 = TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto p3 = TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY);
+	if ((DX9GF::ICollider::debugDraw && color == 0xFF00FF00) || (DX9GF::ITrigger::debugDraw && color == 0x550000FF) || isFilled) {
+		auto p0 = TransformRectanglePoint(x, y, 0.0f, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
+		auto p1 = TransformRectanglePoint(x, y, width, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
+		auto p2 = TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY);
+		auto p3 = TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY);
 
-	std::vector<Vertex> vertices = {
-		{.x = p0.x, .y = p0.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p1.x, .y = p1.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p2.x, .y = p2.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p3.x, .y = p3.y, .z = 0.0f, .rhw = 1.0f, .color = color }
-	};
+		std::vector<Vertex> vertices = {
+			{.x = p0.x, .y = p0.y, .z = 0.0f, .rhw = 1.0f, .color = color },
+			{.x = p1.x, .y = p1.y, .z = 0.0f, .rhw = 1.0f, .color = color },
+			{.x = p2.x, .y = p2.y, .z = 0.0f, .rhw = 1.0f, .color = color },
+			{.x = p3.x, .y = p3.y, .z = 0.0f, .rhw = 1.0f, .color = color }
+		};
 
-	if (!isFilled) {
-		vertices.push_back(vertices[0]);
+		if (!isFilled) {
+			vertices.push_back(vertices[0]);
+		}
+
+		d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+		D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
+		d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
 	}
-
-	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
-	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
 }
 
 void DX9GF::GraphicsDevice::DrawRectangle(const DX9GF::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled)
 {
-	auto matCamera = camera.GetTransformMatrix();
+	if ((DX9GF::ICollider::debugDraw && color == 0xFF00FF00) || (DX9GF::ITrigger::debugDraw && color == 0x550000FF) || isFilled) {
+		auto matCamera = camera.GetTransformMatrix();
 
-	auto wp0 = TransformRectanglePoint(x, y, 0.0f, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto wp1 = TransformRectanglePoint(x, y, width, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto wp2 = TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto wp3 = TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY);
+		auto wp0 = TransformRectanglePoint(x, y, 0.0f, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
+		auto wp1 = TransformRectanglePoint(x, y, width, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
+		auto wp2 = TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY);
+		auto wp3 = TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY);
 
-	auto p0 = TransformPoint(matCamera, wp0.x, wp0.y);
-	auto p1 = TransformPoint(matCamera, wp1.x, wp1.y);
-	auto p2 = TransformPoint(matCamera, wp2.x, wp2.y);
-	auto p3 = TransformPoint(matCamera, wp3.x, wp3.y);
+		auto p0 = TransformPoint(matCamera, wp0.x, wp0.y);
+		auto p1 = TransformPoint(matCamera, wp1.x, wp1.y);
+		auto p2 = TransformPoint(matCamera, wp2.x, wp2.y);
+		auto p3 = TransformPoint(matCamera, wp3.x, wp3.y);
 
-	std::vector<Vertex> vertices = {
-		{.x = p0.x, .y = p0.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p1.x, .y = p1.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p2.x, .y = p2.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p3.x, .y = p3.y, .z = 0.0f, .rhw = 1.0f, .color = color }
-	};
+		std::vector<Vertex> vertices = {
+			{.x = p0.x, .y = p0.y, .z = 0.0f, .rhw = 1.0f, .color = color },
+			{.x = p1.x, .y = p1.y, .z = 0.0f, .rhw = 1.0f, .color = color },
+			{.x = p2.x, .y = p2.y, .z = 0.0f, .rhw = 1.0f, .color = color },
+			{.x = p3.x, .y = p3.y, .z = 0.0f, .rhw = 1.0f, .color = color }
+		};
 
-	if (!isFilled) {
-		vertices.push_back(vertices[0]);
+		if (!isFilled) {
+			vertices.push_back(vertices[0]);
+		}
+		D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
+		d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+		d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
 	}
-	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
-	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
+	else {
+		DrawRectangle(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY, color, isFilled);
+	}
 }
 
 void DX9GF::GraphicsDevice::DrawEllipse(float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled)
