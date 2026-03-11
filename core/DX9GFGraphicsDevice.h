@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <d3d9.h>
 #include "DX9GFCamera.h"
+#include "DX9GFExtras/DX9GFICollider.h"
 
 namespace DX9GF {
 	class GraphicsDevice final {

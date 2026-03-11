@@ -8,11 +8,16 @@ void MainScene::Init()
 {
 	inputManager = DX9GF::InputManager::GetInstance();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
+
+
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
 	fontSpriteArial = std::make_shared<DX9GF::FontSprite>(fontArial.get());
 	fontSpriteArial->SetOrigin(16, 16);
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
+
+	DX9GF::Debug::Init(game->GetGraphicsDevice());
+
 	player = std::make_shared<GO::Player>(transformManager);
 	player->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
 	rect = std::make_shared<GO::Rectangle>(transformManager, 64, 128, 64, 128);
@@ -47,7 +52,11 @@ void MainScene::Update(unsigned long long deltaTime)
 		cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
 		camera.SetPosition(cameraPos);
 	}
-	fontSpriteArial->Rotate(D3DXToRadian(0.1f * deltaTime));
+	if (GetAsyncKeyState(VK_F1) & 1) DX9GF::ICollider::debugDraw = !DX9GF::ICollider::debugDraw;
+	if (GetAsyncKeyState(VK_F2) & 1) DX9GF::ITrigger::debugDraw = !DX9GF::ITrigger::debugDraw;
+	if (GetAsyncKeyState(VK_F3) & 1) DX9GF::Debug::drawGrid = !DX9GF::Debug::drawGrid;
+
+	fontSpriteArial->Rotate(D3DXToRadian(0.5f * deltaTime));
 	player->Update(deltaTime);
 	rect->Update(deltaTime);
 	camera.Update();
@@ -56,6 +65,7 @@ void MainScene::Update(unsigned long long deltaTime)
 
 void MainScene::Dispose()
 {
+	DX9GF::Debug::Release();
 	delete colorRec;
 	delete textureRec;
 }
@@ -79,6 +89,9 @@ void MainScene::Draw(unsigned long long deltaTime)
 			32,
 			32,
 			0xFFFF0000);
+
+		DX9GF::Debug::DrawAxes(camera, 2000, 32);
+
 		textureRec->Begin();
 		textureRec->Draw(camera, deltaTime);
 		textureRec->End();

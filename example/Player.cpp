@@ -64,18 +64,18 @@ void GO::Player::Draw(unsigned long long deltaTime)
 	mario->Begin();
 	mario->Draw(*camera, deltaTime);
 	mario->End();
-	this->graphicsDevice->DrawRectangle(
-		*camera,
-		collider->GetWorldX(),
-		collider->GetWorldY(),
-		collider->GetWidth(),
-		collider->GetHeight(),
-		collider->GetWorldRotation(),
-		collider->GetWorldScaleX(),
-		collider->GetWorldScaleY(),
-		collider->GetOriginX(),
-		collider->GetOriginY(),
-		0xFF00FF00,
-		false
-	);
+		this->graphicsDevice->DrawRectangle(
+			*camera,
+			collider->GetWorldX(),
+			collider->GetWorldY(),
+			collider->GetWidth(),
+			collider->GetHeight(),
+			collider->GetWorldRotation(),
+			collider->GetWorldScaleX(),
+			collider->GetWorldScaleY(),
+			collider->GetOriginX(),
+			collider->GetOriginY(),
+			0xFF00FF00,
+			false
+		);
 }
