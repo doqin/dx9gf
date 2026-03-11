@@ -84,6 +84,15 @@
     <ClCompile Include="DX9GFFont.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DX9GFTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFMapLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GFApplication.h">
@@ -160,6 +169,15 @@
     </ClInclude>
     <ClInclude Include="DX9GFFont.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFMap.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h">
+      <Filter>Header Files\Extras</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

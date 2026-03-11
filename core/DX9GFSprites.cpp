@@ -4,7 +4,7 @@
 #include <d3dx9.h>
 #include <stdexcept>
 
-DX9GF::StaticSprite::StaticSprite(GraphicsDevice* graphicsDevice) : ISprite(graphicsDevice)
+DX9GF::StaticSprite::StaticSprite(Texture* texture) : ISprite(texture->GetGraphicsDevice()), texture(texture)
 {
 	HRESULT result = D3DXCreateSprite(graphicsDevice->GetDevice(), &p_sprite);
 	if (result != D3D_OK) {
@@ -16,116 +16,8 @@ DX9GF::StaticSprite::StaticSprite(GraphicsDevice* graphicsDevice) : ISprite(grap
 
 DX9GF::StaticSprite::~StaticSprite()
 {
-	if (p_texture != nullptr) p_texture->Release();
 	if (p_sprite != nullptr) p_sprite->Release();
 	if (p_src != nullptr) delete p_src;
-}
-
-void DX9GF::StaticSprite::CreatePlainTexture(D3DCOLOR color, UINT width, UINT height)
-{
-	if (p_texture != nullptr) p_texture->Release();
-	HRESULT result = graphicsDevice->GetDevice()->CreateTexture(
-		width, height, 1,
-		0,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_MANAGED,
-		&p_texture,
-		nullptr
-	);
-	if (result != S_OK) {
-		auto error = DXGetErrorDescription(result);
-		std::string what = std::string(error, error + wcslen(error));
-		throw std::runtime_error(what);
-	}
-	// Lock the texture
-	D3DLOCKED_RECT lockedRect;
-	result = p_texture->LockRect(0, &lockedRect, nullptr, 0);
-	if (FAILED(result))
-	{
-		p_texture->Release();
-		auto error = DXGetErrorDescription(result);
-		std::string what = std::string(error, error + wcslen(error));
-		throw std::runtime_error(what);
-	}
-
-	// Fill the texture with the color
-	DWORD* pixels = (DWORD*)lockedRect.pBits;
-	UINT pitch = lockedRect.Pitch / sizeof(DWORD);
-
-	for (UINT y = 0; y < height; ++y)
-	{
-		for (UINT x = 0; x < width; ++x)
-		{
-			pixels[y * pitch + x] = color;
-		}
-	}
-
-	// Unlock
-	p_texture->UnlockRect(0);
-	this->width = width;
-	this->height = height;
-}
-
-void DX9GF::StaticSprite::SetColor(D3DCOLOR color)
-{
-	// Lock the texture
-	D3DLOCKED_RECT lockedRect;
-	HRESULT result = p_texture->LockRect(0, &lockedRect, nullptr, 0);
-	if (FAILED(result))
-	{
-		p_texture->Release();
-		auto error = DXGetErrorDescription(result);
-		std::string what = std::string(error, error + wcslen(error));
-		throw std::runtime_error(what);
-	}
-
-	// Fill the texture with the color
-	DWORD* pixels = (DWORD*)lockedRect.pBits;
-	UINT pitch = lockedRect.Pitch / sizeof(DWORD);
-
-	for (UINT y = 0; y < height; ++y)
-	{
-		for (UINT x = 0; x < width; ++x)
-		{
-			pixels[y * pitch + x] = color;
-		}
-	}
-
-	// Unlock
-	p_texture->UnlockRect(0);
-}
-
-void DX9GF::StaticSprite::LoadTexture(
-	std::wstring filePath, 
-	UINT width, 
-	UINT height
-)
-{
-	if (this->p_texture != nullptr) p_texture->Release();
-	if (graphicsDevice->GetDevice() == nullptr) {
-		throw std::runtime_error("Graphics device is null");
-	}
-	auto result = D3DXCreateTextureFromFileExW(
-		graphicsDevice->GetDevice(),
-		filePath.c_str(),
-		width,
-		height,
-		1,
-		0,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_MANAGED,
-		D3DX_FILTER_LINEAR,
-		D3DX_FILTER_LINEAR,
-		0,
-		nullptr,
-		nullptr,
-		&p_texture
-	);
-	if (result != D3D_OK) {
-		auto error = DXGetErrorDescription(result);
-		std::string what = std::string(error, error + wcslen(error));
-		throw std::runtime_error(what);
-	}
 }
 
 void DX9GF::StaticSprite::Begin()
@@ -147,7 +39,7 @@ void DX9GF::StaticSprite::Draw(const Camera& camera, unsigned long long deltaTim
 	D3DXVECTOR3 zeroPos(0.0f, 0.0f, 0.0f);
 	p_sprite->SetTransform(&matFinal);
 	p_sprite->Draw(
-		p_texture,
+		texture->GetRawTexture(),
 		p_src,
 		nullptr,
 		&zeroPos,
@@ -166,7 +58,7 @@ void DX9GF::StaticSprite::SetSrcRect(RECT srcRect)
 	this->p_src = new RECT(srcRect);
 }
 
-DX9GF::AnimatedSprite::AnimatedSprite(GraphicsDevice* graphicsDevice) : ISprite(graphicsDevice) {
+DX9GF::AnimatedSprite::AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate) : ISprite(spritesheet->GetGraphicsDevice()), frames(frames), frameRate(frameRate), texture(spritesheet) {
 	HRESULT result = D3DXCreateSprite(graphicsDevice->GetDevice(), &p_sprite);
 
 	if (result != D3D_OK) {
@@ -178,45 +70,11 @@ DX9GF::AnimatedSprite::AnimatedSprite(GraphicsDevice* graphicsDevice) : ISprite(
 
 DX9GF::AnimatedSprite::~AnimatedSprite()
 {
-	if (p_texture != nullptr) p_texture->Release();
 	if (p_sprite != nullptr) p_sprite->Release();
 }
 
 void DX9GF::AnimatedSprite::SetFrameRate(unsigned int frameRate)
 {
-	this->frameRate = frameRate;
-}
-
-void DX9GF::AnimatedSprite::LoadSpriteSheet(std::wstring filePath,
-	std::vector<RECT> frames,
-	UINT width,
-	UINT height,
-	UINT frameRate)
-{
-	if (this->p_texture != nullptr) p_texture->Release();
-	if (graphicsDevice->GetDevice() == nullptr) throw std::runtime_error("Graphics device is null");
-	auto result = D3DXCreateTextureFromFileExW(
-		graphicsDevice->GetDevice(),
-		filePath.c_str(),
-		width,
-		height,
-		1,
-		0,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_MANAGED,
-		D3DX_FILTER_LINEAR,
-		D3DX_FILTER_LINEAR,
-		0,
-		nullptr,
-		nullptr,
-		&p_texture
-	);
-	if (result != D3D_OK) {
-		auto error = DXGetErrorDescription(result);
-		std::string what = std::string(error, error + wcslen(error));
-		throw std::runtime_error(what);
-	}
-	this->srcs = frames;
 	this->frameRate = frameRate;
 }
 
@@ -233,21 +91,21 @@ void DX9GF::AnimatedSprite::Begin()
 
 void DX9GF::AnimatedSprite::Draw(const Camera& camera, unsigned long long deltaTime)
 {
-	if (srcs.size() == 0) throw std::runtime_error("Sprite frames are not set!");
+	if (frames.size() == 0) throw std::runtime_error("Sprite frames are empty!");
 	delta += deltaTime;
 	if (delta > 1000 / frameRate) {
 		frame_index += delta / (1000 / frameRate); // this will handle skipping more than 1 frame if delta is worth 2+ frame time
 		delta = 0;
 	}
-	frame_index %= srcs.size();
-	auto p_src = &srcs.at(frame_index);
+	frame_index %= frames.size();
+	auto p_src = &frames.at(frame_index);
 	auto matWorld = GetTransformMatrix();
 	auto matCamera = camera.GetTransformMatrix();
 	auto matFinal = matWorld * matCamera;
 	D3DXVECTOR3 zeroPos(0.0f, 0.0f, 0.0f);
 	p_sprite->SetTransform(&matFinal);
 	p_sprite->Draw(
-		p_texture,
+		texture->GetRawTexture(),
 		p_src,
 		nullptr,
 		&zeroPos,

@@ -196,6 +196,11 @@ POINT DX9GF::InputManager::GetAbsoluteMousePos() const
     return mousePos;
 }
 
+long DX9GF::InputManager::GetMouseScroll() const
+{
+    return diMouseState.lZ;
+}
+
 void DX9GF::InputManager::Dispose()
 {
     if (diKeyboard != nullptr) {

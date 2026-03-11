@@ -46,18 +46,21 @@ void DX9GF::Utils::SetMousePos(int x, int y)
 
 std::tuple<float, float> DX9GF::Utils::WindowToWorldCoords(const DX9GF::Camera& camera, float windowX, float windowY)
 {
-	auto app = DX9GF::Application::GetInstance();
-	auto [cameraX, cameraY] = camera.GetPosition();
-	float worldX = -windowX + cameraX - app->GetScreenWidth() / 2;
-	float worldY = -windowY + cameraY - app->GetScreenHeight() / 2;
-	return std::make_tuple(worldX, worldY);
+	D3DXMATRIX cameraTransform = camera.GetTransformMatrix();
+	D3DXMATRIX invTransform;
+	D3DXMatrixInverse(&invTransform, nullptr, &cameraTransform);
+
+	D3DXVECTOR3 windowPos(windowX, windowY, 0.0f);
+	D3DXVECTOR3 worldPos;
+	D3DXVec3TransformCoord(&worldPos, &windowPos, &invTransform);
+	return std::make_tuple(worldPos.x, worldPos.y);
 }
 
 std::tuple<float, float> DX9GF::Utils::WorldToWindowCoords(const DX9GF::Camera& camera, float worldX, float worldY)
 {
-	auto app = DX9GF::Application::GetInstance();
-	auto [cameraX, cameraY] = camera.GetPosition();
-	float windowX = worldX - cameraX + app->GetScreenWidth() / 2;
-	float windowY = worldY - cameraY + app->GetScreenHeight() / 2;
-	return std::make_tuple(windowX, windowY);
+	D3DXMATRIX cameraTransform = camera.GetTransformMatrix();
+	D3DXVECTOR3 worldPos(worldX, worldY, 0.0f);
+	D3DXVECTOR3 windowPos;
+	D3DXVec3TransformCoord(&windowPos, &worldPos, &cameraTransform);
+	return std::make_tuple(windowPos.x, windowPos.y);
 }
