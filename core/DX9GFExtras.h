@@ -9,3 +9,5 @@
 #include "DX9GFExtras/DX9GFICollider.h"
 #include "DX9GFExtras/DX9GFRectangleCollider.h"
 #include "DX9GFExtras/DX9GFEllipseCollider.h"
+#include "DX9GFExtras/DX9GFMap.h"
+#include "DX9GFExtras/DX9GFMapLayer.h"

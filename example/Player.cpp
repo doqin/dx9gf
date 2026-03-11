@@ -1,17 +1,13 @@
 #include "Player.h"
+#include "resource.h"
 
 void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::weak_ptr<DX9GF::ICollider>>* worldColliders)
 {
 	this->graphicsDevice = graphicsDevice;
 	this->camera = camera;
-	mario = std::make_shared<DX9GF::AnimatedSprite>(this->graphicsDevice);
-	mario->LoadSpriteSheet(
-		L".\\Resources\\spritesheet.png",
-		DX9GF::Utils::CreateFrames(156, 7497, 39, 51, 3),
-		156,
-		7497,
-		12
-	);
+	marioTexture = std::make_shared<DX9GF::Texture>(this->graphicsDevice);
+	marioTexture->LoadTexture(IDB_PNG3, 156, 7497);
+	mario = std::make_shared<DX9GF::AnimatedSprite>(marioTexture.get(), DX9GF::Utils::CreateFrames(156, 7497, 39, 51, 3), 12);
 	mario->SetOrigin(17.0f, 51.0f / 3.0f);
 	mario->SetScale(2, 2);
 	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 39, 51, 0, 0);

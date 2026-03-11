@@ -6,6 +6,7 @@ namespace GO {
 	class Player : public DX9GF::IGameObject {
 		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
 		DX9GF::Camera* camera = nullptr;
+		std::shared_ptr<DX9GF::Texture> marioTexture = nullptr;
 		std::shared_ptr<DX9GF::AnimatedSprite> mario = nullptr;
 		std::shared_ptr<DX9GF::RectangleCollider> collider = nullptr;
 		std::vector<std::weak_ptr<DX9GF::ICollider>>* worldColliders;

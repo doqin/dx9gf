@@ -1,0 +1,208 @@
+#include "DX9GFMapLayer.h"
+#include "DX9GFMap.h"
+#include "tmxlite/TileLayer.hpp"
+#include <ranges>
+
+bool DX9GF::MapLayer::IsTileIDInTileSet(unsigned int idx, const std::vector<std::uint32_t>& tileIDs, const tmx::Tileset& tileSet)
+{
+	return idx < tileIDs.size() && tileIDs[idx] >= tileSet.getFirstGID() && tileIDs[idx] < (tileSet.getFirstGID() + tileSet.getTileCount());
+}
+
+void DX9GF::MapLayer::Create(Map* map, std::uint32_t layerIndex)
+{
+	auto& tmxMap = map->map;
+	const auto& layers = tmxMap.getLayers();
+	const auto& textures = map->textures;
+	assert(layers[layerIndex]->getType() == tmx::Layer::Type::Tile);
+	const auto& layer = layers[layerIndex]->getLayerAs<tmx::TileLayer>();
+	const auto mapSize = tmxMap.getTileCount(); // the size of the map in number of tiles per axis
+	const auto gridSize = tmxMap.getTileSize(); // returns the size of a grid
+	const auto& tileSets = tmxMap.getTilesets();
+	const auto tintColour = layer.getTintColour();
+	D3DXCOLOR vertexColour(
+		static_cast<float>(tintColour.r) / 0xFF, 
+		static_cast<float>(tintColour.g) / 0xFF,
+		static_cast<float>(tintColour.b) / 0xFF,
+		static_cast<float>(tintColour.a) / 0xFF
+	);
+	for (auto i = 0u; i < tileSets.size(); ++i) {
+		const auto& tileSet = tileSets[i];
+		// Convert the transform view to a vector
+		// TODO: Handle when the map is infinite
+		const auto tilesView = layer.getTiles() | std::views::transform([](const tmx::TileLayer::Tile& tile) { return tile.ID; });
+		const std::vector<std::uint32_t> tileIDs(tilesView.begin(), tilesView.end());
+		const auto& [textureSizeX, textureSizeY] = textures[i]->GetSize();
+		const auto& tileSetTileSize = tileSet.getTileSize();
+		const auto tileCountX = textureSizeX / gridSize.x;
+		const auto tileCountY = textureSizeY / gridSize.y;
+		const float uNorm = static_cast<float>(tileSetTileSize.x) / textureSizeX;
+		const float vNorm = static_cast<float>(tileSetTileSize.y) / textureSizeY;
+		std::vector<TileVertex> vertices;
+		for (auto y = 0u; y < mapSize.y; ++y) {
+			for (auto x = 0u; x < mapSize.x; ++x) { // Fixed: was ++y, should be ++x
+				const auto idx = y * mapSize.x + x;
+				if (!IsTileIDInTileSet(idx, tileIDs, tileSet)) continue;
+				// texture coords
+				auto idIndex = (tileIDs[idx] - tileSet.getFirstGID());
+				float u = static_cast<float>(idIndex % tileCountX) * tileSetTileSize.x / textures[i]->GetWidth();
+				float v = static_cast<float>(idIndex / tileCountX) * tileSetTileSize.y / textures[i]->GetHeight();
+				// vertex pos
+				const float tilePosX = static_cast<float>(x) * gridSize.x;
+				const float tilePosY = (static_cast<float>(y) * gridSize.y);
+				// first triangle
+				// top left, top right, bottom left
+				vertices.push_back({ .x = tilePosX, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u, .v = v }); 
+				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v }); 
+				vertices.push_back({ .x = tilePosX, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u, .v = v + vNorm });
+				
+				// second triangle
+				// top right, bottom right, bottom left
+				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v }); 
+				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v + uNorm }); 
+				vertices.push_back({ .x = tilePosX, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u, .v = v + vNorm });
+			}
+		}
+		if (!vertices.empty()) {
+			subsets.emplace_back();
+			subsets.back().vertexData.swap(vertices);
+			subsets.back().texture = textures[i].get();
+		}
+	}
+}
+
+void DX9GF::MapLayer::Draw(const Camera& camera)
+{
+	auto* device = graphicsDevice != nullptr ? graphicsDevice->GetDevice() : nullptr;
+	if (device == nullptr || subsets.empty()) return;
+
+	DWORD oldFVF = 0;
+	device->GetFVF(&oldFVF);
+
+	D3DXMATRIX oldWorld, oldView, oldProj;
+	device->GetTransform(D3DTS_WORLD, &oldWorld);
+	device->GetTransform(D3DTS_VIEW, &oldView);
+	device->GetTransform(D3DTS_PROJECTION, &oldProj);
+
+	IDirect3DBaseTexture9* oldTexture0 = nullptr;
+	device->GetTexture(0, &oldTexture0);
+
+	DWORD oldAlphaBlendEnable = FALSE;
+	DWORD oldSrcBlend = D3DBLEND_ONE;
+	DWORD oldDestBlend = D3DBLEND_ZERO;
+	DWORD oldZEnable = D3DZB_FALSE;
+	DWORD oldLighting = FALSE;
+	DWORD oldCullMode = D3DCULL_CCW;
+	device->GetRenderState(D3DRS_ALPHABLENDENABLE, &oldAlphaBlendEnable);
+	device->GetRenderState(D3DRS_SRCBLEND, &oldSrcBlend);
+	device->GetRenderState(D3DRS_DESTBLEND, &oldDestBlend);
+	device->GetRenderState(D3DRS_ZENABLE, &oldZEnable);
+	device->GetRenderState(D3DRS_LIGHTING, &oldLighting);
+	device->GetRenderState(D3DRS_CULLMODE, &oldCullMode);
+
+	DWORD oldColorOp = D3DTOP_MODULATE;
+	DWORD oldColorArg1 = D3DTA_TEXTURE;
+	DWORD oldColorArg2 = D3DTA_DIFFUSE;
+	DWORD oldAlphaOp = D3DTOP_MODULATE;
+	DWORD oldAlphaArg1 = D3DTA_TEXTURE;
+	DWORD oldAlphaArg2 = D3DTA_DIFFUSE;
+	device->GetTextureStageState(0, D3DTSS_COLOROP, &oldColorOp);
+	device->GetTextureStageState(0, D3DTSS_COLORARG1, &oldColorArg1);
+	device->GetTextureStageState(0, D3DTSS_COLORARG2, &oldColorArg2);
+	device->GetTextureStageState(0, D3DTSS_ALPHAOP, &oldAlphaOp);
+	device->GetTextureStageState(0, D3DTSS_ALPHAARG1, &oldAlphaArg1);
+	device->GetTextureStageState(0, D3DTSS_ALPHAARG2, &oldAlphaArg2);
+
+	DWORD oldMinFilter = D3DTEXF_LINEAR;
+	DWORD oldMagFilter = D3DTEXF_LINEAR;
+	DWORD oldMipFilter = D3DTEXF_NONE;
+	DWORD oldAddressU = D3DTADDRESS_WRAP;
+	DWORD oldAddressV = D3DTADDRESS_WRAP;
+	device->GetSamplerState(0, D3DSAMP_MINFILTER, &oldMinFilter);
+	device->GetSamplerState(0, D3DSAMP_MAGFILTER, &oldMagFilter);
+	device->GetSamplerState(0, D3DSAMP_MIPFILTER, &oldMipFilter);
+	device->GetSamplerState(0, D3DSAMP_ADDRESSU, &oldAddressU);
+	device->GetSamplerState(0, D3DSAMP_ADDRESSV, &oldAddressV);
+
+	const auto [screenWidth, screenHeight] = camera.GetScreenResolution();
+	D3DXMATRIX matView;
+	D3DXMatrixIdentity(&matView);
+	D3DXMATRIX matProj;
+	D3DXMatrixOrthoOffCenterLH(
+		&matProj,
+		0.0f,
+		static_cast<float>(screenWidth),
+		static_cast<float>(screenHeight),
+		0.0f,
+		0.0f,
+		1.0f
+	);
+	auto matCamera = camera.GetTransformMatrix();
+	device->SetTransform(D3DTS_WORLD, &matCamera);
+	device->SetTransform(D3DTS_VIEW, &matView);
+	device->SetTransform(D3DTS_PROJECTION, &matProj);
+
+	device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+	device->SetRenderState(D3DRS_LIGHTING, FALSE);
+	device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+	device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+
+	device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+	device->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+	device->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+
+	device->SetFVF(D3DFVF_TILEVERTEX);
+	for (const auto& subset : subsets) {
+		if (subset.vertexData.empty()) continue;
+
+		if (auto texture = subset.texture; texture != nullptr) {
+			device->SetTexture(0, texture->GetRawTexture());
+		}
+		else {
+			device->SetTexture(0, nullptr);
+		}
+
+		const UINT primitiveCount = static_cast<UINT>(subset.vertexData.size() / 3);
+		if (primitiveCount == 0) continue;
+		device->DrawPrimitiveUP(D3DPT_TRIANGLELIST, primitiveCount, subset.vertexData.data(), sizeof(TileVertex));
+	}
+
+	device->SetFVF(oldFVF);
+	device->SetTransform(D3DTS_WORLD, &oldWorld);
+	device->SetTransform(D3DTS_VIEW, &oldView);
+	device->SetTransform(D3DTS_PROJECTION, &oldProj);
+
+	device->SetRenderState(D3DRS_ALPHABLENDENABLE, oldAlphaBlendEnable);
+	device->SetRenderState(D3DRS_SRCBLEND, oldSrcBlend);
+	device->SetRenderState(D3DRS_DESTBLEND, oldDestBlend);
+	device->SetRenderState(D3DRS_ZENABLE, oldZEnable);
+	device->SetRenderState(D3DRS_LIGHTING, oldLighting);
+	device->SetRenderState(D3DRS_CULLMODE, oldCullMode);
+
+	device->SetTextureStageState(0, D3DTSS_COLOROP, oldColorOp);
+	device->SetTextureStageState(0, D3DTSS_COLORARG1, oldColorArg1);
+	device->SetTextureStageState(0, D3DTSS_COLORARG2, oldColorArg2);
+	device->SetTextureStageState(0, D3DTSS_ALPHAOP, oldAlphaOp);
+	device->SetTextureStageState(0, D3DTSS_ALPHAARG1, oldAlphaArg1);
+	device->SetTextureStageState(0, D3DTSS_ALPHAARG2, oldAlphaArg2);
+
+	device->SetSamplerState(0, D3DSAMP_MINFILTER, oldMinFilter);
+	device->SetSamplerState(0, D3DSAMP_MAGFILTER, oldMagFilter);
+	device->SetSamplerState(0, D3DSAMP_MIPFILTER, oldMipFilter);
+	device->SetSamplerState(0, D3DSAMP_ADDRESSU, oldAddressU);
+	device->SetSamplerState(0, D3DSAMP_ADDRESSV, oldAddressV);
+
+	device->SetTexture(0, oldTexture0);
+	if (oldTexture0 != nullptr) oldTexture0->Release();
+}

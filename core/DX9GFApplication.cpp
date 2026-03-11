@@ -33,6 +33,18 @@ void DX9GF::Application::Init(HINSTANCE hInstance, std::wstring appTitle, UINT s
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
 
+	// Ensure the current working directory is the executable directory so relative paths work
+	wchar_t exePath[MAX_PATH]{};
+	DWORD exePathLen = GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+	if (exePathLen > 0 && exePathLen < MAX_PATH) {
+		std::wstring exePathStr(exePath, exePathLen);
+		size_t lastSlash = exePathStr.find_last_of(L"\\/");
+		if (lastSlash != std::wstring::npos) {
+			std::wstring exeDir = exePathStr.substr(0, lastSlash);
+			SetCurrentDirectoryW(exeDir.c_str());
+		}
+	}
+
 	// Very important =)))
 	AppRegisterClass();
 

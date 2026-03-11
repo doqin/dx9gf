@@ -10,3 +10,4 @@
 #include "DX9GFInputManager.h"
 #include "DX9GFDebug.h"
 #include "DX9GFFont.h"
+#include "DX9GFTexture.h"
