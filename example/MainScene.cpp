@@ -3,10 +3,13 @@
 #include "DX9GFGraphicsDevice.h"
 #include "DX9GFSceneManager.h"
 #include "SubScene.h"
+#include "resource.h"
 
 void MainScene::Init()
 {
 	inputManager = DX9GF::InputManager::GetInstance();
+	audioManager = DX9GF::AudioManager::GetInstance();
+	audioManager->Load("ALOVU", IDR_WAVE_ALOVU);
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
 	fontSpriteArial = std::make_shared<DX9GF::FontSprite>(fontArial.get());
@@ -41,6 +44,7 @@ void MainScene::Update(unsigned long long deltaTime)
 	if (inputManager->KeyPress(DIK_RIGHT)) cameraXDir += 1;
 	if (inputManager->KeyPress(DIK_UP)) cameraYDir -= 1;
 	if (inputManager->KeyPress(DIK_DOWN)) cameraYDir += 1;
+	if (inputManager->KeyDown(DIK_SPACE)) audioManager->Play("ALOVU");
 	if (cameraXDir != 0 || cameraYDir != 0) {
 		auto cameraPos = camera.GetPosition();
 		cameraPos.x += cameraXDir * cameraVelocity * deltaTime / 1000;

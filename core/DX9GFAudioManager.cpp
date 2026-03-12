@@ -1,7 +1,7 @@
-﻿#include "IAudioManager.h"
+﻿#include "DX9GFAudioManager.h"
 
 
-bool loadWavFromResource(int resourceID, SoundBuffer& out_audio)
+bool DX9GF::LoadWavFromResource(int resourceID, DX9GF::SoundBuffer& out_audio)
 {
 	//find embedded resource in this project by its ID
 	HRSRC hResInfo = FindResource(NULL, MAKEINTRESOURCE(resourceID), L"WAVE");
@@ -36,11 +36,21 @@ bool loadWavFromResource(int resourceID, SoundBuffer& out_audio)
 	return true;
 }
 
+DX9GF::AudioManager* DX9GF::AudioManager::instance = nullptr;
 
-bool cAudioManager::Init()
+DX9GF::AudioManager* DX9GF::AudioManager::GetInstance()
+{
+	if (!instance) {
+		instance = new AudioManager();
+	}
+	return instance;
+}
+
+bool DX9GF::AudioManager::Init()
 {
 	//turn on COM of Windows
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED)))
+		return false;
 
 	if (FAILED(XAudio2Create(&pEngine, 0, XAUDIO2_DEFAULT_PROCESSOR)))
 		return false;
@@ -51,11 +61,11 @@ bool cAudioManager::Init()
 	return true;
 }
 
-void cAudioManager::Load(string name, int resID)
+void DX9GF::AudioManager::Load(std::string name, int resID)
 {
 	if (cache.count(name)) return;
 	SoundBuffer* ad = new SoundBuffer();
-	if (loadWavFromResource(resID, *ad))
+	if (LoadWavFromResource(resID, *ad))
 	{
 		cache[name] = ad;
 	}
@@ -65,7 +75,7 @@ void cAudioManager::Load(string name, int resID)
 	}
 }
 
-void cAudioManager::Play(string name, bool loop, float volume)
+void DX9GF::AudioManager::Play(std::string name, bool loop, float volume)
 {
 	//can't find sound name from cache
 	if (!cache.count(name)) return;
@@ -73,7 +83,7 @@ void cAudioManager::Play(string name, bool loop, float volume)
 	SoundBuffer* data = cache[name];
 
 	//create a callback for this turn
-	cVoiceCallback* cb = new cVoiceCallback();
+	DX9GF::VoiceCallback* cb = new VoiceCallback();
 	IXAudio2SourceVoice* pVoice = nullptr;
 
 	if (FAILED(pEngine->CreateSourceVoice(&pVoice, &data->wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, cb, NULL, NULL)))
@@ -101,10 +111,10 @@ void cAudioManager::Play(string name, bool loop, float volume)
 	pVoice->Start(0);
 
 	//save into list to control it easily
-	activeVoices.push_back(new activeVoice{ pVoice, cb });
+	activeVoices.push_back(new ActiveVoice{ pVoice, cb });
 }
 
-void cAudioManager::Update() {
+void DX9GF::AudioManager::Update() {
 	for (auto it = activeVoices.begin(); it != activeVoices.end(); )
 	{
 		if ((*it)->pCallback->isFinished) //finished sound should be destroyed
@@ -121,7 +131,7 @@ void cAudioManager::Update() {
 	}
 }
 
-void cAudioManager::Shutdown() {
+void DX9GF::AudioManager::Shutdown() {
 	//destroy playing sound
 	for (auto av : activeVoices)
 	{
@@ -133,7 +143,7 @@ void cAudioManager::Shutdown() {
 	activeVoices.clear();
 
 	//clear the cache
-	for (auto pair : cache) delete pair.second;
+	for (auto& pair : cache) delete pair.second;
 	cache.clear();
 
 	//free what it need to be freed
@@ -144,7 +154,7 @@ void cAudioManager::Shutdown() {
 	CoUninitialize();
 }
 
-void cAudioManager::setMasterVolume(float volume)
+void DX9GF::AudioManager::SetMasterVolume(float volume)
 {
 	if (pMasterVoice)
 	{

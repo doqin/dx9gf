@@ -17,6 +17,7 @@ private:
 	DX9GF::StaticSprite* colorRec;
 	DX9GF::StaticSprite* textureRec;
 	DX9GF::InputManager* inputManager;
+	DX9GF::AudioManager* audioManager;
 public:
 	MainScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;

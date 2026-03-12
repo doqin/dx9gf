@@ -219,7 +219,7 @@
     <ClCompile Include="DX9GFSceneManager.cpp" />
     <ClCompile Include="DX9GFSprites.cpp" />
     <ClCompile Include="DX9GFUtils.cpp" />
-    <ClCompile Include="IAudioManager.cpp" />
+    <ClCompile Include="DX9GFAudioManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GF.h" />
@@ -247,7 +247,7 @@
     <ClInclude Include="DX9GFSprites.h" />
     <ClInclude Include="DX9GFUtils.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="IAudioManager.h" />
+    <ClInclude Include="DX9GFAudioManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

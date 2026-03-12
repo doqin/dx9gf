@@ -77,7 +77,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Media Include="..\..\..\..\Downloads\aloVu.wav">
+    <Media Include="Resources\ALOVU.wav">
       <Filter>Resource Files</Filter>
     </Media>
   </ItemGroup>
