@@ -10,12 +10,13 @@ class MainScene : public DX9GF::IScene
 private:
 	ExampleGame* game;
 	DX9GF::InputManager* inputManager = nullptr;
+	DX9GF::CommandBuffer commandBuffer;
 	std::shared_ptr<DX9GF::Font> fontArial;
 	std::shared_ptr<DX9GF::FontSprite> fontSpriteArial;
-	std::shared_ptr<GO::Player> player;
+	std::vector<std::shared_ptr<GO::Player>> players;
 	std::shared_ptr<GO::Rectangle> rect;
 	std::shared_ptr<DX9GF::TransformManager> transformManager;
-	std::vector<std::weak_ptr<DX9GF::ICollider>> worldColliders;
+	std::vector<std::shared_ptr<DX9GF::ICollider>> worldColliders;
 	std::shared_ptr<DX9GF::Texture> whiteTexture;
 	std::shared_ptr<DX9GF::Texture> dawgTexture;
 	std::shared_ptr<DX9GF::StaticSprite> colorRec;

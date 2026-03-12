@@ -5,7 +5,14 @@
 #include "DX9GFTransformManager.h"
 namespace DX9GF {
 	class IGameObject : public std::enable_shared_from_this<IGameObject> {
+	public:
+		enum class State {
+			Active,
+			Inactive,
+			Destroyed
+		};
 	private:
+		State state = State::Active;
 	protected:
 		TransformHandle transformHandle;
 		std::weak_ptr<TransformManager> transformManager;
@@ -15,6 +22,7 @@ namespace DX9GF {
 		IGameObject(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<IGameObject> parent, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1);
 	public:
 		virtual ~IGameObject();
+		bool operator==(const IGameObject& other) const;
 		std::optional<std::weak_ptr<IGameObject>> GetParent() const;
 		TransformHandle GetTransformHandle() const;
 		void SetLocalX(float x);
@@ -38,5 +46,7 @@ namespace DX9GF {
 		std::tuple<float, float> GetWorldScale();
 		float GetWorldScaleX();
 		float GetWorldScaleY();
+		State GetState() const;
+		friend class ICommand;
 	};
 };

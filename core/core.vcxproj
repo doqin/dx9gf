@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -219,9 +219,12 @@
     <ClCompile Include="DX9GFApplication.cpp" />
     <ClCompile Include="DX9GFCamera.cpp" />
     <ClCompile Include="DX9GFDebug.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFCommandBuffer.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseCollider.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFICollider.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFITrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFJobSystem.cpp" />
@@ -248,9 +251,12 @@
     <ClInclude Include="DX9GFCamera.h" />
     <ClInclude Include="DX9GFDebug.h" />
     <ClInclude Include="DX9GFExtras.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFICollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFICommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h" />
     <ClInclude Include="DX9GFExtras\DX9GFITrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFJobSystem.h" />

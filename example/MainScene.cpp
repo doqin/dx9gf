@@ -20,8 +20,8 @@ void MainScene::Init()
 	fontSpriteArial->SetOrigin(16, 16);
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
-	player = std::make_shared<GO::Player>(transformManager);
-	player->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+	players.push_back(std::make_shared<GO::Player>(transformManager));
+	for (auto& player : players) player->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, &worldColliders);
 	rect = std::make_shared<GO::Rectangle>(transformManager, 64, 128, 64, 128);
 	rect->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
 	colorRec = std::make_shared<DX9GF::StaticSprite>(whiteTexture.get());
@@ -37,6 +37,11 @@ void MainScene::Update(unsigned long long deltaTime)
 	inputManager->ReadMouse(deltaTime);
 	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
 	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->GoToNext();
+	if (inputManager->KeyDown(DIK_C)) {
+		players.push_back(std::make_shared<GO::Player>(transformManager));
+		players.back()->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, &worldColliders);
+		transformManager->RebuildHierarchy();
+	}
 	float cameraXDir = 0;
 	float cameraYDir = 0;
 	const float cameraVelocity = 200;
@@ -60,10 +65,27 @@ void MainScene::Update(unsigned long long deltaTime)
 	auto dScroll = inputManager->GetMouseScroll();
 	camera.SetZoom(camera.GetZoom() + dScroll / static_cast<float>(1000));
 	fontSpriteArial->Rotate(D3DXToRadian(0.1f * deltaTime));
-	player->Update(deltaTime);
+	auto& js = game->GetJobSystem();
+	js.DispatchBatch({
+		.function = [deltaTime](void* batch, size_t idx) {
+			auto players = static_cast<std::shared_ptr<GO::Player>*>(batch);
+			players[idx]->Update(deltaTime);
+		},
+		.batch = players.data(),
+		.startIdx = 0,
+		.endIdx = players.size()
+	}, 3);
+	js.Wait();
 	rect->Update(deltaTime);
 	camera.Update();
-	transformManager->UpdateAll(game->GetJobSystem());
+	commandBuffer.Update(deltaTime);
+	for (auto& player : players) {
+		if (player && player->GetState() == DX9GF::IGameObject::State::Destroyed) {
+			auto it = std::find(players.begin(), players.end(), player);
+			players.erase(it);
+		}
+	}
+	transformManager->UpdateAll(js);
 }
 
 void MainScene::Dispose()
@@ -94,7 +116,7 @@ void MainScene::Draw(unsigned long long deltaTime)
 		textureRec->Draw(camera, deltaTime);
 		textureRec->End();
 		rect->Draw(deltaTime);
-		player->Draw(deltaTime);
+		for (auto& player : players) player->Draw(deltaTime);
 		fontSpriteArial->Begin();
 		fontSpriteArial->Draw(camera, deltaTime);
 		fontSpriteArial->End();
