@@ -11,3 +11,6 @@
 #include "DX9GFExtras/DX9GFEllipseCollider.h"
 #include "DX9GFExtras/DX9GFMap.h"
 #include "DX9GFExtras/DX9GFMapLayer.h"
+#include "DX9GFExtras/DX9GFCommandBuffer.h"
+#include "DX9GFExtras/DX9GFICommand.h"
+#include "DX9GFExtras/DX9GFDestroyObjectCommand.h"
