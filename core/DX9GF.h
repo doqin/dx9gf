@@ -11,3 +11,4 @@
 #include "DX9GFDebug.h"
 #include "DX9GFFont.h"
 #include "DX9GFTexture.h"
+#include "DX9GFAudioManager.h"

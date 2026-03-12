@@ -22,6 +22,7 @@ private:
 	std::shared_ptr<DX9GF::StaticSprite> colorRec;
 	std::shared_ptr<DX9GF::StaticSprite> textureRec;
 	std::shared_ptr<DX9GF::Map> map;
+	DX9GF::AudioManager* audioManager;
 public:
 	MainScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;

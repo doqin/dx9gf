@@ -102,6 +102,9 @@
     <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DX9GFAudioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GFApplication.h">
@@ -196,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h">
       <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFAudioManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
