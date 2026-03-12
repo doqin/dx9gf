@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -46,7 +46,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExternalIncludePath>$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\external\;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
     <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -84,6 +84,11 @@
     <LibraryWPath>$(WindowsSDK_MetadataPath);</LibraryWPath>
     <SourcePath>$(VC_SourcePath);</SourcePath>
     <ExcludePath>$(CommonExcludePath);$(VC_ExecutablePath_x86);$(VC_LibraryPath_x86)</ExcludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(ExternalIncludePath)</ExternalIncludePath>
+    <LibraryPath>..\external;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -154,6 +159,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalIncludeDirectories>../includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -161,8 +167,13 @@
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;DxErr.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d9.lib;d3dx9.lib;DxErr.lib;legacy_stdio_definitions.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;DxErr.lib;legacy_stdio_definitions.lib;dinput8.lib;dxguid.lib;tmxlite-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Lib>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)external\*.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -172,7 +183,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalIncludeDirectories>../includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <Link>
@@ -195,17 +207,29 @@
         <GenerateDebugInformation>true</GenerateDebugInformation>
       </Link>
     </Link>
+    <Lib>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;DxErr.lib;legacy_stdio_definitions.lib;dinput8.lib;dxguid.lib;tmxlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\external\release\tmxlite</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)external\*.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DX9GFApplication.cpp" />
     <ClCompile Include="DX9GFCamera.cpp" />
     <ClCompile Include="DX9GFDebug.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFCommandBuffer.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseCollider.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFICollider.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFITrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFJobSystem.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFMap.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFMapLayer.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleCollider.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFThreadPool.cpp" />
@@ -218,6 +242,7 @@
     <ClCompile Include="DX9GFISprite.cpp" />
     <ClCompile Include="DX9GFSceneManager.cpp" />
     <ClCompile Include="DX9GFSprites.cpp" />
+    <ClCompile Include="DX9GFTexture.cpp" />
     <ClCompile Include="DX9GFUtils.cpp" />
     <ClCompile Include="DX9GFAudioManager.cpp" />
   </ItemGroup>
@@ -227,12 +252,17 @@
     <ClInclude Include="DX9GFCamera.h" />
     <ClInclude Include="DX9GFDebug.h" />
     <ClInclude Include="DX9GFExtras.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFICollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFICommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h" />
     <ClInclude Include="DX9GFExtras\DX9GFITrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFJobSystem.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFMap.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFThreadPool.h" />
@@ -245,6 +275,7 @@
     <ClInclude Include="DX9GFISprite.h" />
     <ClInclude Include="DX9GFSceneManager.h" />
     <ClInclude Include="DX9GFSprites.h" />
+    <ClInclude Include="DX9GFTexture.h" />
     <ClInclude Include="DX9GFUtils.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="DX9GFAudioManager.h" />

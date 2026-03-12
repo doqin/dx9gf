@@ -60,6 +60,7 @@ namespace DX9GF {
 		long GetAbsoluteMouseX() const;
 		long GetAbsoluteMouseY() const;
 		POINT GetAbsoluteMousePos() const;
+		long GetMouseScroll() const;
 		void Dispose();
 	};
 }

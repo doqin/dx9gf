@@ -10,7 +10,7 @@ std::weak_ptr<DX9GF::EllipseCollider> GO::Ellipse::GetCollider()
 	return collider;
 }
 
-void GO::Ellipse::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::weak_ptr<DX9GF::ICollider>>* worldColliders)
+void GO::Ellipse::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::shared_ptr<DX9GF::ICollider>>* worldColliders)
 {
 	this->graphicsDevice = graphicsDevice;
 	this->camera = camera;
@@ -49,7 +49,7 @@ void GO::Ellipse::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* cam
 		auto localY = parent->GetLocalY();
 		auto parentCollider = parent->GetCollider().lock();
 		for (auto& collider : *worldColliders) {
-			if (auto ellipseCollider = dynamic_pointer_cast<DX9GF::EllipseCollider>(collider.lock());
+			if (auto ellipseCollider = dynamic_pointer_cast<DX9GF::EllipseCollider>(collider);
 				ellipseCollider == parentCollider) continue; // skip if it's our collider
 			if (auto pos = parentCollider->IsIntersecting(
 				collider,

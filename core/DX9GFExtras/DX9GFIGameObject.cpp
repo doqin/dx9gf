@@ -18,7 +18,12 @@ DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager
 
 DX9GF::IGameObject::~IGameObject()
 {
-    
+    this->transformManager.lock()->DestroyTransform(this->GetTransformHandle());
+}
+
+bool DX9GF::IGameObject::operator==(const IGameObject& other) const
+{
+    return transformHandle.slotIndex == other.transformHandle.slotIndex && transformHandle.generation == other.transformHandle.generation;
 }
 
 std::optional<std::weak_ptr<DX9GF::IGameObject>> DX9GF::IGameObject::GetParent() const
@@ -178,4 +183,8 @@ float DX9GF::IGameObject::GetWorldScaleY()
     auto lock = transformManager.lock();
     auto& transformData = lock->GetTransform(transformHandle.slotIndex);
     return transformData.worldScaleY;
+}
+
+DX9GF::IGameObject::State DX9GF::IGameObject::GetState() const {
+    return state;
 }

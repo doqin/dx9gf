@@ -5,7 +5,7 @@ std::weak_ptr<DX9GF::RectangleCollider> GO::Rectangle::GetCollider()
 	return collider;
 }
 
-void GO::Rectangle::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::weak_ptr<DX9GF::ICollider>>* worldColliders)
+void GO::Rectangle::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::shared_ptr<DX9GF::ICollider>>* worldColliders)
 {
 	this->camera = camera;
 	this->graphicsDevice = graphicsDevice;
@@ -30,7 +30,7 @@ void GO::Rectangle::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* c
 		auto localY = parent->GetLocalY();
 		auto parentCollider = parent->GetCollider().lock();
 		for (auto& collider : *worldColliders) {
-			if (auto rectCollider = dynamic_pointer_cast<DX9GF::RectangleCollider>(collider.lock());
+			if (auto rectCollider = dynamic_pointer_cast<DX9GF::RectangleCollider>(collider);
 				rectCollider == parentCollider) continue; // skip if it's our collider
 			if (auto pos = parentCollider->IsIntersecting(
 				collider,

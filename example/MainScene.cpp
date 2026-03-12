@@ -11,21 +11,23 @@ void MainScene::Init()
 	audioManager = DX9GF::AudioManager::GetInstance();
 	audioManager->Load("ALOVU", IDR_WAVE_ALOVU);
 	transformManager = std::make_shared<DX9GF::TransformManager>();
+	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
+	map->Create("./Resources/example.tmx");
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
+	whiteTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	whiteTexture->CreatePlainTexture(0xFFFFFFFF, 500, 500);
+	dawgTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	dawgTexture->LoadTexture(IDR_RCDATA1, 100, 100);
 	fontSpriteArial = std::make_shared<DX9GF::FontSprite>(fontArial.get());
 	fontSpriteArial->SetOrigin(16, 16);
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
-	player = std::make_shared<GO::Player>(transformManager);
-	player->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+	players.push_back(std::make_shared<GO::Player>(transformManager));
+	for (auto& player : players) player->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, &worldColliders);
 	rect = std::make_shared<GO::Rectangle>(transformManager, 64, 128, 64, 128);
 	rect->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
-	// Creating colorRec
-	colorRec = new DX9GF::StaticSprite(game->GetGraphicsDevice());
-	colorRec->CreatePlainTexture(0xFFFFFFFF, 500, 500);
-	// Creating textureRec
-	textureRec = new DX9GF::StaticSprite(game->GetGraphicsDevice());
-	textureRec->LoadTexture(L".\\Resources\\dawg.jpg", 100, 100);
+	colorRec = std::make_shared<DX9GF::StaticSprite>(whiteTexture.get());
+	textureRec = std::make_shared<DX9GF::StaticSprite>(dawgTexture.get());
 	auto app = DX9GF::Application::GetInstance();
 	game->GetSceneManager()->PushScene(new SubScene(game, app->GetScreenWidth(), app->GetScreenHeight()));
 	transformManager->RebuildHierarchy();
@@ -37,6 +39,11 @@ void MainScene::Update(unsigned long long deltaTime)
 	inputManager->ReadMouse(deltaTime);
 	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
 	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->GoToNext();
+	if (inputManager->KeyDown(DIK_C)) {
+		players.push_back(std::make_shared<GO::Player>(transformManager));
+		players.back()->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, &worldColliders);
+		transformManager->RebuildHierarchy();
+	}
 	float cameraXDir = 0;
 	float cameraYDir = 0;
 	const float cameraVelocity = 200;
@@ -51,17 +58,41 @@ void MainScene::Update(unsigned long long deltaTime)
 		cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
 		camera.SetPosition(cameraPos);
 	}
+	if (inputManager->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
+		auto [dX, dY] = inputManager->GetRelativeMousePos();
+		auto cameraPos = camera.GetPosition();
+		cameraPos.x -= dX;
+		cameraPos.y -= dY;
+		camera.SetPosition(cameraPos);
+	}
+	auto dScroll = inputManager->GetMouseScroll();
+	camera.SetZoom(camera.GetZoom() + dScroll / static_cast<float>(1000));
 	fontSpriteArial->Rotate(D3DXToRadian(0.1f * deltaTime));
-	player->Update(deltaTime);
+	auto& js = game->GetJobSystem();
+	js.DispatchBatch({
+		.function = [deltaTime](void* batch, size_t idx) {
+			auto players = static_cast<std::shared_ptr<GO::Player>*>(batch);
+			players[idx]->Update(deltaTime);
+		},
+		.batch = players.data(),
+		.startIdx = 0,
+		.endIdx = players.size()
+	}, 3);
+	js.Wait();
 	rect->Update(deltaTime);
 	camera.Update();
-	transformManager->UpdateAll(game->GetJobSystem());
+	commandBuffer.Update(deltaTime);
+	for (auto& player : players) {
+		if (player && player->GetState() == DX9GF::IGameObject::State::Destroyed) {
+			auto it = std::find(players.begin(), players.end(), player);
+			players.erase(it);
+		}
+	}
+	transformManager->UpdateAll(js);
 }
 
 void MainScene::Dispose()
 {
-	delete colorRec;
-	delete textureRec;
 }
 
 void MainScene::Draw(unsigned long long deltaTime)
@@ -73,6 +104,7 @@ void MainScene::Draw(unsigned long long deltaTime)
 		auto app = DX9GF::Application::GetInstance();
 		auto width = app->GetScreenWidth();
 		auto height = app->GetScreenHeight();
+		map->Draw(camera);
 		DX9GF::Debug::DrawGrid(
 			dev,
 			camera,
@@ -87,7 +119,7 @@ void MainScene::Draw(unsigned long long deltaTime)
 		textureRec->Draw(camera, deltaTime);
 		textureRec->End();
 		rect->Draw(deltaTime);
-		player->Draw(deltaTime);
+		for (auto& player : players) player->Draw(deltaTime);
 		fontSpriteArial->Begin();
 		fontSpriteArial->Draw(camera, deltaTime);
 		fontSpriteArial->End();

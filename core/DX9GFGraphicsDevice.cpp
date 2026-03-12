@@ -216,7 +216,6 @@ void DX9GF::GraphicsDevice::DrawEllipse(float x, float y, float width, float hei
 			.color = color
 		});
 	}
-
 	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
 	d3ddev->DrawPrimitiveUP(primitiveType, SAMPLES, vertices.data(), sizeof(Vertex));
