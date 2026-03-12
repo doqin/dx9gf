@@ -84,6 +84,9 @@
     <ClCompile Include="DX9GFFont.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IAudioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GFApplication.h">
@@ -159,6 +162,9 @@
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
     <ClInclude Include="DX9GFFont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IAudioManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

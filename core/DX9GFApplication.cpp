@@ -1,7 +1,7 @@
 ﻿#include "DX9GFApplication.h"
 #include <stdexcept>
 #include "DX9GFInputManager.h"
-
+#include "IAudioManager.h"
 DX9GF::Application* DX9GF::Application::instance = nullptr;
 DX9GF::IGame* p_game = nullptr;
 
@@ -104,6 +104,11 @@ void DX9GF::Application::Run()
 {
 	p_game->Init();
 
+	//test audio
+	cAudioManager audio;
+	audio.Init();
+	audio.Load("ALOVU", 101);	
+
 	MSG msg;
 	int done = 0;
 	unsigned long long start = GetTickCount64();
@@ -111,6 +116,13 @@ void DX9GF::Application::Run()
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT) done = 1;
+
+			//test audio
+			if (msg.message == WM_KEYDOWN) { 
+				if (msg.wParam == VK_SPACE) {
+					audio.Play("ALOVU");
+				}
+			}
 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -120,10 +132,16 @@ void DX9GF::Application::Run()
 				unsigned long long deltaTime = GetTickCount64() - start;
 				start = GetTickCount64();
 				p_game->Update(deltaTime);
+
+				audio.Update();
+
 				p_game->Draw(deltaTime);
 			}
 		}
 	}
+
+	//test audio
+	audio.Shutdown();
 }
 
 ATOM DX9GF::Application::AppRegisterClass()

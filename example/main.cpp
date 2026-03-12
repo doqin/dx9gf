@@ -28,6 +28,8 @@ int WINAPI WinMain(
 			L"Error", MB_OK | MB_ICONEXCLAMATION
 		);
 		return E_FAIL;
-	}
+	}	
+
+
 	return 0;
 }
