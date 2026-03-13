@@ -219,6 +219,7 @@
     <ClCompile Include="DX9GFApplication.cpp" />
     <ClCompile Include="DX9GFCamera.cpp" />
     <ClCompile Include="DX9GFDebug.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFColliderManager.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFCommandBuffer.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseCollider.cpp" />
@@ -227,12 +228,10 @@
     <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFITrigger.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFJobSystem.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFMap.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFMapLayer.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleCollider.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFThreadPool.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp" />
     <ClCompile Include="DX9GFFont.cpp" />
     <ClCompile Include="DX9GFGraphicsDevice.cpp" />
@@ -252,6 +251,9 @@
     <ClInclude Include="DX9GFCamera.h" />
     <ClInclude Include="DX9GFDebug.h" />
     <ClInclude Include="DX9GFExtras.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFColliderManager.h">
+      <DeploymentContent>false</DeploymentContent>
+    </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h" />
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseCollider.h" />
@@ -260,12 +262,10 @@
     <ClInclude Include="DX9GFExtras\DX9GFICommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h" />
     <ClInclude Include="DX9GFExtras\DX9GFITrigger.h" />
-    <ClInclude Include="DX9GFExtras\DX9GFJobSystem.h" />
     <ClInclude Include="DX9GFExtras\DX9GFMap.h" />
     <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h" />
-    <ClInclude Include="DX9GFExtras\DX9GFThreadPool.h" />
     <ClInclude Include="DX9GFExtras\DX9GFTransformManager.h" />
     <ClInclude Include="DX9GFFont.h" />
     <ClInclude Include="DX9GFGraphicsDevice.h" />

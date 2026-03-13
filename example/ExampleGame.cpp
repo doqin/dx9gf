@@ -8,8 +8,3 @@ void ExampleGame::Init()
 	sceneManager->PushScene(new MainScene(this, app->GetScreenWidth(), app->GetScreenHeight()));
 	sceneManager->GoToNext();
 }
-
-DX9GF::JobSystem& ExampleGame::GetJobSystem()
-{
-	return jobSystem;
-}

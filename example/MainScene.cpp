@@ -4,6 +4,8 @@
 #include "DX9GFSceneManager.h"
 #include "SubScene.h"
 #include "resource.h"
+#include "taskflow/taskflow.hpp"
+#include "taskflow/algorithm/for_each.hpp"
 
 void MainScene::Init()
 {
@@ -11,6 +13,7 @@ void MainScene::Init()
 	audioManager = DX9GF::AudioManager::GetInstance();
 	audioManager->Load("ALOVU", IDR_WAVE_ALOVU);
 	transformManager = std::make_shared<DX9GF::TransformManager>();
+	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
 	map->Create("./Resources/example.tmx");
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
@@ -23,9 +26,11 @@ void MainScene::Init()
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
 	players.push_back(std::make_shared<GO::Player>(transformManager));
-	for (auto& player : players) player->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, &worldColliders);
+	for (auto& player : players) {
+		player->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, colliderManager);
+	}
 	rect = std::make_shared<GO::Rectangle>(transformManager, 64, 128, 64, 128);
-	rect->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+	rect->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	colorRec = std::make_shared<DX9GF::StaticSprite>(whiteTexture.get());
 	textureRec = std::make_shared<DX9GF::StaticSprite>(dawgTexture.get());
 	auto app = DX9GF::Application::GetInstance();
@@ -34,14 +39,14 @@ void MainScene::Init()
 }
 
 void MainScene::Update(unsigned long long deltaTime)
-{	
+{
 	inputManager->ReadKeyboard(deltaTime);
 	inputManager->ReadMouse(deltaTime);
 	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
 	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->GoToNext();
 	if (inputManager->KeyDown(DIK_C)) {
 		players.push_back(std::make_shared<GO::Player>(transformManager));
-		players.back()->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, &worldColliders);
+		players.back()->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, colliderManager);
 		transformManager->RebuildHierarchy();
 	}
 	float cameraXDir = 0;
@@ -68,17 +73,13 @@ void MainScene::Update(unsigned long long deltaTime)
 	auto dScroll = inputManager->GetMouseScroll();
 	camera.SetZoom(camera.GetZoom() + dScroll / static_cast<float>(1000));
 	fontSpriteArial->Rotate(D3DXToRadian(0.1f * deltaTime));
-	auto& js = game->GetJobSystem();
-	js.DispatchBatch({
-		.function = [deltaTime](void* batch, size_t idx) {
-			auto players = static_cast<std::shared_ptr<GO::Player>*>(batch);
-			players[idx]->Update(deltaTime);
-		},
-		.batch = players.data(),
-		.startIdx = 0,
-		.endIdx = players.size()
-	}, 3);
-	js.Wait();
+	// Using task flow because I can't create a parallel programming system better than them (T_T)
+	tf::Executor executor;
+	tf::Taskflow taskflow;
+	taskflow.for_each(players.begin(), players.end(), [deltaTime](std::shared_ptr<GO::Player> player) {
+		player->Update(deltaTime);
+	});
+	executor.run(taskflow).wait();
 	rect->Update(deltaTime);
 	camera.Update();
 	commandBuffer.Update(deltaTime);
@@ -88,7 +89,7 @@ void MainScene::Update(unsigned long long deltaTime)
 			players.erase(it);
 		}
 	}
-	transformManager->UpdateAll(js);
+	transformManager->UpdateAll();
 }
 
 void MainScene::Dispose()

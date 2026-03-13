@@ -1,7 +1,9 @@
-#include "SubScene.h"
+﻿#include "SubScene.h"
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
 #include <utility>
+#include "taskflow/taskflow.hpp"
+#include "taskflow/algorithm/for_each.hpp"
 
 void SubScene::Init()
 {
@@ -9,16 +11,24 @@ void SubScene::Init()
 	auto app = DX9GF::Application::GetInstance();
 	auto graphicsDevice = game->GetGraphicsDevice();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
+
+	//Khởi tạo ColliderManager
+	colliderManager = std::make_shared<DX9GF::ColliderManager>();
+
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 100, 100, 200, 200));
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 50, 200, -200, 200));
 	for (auto& rect : rects) {
-		rect->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+		//Truyền colliderManager thay vì &worldColliders
+		rect->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
+
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 100, 100, 0, 0));
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 200, 50, 0, -200));
 	for (auto& ellipse : ellipses) {
-		ellipse->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+		//Truyền colliderManager thay vì &worldColliders
+		ellipse->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
+
 	transformManager->RebuildHierarchy();
 }
 
@@ -30,25 +40,16 @@ void SubScene::Update(unsigned long long deltaTime)
 		game->GetSceneManager()->GoToPrevious();
 		return; // return otherwise we get a use after free situation
 	}
-	auto& js = game->GetJobSystem();
-	js.DispatchBatch({
-		.function = [deltaTime](void* batch, size_t idx) {
-			static_cast<std::shared_ptr<GO::Rectangle>*>(batch)[idx]->Update(deltaTime);
-		},
-		.batch=rects.data(),
-		.startIdx = 0,
-		.endIdx = rects.size() // for some reason this is +1 than intended :P
-	}, 1);
-	js.DispatchBatch({
-		.function = [deltaTime](void* batch, size_t idx) {
-			static_cast<std::shared_ptr<GO::Ellipse>*>(batch)[idx]->Update(deltaTime);
-		},
-		.batch = static_cast<void*>(ellipses.data()),
-		.startIdx = 0,
-		.endIdx = ellipses.size()
-	}, 1);
-	js.Wait();
-	transformManager->UpdateAll(js);
+	tf::Executor executor;
+	tf::Taskflow taskflow;
+	taskflow.for_each(rects.begin(), rects.end(), [deltaTime](std::shared_ptr<GO::Rectangle> rect) {
+		rect->Update(deltaTime);
+	});
+	taskflow.for_each(ellipses.begin(), ellipses.end(), [deltaTime](std::shared_ptr<GO::Ellipse> ellipse) {
+		ellipse->Update(deltaTime);
+	});
+	executor.run(taskflow).wait();
+	transformManager->UpdateAll();
 	camera.Update();
 }
 

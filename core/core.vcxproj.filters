@@ -60,12 +60,6 @@
     <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DX9GFExtras\DX9GFThreadPool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DX9GFExtras\DX9GFJobSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -100,6 +94,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFColliderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DX9GFAudioManager.cpp">
@@ -158,12 +155,6 @@
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFThreadPool.h">
-      <Filter>Header Files\Extras</Filter>
-    </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFJobSystem.h">
-      <Filter>Header Files\Extras</Filter>
-    </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFTransformManager.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
@@ -198,6 +189,9 @@
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFColliderManager.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
     <ClInclude Include="DX9GFAudioManager.h">
