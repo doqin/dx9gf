@@ -102,6 +102,18 @@
     <ClCompile Include="DX9GFAudioManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFGoToCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFRotateCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFSetCameraPositionCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFZoomCameraCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GFApplication.h">
@@ -182,9 +194,6 @@
     <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFICommand.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
@@ -196,6 +205,21 @@
     </ClInclude>
     <ClInclude Include="DX9GFAudioManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFGoToCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFICommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFRotateCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFSetCameraPositionCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFZoomCameraCommand.h">
+      <Filter>Header Files\Extras</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
