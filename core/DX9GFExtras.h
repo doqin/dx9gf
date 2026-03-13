@@ -14,3 +14,4 @@
 #include "DX9GFExtras/DX9GFCommandBuffer.h"
 #include "DX9GFExtras/DX9GFICommand.h"
 #include "DX9GFExtras/DX9GFDestroyObjectCommand.h"
+#include "DX9GFExtras/DX9GFColliderManager.h"

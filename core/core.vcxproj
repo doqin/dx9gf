@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -219,6 +219,7 @@
     <ClCompile Include="DX9GFApplication.cpp" />
     <ClCompile Include="DX9GFCamera.cpp" />
     <ClCompile Include="DX9GFDebug.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFColliderManager.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFCommandBuffer.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseCollider.cpp" />
@@ -251,6 +252,9 @@
     <ClInclude Include="DX9GFCamera.h" />
     <ClInclude Include="DX9GFDebug.h" />
     <ClInclude Include="DX9GFExtras.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFColliderManager.h">
+      <DeploymentContent>false</DeploymentContent>
+    </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h" />
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseCollider.h" />

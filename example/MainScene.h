@@ -16,7 +16,7 @@ private:
 	std::vector<std::shared_ptr<GO::Player>> players;
 	std::shared_ptr<GO::Rectangle> rect;
 	std::shared_ptr<DX9GF::TransformManager> transformManager;
-	std::vector<std::shared_ptr<DX9GF::ICollider>> worldColliders;
+	std::shared_ptr<DX9GF::ColliderManager> colliderManager;
 	std::shared_ptr<DX9GF::Texture> whiteTexture;
 	std::shared_ptr<DX9GF::Texture> dawgTexture;
 	std::shared_ptr<DX9GF::StaticSprite> colorRec;

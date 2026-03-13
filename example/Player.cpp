@@ -4,15 +4,17 @@
 
 GO::Player::~Player()
 {
-	auto it = std::find(worldColliders->begin(), worldColliders->end(), collider);
-	worldColliders->erase(it);
+	if (colliderManager && collider) {
+		colliderManager->Remove(collider);
+	}
 }
 
-void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::CommandBuffer* commandBuffer, DX9GF::Camera* camera, std::vector<std::shared_ptr<DX9GF::ICollider>>* worldColliders)
+void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::CommandBuffer* commandBuffer, DX9GF::Camera* camera, std::shared_ptr<DX9GF::ColliderManager> colliderManager)
 {
 	this->graphicsDevice = graphicsDevice;
 	this->commandBuffer = commandBuffer;
 	this->camera = camera;
+	this->colliderManager = colliderManager;
 	marioTexture = std::make_shared<DX9GF::Texture>(this->graphicsDevice);
 	marioTexture->LoadTexture(IDB_PNG3, 156, 7497);
 	mario = std::make_shared<DX9GF::AnimatedSprite>(marioTexture.get(), DX9GF::Utils::CreateFrames(156, 7497, 39, 51, 3), 12);
@@ -20,8 +22,7 @@ void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::CommandBuffe
 	mario->SetScale(2, 2);
 	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 39, 51, 0, 0);
 	collider->SetOriginCenter();
-	worldColliders->push_back(collider);
-	this->worldColliders = worldColliders;
+	this->colliderManager->Add(collider);
 }
 
 void GO::Player::Update(unsigned long long deltaTime)
@@ -40,19 +41,10 @@ void GO::Player::Update(unsigned long long deltaTime)
 		if (inputManager->KeyPress(DIK_X)) commandBuffer->PushCommand(std::make_shared<DX9GF::DestroyObjectCommand>(shared_from_this(), [this]() {}));
 		auto dX = xDir * velocity * deltaTime / 1000;
 		auto dY = yDir * velocity * deltaTime / 1000;
-		for (auto& otherCollider : *worldColliders) {
-			if (otherCollider == collider) continue;
-			auto colliderWorldX = collider->GetWorldX();
-			auto colliderWorldY = collider->GetWorldY();
-			// handle x and y per axis to prevent getting stuck instead of sliding
-			if (auto pos = collider->IsIntersecting(otherCollider, colliderWorldX + dX, colliderWorldY); pos.has_value()) {
-				auto& [correctedX, correctedY] = pos.value();
-				dX = correctedX - colliderWorldX;
-			}
-			if (auto pos = collider->IsIntersecting(otherCollider, colliderWorldX, colliderWorldY + dY); pos.has_value()) {
-				auto& [correctedX, correctedY] = pos.value();
-				dY = correctedY - colliderWorldY;
-			}
+		if (colliderManager) {
+			auto [safeDx, safeDy] = colliderManager->GetSlidingDeltas(collider, dX, dY);
+			dX = safeDx;
+			dY = safeDy;
 		}
 		SetLocalPosition(
 			GetLocalX() + dX,

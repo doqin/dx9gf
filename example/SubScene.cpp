@@ -1,4 +1,4 @@
-#include "SubScene.h"
+﻿#include "SubScene.h"
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
 #include <utility>
@@ -9,16 +9,24 @@ void SubScene::Init()
 	auto app = DX9GF::Application::GetInstance();
 	auto graphicsDevice = game->GetGraphicsDevice();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
+
+	//Khởi tạo ColliderManager
+	colliderManager = std::make_shared<DX9GF::ColliderManager>();
+
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 100, 100, 200, 200));
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 50, 200, -200, 200));
 	for (auto& rect : rects) {
-		rect->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+		//Truyền colliderManager thay vì &worldColliders
+		rect->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
+
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 100, 100, 0, 0));
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 200, 50, 0, -200));
 	for (auto& ellipse : ellipses) {
-		ellipse->Init(game->GetGraphicsDevice(), &camera, &worldColliders);
+		//Truyền colliderManager thay vì &worldColliders
+		ellipse->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
+
 	transformManager->RebuildHierarchy();
 }
 
