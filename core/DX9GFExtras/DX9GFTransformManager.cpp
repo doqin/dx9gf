@@ -1,4 +1,6 @@
 #include "DX9GFTransformManager.h"
+#include "taskflow/taskflow.hpp"
+#include "taskflow/algorithm/for_each.hpp"
 
 void DX9GF::TransformManager::ComputeTransform(int dataIndex) {
 	auto& t = transforms[dataIndex];
@@ -26,21 +28,15 @@ void DX9GF::TransformManager::ComputeTransform(int dataIndex) {
 	}
 }
 
-void DX9GF::TransformManager::UpdateAll(JobSystem& js)
+void DX9GF::TransformManager::UpdateAll()
 {
 	for (const auto& level : levels) {
-		js.DispatchBatch({ 
-			.function = [this](void* batch, size_t idx) {
-				auto slotBatch = static_cast<Slot*>(batch);
-				if (slotBatch[idx].isAlive) {
-					this->ComputeTransform(slotBatch[idx].dataIndex);
-				}
-			}, 
-			.batch = slots.data(),
-			.startIdx = level.start, 
-			.endIdx = level.end
-		}, 10);
-		js.Wait();
+		tf::Executor executor;
+		tf::Taskflow taskflow;
+		taskflow.for_each(slots.begin() + level.start, slots.begin() + level.end, [this](Slot slot) {
+			this->ComputeTransform(slot.dataIndex);
+		});
+		executor.run(taskflow).wait();
 	}
 }
 

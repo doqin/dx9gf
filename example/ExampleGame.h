@@ -5,10 +5,8 @@
 class ExampleGame : public DX9GF::IGame
 {
 private:
-	DX9GF::JobSystem jobSystem;
 public:
-	ExampleGame(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : IGame(hwnd, screenWidth, screenHeight), jobSystem(5) {};
+	ExampleGame(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : IGame(hwnd, screenWidth, screenHeight) {};
 	void Init() override;
-	DX9GF::JobSystem& GetJobSystem();
 };
 

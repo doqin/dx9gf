@@ -2,6 +2,8 @@
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
 #include <utility>
+#include "taskflow/taskflow.hpp"
+#include "taskflow/algorithm/for_each.hpp"
 
 void SubScene::Init()
 {
@@ -38,25 +40,16 @@ void SubScene::Update(unsigned long long deltaTime)
 		game->GetSceneManager()->GoToPrevious();
 		return; // return otherwise we get a use after free situation
 	}
-	auto& js = game->GetJobSystem();
-	js.DispatchBatch({
-		.function = [deltaTime](void* batch, size_t idx) {
-			static_cast<std::shared_ptr<GO::Rectangle>*>(batch)[idx]->Update(deltaTime);
-		},
-		.batch=rects.data(),
-		.startIdx = 0,
-		.endIdx = rects.size() // for some reason this is +1 than intended :P
-	}, 1);
-	js.DispatchBatch({
-		.function = [deltaTime](void* batch, size_t idx) {
-			static_cast<std::shared_ptr<GO::Ellipse>*>(batch)[idx]->Update(deltaTime);
-		},
-		.batch = static_cast<void*>(ellipses.data()),
-		.startIdx = 0,
-		.endIdx = ellipses.size()
-	}, 1);
-	js.Wait();
-	transformManager->UpdateAll(js);
+	tf::Executor executor;
+	tf::Taskflow taskflow;
+	taskflow.for_each(rects.begin(), rects.end(), [deltaTime](std::shared_ptr<GO::Rectangle> rect) {
+		rect->Update(deltaTime);
+	});
+	taskflow.for_each(ellipses.begin(), ellipses.end(), [deltaTime](std::shared_ptr<GO::Ellipse> ellipse) {
+		ellipse->Update(deltaTime);
+	});
+	executor.run(taskflow).wait();
+	transformManager->UpdateAll();
 	camera.Update();
 }
 

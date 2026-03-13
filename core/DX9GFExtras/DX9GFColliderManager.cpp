@@ -1,9 +1,14 @@
 ﻿#include "DX9GFColliderManager.h"
+#include "taskflow/taskflow.hpp"
+#include "taskflow/algorithm/for_each.hpp"
+#include <mutex>
+#include <atomic>
 
 namespace DX9GF {
 
     void ColliderManager::Add(std::shared_ptr<ICollider> collider) {
         if (collider) {
+            std::scoped_lock<std::mutex> lock{vectorMutex};
             colliders.push_back(collider);
         }
     }
@@ -30,19 +35,30 @@ namespace DX9GF {
         float finalY = newY;
         bool hasCollision = false;
 
-        for (auto& other : colliders) {
+        tf::Executor executor;
+        tf::Taskflow taskflow;
+        taskflow.for_each(colliders.begin(), colliders.end(), [&](std::shared_ptr<ICollider> other) {
             // Bỏ qua chính nó
-            if (other == target) continue;
+            if (other == target) {
+                return;
+            }
 
+            float x;
+            float y;
+            {
+                x = finalX;
+                y = finalY;
+            }
             // Kiểm tra va chạm và lấy vị trí đã được điều chỉnh (nếu có)
-            auto result = target->IsIntersecting(other, finalX, finalY);
+            auto result = target->IsIntersecting(other, x, y);
             if (result.has_value()) {
                 auto& [correctedX, correctedY] = result.value();
                 finalX = correctedX;
                 finalY = correctedY;
                 hasCollision = true;
             }
-        }
+        });
+        executor.run(taskflow).wait();
 
         if (hasCollision) {
             return std::make_tuple(finalX, finalY);
@@ -65,21 +81,33 @@ namespace DX9GF {
         float finalDx = deltaX;
         float finalDy = deltaY;
 
-        for (auto& other : colliders) {
-            if (other == target) continue;
+        tf::Executor executor;
+        tf::Taskflow taskflow;
+        taskflow.for_each(colliders.begin(), colliders.end(), [&](std::shared_ptr<ICollider> other) {
+            if (other == target) {
+                return;
+            }
+
+            float dx;
+            float dy;
+            {
+                dx = finalDx;
+                dy = finalDy;
+            }
 
             // Xử lý riêng trục X
-            if (auto pos = target->IsIntersecting(other, currentX + finalDx, currentY); pos.has_value()) {
+            if (auto pos = target->IsIntersecting(other, currentX + dx, currentY); pos.has_value()) {
                 auto& [correctedX, correctedY] = pos.value();
                 finalDx = correctedX - currentX;
             }
 
             // Xử lý riêng trục Y
-            if (auto pos = target->IsIntersecting(other, currentX, currentY + finalDy); pos.has_value()) {
+            if (auto pos = target->IsIntersecting(other, currentX, currentY + dy); pos.has_value()) {
                 auto& [correctedX, correctedY] = pos.value();
                 finalDy = correctedY - currentY;
             }
-        }
+        });
+        executor.run(taskflow).wait();
 
         return std::make_tuple(finalDx, finalDy);
     }

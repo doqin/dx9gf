@@ -10,7 +10,7 @@ namespace DX9GF {
     class ColliderManager {
     private:
         std::vector<std::shared_ptr<ICollider>> colliders;
-
+        std::mutex vectorMutex;
     public:
         ColliderManager() = default;
         ~ColliderManager() = default;

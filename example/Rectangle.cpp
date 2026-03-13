@@ -11,9 +11,7 @@ void GO::Rectangle::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* c
 	this->graphicsDevice = graphicsDevice;
 	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), width, height, 0, 0);
 	collider->SetOriginCenter();
-	if (colliderManager) {
-		colliderManager->Add(collider);
-	}
+	colliderManager->Add(collider);
 	trigger = std::make_shared<DX9GF::RectangleTrigger>(transformManager, shared_from_this(), width, height, 0, 0);
 	trigger->SetOriginCenter();
 	trigger->Init(camera);
@@ -33,20 +31,17 @@ void GO::Rectangle::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* c
 		auto parentCollider = parent->GetCollider().lock();
 		float targetWorldX = parentCollider->GetWorldX() + deltaX;
 		float targetWorldY = parentCollider->GetWorldY() + deltaY;
-		if (colliderManager) {
-			auto safePos = colliderManager->GetSafePosition(parentCollider, targetWorldX, targetWorldY);
-			if (safePos.has_value()) {
-				auto& [posX, posY] = safePos.value();
-				deltaX = posX - parentCollider->GetWorldX();
-				deltaY = posY - parentCollider->GetWorldY();
-			}
+		auto safePos = colliderManager->GetSafePosition(parentCollider, targetWorldX, targetWorldY);
+		if (safePos.has_value()) {
+			auto& [posX, posY] = safePos.value();
+			deltaX = posX - parentCollider->GetWorldX();
+			deltaY = posY - parentCollider->GetWorldY();
 		}
-
 		parent->SetLocalPosition(
 			localX + deltaX,
 			localY + deltaY
 		);
-		});
+	});
 }
 
 void GO::Rectangle::Update(unsigned long long deltaTime)

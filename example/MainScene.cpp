@@ -4,6 +4,8 @@
 #include "DX9GFSceneManager.h"
 #include "SubScene.h"
 #include "resource.h"
+#include "taskflow/taskflow.hpp"
+#include "taskflow/algorithm/for_each.hpp"
 
 void MainScene::Init()
 {
@@ -68,17 +70,13 @@ void MainScene::Update(unsigned long long deltaTime)
 	auto dScroll = inputManager->GetMouseScroll();
 	camera.SetZoom(camera.GetZoom() + dScroll / static_cast<float>(1000));
 	fontSpriteArial->Rotate(D3DXToRadian(0.1f * deltaTime));
-	auto& js = game->GetJobSystem();
-	js.DispatchBatch({
-		.function = [deltaTime](void* batch, size_t idx) {
-			auto players = static_cast<std::shared_ptr<GO::Player>*>(batch);
-			players[idx]->Update(deltaTime);
-		},
-		.batch = players.data(),
-		.startIdx = 0,
-		.endIdx = players.size()
-		}, 3);
-	js.Wait();
+	// Using task flow because I can't create a parallel programming system better than them (T_T)
+	tf::Executor executor;
+	tf::Taskflow taskflow;
+	taskflow.for_each(players.begin(), players.end(), [deltaTime](std::shared_ptr<GO::Player> player) {
+		player->Update(deltaTime);
+	});
+	executor.run(taskflow).wait();
 	rect->Update(deltaTime);
 	camera.Update();
 	commandBuffer.Update(deltaTime);
@@ -88,7 +86,7 @@ void MainScene::Update(unsigned long long deltaTime)
 			players.erase(it);
 		}
 	}
-	transformManager->UpdateAll(js);
+	transformManager->UpdateAll();
 }
 
 void MainScene::Dispose()

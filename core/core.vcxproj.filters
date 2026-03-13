@@ -60,12 +60,6 @@
     <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DX9GFExtras\DX9GFThreadPool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DX9GFExtras\DX9GFJobSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -156,12 +150,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h">
-      <Filter>Header Files\Extras</Filter>
-    </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFThreadPool.h">
-      <Filter>Header Files\Extras</Filter>
-    </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFJobSystem.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFTransformManager.h">
