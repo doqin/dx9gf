@@ -10,6 +10,8 @@
 void MainScene::Init()
 {
 	inputManager = DX9GF::InputManager::GetInstance();
+	audioManager = DX9GF::AudioManager::GetInstance();
+	audioManager->Load("ALOVU", IDR_WAVE_ALOVU);
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
@@ -54,6 +56,7 @@ void MainScene::Update(unsigned long long deltaTime)
 	if (inputManager->KeyPress(DIK_RIGHT)) cameraXDir += 1;
 	if (inputManager->KeyPress(DIK_UP)) cameraYDir -= 1;
 	if (inputManager->KeyPress(DIK_DOWN)) cameraYDir += 1;
+	if (inputManager->KeyDown(DIK_SPACE)) audioManager->Play("ALOVU");
 	if (cameraXDir != 0 || cameraYDir != 0) {
 		auto cameraPos = camera.GetPosition();
 		cameraPos.x += cameraXDir * cameraVelocity * deltaTime / 1000;
