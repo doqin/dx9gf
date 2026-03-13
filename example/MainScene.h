@@ -23,6 +23,10 @@ private:
 	std::shared_ptr<DX9GF::StaticSprite> textureRec;
 	std::shared_ptr<DX9GF::Map> map;
 	DX9GF::AudioManager* audioManager;
+	float triggerX = 170.0f;
+	float triggerY = 170.0f;
+	float triggerRadius = 20.0f;
+	bool wasInTrigger = false;
 public:
 	MainScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;

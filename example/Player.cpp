@@ -28,6 +28,9 @@ void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::CommandBuffe
 void GO::Player::Update(unsigned long long deltaTime)
 {
 	if (GetState() == State::Active) {
+		if (commandBuffer && commandBuffer->IsBusy()) {
+			return;
+		}
 		auto inputManager = DX9GF::InputManager::GetInstance();
 		float xDir = 0;
 		float yDir = 0;

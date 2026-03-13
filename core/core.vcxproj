@@ -224,6 +224,7 @@
     <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseCollider.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFGoToCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFICollider.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
@@ -232,7 +233,10 @@
     <ClCompile Include="DX9GFExtras\DX9GFMapLayer.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleCollider.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFRotateCommand.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFSetCameraPositionCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFZoomCameraCommand.cpp" />
     <ClCompile Include="DX9GFFont.cpp" />
     <ClCompile Include="DX9GFGraphicsDevice.cpp" />
     <ClCompile Include="DX9GFIGame.cpp" />
@@ -257,6 +261,7 @@
     <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h" />
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseCollider.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFGoToCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFICollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFICommand.h" />
@@ -266,7 +271,10 @@
     <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFRotateCommand.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFSetCameraPositionCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFTransformManager.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFZoomCameraCommand.h" />
     <ClInclude Include="DX9GFFont.h" />
     <ClInclude Include="DX9GFGraphicsDevice.h" />
     <ClInclude Include="DX9GFIGame.h" />

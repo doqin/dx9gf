@@ -1,4 +1,4 @@
-#include "MainScene.h"
+﻿#include "MainScene.h"
 #include <DX9GFUtils.h>
 #include "DX9GFGraphicsDevice.h"
 #include "DX9GFSceneManager.h"
@@ -43,35 +43,42 @@ void MainScene::Update(unsigned long long deltaTime)
 	inputManager->ReadKeyboard(deltaTime);
 	inputManager->ReadMouse(deltaTime);
 	if (inputManager->KeyDown(DIK_ESCAPE)) PostMessage(game->GetHwnd(), WM_DESTROY, 0, 0);
-	if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->GoToNext();
-	if (inputManager->KeyDown(DIK_C)) {
-		players.push_back(std::make_shared<GO::Player>(transformManager));
-		players.back()->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, colliderManager);
-		transformManager->RebuildHierarchy();
+	if (!commandBuffer.IsBusy()) {
+		if (inputManager->KeyDown(DIK_F)) game->GetSceneManager()->GoToNext();
+		if (inputManager->KeyDown(DIK_C)) {
+			players.push_back(std::make_shared<GO::Player>(transformManager));
+			players.back()->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, colliderManager);
+			transformManager->RebuildHierarchy();
+		}
+
+		float cameraXDir = 0;
+		float cameraYDir = 0;
+		const float cameraVelocity = 200;
+		if (inputManager->KeyPress(DIK_LEFT)) cameraXDir -= 1;
+		if (inputManager->KeyPress(DIK_RIGHT)) cameraXDir += 1;
+		if (inputManager->KeyPress(DIK_UP)) cameraYDir -= 1;
+		if (inputManager->KeyPress(DIK_DOWN)) cameraYDir += 1;
+		if (inputManager->KeyDown(DIK_SPACE)) audioManager->Play("ALOVU");
+
+		if (cameraXDir != 0 || cameraYDir != 0) {
+			auto cameraPos = camera.GetPosition();
+			cameraPos.x += cameraXDir * cameraVelocity * deltaTime / 1000;
+			cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
+			camera.SetPosition(cameraPos);
+		}
+
+		if (inputManager->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
+			auto [dX, dY] = inputManager->GetRelativeMousePos();
+			auto cameraPos = camera.GetPosition();
+			cameraPos.x -= dX;
+			cameraPos.y -= dY;
+			camera.SetPosition(cameraPos);
+		}
+
+		auto dScroll = inputManager->GetMouseScroll();
+		camera.SetZoom(camera.GetZoom() + dScroll / static_cast<float>(1000));
+		rect->Update(deltaTime);
 	}
-	float cameraXDir = 0;
-	float cameraYDir = 0;
-	const float cameraVelocity = 200;
-	if (inputManager->KeyPress(DIK_LEFT)) cameraXDir -= 1;
-	if (inputManager->KeyPress(DIK_RIGHT)) cameraXDir += 1;
-	if (inputManager->KeyPress(DIK_UP)) cameraYDir -= 1;
-	if (inputManager->KeyPress(DIK_DOWN)) cameraYDir += 1;
-	if (inputManager->KeyDown(DIK_SPACE)) audioManager->Play("ALOVU");
-	if (cameraXDir != 0 || cameraYDir != 0) {
-		auto cameraPos = camera.GetPosition();
-		cameraPos.x += cameraXDir * cameraVelocity * deltaTime / 1000;
-		cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
-		camera.SetPosition(cameraPos);
-	}
-	if (inputManager->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
-		auto [dX, dY] = inputManager->GetRelativeMousePos();
-		auto cameraPos = camera.GetPosition();
-		cameraPos.x -= dX;
-		cameraPos.y -= dY;
-		camera.SetPosition(cameraPos);
-	}
-	auto dScroll = inputManager->GetMouseScroll();
-	camera.SetZoom(camera.GetZoom() + dScroll / static_cast<float>(1000));
 	fontSpriteArial->Rotate(D3DXToRadian(0.1f * deltaTime));
 	// Using task flow because I can't create a parallel programming system better than them (T_T)
 	tf::Executor executor;
@@ -80,7 +87,35 @@ void MainScene::Update(unsigned long long deltaTime)
 		player->Update(deltaTime);
 	});
 	executor.run(taskflow).wait();
-	rect->Update(deltaTime);
+
+	if (!players.empty()) {
+		auto mainPlayer = players[0];
+		float px = mainPlayer->GetWorldX();
+		float py = mainPlayer->GetWorldY();
+
+		float dx = px - triggerX;
+		float dy = py - triggerY;
+		bool isInside = (dx * dx + dy * dy) <= (triggerRadius * triggerRadius);
+		if (isInside && !wasInTrigger) {
+
+			auto originalCamPos = camera.GetPosition();
+			float originalZoom = camera.GetZoom();
+			float originalRectRotation = rect->GetLocalRotation();
+			float chestX = rect->GetWorldX();
+			float chestY = rect->GetWorldY();
+
+			// Cutscene
+			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, chestX, chestY));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, 2.0f, 1.5f));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::RotateCommand>(rect, rect->GetLocalRotation() + 360.0f, 180.0f));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, originalZoom, 2.0f));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::RotateCommand>(rect, originalRectRotation, 180.0f));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, originalCamPos.x, originalCamPos.y));
+		}
+
+		wasInTrigger = isInside;
+	}
+
 	camera.Update();
 	commandBuffer.Update(deltaTime);
 	for (auto& player : players) {
@@ -120,6 +155,16 @@ void MainScene::Draw(unsigned long long deltaTime)
 		textureRec->Draw(camera, deltaTime);
 		textureRec->End();
 		rect->Draw(deltaTime);
+		dev->DrawEllipse(
+			camera,
+			170.0f, 170.0f,
+			40.0f, 40.0f,  
+			0.0f,         
+			1.0f, 1.0f,    
+			20.0f, 20.0f,   
+			0x880000FF,   
+			true
+		);
 		for (auto& player : players) player->Draw(deltaTime);
 		fontSpriteArial->Begin();
 		fontSpriteArial->Draw(camera, deltaTime);
