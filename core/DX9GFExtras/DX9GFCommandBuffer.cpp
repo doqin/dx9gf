@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFCommandBuffer.h"
 
 void DX9GF::CommandBuffer::PushCommand(std::shared_ptr<ICommand> command)

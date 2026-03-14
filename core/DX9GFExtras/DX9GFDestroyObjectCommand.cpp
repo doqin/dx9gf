@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFDestroyObjectCommand.h"
 
 void DX9GF::DestroyObjectCommand::Execute(unsigned long long deltaTime)

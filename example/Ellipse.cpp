@@ -1,4 +1,5 @@
-﻿#include "Ellipse.h"
+#include "pch.h"
+#include "Ellipse.h"
 
 void GO::Ellipse::Update(unsigned long long deltaTime)
 {

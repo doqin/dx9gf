@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFInputManager.h"
 #include <stdexcept>
 #include <DxErr.h>

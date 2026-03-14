@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFFont.h"
 #include <DxErr.h>
 #include <stdexcept>

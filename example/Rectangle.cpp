@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Rectangle.h"
 
 std::weak_ptr<DX9GF::RectangleCollider> GO::Rectangle::GetCollider()

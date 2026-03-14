@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFIGameObject.h"
 
 DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager) : transformManager(transformManager)
@@ -18,7 +19,8 @@ DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager
 
 DX9GF::IGameObject::~IGameObject()
 {
-    this->transformManager.lock()->DestroyTransform(this->GetTransformHandle());
+    auto lock = this->transformManager.lock();
+    if (lock) lock->DestroyTransform(this->GetTransformHandle());
 }
 
 bool DX9GF::IGameObject::operator==(const IGameObject& other) const

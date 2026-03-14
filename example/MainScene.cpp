@@ -1,11 +1,9 @@
-﻿#include "MainScene.h"
+#include "pch.h"
+#include "MainScene.h"
 #include <DX9GFUtils.h>
 #include "DX9GFGraphicsDevice.h"
 #include "DX9GFSceneManager.h"
-#include "SubScene.h"
 #include "resource.h"
-#include "taskflow/taskflow.hpp"
-#include "taskflow/algorithm/for_each.hpp"
 
 void MainScene::Init()
 {
@@ -34,7 +32,6 @@ void MainScene::Init()
 	colorRec = std::make_shared<DX9GF::StaticSprite>(whiteTexture.get());
 	textureRec = std::make_shared<DX9GF::StaticSprite>(dawgTexture.get());
 	auto app = DX9GF::Application::GetInstance();
-	game->GetSceneManager()->PushScene(new SubScene(game, app->GetScreenWidth(), app->GetScreenHeight()));
 	transformManager->RebuildHierarchy();
 }
 
@@ -59,6 +56,9 @@ void MainScene::Update(unsigned long long deltaTime)
 		if (inputManager->KeyPress(DIK_UP)) cameraYDir -= 1;
 		if (inputManager->KeyPress(DIK_DOWN)) cameraYDir += 1;
 		if (inputManager->KeyDown(DIK_SPACE)) audioManager->Play("ALOVU");
+		if (inputManager->KeyPress(DIK_LCONTROL) && inputManager->KeyDown(DIK_S)) {
+			game->GetSaveManager()->Save("./Save/temp.sav");
+		}
 
 		if (cameraXDir != 0 || cameraYDir != 0) {
 			auto cameraPos = camera.GetPosition();
@@ -129,6 +129,47 @@ void MainScene::Update(unsigned long long deltaTime)
 
 void MainScene::Dispose()
 {
+}
+
+std::string MainScene::GetSaveID() const
+{
+	return "MainScene";
+}
+
+void MainScene::GenerateSaveData(nlohmann::json& outData)
+{
+	std::vector<nlohmann::json> playerData;
+	for (auto& player : players) {
+		nlohmann::json data;
+		player->GenerateSaveData(data);
+		playerData.push_back(data);
+	}
+	outData["playerData"] = playerData;
+	nlohmann::json cameraData;
+	auto cameraPosition = camera.GetPosition();
+	cameraData["position"] = { cameraPosition.x, cameraPosition.y };
+	cameraData["zoom"] = camera.GetZoom();
+	outData["cameraData"] = cameraData;
+}
+
+void MainScene::RestoreSaveData(const nlohmann::json& inData)
+{
+	players.clear();
+	if (auto playerData = inData["playerData"]; playerData.is_array()) {
+		for (auto& data : playerData) {
+			players.push_back(std::make_shared<GO::Player>(transformManager));
+			players.back()->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, colliderManager);
+			players.back()->RestoreSaveData(data);
+		}
+		transformManager->RebuildHierarchy();
+	}
+	if (inData.contains("cameraData")) {
+		auto& cameraData = inData["cameraData"];
+		auto& cameraPosition = cameraData["position"];
+		auto& cameraZoom = cameraData["zoom"];
+		camera.SetPosition(cameraPosition[0], cameraPosition[1]);
+		camera.SetZoom(cameraZoom);
+	}
 }
 
 void MainScene::Draw(unsigned long long deltaTime)

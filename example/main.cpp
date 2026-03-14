@@ -1,4 +1,5 @@
-﻿#include <Windows.h>
+#include "pch.h"
+#include <Windows.h>
 #include "DX9GF.h"
 #include "ExampleGame.h"
 #include <format>
@@ -15,9 +16,10 @@ int WINAPI WinMain(
 	try {
 		app->Init(hInstance, L"Example game", 620, 480);
 		// Create your game that interfaces with IGame
-		ExampleGame game(app->GetHWnd(), 620, 480);
+		DX9GF::SaveManager saveManager;
+		std::shared_ptr<ExampleGame> game = std::make_shared<ExampleGame>(app->GetHWnd(), 620, 480, &saveManager);
 		// Attach your game to the application
-		app->AttachGame(&game);
+		app->AttachGame(game.get());
 		// Run the application
 		app->Run();
 	}

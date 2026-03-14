@@ -17,3 +17,5 @@
 #include "DX9GFExtras/DX9GFRotateCommand.h"
 #include "DX9GFExtras/DX9GFSetCameraPositionCommand.h"
 #include "DX9GFExtras/DX9GFZoomCameraCommand.h"
+#include "DX9GFExtras/DX9GFSaveManager.h"
+#include "DX9GFExtras/DX9GFISaveable.h"

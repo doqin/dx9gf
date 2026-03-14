@@ -1,4 +1,5 @@
-﻿#include "DX9GFColliderManager.h"
+#include "pch.h"
+#include "DX9GFColliderManager.h"
 #include "taskflow/taskflow.hpp"
 #include "taskflow/algorithm/for_each.hpp"
 #include <mutex>
@@ -38,7 +39,7 @@ namespace DX9GF {
         tf::Executor executor;
         tf::Taskflow taskflow;
         taskflow.for_each(colliders.begin(), colliders.end(), [&](std::shared_ptr<ICollider> other) {
-            // Bỏ qua chính nó
+            // B? qua ch�nh n�
             if (other == target) {
                 return;
             }
@@ -49,7 +50,7 @@ namespace DX9GF {
                 x = finalX;
                 y = finalY;
             }
-            // Kiểm tra va chạm và lấy vị trí đã được điều chỉnh (nếu có)
+            // Ki?m tra va ch?m v� l?y v? tr� d� du?c di?u ch?nh (n?u c�)
             auto result = target->IsIntersecting(other, x, y);
             if (result.has_value()) {
                 auto& [correctedX, correctedY] = result.value();
@@ -95,13 +96,13 @@ namespace DX9GF {
                 dy = finalDy;
             }
 
-            // Xử lý riêng trục X
+            // X? l� ri�ng tr?c X
             if (auto pos = target->IsIntersecting(other, currentX + dx, currentY); pos.has_value()) {
                 auto& [correctedX, correctedY] = pos.value();
                 finalDx = correctedX - currentX;
             }
 
-            // Xử lý riêng trục Y
+            // X? l� ri�ng tr?c Y
             if (auto pos = target->IsIntersecting(other, currentX, currentY + dy); pos.has_value()) {
                 auto& [correctedX, correctedY] = pos.value();
                 finalDy = correctedY - currentY;

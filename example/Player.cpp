@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Player.h"
 #include "resource.h"
 #include <memory>
@@ -7,6 +8,7 @@ GO::Player::~Player()
 	if (colliderManager && collider) {
 		colliderManager->Remove(collider);
 	}
+	playerCount--;
 }
 
 void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::CommandBuffer* commandBuffer, DX9GF::Camera* camera, std::shared_ptr<DX9GF::ColliderManager> colliderManager)
@@ -82,4 +84,24 @@ void GO::Player::Draw(unsigned long long deltaTime)
 			false
 		);
 	}
+}
+
+std::string GO::Player::GetSaveID() const
+{
+	return "Player" + std::to_string(playerCount);
+}
+
+void GO::Player::GenerateSaveData(nlohmann::json& outData)
+{
+	outData["position"] = { GetWorldX(), GetWorldY() };
+	outData["rotation"] = GetWorldRotation();
+}
+
+void GO::Player::RestoreSaveData(const nlohmann::json& inData)
+{
+	if (inData.contains("position")) {
+		SetLocalX(inData["position"][0]);
+		SetLocalY(inData["position"][1]);
+	}
+	if (inData.contains("rotation")) SetLocalRotation(inData["rotation"]);
 }

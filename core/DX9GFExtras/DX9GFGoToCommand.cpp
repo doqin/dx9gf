@@ -1,4 +1,5 @@
-﻿#include "DX9GFGoToCommand.h"
+#include "pch.h"
+#include "DX9GFGoToCommand.h"
 #include <cmath>
 
 namespace DX9GF {
@@ -8,7 +9,7 @@ namespace DX9GF {
 
 	void GoToCommand::Execute(unsigned long long deltaTime) {
 		auto obj = targetObject.lock();
-		// Nếu object đã bị xóa giữa chừng, kết thúc lệnh luôn để tránh kẹt Cutscene
+		// N?u object d� b? x�a gi?a ch?ng, k?t th�c l?nh lu�n d? tr�nh k?t Cutscene
 		if (!obj) {
 			MarkFinished();
 			return;

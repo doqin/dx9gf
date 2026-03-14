@@ -1,6 +1,6 @@
+#include "pch.h"
 #include "DX9GFTransformManager.h"
-#include "taskflow/taskflow.hpp"
-#include "taskflow/algorithm/for_each.hpp"
+#include "pch.h"
 
 void DX9GF::TransformManager::ComputeTransform(int dataIndex) {
 	auto& t = transforms[dataIndex];

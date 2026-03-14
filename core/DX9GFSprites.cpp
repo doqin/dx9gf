@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFSprites.h"
 #include "DX9GFGraphicsDevice.h"
 #include <DxErr.h>
@@ -131,7 +132,7 @@ DX9GF::FontSprite::FontSprite(Font* font) : ISprite(font->GetGraphicsDevice()), 
 DX9GF::FontSprite::~FontSprite()
 {
 	if (p_src != nullptr) delete p_src;
-	if (p_sprite != nullptr) delete p_sprite;
+	if (p_sprite != nullptr) p_sprite->Release();
 }
 
 void DX9GF::FontSprite::SetText(std::wstring&& text)

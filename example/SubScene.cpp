@@ -1,9 +1,8 @@
-﻿#include "SubScene.h"
+#include "pch.h"
+#include "SubScene.h"
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
 #include <utility>
-#include "taskflow/taskflow.hpp"
-#include "taskflow/algorithm/for_each.hpp"
 
 void SubScene::Init()
 {
@@ -12,20 +11,20 @@ void SubScene::Init()
 	auto graphicsDevice = game->GetGraphicsDevice();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 
-	//Khởi tạo ColliderManager
+	//Kh?i t?o ColliderManager
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 100, 100, 200, 200));
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 50, 200, -200, 200));
 	for (auto& rect : rects) {
-		//Truyền colliderManager thay vì &worldColliders
+		//Truy?n colliderManager thay v� &worldColliders
 		rect->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
 
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 100, 100, 0, 0));
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 200, 50, 0, -200));
 	for (auto& ellipse : ellipses) {
-		//Truyền colliderManager thay vì &worldColliders
+		//Truy?n colliderManager thay v� &worldColliders
 		ellipse->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
 
@@ -39,6 +38,9 @@ void SubScene::Update(unsigned long long deltaTime)
 	if (inputManager->KeyDown(DIK_F)) {
 		game->GetSceneManager()->GoToPrevious();
 		return; // return otherwise we get a use after free situation
+	}
+	if (inputManager->KeyPress(DIK_LCONTROL) && inputManager->KeyDown(DIK_S)) {
+		game->GetSaveManager()->Save("./Save/temp.sav");
 	}
 	tf::Executor executor;
 	tf::Taskflow taskflow;
@@ -82,5 +84,18 @@ void SubScene::Draw(unsigned long long deltaTime)
 }
 
 void SubScene::Dispose()
+{
+}
+
+std::string SubScene::GetSaveID() const
+{
+	return "SubScene";
+}
+
+void SubScene::GenerateSaveData(nlohmann::json& outData)
+{
+}
+
+void SubScene::RestoreSaveData(const nlohmann::json& inData)
 {
 }

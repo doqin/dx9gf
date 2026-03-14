@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFTexture.h"
 #include <DxErr.h>
 #include <Windows.h>
