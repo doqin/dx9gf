@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFICommand.h"
 
 void DX9GF::ICommand::MarkFinished()

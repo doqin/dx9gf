@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFRotateCommand.h"
 #include <cmath>
 

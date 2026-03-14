@@ -14,6 +14,8 @@ namespace DX9GF {
 		void Dispose();
 	public:
 		~SceneManager();
+		IScene* GetCurrentScene();
+		IScene* GetScene(size_t index);
 		void ChangeScene(IScene*);
 		void PushScene(IScene*);
 		void PopScene();
@@ -23,5 +25,6 @@ namespace DX9GF {
 		void GoToNext();
 		void GoToPrevious();
 		void GoToScene(size_t index);
+		size_t GetSceneCount() const;
 	};
 }

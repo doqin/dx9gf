@@ -1,4 +1,5 @@
-﻿#include "DX9GFZoomCameraCommand.h"
+#include "pch.h"
+#include "DX9GFZoomCameraCommand.h"
 #include <cmath>
 
 namespace DX9GF {

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFDebug.h"
 #include "DX9GFUtils.h"
 #include <algorithm>

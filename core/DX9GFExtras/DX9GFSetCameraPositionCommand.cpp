@@ -1,4 +1,5 @@
-﻿#include "DX9GFSetCameraPositionCommand.h"
+#include "pch.h"
+#include "DX9GFSetCameraPositionCommand.h"
 
 namespace DX9GF {
 	SetCameraPositionCommand::SetCameraPositionCommand(DX9GF::Camera* camera, float x, float y)

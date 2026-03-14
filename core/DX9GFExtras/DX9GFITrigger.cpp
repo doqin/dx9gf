@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFITrigger.h"
 #include "../DX9GFInputManager.h"
 

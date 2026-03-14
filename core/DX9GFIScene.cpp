@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFIScene.h"
 
 void DX9GF::IScene::Dispose()

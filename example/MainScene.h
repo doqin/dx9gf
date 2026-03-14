@@ -5,7 +5,7 @@
 #include "Player.h"
 #include "Rectangle.h"
 
-class MainScene : public DX9GF::IScene 
+class MainScene : public DX9GF::IScene, public DX9GF::ISaveable
 {
 private:
 	ExampleGame* game;
@@ -33,4 +33,9 @@ public:
 	void Draw(unsigned long long deltaTime) override;
 	void Update(unsigned long long deltaTime) override;
 	void Dispose() override;
+
+	// Inherited via ISaveable
+	std::string GetSaveID() const override;
+	void GenerateSaveData(nlohmann::json& outData) override;
+	void RestoreSaveData(const nlohmann::json& inData) override;
 };
