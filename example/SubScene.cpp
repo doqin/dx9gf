@@ -11,20 +11,17 @@ void SubScene::Init()
 	auto graphicsDevice = game->GetGraphicsDevice();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 
-	//Kh?i t?o ColliderManager
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 100, 100, 200, 200));
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 50, 200, -200, 200));
 	for (auto& rect : rects) {
-		//Truy?n colliderManager thay vì &worldColliders
 		rect->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
 
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 100, 100, 0, 0));
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 200, 50, 0, -200));
 	for (auto& ellipse : ellipses) {
-		//Truy?n colliderManager thay vì &worldColliders
 		ellipse->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
 
