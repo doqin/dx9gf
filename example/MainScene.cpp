@@ -56,8 +56,11 @@ void MainScene::Update(unsigned long long deltaTime)
 		if (inputManager->KeyPress(DIK_UP)) cameraYDir -= 1;
 		if (inputManager->KeyPress(DIK_DOWN)) cameraYDir += 1;
 		if (inputManager->KeyDown(DIK_SPACE)) audioManager->Play("ALOVU");
-		if (inputManager->KeyPress(DIK_LCONTROL) && inputManager->KeyDown(DIK_S)) {
-			game->GetSaveManager()->Save("./Save/temp.sav");
+		if (inputManager->KeyPress(DIK_LCONTROL)) {
+			if (inputManager->KeyDown(DIK_S)) {
+				game->GetSaveManager()->Save("./Save/temp.sav");
+			}
+			inputManager->ConsumeKey(DIK_S);
 		}
 
 		if (cameraXDir != 0 || cameraYDir != 0) {
