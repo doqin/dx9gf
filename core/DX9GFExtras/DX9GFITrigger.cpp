@@ -41,10 +41,10 @@ void DX9GF::ITrigger::Update(unsigned long long deltaTime)
 	if (hR) this->onHeldRight(this);
 
 	auto input = DX9GF::InputManager::GetInstance();
-	if (cL || hL) {
+	if (cL || isHeldLeft) {
 		input->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
 	}
-	if (cR || hR) {
+	if (cR || isHeldRight) {
 		input->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Right);
 	}
 }

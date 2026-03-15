@@ -13,6 +13,8 @@ private:
 	std::shared_ptr<DX9GF::ColliderManager> colliderManager;
 	std::vector<std::shared_ptr<GO::Rectangle>> rects;
 	std::vector<std::shared_ptr<GO::Ellipse>> ellipses;
+	std::shared_ptr<DX9GF::RectangleTrigger> rectTrigger1;
+	std::shared_ptr<DX9GF::RectangleTrigger> rectTrigger2;
 public:
 	SubScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;
