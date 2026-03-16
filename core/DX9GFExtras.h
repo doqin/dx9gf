@@ -19,3 +19,5 @@
 #include "DX9GFExtras/DX9GFZoomCameraCommand.h"
 #include "DX9GFExtras/DX9GFSaveManager.h"
 #include "DX9GFExtras/DX9GFISaveable.h"
+#include "DX9GFExtras/DX9GFPlaySoundCommand.h"
+#include "DX9GFExtras/DX9GFConcurrentCommand.h"
