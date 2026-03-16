@@ -11,20 +11,33 @@ void SubScene::Init()
 	auto graphicsDevice = game->GetGraphicsDevice();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 
-	//Kh?i t?o ColliderManager
+	rectTrigger1 = std::make_shared<DX9GF::RectangleTrigger>(transformManager, 150, 150, 200, 200);
+	rectTrigger1->Init(&camera);
+	rectTrigger1->SetOriginCenter();
+	rectTrigger1->SetOnHeldLeft([](DX9GF::ITrigger* t) {
+		auto input = DX9GF::InputManager::GetInstance();
+		t->SetLocalPosition(t->GetLocalX() + input->GetRelativeMouseX(), t->GetLocalY() + input->GetRelativeMouseY());
+		});
+
+	rectTrigger2 = std::make_shared<DX9GF::RectangleTrigger>(transformManager, 50, 200, 200, 200);
+	rectTrigger2->Init(&camera);
+	rectTrigger2->SetOriginCenter();
+	rectTrigger2->SetOnHeldLeft([](DX9GF::ITrigger* t) {
+		auto input = DX9GF::InputManager::GetInstance();
+		t->SetLocalPosition(t->GetLocalX() + input->GetRelativeMouseX(), t->GetLocalY() + input->GetRelativeMouseY());
+		});
+
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 
-	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 100, 100, 200, 200));
-	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 50, 200, -200, 200));
+	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 100, 100, -200, 200));
+	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 50, 200, -200, 60));
 	for (auto& rect : rects) {
-		//Truy?n colliderManager thay vì &worldColliders
 		rect->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
 
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 100, 100, 0, 0));
 	ellipses.push_back(std::make_shared<GO::Ellipse>(transformManager, 200, 50, 0, -200));
 	for (auto& ellipse : ellipses) {
-		//Truy?n colliderManager thay vì &worldColliders
 		ellipse->Init(game->GetGraphicsDevice(), &camera, colliderManager);
 	}
 
@@ -37,20 +50,19 @@ void SubScene::Update(unsigned long long deltaTime)
 	inputManager->ReadMouse(deltaTime);
 	if (inputManager->KeyDown(DIK_F)) {
 		game->GetSceneManager()->GoToPrevious();
-		return; // return otherwise we get a use after free situation
+		return;
 	}
 	if (inputManager->KeyPress(DIK_LCONTROL) && inputManager->KeyDown(DIK_S)) {
 		game->GetSaveManager()->Save("./Save/temp.sav");
 	}
-	tf::Executor executor;
-	tf::Taskflow taskflow;
-	taskflow.for_each(rects.begin(), rects.end(), [deltaTime](std::shared_ptr<GO::Rectangle> rect) {
+	if (rectTrigger2) rectTrigger2->Update(deltaTime);
+	if (rectTrigger1) rectTrigger1->Update(deltaTime);
+	for (auto& rect : rects) {
 		rect->Update(deltaTime);
-	});
-	taskflow.for_each(ellipses.begin(), ellipses.end(), [deltaTime](std::shared_ptr<GO::Ellipse> ellipse) {
+	}
+	for (auto& ellipse : ellipses) {
 		ellipse->Update(deltaTime);
-	});
-	executor.run(taskflow).wait();
+	}
 	transformManager->UpdateAll();
 	camera.Update();
 }
@@ -78,6 +90,20 @@ void SubScene::Draw(unsigned long long deltaTime)
 		for (auto& ellipse : ellipses) {
 			ellipse->Draw(deltaTime);
 		}
+
+		dev->DrawRectangle(camera,
+			rectTrigger1->GetWorldX(), rectTrigger1->GetWorldY(),
+			rectTrigger1->GetWidth(), rectTrigger1->GetHeight(),
+			rectTrigger1->GetWorldRotation(), rectTrigger1->GetWorldScaleX(), rectTrigger1->GetWorldScaleY(),
+			rectTrigger1->GetOriginX(), rectTrigger1->GetOriginY(),
+			0xAA00FF00, false);
+
+		dev->DrawRectangle(camera,
+			rectTrigger2->GetWorldX(), rectTrigger2->GetWorldY(),
+			rectTrigger2->GetWidth(), rectTrigger2->GetHeight(),
+			rectTrigger2->GetWorldRotation(), rectTrigger2->GetWorldScaleX(), rectTrigger2->GetWorldScaleY(),
+			rectTrigger2->GetOriginX(), rectTrigger2->GetOriginY(),
+			0xAA0000FF, false);
 		dev->EndDraw();
 	}
 	dev->Present();

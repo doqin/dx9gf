@@ -6,8 +6,7 @@ namespace {
 	bool IsClickedButton(DX9GF::ITrigger* trigger, unsigned long long deltaTime, DX9GF::InputManager::MouseButton button)
 	{
 		auto input = DX9GF::InputManager::GetInstance();
-		return trigger->IsHovering(deltaTime)
-			&& input->MouseDown(button);
+		return trigger->IsHovering(deltaTime) && input->MouseDown(button);
 	}
 
 	bool IsHeldButton(DX9GF::ITrigger* trigger, unsigned long long deltaTime, DX9GF::InputManager::MouseButton button, bool& isHeld)
@@ -30,17 +29,23 @@ void DX9GF::ITrigger::Update(unsigned long long deltaTime)
 	if (IsHovering(deltaTime)) {
 		this->onHover(this);
 	}
-	if (IsClickedLeft(deltaTime)) {
-		this->onClickLeft(this);
+
+	bool cL = IsClickedLeft(deltaTime);
+	bool cR = IsClickedRight(deltaTime);
+	bool hL = IsHeldLeft(deltaTime);
+	bool hR = IsHeldRight(deltaTime);
+
+	if (cL) this->onClickLeft(this);
+	if (cR) this->onClickRight(this);
+	if (hL) this->onHeldLeft(this);
+	if (hR) this->onHeldRight(this);
+
+	auto input = DX9GF::InputManager::GetInstance();
+	if (cL || isHeldLeft) {
+		input->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
 	}
-	if (IsClickedRight(deltaTime)) {
-		this->onClickRight(this);
-	}
-	if (IsHeldLeft(deltaTime)) {
-		this->onHeldLeft(this);
-	}
-	if (IsHeldRight(deltaTime)) {
-		this->onHeldRight(this);
+	if (cR || isHeldRight) {
+		input->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Right);
 	}
 }
 
