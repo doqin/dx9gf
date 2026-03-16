@@ -48,6 +48,23 @@ void MainScene::Update(unsigned long long deltaTime)
 			transformManager->RebuildHierarchy();
 		}
 
+		if (inputManager->KeyDown(DIK_X)) {
+			auto originalCamPos = camera.GetPosition();
+			float originalZoom = camera.GetZoom();
+			float originalRectRotation = rect->GetLocalRotation();
+
+			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, 0.0f, 0.0f));
+			commandBuffer.StackCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, 0.5f, 2.0f));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::PlaySoundCommand>("ALOVU"));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, rect->GetWorldX(), rect->GetWorldY()));
+			commandBuffer.StackCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, 3.0f, 3.0f));
+			commandBuffer.StackCommand(std::make_shared<DX9GF::RotateCommand>(rect, originalRectRotation + 720.0f, 360.0f));
+			commandBuffer.StackCommand(std::make_shared<DX9GF::PlaySoundCommand>("ALOVU"));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, originalCamPos.x, originalCamPos.y));
+			commandBuffer.StackCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, originalZoom, 2.0f));
+			commandBuffer.StackCommand(std::make_shared<DX9GF::RotateCommand>(rect, originalRectRotation, 360.0f));
+		}
+
 		float cameraXDir = 0;
 		float cameraYDir = 0;
 		const float cameraVelocity = 200;

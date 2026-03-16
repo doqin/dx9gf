@@ -242,6 +242,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFConcurrentCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -282,6 +283,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFPlaySoundCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleCollider.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
@@ -366,6 +368,7 @@
       <DeploymentContent>false</DeploymentContent>
     </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFConcurrentCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFGoToCommand.h" />
@@ -377,6 +380,7 @@
     <ClInclude Include="DX9GFExtras\DX9GFITrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFMap.h" />
     <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFPlaySoundCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRotateCommand.h" />
