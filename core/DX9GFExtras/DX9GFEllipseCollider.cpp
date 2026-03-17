@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFEllipseCollider.h"
 #include "DX9GFRectangleCollider.h"
 #include <algorithm>

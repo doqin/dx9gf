@@ -160,6 +160,9 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <AdditionalIncludeDirectories>../includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -185,6 +188,9 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <AdditionalIncludeDirectories>../includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <Link>
@@ -216,35 +222,141 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DX9GFApplication.cpp" />
-    <ClCompile Include="DX9GFCamera.cpp" />
-    <ClCompile Include="DX9GFDebug.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFCommandBuffer.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFEllipseCollider.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFICollider.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFITrigger.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFJobSystem.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFMap.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFMapLayer.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFRectangleCollider.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFThreadPool.cpp" />
-    <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp" />
-    <ClCompile Include="DX9GFFont.cpp" />
-    <ClCompile Include="DX9GFGraphicsDevice.cpp" />
-    <ClCompile Include="DX9GFIGame.cpp" />
-    <ClCompile Include="DX9GFInputManager.cpp" />
-    <ClCompile Include="DX9GFIScene.cpp" />
-    <ClCompile Include="DX9GFISprite.cpp" />
-    <ClCompile Include="DX9GFSceneManager.cpp" />
-    <ClCompile Include="DX9GFSprites.cpp" />
-    <ClCompile Include="DX9GFTexture.cpp" />
-    <ClCompile Include="DX9GFUtils.cpp" />
-    <ClCompile Include="DX9GFAudioManager.cpp" />
+    <ClCompile Include="DX9GFApplication.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFCamera.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFDebug.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFColliderManager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFCommandBuffer.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFConcurrentCommand.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFEllipseCollider.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFGoToCommand.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFICollider.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFIGameObject.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFITrigger.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFMap.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFMapLayer.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFPlaySoundCommand.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFRectangleCollider.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFRectangleTrigger.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFRotateCommand.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFSaveManager.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFSetCameraPositionCommand.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFZoomCameraCommand.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFFont.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFGraphicsDevice.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFIGame.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFInputManager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFIScene.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFISprite.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFSceneManager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFSprites.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFTexture.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFUtils.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DX9GFAudioManager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9GF.h" />
@@ -252,21 +364,30 @@
     <ClInclude Include="DX9GFCamera.h" />
     <ClInclude Include="DX9GFDebug.h" />
     <ClInclude Include="DX9GFExtras.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFColliderManager.h">
+      <DeploymentContent>false</DeploymentContent>
+    </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFConcurrentCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseCollider.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFGoToCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFICollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFICommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFIGameObject.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFISaveable.h" />
     <ClInclude Include="DX9GFExtras\DX9GFITrigger.h" />
-    <ClInclude Include="DX9GFExtras\DX9GFJobSystem.h" />
     <ClInclude Include="DX9GFExtras\DX9GFMap.h" />
     <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFPlaySoundCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h" />
-    <ClInclude Include="DX9GFExtras\DX9GFThreadPool.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFRotateCommand.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFSaveManager.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFSetCameraPositionCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFTransformManager.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFZoomCameraCommand.h" />
     <ClInclude Include="DX9GFFont.h" />
     <ClInclude Include="DX9GFGraphicsDevice.h" />
     <ClInclude Include="DX9GFIGame.h" />

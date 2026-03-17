@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFISprite.h"
 
 D3DXMATRIX DX9GF::ISprite::GetTransformMatrix()

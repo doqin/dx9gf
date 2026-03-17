@@ -60,12 +60,6 @@
     <ClCompile Include="DX9GFExtras\DX9GFEllipseTrigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DX9GFExtras\DX9GFThreadPool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DX9GFExtras\DX9GFJobSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,7 +96,34 @@
     <ClCompile Include="DX9GFExtras\DX9GFICommand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFColliderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="DX9GFAudioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFGoToCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFRotateCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFSetCameraPositionCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFZoomCameraCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFSaveManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFPlaySoundCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFConcurrentCommand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -158,12 +179,6 @@
     <ClInclude Include="DX9GFExtras\DX9GFEllipseTrigger.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFThreadPool.h">
-      <Filter>Header Files\Extras</Filter>
-    </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFJobSystem.h">
-      <Filter>Header Files\Extras</Filter>
-    </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFTransformManager.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
@@ -191,17 +206,44 @@
     <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
-    <ClInclude Include="DX9GFExtras\DX9GFICommand.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h">
       <Filter>Header Files\Extras</Filter>
     </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFColliderManager.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
     <ClInclude Include="DX9GFAudioManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFGoToCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFICommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFRotateCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFSetCameraPositionCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFZoomCameraCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFISaveable.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFSaveManager.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFPlaySoundCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFConcurrentCommand.h">
+      <Filter>Header Files\Extras</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

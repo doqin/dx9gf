@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFRectangleTrigger.h"
 #include "../DX9GFInputManager.h"
 #include "../DX9GFUtils.h"

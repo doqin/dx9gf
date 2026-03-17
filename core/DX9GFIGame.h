@@ -20,7 +20,7 @@ namespace DX9GF {
 		SceneManager* sceneManager;
 	public:
 		IGame(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : hwnd(hwnd), SCREEN_WIDTH(screenWidth), SCREEN_HEIGHT(screenHeight) {}
-		~IGame();
+		virtual ~IGame();
 
 		HWND GetHwnd() const;
 		GraphicsDevice* GetGraphicsDevice();

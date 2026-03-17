@@ -30,6 +30,8 @@ namespace DX9GF {
 
 		char keys[256];
 		char keysBuffer[256];
+		bool consumedKeys[256] = { false };
+		bool consumedMouseButtons[4] = { false };
 		int lastKeyPressed = -1;
 		int lastBufferPressed = -1;
 		int lastMouseButtonPressed = -1;
@@ -45,6 +47,8 @@ namespace DX9GF {
 	public:
 		static InputManager* GetInstance();
 		void Init(HWND, HINSTANCE);
+		void ConsumeKey(int DIKey);
+		void ConsumeMouseButton(MouseButton button);
 		void ReadKeyboard(unsigned long long deltaTime);
 		bool KeyPress(int DIKey);
 		bool KeyDown(int DIKey);

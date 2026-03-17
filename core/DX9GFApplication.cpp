@@ -1,4 +1,5 @@
-﻿#include "DX9GFApplication.h"
+#include "pch.h"
+#include "DX9GFApplication.h"
 #include <stdexcept>
 #include "DX9GFFont.h"
 #include "DX9GFInputManager.h"
@@ -52,19 +53,19 @@ void DX9GF::Application::Init(HINSTANCE hInstance, std::wstring appTitle, UINT s
 	RECT windowRect = { 0, 0, static_cast<LONG>(screenWidth), static_cast<LONG>(screenHeight) };
 	AdjustWindowRect(&windowRect, WS_VISIBLE | WS_OVERLAPPEDWINDOW, FALSE);
 
-	// Tạo một cửa sổ
+	// T?o m?t c?a s?
 	hwnd = CreateWindow(
 		appTitle.c_str(),
 		appTitle.c_str(),
 		WS_VISIBLE | WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		windowRect.right - windowRect.left, // chiều rộng
-		windowRect.bottom - windowRect.top, // chiều cao
-		NULL, // cửa sổ cha
+		windowRect.right - windowRect.left, // chi?u r?ng
+		windowRect.bottom - windowRect.top, // chi?u cao
+		NULL, // c?a s? cha
 		NULL, // menu
 		hInstance, // instance
-		NULL // Các tham số cửa sổ
+		NULL // C�c tham s? c?a s?
 	);
 
 	if (!hwnd) {

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFMapLayer.h"
 #include "DX9GFMap.h"
 #include "tmxlite/TileLayer.hpp"
