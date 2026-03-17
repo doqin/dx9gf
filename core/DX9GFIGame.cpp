@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFIGame.h"
 #include "DX9GFSceneManager.h"
 #include "DX9GFGraphicsDevice.h"

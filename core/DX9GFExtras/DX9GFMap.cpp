@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFMap.h"
 #include "../DX9GFUtils.h"
 

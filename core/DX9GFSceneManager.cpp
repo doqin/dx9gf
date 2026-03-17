@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFSceneManager.h"
 #include "DX9GFIScene.h"
 #include <stdexcept>
@@ -6,6 +7,15 @@
 DX9GF::SceneManager::~SceneManager()
 {
 	Dispose();
+}
+
+DX9GF::IScene* DX9GF::SceneManager::GetCurrentScene()
+{
+	return scenes[index];
+}
+
+DX9GF::IScene* DX9GF::SceneManager::GetScene(size_t index) {
+	return scenes[index];
 }
 
 void DX9GF::SceneManager::ChangeScene(IScene* scene)
@@ -80,4 +90,9 @@ void DX9GF::SceneManager::Dispose()
 	while (!scenes.empty()) {
 		PopScene();
 	}
+}
+
+size_t DX9GF::SceneManager::GetSceneCount() const
+{
+	return scenes.size();
 }

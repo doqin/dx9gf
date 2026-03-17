@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFCamera.h"
 
 DX9GF::Camera::Camera(int screenWidth, int screenHeight) : screenWidth(screenWidth), screenHeight(screenHeight), position(0.0f, 0.0f), rotation(0.0f), zoom(1.0f), needUpdate(true)

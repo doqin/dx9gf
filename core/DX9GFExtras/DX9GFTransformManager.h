@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include "DX9GFJobSystem.h"
 namespace DX9GF {
 	constexpr auto NO_PARENT = -1;
 
@@ -42,7 +41,7 @@ namespace DX9GF {
 
 		void ComputeTransform(int index);
 	public:
-		void UpdateAll(JobSystem& js);
+		void UpdateAll();
 		void RebuildHierarchy();
 		TransformData& GetTransform(size_t index);
 		void ValidateSlotIndexing(size_t slotIdx);

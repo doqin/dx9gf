@@ -1,4 +1,5 @@
-﻿#include "DX9GFAudioManager.h"
+#include "pch.h"
+#include "DX9GFAudioManager.h"
 
 
 bool DX9GF::LoadWavFromResource(int resourceID, DX9GF::SoundBuffer& out_audio)

@@ -38,7 +38,7 @@ namespace GO {
 			width(width),
 			height(height) {}
 		std::weak_ptr<DX9GF::RectangleCollider> GetCollider();
-		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::shared_ptr<DX9GF::ICollider>>* worldColliders);
+		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::shared_ptr<DX9GF::ColliderManager> colliderManager);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
 		void Dispose();

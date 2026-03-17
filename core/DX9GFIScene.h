@@ -12,7 +12,7 @@ namespace DX9GF {
 		virtual void Dispose();
 	public:
 		IScene(int screenWidth, int screenHeight) : camera(screenWidth, screenHeight) {}
-		~IScene();
+		virtual ~IScene();
 		Camera& GetCamera();
 		/// <summary>
 		/// Initializes the object.

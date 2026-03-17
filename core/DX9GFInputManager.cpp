@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DX9GFInputManager.h"
 #include <stdexcept>
 #include <DxErr.h>
@@ -72,8 +73,23 @@ void DX9GF::InputManager::Init(HWND hWnd, HINSTANCE hInstance)
     }
 }
 
+void DX9GF::InputManager::ConsumeKey(int DIKey)
+{
+    if (DIKey >= 0 && DIKey < 256) {
+        consumedKeys[DIKey] = true;
+    }
+}
+
+void DX9GF::InputManager::ConsumeMouseButton(MouseButton button)
+{
+    if (button >= 0 && button < 4) {
+        consumedMouseButtons[button] = true;
+    }
+}
+
 void DX9GF::InputManager::ReadKeyboard(unsigned long long deltaTime)
 {
+    std::memset(consumedKeys, 0, sizeof(consumedKeys));
     keysDelta += deltaTime;
     if (keysDelta > KEYBOARD_LAST_PRESS_TIME) {
         ReleaseLastPressed();
@@ -90,6 +106,7 @@ void DX9GF::InputManager::ReadKeyboard(unsigned long long deltaTime)
 
 bool DX9GF::InputManager::KeyPress(int DIKey)
 {
+    if (consumedKeys[DIKey]) return false;
     if (keys[DIKey] & 0x80) {
         if (firstKeyCheck && keysBuffer[DIKey] != keys[DIKey]) {
             lastBufferPressed = lastKeyPressed;
@@ -104,11 +121,13 @@ bool DX9GF::InputManager::KeyPress(int DIKey)
 
 bool DX9GF::InputManager::KeyDown(int DIKey)
 {
+    if (consumedKeys[DIKey]) return false;
     return KeyPress(DIKey) && !CheckKeysBuffer(DIKey);
 }
 
 bool DX9GF::InputManager::KeyUp(int DIKey)
 {
+    if (consumedKeys[DIKey]) return false;
     return !KeyPress(DIKey) && CheckKeysBuffer(DIKey);
 }
 
@@ -121,6 +140,7 @@ void DX9GF::InputManager::ReleaseLastPressed()
 
 void DX9GF::InputManager::ReadMouse(unsigned long long deltaTime)
 {
+    std::memset(consumedMouseButtons, 0, sizeof(consumedMouseButtons));
     mouseDelta += deltaTime;
     if (mouseDelta > MOUSE_LAST_PRESS_TIME) {
         mouseDelta = 0;
@@ -149,6 +169,7 @@ void DX9GF::InputManager::ReadMouse(unsigned long long deltaTime)
 
 bool DX9GF::InputManager::MousePress(MouseButton button)
 {
+    if (consumedMouseButtons[button]) return false;
     if (diMouseState.rgbButtons[button] & 0x80) {
         UpdateMouseBuffer(button);
         return true;
@@ -158,11 +179,13 @@ bool DX9GF::InputManager::MousePress(MouseButton button)
 
 bool DX9GF::InputManager::MouseDown(MouseButton button)
 {
+    if (consumedMouseButtons[button]) return false;
     return MousePress(button) && !CheckMouseBuffer(button);
 }
 
 bool DX9GF::InputManager::MouseUp(MouseButton button)
 {
+    if (consumedMouseButtons[button]) return false;
     return !MousePress(button) && CheckMouseBuffer(button);
 }
 
