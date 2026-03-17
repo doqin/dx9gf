@@ -53,5 +53,6 @@ namespace DX9GF {
 			float localScaleX = 1, 
 			float localScaleY = 1);
 		void DestroyTransform(const TransformHandle& handle);
+		void SetParent(const TransformHandle& handle, uint32_t parentSlotIndex);
 	};
 }
