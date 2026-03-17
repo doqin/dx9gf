@@ -401,3 +401,5 @@ std::optional<std::tuple<float, float>> DX9GF::ICollider::IsIntersecting(std::we
         targetCurrentY + (otherCurrentY - correctedOtherY)
     );
 }
+
+bool DX9GF::ICollider::drawCollider = false;

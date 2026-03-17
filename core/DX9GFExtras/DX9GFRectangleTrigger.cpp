@@ -104,3 +104,30 @@ float DX9GF::RectangleTrigger::GetHeight() const
 {
     return height;
 }
+
+void DX9GF::RectangleTrigger::Draw(GraphicsDevice* graphicsDevice, Camera* camera)
+{
+	if (!ITrigger::drawTrigger) return;
+
+	float x = GetWorldX();
+	float y = GetWorldY();
+	float a = GetWorldRotation();
+	float sx = GetWorldScaleX();
+	float sy = GetWorldScaleY();
+	float ox = GetOriginX();
+	float oy = GetOriginY();
+	graphicsDevice->DrawRectangle(
+		*camera,
+		x,
+		y,
+		width,
+		height,
+		a,
+		sx,
+		sy,
+		ox,
+		oy,
+		0x550000FF,
+		false
+	);
+}

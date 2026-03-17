@@ -102,3 +102,4 @@ void DX9GF::ITrigger::SetOnHeldRight(std::function<void(ITrigger*)> onHeld)
 {
 	this->onHeldRight = onHeld;
 }
+bool DX9GF::ITrigger::drawTrigger = false;

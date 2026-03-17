@@ -53,6 +53,27 @@ bool DX9GF::EllipseTrigger::IsHovering(unsigned long long deltaTime)
 	return (nx * nx + ny * ny) <= (1.0f + floatEpsilon);
 }
 
+void DX9GF::EllipseTrigger::Draw(GraphicsDevice* graphicsDevice, Camera* camera)
+{
+	if (DX9GF::ITrigger::drawTrigger) {
+		graphicsDevice->DrawEllipse(
+			*camera,
+			GetWorldX(),
+			GetWorldY(),
+			width,
+			height,
+			GetWorldRotation(),
+			GetWorldScaleX(),
+			GetWorldScaleY(),
+			GetOriginX(),
+			GetOriginY(),
+			0x550000FF,
+			false
+		);
+	}
+
+}
+
 void DX9GF::EllipseTrigger::SetOrigin(float x, float y)
 {
 	originX = x;

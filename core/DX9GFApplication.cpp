@@ -1,5 +1,6 @@
 ﻿#include "DX9GFApplication.h"
 #include <stdexcept>
+#include "DX9GFFont.h"
 #include "DX9GFInputManager.h"
 #include "DX9GFAudioManager.h"
 DX9GF::Application* DX9GF::Application::instance = nullptr;
@@ -141,6 +142,8 @@ void DX9GF::Application::Run()
 			}
 		}
 	}
+	// Cleanup any fonts added at runtime
+	DX9GF::Font::RemoveAllFonts();
 	audioManager->Shutdown();
 }
 

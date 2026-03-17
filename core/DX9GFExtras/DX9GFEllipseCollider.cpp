@@ -292,3 +292,8 @@ float DX9GF::EllipseCollider::GetOriginY() const
 {
 	return originY;
 }
+
+void DX9GF::EllipseCollider::Draw(GraphicsDevice* graphicsDevice, Camera* camera)
+{
+
+}

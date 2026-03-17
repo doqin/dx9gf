@@ -1,4 +1,5 @@
 #include "DX9GFFont.h"
+#include <windows.h>
 #include <DxErr.h>
 #include <stdexcept>
 
@@ -25,4 +26,43 @@ ID3DXFont* DX9GF::Font::GetRawFont()
 DX9GF::GraphicsDevice* DX9GF::Font::GetGraphicsDevice()
 {
 	return graphicsDevice;
+}
+
+std::vector<std::wstring> DX9GF::Font::addedFonts;
+
+void DX9GF::Font::AddFont(std::wstring path)
+{
+	int result = AddFontResourceExW(
+		path.c_str(),
+		FR_PRIVATE,
+		0
+	);
+
+	if (result > 0)
+	{
+		addedFonts.push_back(path);
+	}
+}
+
+void DX9GF::Font::RemoveFont(std::wstring path)
+{
+	RemoveFontResourceExW(
+		path.c_str(),
+		FR_PRIVATE,
+		0
+	);
+}
+
+void DX9GF::Font::RemoveAllFonts()
+{
+	for (auto& font : addedFonts)
+	{
+		RemoveFontResourceExW(
+			font.c_str(),
+			FR_PRIVATE,
+			0
+		);
+	}
+
+	addedFonts.clear();
 }

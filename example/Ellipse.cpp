@@ -83,20 +83,21 @@ void GO::Ellipse::Draw(unsigned long long deltaTime)
 		0xFF00FF00, 
 		trigger->IsHeld(deltaTime)
 	);
-	graphicsDevice->DrawEllipse(
-		*camera, 
-		trigger->GetWorldX(), 
-		trigger->GetWorldY(), 
-		width, 
-		height, 
-		trigger->GetWorldRotation(), 
-		trigger->GetWorldScaleX(), 
-		trigger->GetWorldScaleY(), 
-		trigger->GetOriginX(), 
-		trigger->GetOriginY(), 
-		0x550000FF,
-		false
-	);
+	trigger->Draw(graphicsDevice, camera);
+	//graphicsDevice->DrawEllipse(
+	//	*camera, 
+	//	trigger->GetWorldX(), 
+	//	trigger->GetWorldY(), 
+	//	width, 
+	//	height, 
+	//	trigger->GetWorldRotation(), 
+	//	trigger->GetWorldScaleX(), 
+	//	trigger->GetWorldScaleY(), 
+	//	trigger->GetOriginX(), 
+	//	trigger->GetOriginY(), 
+	//	0x550000FF,
+	//	false
+	//);
 }
 
 void GO::Ellipse::Dispose()
