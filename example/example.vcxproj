@@ -169,7 +169,9 @@
     <ClInclude Include="SubScene.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\dx9gf1\example\Resources\Alo_Vu_a_Vu.png" />
     <Image Include="Resources\Actor1.png" />
+    <Image Include="Resources\Alo_Vu_a_Vu.png" />
     <Image Include="Resources\dawg.jpg">
       <DeploymentContent>true</DeploymentContent>
     </Image>
