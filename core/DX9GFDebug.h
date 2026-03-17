@@ -1,7 +1,7 @@
 #pragma once
 #include "DX9GFGraphicsDevice.h"
 #include "DX9GFFont.h"
-#include "DebugFont.h"
+#include "DX9GFSprites.h"
 #include <map>
 #include <string>
 #include <vector>
