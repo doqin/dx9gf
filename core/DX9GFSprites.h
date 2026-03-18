@@ -34,7 +34,7 @@ namespace DX9GF {
 	public:
 		AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate = 24);
 		~AnimatedSprite();
-
+		void SetFrame(unsigned int frameIndex);
 		void SetFrameRate(unsigned int frameRate);
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;
