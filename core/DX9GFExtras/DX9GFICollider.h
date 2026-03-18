@@ -1,5 +1,6 @@
 #pragma once
 #include "DX9GFIGameObject.h"
+#include "../DX9GFGraphicsDevice.h"
 #include <optional>
 #include <tuple>
 
@@ -18,5 +19,8 @@ namespace DX9GF {
 		virtual std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<ICollider> other, float newX, float newY) = 0;
 		static std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<RectangleCollider> targetCollider, std::weak_ptr<EllipseCollider> otherCollider, float newX, float newY);
 		static std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<EllipseCollider> targetCollider, std::weak_ptr<RectangleCollider> otherCollider, float newX, float newY);
+
+		static bool drawCollider;
+		virtual void Draw(GraphicsDevice* graphicsDevice, Camera* camera) {}
 	};
 }

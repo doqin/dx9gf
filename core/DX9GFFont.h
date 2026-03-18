@@ -1,5 +1,6 @@
 #pragma once
 #include "DX9GFGraphicsDevice.h"
+#include <vector>
 #include <string>
 namespace DX9GF {
 	class Font {
@@ -24,5 +25,14 @@ namespace DX9GF {
 		~Font();
 		ID3DXFont* GetRawFont();
 		GraphicsDevice* GetGraphicsDevice();
+
+	private:
+		static std::vector<std::wstring> addedFonts;
+	public:
+		static void AddFont(std::wstring path);
+		static void RemoveFont(std::wstring path);
+		static void RemoveAllFonts();
+
+
 	};
 }

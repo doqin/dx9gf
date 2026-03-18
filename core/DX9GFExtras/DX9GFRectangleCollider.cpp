@@ -319,3 +319,31 @@ float DX9GF::RectangleCollider::GetHeight() const
 {
     return height;
 }
+
+void DX9GF::RectangleCollider::Draw(GraphicsDevice* graphicsDevice, Camera* camera)
+{
+	if (!ICollider::drawCollider) return;
+
+	float x = GetWorldX();
+	float y = GetWorldY();
+	float a = GetWorldRotation();
+	float sx = GetWorldScaleX();
+	float sy = GetWorldScaleY();
+	float ox = GetOriginX();
+	float oy = GetOriginY();
+	graphicsDevice->DrawRectangle(
+		*camera,
+		x,
+		y,
+		width,
+		height,
+		a,
+		sx,
+		sy,
+		ox,
+		oy,
+		0xFF00FF00,
+		false
+	);
+
+}

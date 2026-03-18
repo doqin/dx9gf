@@ -23,6 +23,9 @@ void MainScene::Init()
 	fontSpriteArial->SetOrigin(16, 16);
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
+
+	DX9GF::Debug::Init(game->GetGraphicsDevice());
+
 	players.push_back(std::make_shared<GO::Player>(transformManager));
 	for (auto& player : players) {
 		player->Init(game->GetGraphicsDevice(), &commandBuffer, &camera, colliderManager);
@@ -86,7 +89,10 @@ void MainScene::Update(unsigned long long deltaTime)
 			cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
 			camera.SetPosition(cameraPos);
 		}
-
+		if (inputManager->KeyDown(DIK_F1))  DX9GF::ICollider::drawCollider = !DX9GF::ICollider::drawCollider;
+		if (inputManager->KeyDown(DIK_F2))  DX9GF::ITrigger::drawTrigger = !DX9GF::ITrigger::drawTrigger;
+		if (inputManager->KeyDown(DIK_F3))  DX9GF::Debug::drawGrid = !DX9GF::Debug::drawGrid;
+		if (inputManager->KeyDown(DIK_F4))  DX9GF::Debug::drawAxis = !DX9GF::Debug::drawAxis;
 		if (inputManager->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
 			auto [dX, dY] = inputManager->GetRelativeMousePos();
 			auto cameraPos = camera.GetPosition();
@@ -202,16 +208,21 @@ void MainScene::Draw(unsigned long long deltaTime)
 		auto width = app->GetScreenWidth();
 		auto height = app->GetScreenHeight();
 		map->Draw(camera);
-		DX9GF::Debug::DrawGrid(
-			dev,
-			camera,
-			0,
-			0,
-			width,
-			height,
-			32,
-			32,
-			0xFFFF0000);
+		if(DX9GF::Debug::drawGrid){
+			DX9GF::Debug::DrawGrid(
+				dev,
+				camera,
+				0,
+				0,
+				width,
+				height,
+				32,
+				32,
+				0xFFFF0000);
+		}
+		if (DX9GF::Debug::drawAxis) {
+			DX9GF::Debug::DrawAxis(camera, 3000, 32, 0xFFFF0000);
+		}
 		textureRec->Begin();
 		textureRec->Draw(camera, deltaTime);
 		textureRec->End();

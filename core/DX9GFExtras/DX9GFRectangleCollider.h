@@ -42,5 +42,7 @@ namespace DX9GF {
 		std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<ICollider> other, float newX, float newY) override;
 		float GetWidth() const;
 		float GetHeight() const;
+
+		void Draw(GraphicsDevice* graphicsDevice, Camera* camera) override;
 	};
 }

@@ -2,6 +2,7 @@
 #include "DX9GFIGameObject.h"
 #include <functional>
 #include "../DX9GFCamera.h"
+#include "../DX9GFGraphicsDevice.h"
 
 namespace DX9GF {
 	class ITrigger : public IGameObject {
@@ -37,5 +38,8 @@ namespace DX9GF {
 		void SetOnReleaseLeft(std::function<void(ITrigger*)> onRelease);
 		void SetOnReleaseRight(std::function<void(ITrigger*)> onRelease);
 		void Update(unsigned long long deltaTime);
+
+		static bool drawTrigger;
+		virtual void Draw(GraphicsDevice* graphicsDevice, Camera* camera) {}
 	};
 }

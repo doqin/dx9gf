@@ -123,3 +123,4 @@ void DX9GF::ITrigger::SetOnReleaseRight(std::function<void(ITrigger*)> onRelease
 {
 	this->onReleaseRight = onRelease;
 }
+bool DX9GF::ITrigger::drawTrigger = false;
