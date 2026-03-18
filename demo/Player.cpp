@@ -7,11 +7,14 @@ Demo::Player::~Player() {
 }
 
 void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderManager* colliderManager, DX9GF::Camera* camera) {
+	// External components
 	this->graphicsDevice = graphicsDevice;
 	this->colliderManager = colliderManager;
 	this->camera = camera;
+	// Create texture
 	spritesheet = std::make_shared<DX9GF::Texture>(graphicsDevice);
 	spritesheet->LoadTexture(IDB_PNG1);
+	// Create sprites
 	idleDown = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
 	idleDown->SetSrcRect({.left = 0, .top = 0, .right = 32, .bottom = 32});
 	idleUp = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
@@ -24,6 +27,7 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 	walkingUp = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 4));
 	walkingRight = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 8));
 	walkingLeft = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 12));
+	// Align sprites
 	idleDown->SetOrigin(16, 16);
 	idleUp->SetOrigin(16, 16);
 	idleRight->SetOrigin(16, 16);
@@ -37,6 +41,7 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 	walkingUp->SetFrameRate(12);
 	walkingRight->SetFrameRate(12);
 	walkingLeft->SetFrameRate(12);
+	// Create collider
 	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 8, 4, 0, 14);
 	collider->SetOriginCenter();
 	this->colliderManager->Add(collider);
@@ -44,19 +49,23 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 
 void Demo::Player::Update(unsigned long long deltaTime) {
 	auto inpMan = DX9GF::InputManager::GetInstance();
-	float xDir = 0;
-	float yDir = 0;
-	if (inpMan->KeyPress(DIK_D)) xDir += 1;
-	if (inpMan->KeyPress(DIK_A)) xDir -= 1;
-	if (inpMan->KeyPress(DIK_S)) yDir += 1;
-	if (inpMan->KeyPress(DIK_W)) yDir -= 1;
-	if (xDir == 1) state = State::Right;
-	if (xDir == -1) state = State::Left;
-	if (yDir == 1) state = State::Down;
-	if (yDir == -1) state = State::Up;
+	// Movement
+	D3DXVECTOR2 dir{0, 0};
+	if (inpMan->KeyPress(DIK_D)) dir.x += 1;
+	if (inpMan->KeyPress(DIK_A)) dir.x -= 1;
+	if (inpMan->KeyPress(DIK_S)) dir.y += 1;
+	if (inpMan->KeyPress(DIK_W)) dir.y -= 1;
+	if (dir.x == 1) state = State::Right;
+	if (dir.x == -1) state = State::Left;
+	if (dir.y == 1) state = State::Down;
+	if (dir.y == -1) state = State::Up;
+	D3DXVECTOR2 dirNorm;
+	D3DXVec2Normalize(&dirNorm, &dir);
+	bool isRunning = false;
 	if (inpMan->KeyPress(DIK_LSHIFT)) {
-		xDir *= SPRINT_MULTIPLIER;
-		yDir *= SPRINT_MULTIPLIER;
+		isRunning = true;
+		dirNorm.x *= SPRINT_MULTIPLIER;
+		dirNorm.y *= SPRINT_MULTIPLIER;
 		walkingDown->SetFrameRate(12 * SPRINT_MULTIPLIER);
 		walkingUp->SetFrameRate(12 * SPRINT_MULTIPLIER);
 		walkingRight->SetFrameRate(12 * SPRINT_MULTIPLIER);
@@ -68,7 +77,7 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 		walkingRight->SetFrameRate(12);
 		walkingLeft->SetFrameRate(12);
 	}
-	if (xDir != 0 || yDir != 0) isWalking = true;
+	if (dirNorm.x != 0 || dirNorm.y != 0) isWalking = true;
 	else {
 		isWalking = false;
 		walkingDown->SetFrame(0);
@@ -76,12 +85,32 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 		walkingRight->SetFrame(0);
 		walkingLeft->SetFrame(0);
 	}
-	if (xDir == 0 && yDir == 0) return;
-	float dX = xDir * VELOCITY * deltaTime / (float)1000;
-	float dY = yDir * VELOCITY * deltaTime / (float)1000;
+	// if (dirNorm.x == 0 && dirNorm.y == 0) return;
+	float dX = dirNorm.x * VELOCITY * deltaTime / 1000.f;
+	float dY = dirNorm.y * VELOCITY * deltaTime / 1000.f;
 	auto [finalDX, finalDY] = colliderManager->GetSlidingDeltas(collider, dX, dY);
 	auto [currentX, currentY] = GetLocalPosition();
 	SetLocalPosition(currentX + finalDX, currentY + finalDY);
+	// Camera movement
+	auto cameraPos = camera->GetPosition();
+	auto [playerPosX, playerPosY] = GetLocalPosition();
+	D3DXVECTOR2 vec{ playerPosX - cameraPos.x, playerPosY - cameraPos.y};
+	if (vec.x != 0 || vec.y != 0) {
+		if (std::sqrt(std::pow(vec.x, 2) + std::pow(vec.y, 2)) < CAMERA_SNAP_MARGIN) {
+			camera->SetPosition(playerPosX, playerPosY);
+		}
+		else {
+			D3DXVECTOR2 vecNorm;
+			D3DXVec2Normalize(&vecNorm, &vec);
+			float speedX = vecNorm.x * (std::min)(isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY, (CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f)) * deltaTime / 1000.f;
+			float speedY = vecNorm.y * (std::min)(isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY, (CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f)) * deltaTime / 1000.f;
+			camera->SetPosition(cameraPos.x + speedX, cameraPos.y + speedY);
+		}
+		cameraDeltaTime += deltaTime;
+	}
+	else {
+		cameraDeltaTime = 0;
+	}
 }
 
 void Demo::Player::Draw(unsigned long long deltaTime) {

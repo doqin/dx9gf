@@ -14,6 +14,7 @@ namespace Demo {
 		// States
 		State state = State::Down;
 		bool isWalking = false;
+		float cameraDeltaTime = 0;
 		// Sprites
 		std::shared_ptr<DX9GF::Texture> spritesheet;
 		std::shared_ptr<DX9GF::StaticSprite> idleDown;
@@ -33,6 +34,9 @@ namespace Demo {
 		// Constants
 		const float VELOCITY = 75;
 		const float SPRINT_MULTIPLIER = 1.5f;
+		const float CAMERA_VELOCITY = 25;
+		const float CAMERA_ACCELERATION = 50;
+		const float CAMERA_SNAP_MARGIN = 1.f;
 	public:
 		Player(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) { }
 		Player(
