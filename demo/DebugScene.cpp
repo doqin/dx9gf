@@ -11,6 +11,8 @@ void Demo::DebugScene::Init()
 	draggables.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	draggables.push_back(std::make_shared<IDraggable>(transformManager, 25, 60, -90, -100));
 	draggables.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
+	containers.push_back(std::make_shared<IContainer>(transformManager, 100, 30, -100, -100));
+	containers.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	transformManager->RebuildHierarchy();
 }
 

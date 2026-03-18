@@ -57,6 +57,7 @@ namespace Demo {
 		virtual void Update(unsigned long long deltaTime);
 		virtual void Draw(unsigned long long deltaTime);
 		virtual bool OnDrop(std::shared_ptr<IDraggable> other);
+		virtual bool OnHover(std::shared_ptr<IDraggable> other);
 		std::string GetID() const;
 		virtual size_t GetWidth() const;
 		virtual size_t GetHeight() const;
@@ -77,6 +78,7 @@ namespace Demo {
 		void RebuildHierarchy();
 		void Add(std::shared_ptr<IDraggable> obj);
 		void Remove(std::shared_ptr<IDraggable> obj);
+		void HoverDroppable(std::shared_ptr<IDraggable> obj);
 		void AttachDroppable(std::shared_ptr<IDraggable> obj);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);

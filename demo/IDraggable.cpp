@@ -72,6 +72,24 @@ void Demo::DraggableManager::Remove(std::shared_ptr<IDraggable> obj)
 	}
 }
 
+void Demo::DraggableManager::HoverDroppable(std::shared_ptr<IDraggable> obj)
+{
+	for (auto& [_, val] : objectMap) {
+		// skip current object
+		if (val.get() == obj.get()) continue;
+		// skip children
+		bool isChildren = false;
+		for (auto parent = val->GetParent(); parent.has_value(); parent = parent.value().lock()->GetParent()) {
+			if (auto lock = parent.value().lock(); lock.get() == obj.get()) {
+				isChildren = true;
+				break;
+			}
+		}
+		if (isChildren) continue;
+		if (val->OnHover(obj)) break;
+	}
+}
+
 void Demo::DraggableManager::AttachDroppable(std::shared_ptr<IDraggable> obj)
 {
 	for (auto& [_, val] : objectMap) {
@@ -159,7 +177,7 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 		1
 	);
 	trigger->Init(camera);
-	trigger->SetOriginCenter();
+	//trigger->SetOriginCenter();
 	trigger->SetOnHeldLeft([&](DX9GF::ITrigger* thisObj) {
 		auto parent = dynamic_pointer_cast<IDraggable>(thisObj->GetParent().value().lock());
 		if (parent->GetParent().has_value()) {
@@ -259,11 +277,24 @@ bool Demo::IDraggable::OnDrop(std::shared_ptr<IDraggable> other)
 {
 	auto [thisX, thisY] = this->GetWorldPosition();
 	auto [otherX, otherY] = other->GetWorldPosition();
-	if (otherX > thisX - dragAreaWidth / static_cast<float>(2)
-		&& otherX < thisX + dragAreaWidth / static_cast<float>(2)
-		&& otherY > thisY - dragAreaHeight / static_cast<float>(2)
-		&& otherY < thisY + dragAreaHeight / static_cast<float>(2)) {
+	if (otherX > thisX
+		&& otherX < thisX + dragAreaWidth
+		&& otherY > thisY
+		&& otherY < thisY + dragAreaHeight) {
 		other->SetParent(shared_from_this());
+		return true;
+	}
+	return false;
+}
+
+bool Demo::IDraggable::OnHover(std::shared_ptr<IDraggable> other)
+{
+	auto [thisX, thisY] = this->GetWorldPosition();
+	auto [otherX, otherY] = other->GetWorldPosition();
+	if (otherX > thisX
+		&& otherX < thisX + dragAreaWidth
+		&& otherY > thisY
+		&& otherY < thisY + dragAreaHeight) {
 		return true;
 	}
 	return false;
