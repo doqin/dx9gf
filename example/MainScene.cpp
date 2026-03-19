@@ -13,7 +13,7 @@ void MainScene::Init()
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
-	map->Create("./Resources/example.tmx");
+	map->Create(transformManager, colliderManager, "./Resources/example.tmx");
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
 	whiteTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	whiteTexture->CreatePlainTexture(0xFFFFFFFF, 500, 500);
@@ -227,6 +227,9 @@ void MainScene::Draw(unsigned long long deltaTime)
 		textureRec->Draw(camera, deltaTime);
 		textureRec->End();
 		rect->Draw(deltaTime);
+		for (auto& collider : map->GetColliders()) {
+			collider->Draw(game->GetGraphicsDevice(), &camera);
+		}
 		dev->DrawEllipse(
 			camera,
 			170.0f, 170.0f,
