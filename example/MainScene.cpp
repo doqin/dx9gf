@@ -24,6 +24,13 @@ void MainScene::Init()
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
 
+	DX9GF::Font::AddFont(L"./Resources/detemination.ttf");
+	fontdetemination = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Determination", 32);
+	fontSpritedetemination = std::make_shared<DX9GF::FontSprite>(fontdetemination.get());
+	fontSpritedetemination->SetOrigin(16, 16);
+	fontSpritedetemination->SetPosition(64, -128);
+	fontSpritedetemination->SetText(L"Hello world!!!!!");
+
 	DX9GF::Debug::Init(game->GetGraphicsDevice());
 
 	players.push_back(std::make_shared<GO::Player>(transformManager));
@@ -238,6 +245,11 @@ void MainScene::Draw(unsigned long long deltaTime)
 		fontSpriteArial->Begin();
 		fontSpriteArial->Draw(camera, deltaTime);
 		fontSpriteArial->End();
+
+		fontSpritedetemination->Begin();
+		fontSpritedetemination->Draw(camera, deltaTime);
+		fontSpritedetemination->End();
+
 		dev->EndDraw();
 	}
 
