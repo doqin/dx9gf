@@ -1,0 +1,35 @@
+Trạng thái thứ n 
+(với n=0 là Idle, n=1 là Hover, n=2 là Clicked):
+x_n = x_0 + n * (width + spacing)
+y_n = y_0
+
+
+Continue-button(x,y,w,h)
+Idle: (577,193,94,30)
+Hover: (577+1*(94+34),193,94,30)
+Clicked: (577+2*(94+34),193,94,30)
+
+NewGame-button
+Idle: (577,481,94,30)
+Hover:(577+1*(94+34),481,94,30)
+Clicked: (577+2*(94+34),481,94,30)
+
+LoadGame-button
+Idle: (577,513,94,30)
+Hover:(577+1*(94+34),513,94,30)
+Clicked: (577+2*(94+34),513,94,30)
+
+Option-button
+Idle: (577,65,78,30)
+Hover:(577+1*(78+50),65,78,30)
+Clicked: (577+2*(78+50),65,78,30)
+
+Credit-button
+Idle: (577,1,78,30)
+Hover:(577+1*(78+50),1,78,30)
+Clicked: (577+2*(78+50),1,78,30)
+
+Quit-button
+Idle: (385,449,62,30)
+Hover:(385+1*(62+2),449,62,30)
+Clicked: (385+2*(62+2),449,62,30)
