@@ -134,8 +134,12 @@ void DX9GF::Texture::LoadTexture(std::wstring filePath, UINT width, UINT height)
 		0,
 		D3DFMT_A8R8G8B8,
 		D3DPOOL_MANAGED,
-		D3DX_FILTER_LINEAR,
-		D3DX_FILTER_LINEAR,
+
+		D3DX_FILTER_NONE, //test fix blurred image 
+		D3DX_FILTER_NONE,
+
+		//D3DX_FILTER_LINEAR,
+		//D3DX_FILTER_LINEAR,
 		0,
 		nullptr,
 		nullptr,
