@@ -128,14 +128,22 @@ void DX9GF::Texture::LoadTexture(std::wstring filePath, UINT width, UINT height)
 	auto result = D3DXCreateTextureFromFileExW(
 		graphicsDevice->GetDevice(),
 		filePath.c_str(),
-		width,
-		height,
+
+		D3DX_DEFAULT_NONPOW2, //test fix original w,h
+		D3DX_DEFAULT_NONPOW2,
+
+		//width,
+		//height,
 		1,
 		0,
 		D3DFMT_A8R8G8B8,
 		D3DPOOL_MANAGED,
-		D3DX_FILTER_LINEAR,
-		D3DX_FILTER_LINEAR,
+
+		D3DX_FILTER_NONE, //test fix blurred image 
+		D3DX_FILTER_NONE,
+
+		//D3DX_FILTER_LINEAR,
+		//D3DX_FILTER_LINEAR,
 		0,
 		nullptr,
 		nullptr,
