@@ -38,6 +38,11 @@ DX9GF::TransformHandle DX9GF::IGameObject::GetTransformHandle() const
     return transformHandle;
 }
 
+std::weak_ptr<DX9GF::TransformManager> DX9GF::IGameObject::GetTransformManager()
+{
+    return transformManager;
+}
+
 void DX9GF::IGameObject::SetLocalX(float x)
 {
     auto lock = transformManager.lock();

@@ -13,48 +13,54 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Components">
+      <UniqueIdentifier>{a4781c0e-441f-4c61-a635-a446e9dd7457}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\World1">
+      <UniqueIdentifier>{fffef1c3-8feb-466e-a01c-8efcbbd39f95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shared">
+      <UniqueIdentifier>{ada9d79c-2bb0-4a78-af4e-e277f4e41710}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ExampleGame.cpp">
+    <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MainScene.cpp">
+    <ClCompile Include="DebugScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SubScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rectangle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ellipse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="IDraggable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="World1Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ExampleGame.h">
+    <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainScene.h">
+    <ClInclude Include="DebugScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SubScene.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="IContainer.h">
+      <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Rectangle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ellipse.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="IDraggable.h">
+      <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
@@ -62,53 +68,26 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="World1Scene.h">
+      <Filter>Header Files\World1</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\dawg.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\mario_full.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\spritesheet.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\Actor1.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\Alo_Vu_a_Vu.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\dx9gf1\example\Resources\Alo_Vu_a_Vu.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\example.tmx">
+    <None Include="uiter.aseprite">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\test.tsx">
+    <None Include="uiter-Sheet.aseprite">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="example.rc">
+    <Image Include="uiter-Sheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="demo.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Resource.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="Resources\ALOVU.wav">
-      <Filter>Resource Files</Filter>
-    </Media>
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Resources\determination.ttf">
-      <Filter>Resource Files</Filter>
-    </Font>
   </ItemGroup>
 </Project>

@@ -79,23 +79,11 @@ void GO::Ellipse::Draw(unsigned long long deltaTime)
 		width / 2,
 		height / 2,
 		0xFF00FF00, 
-		trigger->IsHeld(deltaTime)
+		true
 	);
 	trigger->Draw(graphicsDevice, camera);
-	//graphicsDevice->DrawEllipse(
-	//	*camera, 
-	//	trigger->GetWorldX(), 
-	//	trigger->GetWorldY(), 
-	//	width, 
-	//	height, 
-	//	trigger->GetWorldRotation(), 
-	//	trigger->GetWorldScaleX(), 
-	//	trigger->GetWorldScaleY(), 
-	//	trigger->GetOriginX(), 
-	//	trigger->GetOriginY(), 
-	//	0x550000FF,
-	//	false
-	//);
+	collider->Draw(graphicsDevice, camera);
+	
 }
 
 void GO::Ellipse::Dispose()

@@ -25,6 +25,7 @@ namespace DX9GF {
 		bool operator==(const IGameObject& other) const;
 		std::optional<std::weak_ptr<IGameObject>> GetParent() const;
 		TransformHandle GetTransformHandle() const;
+		std::weak_ptr<TransformManager> GetTransformManager();
 		void SetLocalX(float x);
 		void SetLocalY(float y);
 		void SetLocalPosition(float x, float y);

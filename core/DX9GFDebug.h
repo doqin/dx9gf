@@ -2,7 +2,6 @@
 #include "DX9GFGraphicsDevice.h"
 #include "DX9GFFont.h"
 #include "DX9GFSprites.h"
-#include "DX9GFApplication.h"
 #include <map>
 #include <string>
 #include <vector>

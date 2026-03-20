@@ -32,11 +32,16 @@ void DX9GF::ITrigger::Update(unsigned long long deltaTime)
 
 	bool cL = IsClickedLeft(deltaTime);
 	bool cR = IsClickedRight(deltaTime);
+	bool prevHeldLeft = isHeldLeft;
+	bool prevHeldRight = isHeldRight;
 	bool hL = IsHeldLeft(deltaTime);
 	bool hR = IsHeldRight(deltaTime);
+	
 
 	if (cL) this->onClickLeft(this);
 	if (cR) this->onClickRight(this);
+	if (prevHeldLeft && !hL) this->onReleaseLeft(this);
+	if (prevHeldRight && !hR) this->onReleaseRight(this);
 	if (hL) this->onHeldLeft(this);
 	if (hR) this->onHeldRight(this);
 
@@ -107,5 +112,15 @@ void DX9GF::ITrigger::SetOnHeldLeft(std::function<void(ITrigger*)> onHeld)
 void DX9GF::ITrigger::SetOnHeldRight(std::function<void(ITrigger*)> onHeld)
 {
 	this->onHeldRight = onHeld;
+}
+
+void DX9GF::ITrigger::SetOnReleaseLeft(std::function<void(ITrigger*)> onRelease)
+{
+	this->onReleaseLeft = onRelease;
+}
+
+void DX9GF::ITrigger::SetOnReleaseRight(std::function<void(ITrigger*)> onRelease)
+{
+	this->onReleaseRight = onRelease;
 }
 bool DX9GF::ITrigger::drawTrigger = false;

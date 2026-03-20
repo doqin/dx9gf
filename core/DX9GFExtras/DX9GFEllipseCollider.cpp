@@ -296,5 +296,19 @@ float DX9GF::EllipseCollider::GetOriginY() const
 
 void DX9GF::EllipseCollider::Draw(GraphicsDevice* graphicsDevice, Camera* camera)
 {
-
+	if (!drawCollider) return;
+	graphicsDevice->DrawEllipse(
+		*camera, 
+		GetWorldX(), 
+		GetWorldY(), 
+		width, 
+		height, 
+		GetWorldRotation(), 
+		GetWorldScaleY(), 
+		GetWorldScaleX(), 
+		GetOriginX(), 
+		GetOriginY(), 
+		0x550000FF,
+		false
+	);
 }

@@ -138,3 +138,8 @@ void DX9GF::TransformManager::DestroyTransform(const TransformHandle& handle)
 	slots[handle.slotIndex].isAlive = false;
 	freeSlots.push_back(handle.slotIndex);
 }
+
+void DX9GF::TransformManager::SetParent(const TransformHandle& handle, uint32_t parentSlotIndex)
+{
+	transforms[slots[handle.slotIndex].dataIndex].parentSlotIndex = parentSlotIndex;
+}

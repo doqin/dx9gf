@@ -8,7 +8,7 @@ namespace DX9GF {
 	class ITrigger : public IGameObject {
 	private:
 	protected:
-		Camera* camera;
+		Camera* camera = nullptr;
 		bool isHeldLeft = false;
 		bool isHeldRight = false;
 		std::function<void(ITrigger*)> onHover = [](ITrigger*) {};
@@ -16,6 +16,8 @@ namespace DX9GF {
 		std::function<void(ITrigger*)> onClickRight = [](ITrigger*) {};
 		std::function<void(ITrigger*)> onHeldLeft = [](ITrigger*) {};
 		std::function<void(ITrigger*)> onHeldRight = [](ITrigger*) {};
+		std::function<void(ITrigger*)> onReleaseLeft = [](ITrigger*) {};
+		std::function<void(ITrigger*)> onReleaseRight = [](ITrigger*) {};
 		ITrigger(std::weak_ptr<TransformManager> transformManager) : IGameObject(transformManager) {}
 		ITrigger(std::weak_ptr<TransformManager> transformManager, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY) {}
 		ITrigger(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<IGameObject> parent, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY) {}
@@ -33,6 +35,8 @@ namespace DX9GF {
 		void SetOnClickRight(std::function<void(ITrigger*)> onClick);
 		void SetOnHeldLeft(std::function<void(ITrigger*)> onHeld);
 		void SetOnHeldRight(std::function<void(ITrigger*)> onHeld);
+		void SetOnReleaseLeft(std::function<void(ITrigger*)> onRelease);
+		void SetOnReleaseRight(std::function<void(ITrigger*)> onRelease);
 		void Update(unsigned long long deltaTime);
 
 		static bool drawTrigger;

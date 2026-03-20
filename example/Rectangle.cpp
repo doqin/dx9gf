@@ -52,11 +52,9 @@ void GO::Rectangle::Update(unsigned long long deltaTime)
 
 void GO::Rectangle::Draw(unsigned long long deltaTime)
 {
-	graphicsDevice->DrawRectangle(*camera, GetWorldX(), GetWorldY(), width, height, GetWorldRotation(), GetWorldScaleX(), GetWorldScaleY(), width / 2, height / 2, 0xFFFF0000, trigger->IsHeld(deltaTime));
+	graphicsDevice->DrawRectangle(*camera, GetWorldX(), GetWorldY(), width, height, GetWorldRotation(), GetWorldScaleX(), GetWorldScaleY(), width / 2, height / 2, 0xFFFF0000, true);
 	trigger->Draw(graphicsDevice, camera);
-	//graphicsDevice->DrawRectangle(*camera, trigger->GetWorldX(), trigger->GetWorldY(), trigger->GetWidth(), trigger->GetHeight(), trigger->GetWorldRotation(), trigger->GetWorldScaleX(), trigger->GetWorldScaleY(), trigger->GetOriginX(), trigger->GetOriginY(), 0x550000FF, false);
 	collider->Draw(graphicsDevice, camera);
-	//graphicsDevice->DrawRectangle(*camera, collider->GetWorldX(), collider->GetWorldY(), collider->GetWidth(), collider->GetHeight(), collider->GetWorldRotation(), collider->GetWorldScaleX(), collider->GetWorldScaleY(), collider->GetOriginX(), collider->GetOriginY(), 0x5500FF00, false);
 }
 
 void GO::Rectangle::Dispose()

@@ -2,7 +2,7 @@
 #include "DX9GFMap.h"
 #include "../DX9GFUtils.h"
 
-void DX9GF::Map::Create(std::string pathToTmx)
+void DX9GF::Map::Create(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<ColliderManager> colliderManager, std::string pathToTmx)
 {
 	if (!map.load(pathToTmx)) {
 		throw std::invalid_argument("Could not load map file: " + pathToTmx);
@@ -25,6 +25,19 @@ void DX9GF::Map::Create(std::string pathToTmx)
 			layers.emplace_back(std::make_shared<MapLayer>(graphicsDevice));
 			layers.back()->Create(this, i); //just cos we're using C++14
 		}
+		if (mapLayers[i]->getType() == tmx::Layer::Type::Object)
+		{
+			const auto& layer = mapLayers[i]->getLayerAs<tmx::ObjectGroup>();
+			const auto& objects = layer.getObjects();
+			for (auto& object : objects) {
+				if (object.getShape() == tmx::Object::Shape::Rectangle) {
+					auto rect = object.getAABB();
+					std::shared_ptr<RectangleCollider> collider = std::make_shared<RectangleCollider>(transformManager, rect.width, rect.height, rect.left, rect.top);
+					colliders.push_back(collider);
+					colliderManager.lock()->Add(collider);
+				}
+			}
+		}
 	}
 }
 
@@ -43,4 +56,9 @@ std::vector<std::shared_ptr<DX9GF::Texture>>& DX9GF::Map::GetTextures()
 std::vector<std::shared_ptr<DX9GF::MapLayer>>& DX9GF::Map::GetLayers()
 {
 	return layers;
+}
+
+std::vector<std::shared_ptr<DX9GF::ICollider>>& DX9GF::Map::GetColliders()
+{
+	return colliders;
 }

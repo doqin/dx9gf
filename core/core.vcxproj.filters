@@ -218,5 +218,32 @@
     <ClInclude Include="DX9GFAudioManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFGoToCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFICommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFRotateCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFSetCameraPositionCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFZoomCameraCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFISaveable.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFSaveManager.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFPlaySoundCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
+    <ClInclude Include="DX9GFExtras\DX9GFConcurrentCommand.h">
+      <Filter>Header Files\Extras</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

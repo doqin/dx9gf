@@ -13,7 +13,7 @@ void MainScene::Init()
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
-	map->Create("./Resources/example.tmx");
+	map->Create(transformManager, colliderManager, "./Resources/example.tmx");
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
 	whiteTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	whiteTexture->CreatePlainTexture(0xFFFFFFFF, 500, 500);
@@ -96,7 +96,10 @@ void MainScene::Update(unsigned long long deltaTime)
 			cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
 			camera.SetPosition(cameraPos);
 		}
-
+		if (inputManager->KeyDown(DIK_F1))  DX9GF::ICollider::drawCollider = !DX9GF::ICollider::drawCollider;
+		if (inputManager->KeyDown(DIK_F2))  DX9GF::ITrigger::drawTrigger = !DX9GF::ITrigger::drawTrigger;
+		if (inputManager->KeyDown(DIK_F3))  DX9GF::Debug::drawGrid = !DX9GF::Debug::drawGrid;
+		if (inputManager->KeyDown(DIK_F4))  DX9GF::Debug::drawAxis = !DX9GF::Debug::drawAxis;
 		if (inputManager->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
 			auto [dX, dY] = inputManager->GetRelativeMousePos();
 			auto cameraPos = camera.GetPosition();
@@ -231,6 +234,9 @@ void MainScene::Draw(unsigned long long deltaTime)
 		textureRec->Draw(camera, deltaTime);
 		textureRec->End();
 		rect->Draw(deltaTime);
+		for (auto& collider : map->GetColliders()) {
+			collider->Draw(game->GetGraphicsDevice(), &camera);
+		}
 		dev->DrawEllipse(
 			camera,
 			170.0f, 170.0f,
