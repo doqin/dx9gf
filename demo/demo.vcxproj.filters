@@ -16,6 +16,12 @@
     <Filter Include="Header Files\Components">
       <UniqueIdentifier>{a4781c0e-441f-4c61-a635-a446e9dd7457}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\World1">
+      <UniqueIdentifier>{fffef1c3-8feb-466e-a01c-8efcbbd39f95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shared">
+      <UniqueIdentifier>{ada9d79c-2bb0-4a78-af4e-e277f4e41710}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -34,6 +40,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="World1Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextButton.cpp">
@@ -56,6 +68,33 @@
     <ClInclude Include="IDraggable.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="World1Scene.h">
+      <Filter>Header Files\World1</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="uiter.aseprite">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="uiter-Sheet.aseprite">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="uiter-Sheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="demo.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
     <ClInclude Include="IButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>

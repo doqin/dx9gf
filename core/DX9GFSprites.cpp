@@ -5,6 +5,13 @@
 #include <d3dx9.h>
 #include <stdexcept>
 
+static void ApplyPixelArtSamplerState(IDirect3DDevice9* device)
+{
+	device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+}
+
 DX9GF::StaticSprite::StaticSprite(Texture* texture) : ISprite(texture->GetGraphicsDevice()), texture(texture)
 {
 	HRESULT result = D3DXCreateSprite(graphicsDevice->GetDevice(), &p_sprite);
@@ -30,6 +37,7 @@ void DX9GF::StaticSprite::Begin()
 		std::string what = std::string(error, error + wcslen(error));
 		throw std::runtime_error(what);
 	}
+   ApplyPixelArtSamplerState(graphicsDevice->GetDevice());
 }
 
 void DX9GF::StaticSprite::Draw(const Camera& camera, unsigned long long deltaTime)
@@ -74,6 +82,11 @@ DX9GF::AnimatedSprite::~AnimatedSprite()
 	if (p_sprite != nullptr) p_sprite->Release();
 }
 
+void DX9GF::AnimatedSprite::SetFrame(unsigned int frameIndex)
+{
+	this->frame_index = frameIndex;
+}
+
 void DX9GF::AnimatedSprite::SetFrameRate(unsigned int frameRate)
 {
 	this->frameRate = frameRate;
@@ -88,6 +101,7 @@ void DX9GF::AnimatedSprite::Begin()
 		std::string what = std::string(error, error + wcslen(error));
 		throw std::runtime_error(what);
 	}
+   ApplyPixelArtSamplerState(graphicsDevice->GetDevice());
 }
 
 void DX9GF::AnimatedSprite::Draw(const Camera& camera, unsigned long long deltaTime)
@@ -156,6 +170,7 @@ void DX9GF::FontSprite::Begin()
 		std::string what = std::string(error, error + wcslen(error));
 		throw std::runtime_error(what);
 	}
+   ApplyPixelArtSamplerState(graphicsDevice->GetDevice());
 }
 
 void DX9GF::FontSprite::Draw(const Camera& camera, unsigned long long deltaTime)
