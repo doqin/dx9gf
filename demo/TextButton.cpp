@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "TextButton.h"
 
-DX9GF::cTextButton* DX9GF::cTextButton::SetText(std::string newText)
+Demo::TextButton* Demo::TextButton::SetText(std::string newText)
 {
 	this->text = newText;
 	return this;
 }
-DX9GF::cTextButton* DX9GF::cTextButton::SetBackgroundColors(D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled)
+Demo::TextButton* Demo::TextButton::SetBackgroundColors(D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled)
 {
 	this->idleBg = idle;
 	this->hoverBg = hover;
@@ -14,7 +14,7 @@ DX9GF::cTextButton* DX9GF::cTextButton::SetBackgroundColors(D3DXCOLOR idle, D3DX
 	this->disabledBg = disabled;
 	return this;
 }
-DX9GF::cTextButton* DX9GF::cTextButton::SetTextColors(DWORD idle, DWORD hover, DWORD click, DWORD disabled)
+Demo::TextButton* Demo::TextButton::SetTextColors(DWORD idle, DWORD hover, DWORD click, DWORD disabled)
 {
 	this->idleColor = idle;
 	this->hoverColor = hover;
@@ -23,7 +23,7 @@ DX9GF::cTextButton* DX9GF::cTextButton::SetTextColors(DWORD idle, DWORD hover, D
 	return this;
 }
 
-void DX9GF::cTextButton::Init(DX9GF::Camera* cam)
+void Demo::TextButton::Init(DX9GF::Camera* cam)
 {
 	this->trigger = std::make_shared<DX9GF::RectangleTrigger>
 		(
@@ -38,7 +38,7 @@ void DX9GF::cTextButton::Init(DX9GF::Camera* cam)
 	this->trigger->SetOnHeldLeft(this->callback);
 }
 
-void DX9GF::cTextButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::TextButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	D3DXCOLOR currentBgColor = idleBg;
 	DWORD currentTxtColor = idleColor;

@@ -3,19 +3,19 @@
 #include <DX9GF.h>
 #include "DX9GFTexture.h"
 #include <functional>
-namespace DX9GF
+namespace Demo
 {
-	class cIconButton : public IButton
+	class IconButton : public IButton
 	{
 	private:
 		std::shared_ptr<DX9GF::StaticSprite> sprite;
 		RECT buttonRects[3];
 	public:
-		cIconButton(std::shared_ptr<TransformManager> tm,
+		IconButton(std::shared_ptr<DX9GF::TransformManager> tm,
 			float x, float y, float w, float h,
 			std::shared_ptr<DX9GF::Texture> uiSheetTex, //contain button sheet
 			int startX, int startY, int imgW, int imgH, int spacing, //we need these 5 variables to calculate the button's coordinate
-			std::function<void(ITrigger*)> onClick)
+			std::function<void(DX9GF::ITrigger*)> onClick)
 			: IButton(tm, x, y, w, h)
 		{
 			if (uiSheetTex) {
@@ -33,7 +33,7 @@ namespace DX9GF
 			this->SetOnClicked(onClick);
 		}
 
-		cIconButton* ChangeSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing);
+		IconButton* ChangeSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing);
 		void Init(DX9GF::Camera* cam) override;
 		void Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
 		

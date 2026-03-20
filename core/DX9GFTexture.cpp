@@ -128,12 +128,8 @@ void DX9GF::Texture::LoadTexture(std::wstring filePath, UINT width, UINT height)
 	auto result = D3DXCreateTextureFromFileExW(
 		graphicsDevice->GetDevice(),
 		filePath.c_str(),
-
-		D3DX_DEFAULT_NONPOW2, //test fix original w,h
-		D3DX_DEFAULT_NONPOW2,
-
-		//width,
-		//height,
+		width,
+		height,
 		1,
 		0,
 		D3DFMT_A8R8G8B8,

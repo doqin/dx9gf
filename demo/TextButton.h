@@ -4,9 +4,9 @@
 #include <string>
 #include <DX9GF.h>
 #include <functional>
-namespace DX9GF
+namespace Demo
 {
-	class cTextButton : public IButton
+	class TextButton : public IButton
 	{
 	private:
 		std::string text;
@@ -17,10 +17,10 @@ namespace DX9GF
 		D3DXCOLOR idleBg, hoverBg, clickedBg, disabledBg;
 
 	public:
-		cTextButton(std::shared_ptr<TransformManager> tm,
+		TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
 			float x, float y, float w, float h,
-			std::string txtContent, Font* f,
-			std::function<void(ITrigger*)> onClick)
+			std::string txtContent, DX9GF::Font* f,
+			std::function<void(DX9GF::ITrigger*)> onClick)
 			: IButton(tm, x, y, w, h)
 		{
 
@@ -44,9 +44,10 @@ namespace DX9GF
 		}
 
 		//setters
-		cTextButton* SetText(std::string newText);
-		cTextButton* SetBackgroundColors(D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled = D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f));
-		cTextButton* SetTextColors(DWORD idle, DWORD hover, DWORD click, DWORD disabled = 0xFF888888);
+		
+		TextButton* SetText(std::string newText);
+		TextButton* SetBackgroundColors(D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled = D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f));
+		TextButton* SetTextColors(DWORD idle, DWORD hover, DWORD click, DWORD disabled = 0xFF888888);
 
 		void Init(DX9GF::Camera* cam) override;
 		void Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;

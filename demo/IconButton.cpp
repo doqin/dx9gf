@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "IconButton.h"
-DX9GF::cIconButton* DX9GF::cIconButton::ChangeSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing)
+Demo::IconButton* Demo::IconButton::ChangeSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing)
 {
 	//reuse the logic of the constructor
 	for (int i = 0; i < 3; ++i) {
@@ -12,7 +12,7 @@ DX9GF::cIconButton* DX9GF::cIconButton::ChangeSpriteCoords(int startX, int start
 	return this;
 }
 
-void DX9GF::cIconButton::Init(DX9GF::Camera* cam)
+void Demo::IconButton::Init(DX9GF::Camera* cam)
 {
 	this->trigger = std::make_shared<DX9GF::RectangleTrigger>
 		(
@@ -27,7 +27,7 @@ void DX9GF::cIconButton::Init(DX9GF::Camera* cam)
 	this->trigger->SetOnHeldLeft(this->callback);
 }
 
-void DX9GF::cIconButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::IconButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	int stateIndex = 0; //default is IDLE
 	if (this->currentState == ButtonState::HOVER) stateIndex = 1;

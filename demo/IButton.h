@@ -3,9 +3,9 @@
 #include <memory>
 #include <functional>
 #include <DX9GF.h>
-namespace DX9GF
+namespace Demo
 {
-	class IButton : public IGameObject
+	class IButton : public DX9GF::IGameObject
 	{
 	protected:
 		//button state to change its appearance,...
@@ -13,13 +13,13 @@ namespace DX9GF
 		ButtonState currentState;
 		float width;
 		float height;
-		std::shared_ptr<RectangleTrigger> trigger;
+		std::shared_ptr<DX9GF::RectangleTrigger> trigger;
 
-		std::function<void(ITrigger*)> callback;
+		std::function<void(DX9GF::ITrigger*)> callback;
 
 	public:
 
-		IButton(std::shared_ptr<TransformManager> tm, float x, float y, float w, float h)
+		IButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h)
 			: IGameObject(tm, x, y)
 		{
 			this->width = w;
@@ -29,10 +29,10 @@ namespace DX9GF
 
 		virtual void Init(DX9GF::Camera* uiCamera) = 0;
 		//abstract function to determine whether the button displays text or an icon
-		virtual void Draw(Camera* camera, GraphicsDevice* gd, unsigned long long deltaTime) = 0;
+		virtual void Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
 
 
-		virtual void SetOnClicked(std::function<void(ITrigger*)> cb)
+		virtual void SetOnClicked(std::function<void(DX9GF::ITrigger*)> cb)
 		{
 			//save the button's feature
 			this->callback = cb;

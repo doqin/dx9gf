@@ -21,7 +21,7 @@ void Demo::DebugScene::Init()
 	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 24);
 
 	//create 1 text button and 2 icon buttons
-	auto btnTextExit = std::make_shared<DX9GF::cTextButton>(
+	auto btnTextExit = std::make_shared<Demo::TextButton>(
 		transformManager,
 		0, 0, 150, 50, //x,y,w,h
 		"EXIT GAME", //display text
@@ -38,7 +38,8 @@ void Demo::DebugScene::Init()
 	//btnTextExit->SetBackgroundColors(D3DXCOLOR(0.8f, 0, 0, 1), D3DXCOLOR(1, 0, 0, 1), D3DXCOLOR(0, 1, 0, 1))
 	//         ->SetTextColors(0xFFFFA500, 0xFF000000, 0xFFFFFFFF);
 
-	auto quitBtn = std::make_shared<DX9GF::cIconButton>(
+	auto quitBtn = std::make_shared<Demo::IconButton
+	>(
 		transformManager,
 		200, 200, 62, 30, //x,y,w,h display
 		uiSheetTex,
@@ -51,7 +52,7 @@ void Demo::DebugScene::Init()
 	quitBtn->Init(&camera);
 	uiButtons.push_back(quitBtn);
 
-	auto continueBtn = std::make_shared<DX9GF::cIconButton>(
+	auto continueBtn = std::make_shared<Demo::IconButton>(
 		transformManager,
 		150, 150, 94, 30,
 		uiSheetTex,

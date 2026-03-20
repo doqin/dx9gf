@@ -18,7 +18,7 @@ namespace Demo {
 		std::vector<std::shared_ptr<IDraggable>> draggables;
 
 		//UI component
-		std::vector<std::shared_ptr<DX9GF::IButton>> uiButtons;
+		std::vector<std::shared_ptr<Demo::IButton>> uiButtons;
 		std::shared_ptr<DX9GF::Texture> uiSheetTex;
 		std::shared_ptr<DX9GF::Font> myFont;
 
