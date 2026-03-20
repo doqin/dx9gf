@@ -1,8 +1,8 @@
 ﻿#pragma once
-#include "DX9GFRectangleTrigger.h"
+#include "DX9GF.h"
+#include "DX9GFExtras.h"
 #include <memory>
 #include <functional>
-#include <DX9GF.h>
 namespace Demo
 {
 	class IButton : public DX9GF::IGameObject
