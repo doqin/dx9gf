@@ -345,6 +345,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="DX9GFExtras\DX9GFConcurrentCommand.cpp" />
+    <ClCompile Include="DX9GFExtras\DX9GFCustomCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFDestroyObjectCommand.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Use</PrecompiledHeader>
@@ -499,6 +500,7 @@
     </ClInclude>
     <ClInclude Include="DX9GFExtras\DX9GFCommandBuffer.h" />
     <ClInclude Include="DX9GFExtras\DX9GFConcurrentCommand.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFCustomCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFDestroyObjectCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFEllipseCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFGoToCommand.h" />

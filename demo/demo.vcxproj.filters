@@ -54,6 +54,12 @@
     <ClCompile Include="IconButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IBattleScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestBattleScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -76,6 +82,12 @@
     </ClInclude>
     <ClInclude Include="World1Scene.h">
       <Filter>Header Files\World1</Filter>
+    </ClInclude>
+    <ClInclude Include="IBattleScene.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TestBattleScene.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

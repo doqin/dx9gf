@@ -206,6 +206,7 @@
   <ItemGroup>
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="IBattleScene.cpp" />
     <ClCompile Include="IconButton.cpp" />
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IDraggable.cpp" />
@@ -216,18 +217,21 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="TestBattleScene.cpp" />
     <ClCompile Include="World1Scene.cpp" />
     <ClCompile Include="TextButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="IBattleScene.h" />
     <ClInclude Include="IButton.h" />
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="IContainer.h" />
     <ClInclude Include="IDraggable.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="TestBattleScene.h" />
     <ClInclude Include="World1Scene.h" />
   </ItemGroup>
   <ItemGroup>

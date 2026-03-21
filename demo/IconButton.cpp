@@ -25,22 +25,23 @@ void Demo::IconButton::Init(DX9GF::Camera* cam)
 
 	this->trigger->Init(cam);
 	this->trigger->SetOnHeldLeft(this->callback);
+	this->uiCamera = cam;
 }
 
-void Demo::IconButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::IconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	int stateIndex = 0; //default is IDLE
 	if (this->currentState == ButtonState::HOVER) stateIndex = 1;
 	else if (this->currentState == ButtonState::CLICKED) stateIndex = 2;
 
-	if (this->sprite && camera)
+	if (this->sprite && uiCamera)
 	{
 		this->sprite->SetPosition(this->GetWorldX(), this->GetWorldY());
 
 		this->sprite->SetSrcRect(this->buttonRects[stateIndex]);
 
 		this->sprite->Begin();
-		this->sprite->Draw(*camera, deltaTime);
+		this->sprite->Draw(*uiCamera, deltaTime);
 		this->sprite->End();
 	}
 }

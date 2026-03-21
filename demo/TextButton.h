@@ -50,6 +50,6 @@ namespace Demo
 		TextButton* SetTextColors(DWORD idle, DWORD hover, DWORD click, DWORD disabled = 0xFF888888);
 
 		void Init(DX9GF::Camera* cam) override;
-		void Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
+		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
 	};
 }

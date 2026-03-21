@@ -16,7 +16,7 @@ namespace Demo
 		std::shared_ptr<DX9GF::RectangleTrigger> trigger;
 
 		std::function<void(DX9GF::ITrigger*)> callback;
-
+		DX9GF::Camera* uiCamera = nullptr;
 	public:
 
 		IButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h)
@@ -29,7 +29,7 @@ namespace Demo
 
 		virtual void Init(DX9GF::Camera* uiCamera) = 0;
 		//abstract function to determine whether the button displays text or an icon
-		virtual void Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
+		virtual void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
 
 
 		virtual void SetOnClicked(std::function<void(DX9GF::ITrigger*)> cb)
