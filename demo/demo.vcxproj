@@ -207,6 +207,7 @@
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="IBattleScene.cpp" />
+    <ClCompile Include="IButton.cpp" />
     <ClCompile Include="IconButton.cpp" />
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IDraggable.cpp" />

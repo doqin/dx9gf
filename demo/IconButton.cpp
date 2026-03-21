@@ -1,5 +1,21 @@
 #include "pch.h"
 #include "IconButton.h"
+Demo::IconButton::IconButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h, std::shared_ptr<DX9GF::Texture> uiSheetTex, int startX, int startY, int imgW, int imgH, int spacing, std::function<void(DX9GF::ITrigger*)> onClick)
+	: IButton(tm, x, y, w, h)
+{
+	if (uiSheetTex) {
+		this->sprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		//x_n = x_0 + n * (width + spacing) ->>> Horizontal 
+		buttonRects[i].left = startX + i * (imgW + spacing);
+		buttonRects[i].top = startY;
+		buttonRects[i].right = buttonRects[i].left + imgW;
+		buttonRects[i].bottom = buttonRects[i].top + imgH;
+	}
+	this->callback = onClick;
+}
 Demo::IconButton* Demo::IconButton::ChangeSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing)
 {
 	//reuse the logic of the constructor
@@ -24,7 +40,7 @@ void Demo::IconButton::Init(DX9GF::Camera* cam)
 	this->trigger->SetLocalPosition(0, 0);
 
 	this->trigger->Init(cam);
-	this->trigger->SetOnHeldLeft(this->callback);
+	this->SetOnClicked(this->callback);
 	this->uiCamera = cam;
 }
 

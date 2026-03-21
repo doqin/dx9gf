@@ -1,6 +1,27 @@
 #include "pch.h"
 #include "TextButton.h"
 
+Demo::TextButton::TextButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h, std::string txtContent, DX9GF::Font* f, std::function<void(DX9GF::ITrigger*)> onClick)
+	: IButton(tm, x, y, w, h)
+{
+
+	this->text = txtContent;
+	this->fontSprite = std::make_shared<DX9GF::FontSprite>(f);
+
+	//setup text color (HEX)
+	this->idleColor = 0xFFFFFFFF; //white
+	this->hoverColor = 0xFFFFFF00; //yellow 
+	this->clickedColor = 0xFFFF0000; //red
+	this->disabledColor = 0xFF888888; //grey
+
+	//setup background color (RGBA)
+	this->idleBg = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);   //dark grey
+	this->hoverBg = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);  //light grey
+	this->clickedBg = D3DXCOLOR(0.1f, 0.8f, 0.1f, 1.0f); //green
+	this->disabledBg = D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f);
+	this->callback = onClick;
+}
+
 Demo::TextButton* Demo::TextButton::SetText(std::string newText)
 {
 	this->text = newText;
@@ -35,7 +56,7 @@ void Demo::TextButton::Init(DX9GF::Camera* cam)
 	this->trigger->SetLocalPosition(0, 0);
 
 	this->trigger->Init(cam);
-	this->trigger->SetOnHeldLeft(this->callback);
+	this->SetOnClicked(this->callback);
 	this->uiCamera = cam;
 }
 

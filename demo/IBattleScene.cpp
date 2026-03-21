@@ -5,12 +5,10 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 {
 	auto app = DX9GF::Application::GetInstance();
 	// Set position so that it's updated if screen is resized
-	const float screenWidth = app->GetScreenWidth();
-	const float buttonY = app->GetScreenHeight() / 2.f - 20 - attackButton->GetHeight();
-	const float sidePadding = 20.f;
-	const float totalButtonsWidth = attackButton->GetWidth() + actionButton->GetWidth() + itemsButton->GetWidth() + fleeButton->GetWidth();
-	const float spacing = std::max(0.f, (screenWidth - sidePadding * 2.f - totalButtonsWidth) / 3.f);
-	const float leftX = -screenWidth / 2.f + sidePadding;
+	const float buttonY = app->GetScreenHeight() / 2.f - 50 - attackButton->GetHeight();
+	const float spacing = 20.f;
+	const float totalButtonsWidth = attackButton->GetWidth() + actionButton->GetWidth() + itemsButton->GetWidth() + fleeButton->GetWidth() + 3 * spacing;
+	const float leftX = -totalButtonsWidth / 2;
 
 	attackButton->SetLocalPosition(leftX, buttonY);
 	actionButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing, buttonY);
@@ -25,6 +23,14 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 
 void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 {
+	auto app = DX9GF::Application::GetInstance();
+	const float screenWidth = app->GetScreenWidth();
+	const float buttonY = app->GetScreenHeight() / 2.f - 20 - attackButton->GetHeight();
+	const float sidePadding = 20.f;
+	const float leftX = -screenWidth / 2.f + sidePadding;
+
+	backButton->SetLocalPosition(leftX, buttonY);
+	backButton->Update(deltaTime);
 }
 
 void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
@@ -37,6 +43,7 @@ void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
 
 void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 {
+	backButton->Draw(game->GetGraphicsDevice(), deltaTime);
 }
 
 void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
@@ -45,18 +52,21 @@ void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 
 void Demo::IBattleScene::Init()
 {
+	const auto buttonWidth = 100;
+	const auto buttonHeight = 50;
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 20);
-	attackButton = std::make_shared<TextButton>(transformManager, 0, 0, 100, 25, "Attack", font.get(), [&](DX9GF::ITrigger* thisObj) {
+	attackButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Attack", font.get(), [&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerAttack;
+			markFinished();
 		}));
 	});
-	actionButton = std::make_shared<TextButton>(transformManager, 0, 0, 100, 25, "Action", font.get(), [](DX9GF::ITrigger* thisObj) {
+	actionButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Action", font.get(), [](DX9GF::ITrigger* thisObj) {
 	});
-	itemsButton = std::make_shared<TextButton>(transformManager, 0, 0, 100, 25, "Items", font.get(), [](DX9GF::ITrigger* thisObj) {
+	itemsButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Items", font.get(), [](DX9GF::ITrigger* thisObj) {
 	});
-	fleeButton = std::make_shared<TextButton>(transformManager, 0, 0, 100, 25, "Flee", font.get(), [&](DX9GF::ITrigger* thisObj) {
+	fleeButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Flee", font.get(), [&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			auto sceMan = game->GetSceneManager();
 			sceMan->PopScene();
@@ -64,10 +74,17 @@ void Demo::IBattleScene::Init()
 			markFinished();
 		}));
 	});
+	backButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Back", font.get(), [&](DX9GF::ITrigger* thisObj) {
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+			this->state = State::PlayerStandBy;
+			markFinished();
+		}));
+	});
 	attackButton->Init(&camera);
 	actionButton->Init(&camera);
 	itemsButton->Init(&camera);
 	fleeButton->Init(&camera);
+	backButton->Init(&camera);
 	transformManager->RebuildHierarchy();
 }
 

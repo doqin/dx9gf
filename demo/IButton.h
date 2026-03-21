@@ -19,51 +19,20 @@ namespace Demo
 		DX9GF::Camera* uiCamera = nullptr;
 	public:
 
-		IButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h)
-			: IGameObject(tm, x, y)
-		{
-			this->width = w;
-			this->height = h;
-			this->currentState = ButtonState::IDLE;
-		}
+		IButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h);
 
 		virtual void Init(DX9GF::Camera* uiCamera) = 0;
 		//abstract function to determine whether the button displays text or an icon
 		virtual void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
 
 
-		virtual void SetOnClicked(std::function<void(DX9GF::ITrigger*)> cb)
-		{
-			//save the button's feature
-			this->callback = cb;
-
-			if (this->trigger && this->callback)
-			{
-				//use SetOnHeldLeft just like IDraggable
-				this->trigger->SetOnHeldLeft(this->callback);
-			}
-		}
+		virtual void SetOnClicked(std::function<void(DX9GF::ITrigger*)> cb);
 
 		//check if the cursor is hovering over the button.
-		virtual void Update(unsigned long long deltaTime)
-		{
-			if (!this->trigger)
-				return;
+		virtual void Update(unsigned long long deltaTime);
 
-			//update trigger
-			this->trigger->Update(deltaTime);
-
-			//change button state
-			if (this->trigger->IsHeldLeft(deltaTime)) 
-				this->currentState = ButtonState::CLICKED;
-			else if (this->trigger->IsHovering(deltaTime)) 
-				this->currentState = ButtonState::HOVER;
-			else 
-				this->currentState = ButtonState::IDLE;
-		}
-
-		std::shared_ptr<DX9GF::RectangleTrigger> GetTrigger() { return this->trigger; }
-		float GetWidth() { return this->width; }
-		float GetHeight() { return this->height; }
+		std::shared_ptr<DX9GF::RectangleTrigger> GetTrigger();
+		float GetWidth() const;
+		float GetHeight() const;
 	};
 }

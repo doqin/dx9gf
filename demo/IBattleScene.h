@@ -29,6 +29,7 @@ namespace Demo {
 		std::shared_ptr<TextButton> actionButton;
 		std::shared_ptr<TextButton> itemsButton;
 		std::shared_ptr<TextButton> fleeButton;
+		std::shared_ptr<TextButton> backButton;
 		
 	private:
 		// Updates
