@@ -210,6 +210,7 @@
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IDraggable.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Create</PrecompiledHeader>
@@ -226,6 +227,7 @@
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="IContainer.h" />
     <ClInclude Include="IDraggable.h" />
+    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="World1Scene.h" />
@@ -239,6 +241,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="test-background.png" />
+    <Image Include="test-title.png" />
     <Image Include="uiter-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
