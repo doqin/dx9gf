@@ -5,78 +5,126 @@
 #include "IconButton.h"
 namespace Demo
 {
+	void MainMenu::UpdateLayout(int screenW, int screenH)
+	{
+		camera.SetPosition(screenW / 2.0f, screenH / 2.0f);
+
+		//BACKGROUND - use aspect fill
+		float bgImageW = (float)bgTex->GetWidth();
+		float bgImageH = (float)bgTex->GetHeight();
+
+		if (!bgSprite)
+		{
+			bgSprite = std::make_shared<DX9GF::StaticSprite>(bgTex.get());
+			bgSprite->SetSrcRect({ 0, 0, (LONG)bgImageW, (LONG)bgImageH });
+		}
+
+		float bgScaleX = screenW / bgImageW;
+		float bgScaleY = screenH / bgImageH;
+		float bgFinalScale = std::max(bgScaleX, bgScaleY);
+
+		bgSprite->SetScale(bgFinalScale);
+		bgSprite->SetOrigin(bgImageW / 2.0f, bgImageH / 2.0f);
+		bgSprite->SetPosition(screenW / 2.0f, screenH / 2.0f);
+
+		//TITLE - use scale to fit (have a limit)
+		float titleImageW = (float)titleTex->GetWidth();
+		float titleImageH = (float)titleTex->GetHeight();
+
+		if (!titleSprite) {
+			titleSprite = std::make_shared<DX9GF::StaticSprite>(titleTex.get());
+			titleSprite->SetSrcRect({ 0, 0, (LONG)titleImageW, (LONG)titleImageH });
+		}
+
+		float maxTitleWidth = screenW * 0.5f;
+		float titleScale = maxTitleWidth / titleImageW;
+		float maxTitleHeight = screenH * 0.4f;
+
+		if ((titleImageH * titleScale) > maxTitleHeight) {
+			titleScale = maxTitleHeight / titleImageH;
+		}
+
+		titleSprite->SetScale(titleScale);
+		titleSprite->SetOrigin(titleImageW / 2.0f, titleImageH / 2.0f);
+		titleSprite->SetPosition(screenW / 2.0f, screenH * 0.3f);
+
+		//BUTTONS: use anchor center
+		//find center location
+		float centerX = screenW / 2.0f;
+		float centerY = screenH / 2.0f;
+		//spacing between buttons
+		float spacingY = 10.0f;
+		//start drawing from 40% of the screen height
+		float startY = screenH * 0.40f;
+
+		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };
+		float currentY = startY;
+
+		for (auto& btn : buttons)
+		{
+			if (btn)
+			{
+				//center X
+				float posX = centerX - (btn->GetWidth() / 2.0f);
+				btn->SetPosition(posX, currentY);
+
+				//button spacing
+				currentY += btn->GetHeight() + spacingY;
+			}
+		}
+
+	}
+
 	void MainMenu::Init()
 	{
-		// 1. Khởi tạo TransformManager (nếu hệ thống của bạn yêu cầu)
 		transformManager = std::make_shared<DX9GF::TransformManager>();
 
-		// 2. Load Texture Sheet cho toàn bộ UI
-		// Giả sử hệ thống của bạn có hàm LoadTexture tĩnh hoặc thông qua Game object
-		uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
-		uiSheetTex->LoadTexture(L"ui-pack.png");
+		auto app = DX9GF::Application::GetInstance();
+		lastScreenWidth = app->GetScreenWidth();
+		lastScreenHeight = app->GetScreenHeight();
 
-		// 3. Khởi tạo Background và Title
-		// Truyền ID hoặc đường dẫn texture tùy vào thiết kế constructor của StaticSprite
-		backgroundTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		//load textures
+		buttonSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		buttonSheetTex->LoadTexture(L"ui-pack.png");
+
+		bgTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		bgTex->LoadTexture(IDB_PNG2);
+
 		titleTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
-
-		backgroundTex->LoadTexture(IDB_PNG2);
 		titleTex->LoadTexture(IDB_PNG3);
 
-		backgroundSprite = std::make_shared<DX9GF::StaticSprite>(backgroundTex.get());
+		//buttons init
+		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
+			buttonSheetTex, 577, 193, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
 
-		RECT bgRect;
-		bgRect.left = 0;
-		bgRect.top = 0;
-		bgRect.right = backgroundTex->GetWidth();  // Thay bằng chiều rộng thực tế của ảnh nền
-		bgRect.bottom = backgroundTex->GetHeight(); // Thay bằng chiều cao thực tế của ảnh nền
-		backgroundSprite->SetSrcRect(bgRect);
-		backgroundSprite->SetScale(1.0f); // Bắt buộc để ảnh không bị thu nhỏ về 0
-		backgroundSprite->SetPosition(-400, -400); // Đặt tại góc trái trên
+		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
+			buttonSheetTex, 577, 481, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
 
-		titleSprite = std::make_shared<DX9GF::StaticSprite>(titleTex.get());
+		loadGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
+			buttonSheetTex, 577, 513, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
 
+		optionButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30,
+			buttonSheetTex, 577, 65, 78, 30, 50, [](DX9GF::ITrigger* t) { /* Logic */ });
 
-		//RECT titleRect;
-		//titleRect.left = 0;
-		//titleRect.top = 0;
-		//titleRect.right = 400; // Chiều rộng của logo
-		//titleRect.bottom = 150; // Chiều cao của logo
-		//titleSprite->SetSrcRect(titleRect);
-		titleSprite->SetScale(0.5f); // Bắt buộc để ảnh không bị thu nhỏ về 0
-		// Đặt title ở vị trí nào đó (ví dụ x=100, y=50)
-		titleSprite->SetPosition(-400, -300);
+		creditButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30,
+			buttonSheetTex, 577, 1, 78, 30, 50, [](DX9GF::ITrigger* t) { /* Logic */ });
 
-		backgroundSprite->Begin();
-		auto quitBtn = std::make_shared<Demo::IconButton
-		>(
-			transformManager,
-			200, 200, 62, 30, //x,y,w,h display
-			uiSheetTex,
-			385, 449, 62, 30, 2, //startX, startY, w, h, spacing
-			[](DX9GF::ITrigger* t)
+		quitButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 62, 30,
+			buttonSheetTex, 385, 449, 62, 30, 2, [](DX9GF::ITrigger* t) { PostQuitMessage(0); });
+
+		//active buttons
+		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };
+		for (auto& btn : buttons)
+		{
+			if (btn)
 			{
-				PostQuitMessage(0); //set button's logic here
+				btn->Init(&camera);
+				uiButtons.push_back(btn);
 			}
-		);
-		quitBtn->Init(&camera);
-		uiButtons.push_back(quitBtn);
+		}
 
-		auto continueBtn = std::make_shared<Demo::IconButton>(
-			transformManager,
-			150, 150, 94, 30,
-			uiSheetTex,
-			577, 193, 94, 30, 34,
-			[](DX9GF::ITrigger* t)
-			{
-				//switch scene(?)
-			}
-		);
-		continueBtn->Init(&camera);
-		uiButtons.push_back(continueBtn);
-
-		//test function
-		//continueBtn->ChangeSpriteCoords(500, 2, 60, 32, 20);
+		//call it to setup the update layout
+		UpdateLayout(lastScreenWidth, lastScreenHeight);
 
 		transformManager->RebuildHierarchy();
 	}
@@ -86,6 +134,18 @@ namespace Demo
 		auto inpMan = DX9GF::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
+
+		auto app = DX9GF::Application::GetInstance();
+		int currentWidth = app->GetScreenWidth();
+		int currentHeight = app->GetScreenHeight();
+
+		//check the size and update if there is a change
+		if (currentWidth != lastScreenWidth || currentHeight != lastScreenHeight)
+		{
+			UpdateLayout(currentWidth, currentHeight);
+			lastScreenWidth = currentWidth;
+			lastScreenHeight = currentHeight;
+		}
 
 		for (auto& button : uiButtons)
 		{
@@ -101,24 +161,20 @@ namespace Demo
 		auto gd = game->GetGraphicsDevice();
 		gd->Clear();
 		if (SUCCEEDED(gd->BeginDraw())) {
-			// THỨ TỰ VẼ TỪ DƯỚI LÊN TRÊN
-
-			if (backgroundSprite)
+			if (bgSprite)
 			{
-				backgroundSprite->Begin(); // BẮT BUỘC PHẢI CÓ
-				backgroundSprite->Draw(camera, deltaTime);
-				backgroundSprite->End();   // BẮT BUỘC PHẢI CÓ
+				bgSprite->Begin();
+				bgSprite->Draw(camera, deltaTime);
+				bgSprite->End();
 			}
 
-			// 2. Vẽ Tiêu đề / Logo
 			if (titleSprite)
 			{
-				titleSprite->Begin(); // BẮT BUỘC PHẢI CÓ
+				titleSprite->Begin();
 				titleSprite->Draw(camera, deltaTime);
-				titleSprite->End();   // BẮT BUỘC PHẢI CÓ
+				titleSprite->End();
 			}
 
-			// 3. Vẽ toàn bộ UI Buttons lên trên cùng
 			for (auto& btn : uiButtons)
 			{
 				btn->Draw(&this->camera, gd, deltaTime);

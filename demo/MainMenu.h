@@ -1,30 +1,41 @@
 ﻿#pragma once
 #include "DX9GF.h"
+#include "DX9GFExtras.h"
 #include "DX9GFIScene.h"
 #include "Game.h"
-#include "IButton.h"
-#include "DX9GFExtras.h"
-#include <vector>
-#include <memory>
+#include "TextButton.h"
+#include "IconButton.h"
+
 namespace Demo
 {
 	class MainMenu : public DX9GF::IScene
 	{
 	private:
 		Game* game;
-
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
-		std::shared_ptr<DX9GF::StaticSprite> backgroundSprite;
-		std::shared_ptr<DX9GF::StaticSprite> titleSprite;
 
-		std::shared_ptr<DX9GF::Texture> backgroundTex;
+		std::shared_ptr<DX9GF::StaticSprite> bgSprite;
+		std::shared_ptr<DX9GF::StaticSprite> titleSprite;
+		std::shared_ptr<DX9GF::Texture> bgTex;
 		std::shared_ptr<DX9GF::Texture> titleTex;
 
-		//UI component
-		std::vector<std::shared_ptr<IButton>> uiButtons;
-		std::shared_ptr<DX9GF::Texture> uiSheetTex;
-		//std::shared_ptr<DX9GF::Font> myFont;
+		//button component
+		std::shared_ptr<DX9GF::Font> font;
+		std::shared_ptr<DX9GF::Texture> buttonSheetTex;
+		std::vector<std::shared_ptr<Demo::IButton>> uiButtons;
 
+		//temporarily comment, only uncomment when needed. Ex: That button changes affect another component in the scene.
+
+		std::shared_ptr<IconButton> continueButton;
+		std::shared_ptr<IconButton> newGameButton;
+		std::shared_ptr<IconButton> loadGameButton;
+		std::shared_ptr<IconButton> optionButton;
+		std::shared_ptr<IconButton> creditButton;
+		std::shared_ptr<IconButton> quitButton;
+
+		//use to scale or relocate the sprite/object
+		int lastScreenWidth;
+		int lastScreenHeight;
 
 	public:
 
@@ -36,6 +47,8 @@ namespace Demo
 		void Init() override;
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
+		void UpdateLayout(int width, int height);
+
 	};
 }
 

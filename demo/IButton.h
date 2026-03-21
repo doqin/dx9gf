@@ -13,15 +13,19 @@ namespace Demo
 		ButtonState currentState;
 		float width;
 		float height;
+		float displayX;
+		float displayY;
 		std::shared_ptr<DX9GF::RectangleTrigger> trigger;
 
 		std::function<void(DX9GF::ITrigger*)> callback;
 
 	public:
 
-		IButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h)
-			: IGameObject(tm, x, y)
+		IButton(std::shared_ptr<DX9GF::TransformManager> tm, float displayX, float displayY, float w, float h)
+			: IGameObject(tm, displayX, displayY)
 		{
+			this->displayX = displayX;
+			this->displayY = displayY;
 			this->width = w;
 			this->height = h;
 			this->currentState = ButtonState::IDLE;
@@ -54,12 +58,23 @@ namespace Demo
 			this->trigger->Update(deltaTime);
 
 			//change button state
-			if (this->trigger->IsHeldLeft(deltaTime)) 
+			if (this->trigger->IsHeldLeft(deltaTime))
 				this->currentState = ButtonState::CLICKED;
-			else if (this->trigger->IsHovering(deltaTime)) 
+			else if (this->trigger->IsHovering(deltaTime))
 				this->currentState = ButtonState::HOVER;
-			else 
+			else
 				this->currentState = ButtonState::IDLE;
+		}
+
+		virtual void SetPosition(float x, float y)
+		{
+			this->displayX = x;
+			this->displayY = y;
+			this->SetLocalPosition(x, y); 
+			if (this->trigger!=nullptr) 
+			{
+				this->trigger->SetOrigin(0, 0);
+			}
 		}
 
 		std::shared_ptr<DX9GF::RectangleTrigger> GetTrigger() { return this->trigger; }

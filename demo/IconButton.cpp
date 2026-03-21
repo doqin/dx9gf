@@ -35,11 +35,10 @@ void Demo::IconButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, un
 
 	if (this->sprite && camera)
 	{
-		this->sprite->SetPosition(this->GetWorldX(), this->GetWorldY());
-
 		this->sprite->SetSrcRect(this->buttonRects[stateIndex]);
 
 		this->sprite->Begin();
+		this->sprite->SetPosition(this->displayX, this->displayY);
 		this->sprite->Draw(*camera, deltaTime);
 		this->sprite->End();
 	}
