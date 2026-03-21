@@ -5,6 +5,10 @@
 #include "Game.h"
 #include "IDraggable.h"
 #include "TextButton.h"
+#include "MainBlockCard.h"
+#include "StrikeCard.h"
+#include "EnemyCard.h"
+#include "TestEnemy.h"
 
 namespace Demo {
 	class IBattleScene : public DX9GF::IScene {
@@ -16,13 +20,23 @@ namespace Demo {
 		};
 		// States
 		State state = State::PlayerStandBy;
+        State lastEnemyLayoutState = State::EnemyAttack;
+		bool enemyLayoutInitialized = false;
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;
 		// Managers
 		DX9GF::CommandBuffer commandBuffer;
-		DraggableManager draggableManager;
+		std::shared_ptr<DraggableManager> draggableManager;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
+       // Battle cards
+		std::shared_ptr<MainBlockCard> mainBlockCard;
+		std::vector<std::shared_ptr<IDraggable>> cardDeck;
+		std::vector<std::shared_ptr<IEnemy>> enemies;
+		float enemyCardRemoveAreaX = 220.f;
+		float enemyCardRemoveAreaY = -140.f;
+		float enemyCardRemoveAreaWidth = 180.f;
+		float enemyCardRemoveAreaHeight = 80.f;
 		// UI
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<TextButton> attackButton;
@@ -30,12 +44,16 @@ namespace Demo {
 		std::shared_ptr<TextButton> itemsButton;
 		std::shared_ptr<TextButton> fleeButton;
 		std::shared_ptr<TextButton> backButton;
+		std::shared_ptr<TextButton> executeButton;
+		void CreateEnemyCard(std::shared_ptr<IEnemy> enemy);
 		
 	private:
 		// Updates
 		void PlayerStandByUpdate(unsigned long long deltaTime);
 		void PlayerAttackUpdate(unsigned long long deltaTime);
 		virtual void EnemyAttackUpdate(unsigned long long deltaTime) = 0;
+        void QueueEnemyLayoutTransition(State targetState);
+        void RemoveEnemyCardsInRemoveArea();
 		// Draws
 		void PlayerStandByDraw(unsigned long long deltaTime);
 		void PlayerAttackDraw(unsigned long long deltaTime);

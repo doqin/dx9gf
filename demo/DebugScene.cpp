@@ -71,6 +71,7 @@ void Demo::DebugScene::Init()
 	//continueBtn->ChangeSpriteCoords(500, 2, 60, 32, 20);
 
 	transformManager->RebuildHierarchy();
+	DX9GF::ITrigger::drawTrigger = true;
 }
 
 void Demo::DebugScene::Update(unsigned long long deltaTime)
@@ -83,6 +84,9 @@ void Demo::DebugScene::Update(unsigned long long deltaTime)
 		auto dY = inpMan->GetRelativeMouseY();
 		auto camPos = camera.GetPosition();
 		camera.SetPosition(camPos.x - dX, camPos.y - dY);
+	}
+	if (inpMan->KeyDown(DIK_F2)) {
+		DX9GF::ITrigger::drawTrigger = !DX9GF::ITrigger::drawTrigger;
 	}
 	if (inpMan->KeyDown(DIK_F5)) {
 		auto app = DX9GF::Application::GetInstance();
