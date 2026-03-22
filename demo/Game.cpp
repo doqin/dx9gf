@@ -10,7 +10,7 @@ void Demo::Game::Init()
 #ifdef TESTING
 	this->sceneManager->PushScene(new DebugScene(this, app->GetScreenWidth(), app->GetScreenHeight()));
 #else
-	//this->sceneManager->PushScene(new World1Scene(this, app->GetScreenWidth(), app->GetScreenHeight()));
+	// this->sceneManager->PushScene(new World1Scene(this, app->GetScreenWidth(), app->GetScreenHeight()));
 	this->sceneManager->PushScene(new MainMenu(this, app->GetScreenWidth(), app->GetScreenHeight()));
 
 #endif

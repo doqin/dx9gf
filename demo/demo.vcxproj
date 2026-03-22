@@ -241,8 +241,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="test-background.png" />
-    <Image Include="test-title.png" />
+    <Image Include="test-background.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="test-title.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="uiter-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
