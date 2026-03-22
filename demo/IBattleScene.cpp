@@ -108,9 +108,15 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	enemyCardRemoveAreaY = buttonY;
 	enemyCardRemoveAreaWidth = screenWidth / 2.f - sidePadding - enemyCardRemoveAreaX;
 	enemyCardRemoveAreaHeight = backButton->GetHeight();
-	backButton->Update(deltaTime);
-	executeButton->Update(deltaTime);
-    for (auto& enemy : enemies) {
+	if (!mainBlockCard->IsExecuting()) {
+		if (isExecutingAttacks) {
+			state = State::EnemyAttack;
+			return;
+		}
+		backButton->Update(deltaTime);
+		executeButton->Update(deltaTime);
+	}
+	for (auto& enemy : enemies) {
 		enemy->Update(deltaTime);
 	}
 	draggableManager->Update(deltaTime);
@@ -144,8 +150,10 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		removeLabel->Draw(camera, deltaTime);
 		removeLabel->End();
 	}
-	backButton->Draw(game->GetGraphicsDevice(), deltaTime);
-	executeButton->Draw(game->GetGraphicsDevice(), deltaTime);
+	if (!mainBlockCard->IsExecuting()) {
+		backButton->Draw(game->GetGraphicsDevice(), deltaTime);
+		executeButton->Draw(game->GetGraphicsDevice(), deltaTime);
+	}
 	draggableManager->Draw(deltaTime);
 }
 
@@ -166,6 +174,7 @@ void Demo::IBattleScene::Init()
 			this->state = State::PlayerAttack;
 			markFinished();
 		}));
+		isExecutingAttacks = false;
 	});
 	actionButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Action", font.get(), [](DX9GF::ITrigger* thisObj) {
 	});
@@ -187,6 +196,7 @@ void Demo::IBattleScene::Init()
 	});
     executeButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Execute", font.get(), [&](DX9GF::ITrigger* thisObj) {
 		if (mainBlockCard && !mainBlockCard->IsExecuting()) {
+			isExecutingAttacks = true;
 			mainBlockCard->StartExecution();
 		}
 	});

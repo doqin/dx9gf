@@ -15,5 +15,6 @@ namespace Demo {
 		bool Execute() override;
 		void ResetExecution() override;
 		void Draw(unsigned long long deltaTime) override;
+		size_t GetWidth() const override;
 	};
 }

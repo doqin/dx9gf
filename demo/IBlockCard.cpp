@@ -34,14 +34,14 @@ void Demo::IBlockCard::Update(unsigned long long deltaTime)
 		}
 	}
 	if (isExecuting) {
-		ExecuteIteratively();
+		ExecuteIteratively(deltaTime);
 	}
 }
 
 void Demo::IBlockCard::StartExecution()
 {
 	executeIndex = 0;
- currentExecutingCard.reset();
+	currentExecutingCard.reset();
 	for (auto& card : statementCards) {
 		if (auto lock = card.lock()) {
 			lock->ResetExecution();
@@ -50,12 +50,19 @@ void Demo::IBlockCard::StartExecution()
 	isExecuting = !statementCards.empty();
 }
 
-void Demo::IBlockCard::ExecuteIteratively()
+void Demo::IBlockCard::ExecuteIteratively(unsigned long long deltaTime)
 {
 	if (executeIndex >= statementCards.size()) {
 		isExecuting = false;
 		currentExecutingCard.reset();
 		return;
+	}
+	timeSinceLastExecution += deltaTime / 1000.f;
+	if (timeSinceLastExecution <= timePerExecution) {
+		return;
+	}
+	else {
+		timeSinceLastExecution = 0;
 	}
 	auto current = statementCards[executeIndex].lock();
 	if (!current) {

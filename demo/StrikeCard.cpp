@@ -53,3 +53,13 @@ void Demo::StrikeCard::Draw(unsigned long long deltaTime)
 	nameFontSprite->Draw(*camera, deltaTime);
 	nameFontSprite->End();
 }
+
+size_t Demo::StrikeCard::GetWidth() const
+{
+	if (auto lock = enemyCard.lock()) {
+		return IDraggable::GetWidth() + lock->GetWidth();
+	}
+	else {
+		return IDraggable::GetWidth();
+	}
+}
