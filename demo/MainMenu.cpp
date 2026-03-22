@@ -7,8 +7,6 @@ namespace Demo
 {
 	void MainMenu::UpdateLayout(int screenW, int screenH)
 	{
-		camera.SetPosition(screenW / 2.0f, screenH / 2.0f);
-
 		//BACKGROUND - use aspect fill
 		float bgImageW = (float)bgTex->GetWidth();
 		float bgImageH = (float)bgTex->GetHeight();
@@ -25,7 +23,7 @@ namespace Demo
 
 		bgSprite->SetScale(bgFinalScale);
 		bgSprite->SetOrigin(bgImageW / 2.0f, bgImageH / 2.0f);
-		bgSprite->SetPosition(screenW / 2.0f, screenH / 2.0f);
+		bgSprite->SetPosition(0, 0);
 
 		//TITLE - use scale to fit (have a limit)
 		float titleImageW = (float)titleTex->GetWidth();
@@ -46,16 +44,12 @@ namespace Demo
 
 		titleSprite->SetScale(titleScale);
 		titleSprite->SetOrigin(titleImageW / 2.0f, titleImageH / 2.0f);
-		titleSprite->SetPosition(screenW / 2.0f, screenH * 0.3f);
+		titleSprite->SetPosition(0, -screenH * 0.20f);
 
-		//BUTTONS: use anchor center
-		//find center location
-		float centerX = screenW / 2.0f;
-		float centerY = screenH / 2.0f;
 		//spacing between buttons
 		float spacingY = 10.0f;
 		//start drawing from 40% of the screen height
-		float startY = screenH * 0.40f;
+		float startY = - screenH * 0.10f;
 
 		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };
 		float currentY = startY;
@@ -65,8 +59,8 @@ namespace Demo
 			if (btn)
 			{
 				//center X
-				float posX = centerX - (btn->GetWidth() / 2.0f);
-				btn->SetPosition(posX, currentY);
+				float posX = -(btn->GetWidth() / 2.0f);
+				btn->SetLocalPosition(posX, currentY);
 
 				//button spacing
 				currentY += btn->GetHeight() + spacingY;
