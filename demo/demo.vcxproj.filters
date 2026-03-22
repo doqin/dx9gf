@@ -28,6 +28,9 @@
     <Filter Include="Header Files\Cards">
       <UniqueIdentifier>{19e82f88-b9c9-49d7-a9f2-df60961c3582}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Projectiles">
+      <UniqueIdentifier>{970c8ab7-c2dc-41a4-b4cc-833515485537}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -85,6 +88,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestEnemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RoundProjectile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -148,6 +154,12 @@
     </ClInclude>
     <ClInclude Include="MainBlockCard.h">
       <Filter>Header Files\Cards</Filter>
+    </ClInclude>
+    <ClInclude Include="IProjectile.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="RoundProjectile.h">
+      <Filter>Header Files\Projectiles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

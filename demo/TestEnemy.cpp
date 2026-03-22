@@ -23,7 +23,12 @@ void Demo::TestEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera*
     IEnemy::Draw(graphicsDevice, camera, deltaTime);
 }
 
-std::shared_ptr<DX9GF::ICommand> Demo::TestEnemy::GetAttackCommand()
+std::vector<std::shared_ptr<DX9GF::ICommand>> Demo::TestEnemy::GetAttackCommand(std::shared_ptr<Player> player, std::function<void(void)> finishAttack)
 {
-  return nullptr;
+  return {
+    std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+        finishAttack();
+        markFinished();
+    })
+  };
 }

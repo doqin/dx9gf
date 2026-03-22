@@ -26,6 +26,9 @@ namespace Demo {
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;
+		DX9GF::TransformHandle previousPlayerTransformHandle;
+		std::weak_ptr<DX9GF::TransformManager> previousSceneTransformManager;
+		float previousPlayerVelocity = 0;
 		// Managers
 		DX9GF::CommandBuffer commandBuffer;
 		std::shared_ptr<DraggableManager> draggableManager;
@@ -52,7 +55,7 @@ namespace Demo {
 		// Updates
 		void PlayerStandByUpdate(unsigned long long deltaTime);
 		void PlayerAttackUpdate(unsigned long long deltaTime);
-		virtual void EnemyAttackUpdate(unsigned long long deltaTime) = 0;
+		void EnemyAttackUpdate(unsigned long long deltaTime);
         void QueueEnemyLayoutTransition(State targetState);
         void RemoveEnemyCardsInRemoveArea();
 		// Draws

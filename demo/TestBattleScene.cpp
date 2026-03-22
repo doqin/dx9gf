@@ -25,7 +25,3 @@ void Demo::TestBattleScene::Init()
 	cardDeck.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	transformManager->RebuildHierarchy();
 }
-
-void Demo::TestBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
-{
-}

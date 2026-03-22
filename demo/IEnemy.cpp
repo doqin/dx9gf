@@ -74,7 +74,7 @@ bool Demo::IEnemy::TakeDamage(float damage)
 {
     health -= damage;
     if (health < 0) health = 0;
-  damageIndicators.push_back(DamageIndicator{
+    damageIndicators.push_back(DamageIndicator{
         L"-" + std::to_wstring(static_cast<int>(std::round(damage))),
         0.f,
         0

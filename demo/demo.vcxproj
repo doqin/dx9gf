@@ -218,6 +218,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RoundProjectile.cpp" />
     <ClCompile Include="TestBattleScene.cpp" />
     <ClCompile Include="World1Scene.cpp" />
     <ClCompile Include="TextButton.cpp" />
@@ -240,10 +241,12 @@
     <ClInclude Include="IDraggable.h" />
     <ClInclude Include="IEnemy.h" />
     <ClInclude Include="IExpressionCard.h" />
+    <ClInclude Include="IProjectile.h" />
     <ClInclude Include="IStatementCard.h" />
     <ClInclude Include="MainBlockCard.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="RoundProjectile.h" />
     <ClInclude Include="StrikeCard.h" />
     <ClInclude Include="TestBattleScene.h" />
     <ClInclude Include="TestEnemy.h" />

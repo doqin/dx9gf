@@ -1,6 +1,7 @@
 #pragma once
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
+#include "Player.h"
 #include <functional>
 #include <vector>
 
@@ -30,6 +31,6 @@ namespace Demo {
 		virtual void Update(unsigned long long deltaTime);
 		virtual void Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime);
 		virtual bool TakeDamage(float damage);
-		virtual std::shared_ptr<DX9GF::ICommand> GetAttackCommand() = 0;
+		virtual std::vector<std::shared_ptr<DX9GF::ICommand>> GetAttackCommand(std::shared_ptr<Player> player, std::function<void(void)> finishAttack) = 0;
 	};
 }

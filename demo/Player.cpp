@@ -92,24 +92,31 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 	auto [currentX, currentY] = GetLocalPosition();
 	SetLocalPosition(currentX + finalDX, currentY + finalDY);
 	// Camera movement
-	auto cameraPos = camera->GetPosition();
-	auto [playerPosX, playerPosY] = GetLocalPosition();
-	D3DXVECTOR2 vec{ playerPosX - cameraPos.x, playerPosY - cameraPos.y};
-	if (vec.x != 0 || vec.y != 0) {
-		if (std::sqrt(std::pow(vec.x, 2) + std::pow(vec.y, 2)) < CAMERA_SNAP_MARGIN) {
-			camera->SetPosition(playerPosX, playerPosY);
+	if (followCamera) {
+		auto cameraPos = camera->GetPosition();
+		auto [playerPosX, playerPosY] = GetLocalPosition();
+		D3DXVECTOR2 vec{ playerPosX - cameraPos.x, playerPosY - cameraPos.y };
+		// Update only if there is difference in distance
+		if (vec.x != 0 || vec.y != 0) {
+			if (std::sqrt(std::pow(vec.x, 2) + std::pow(vec.y, 2)) < CAMERA_SNAP_MARGIN) {
+				camera->SetPosition(playerPosX, playerPosY);
+			}
+			else {
+				D3DXVECTOR2 vecNorm;
+				D3DXVec2Normalize(&vecNorm, &vec);
+				float speedX = vecNorm.x * (std::min)(isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY, (CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f)) * deltaTime / 1000.f;
+				float speedY = vecNorm.y * (std::min)(isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY, (CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f)) * deltaTime / 1000.f;
+				camera->SetPosition(cameraPos.x + speedX, cameraPos.y + speedY);
+			}
+			cameraDeltaTime += deltaTime;
+			if ((CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f) > (isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY)) {
+				cameraDeltaTime = ((isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY) - CAMERA_VELOCITY) / CAMERA_ACCELERATION * 1000.f;
+			}
 		}
 		else {
-			D3DXVECTOR2 vecNorm;
-			D3DXVec2Normalize(&vecNorm, &vec);
-			float speedX = vecNorm.x * (std::min)(isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY, (CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f)) * deltaTime / 1000.f;
-			float speedY = vecNorm.y * (std::min)(isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY, (CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f)) * deltaTime / 1000.f;
-			camera->SetPosition(cameraPos.x + speedX, cameraPos.y + speedY);
+
+			cameraDeltaTime = (std::max)(0.f, cameraDeltaTime - deltaTime);
 		}
-		cameraDeltaTime += deltaTime;
-	}
-	else {
-		cameraDeltaTime = 0;
 	}
 }
 
@@ -187,4 +194,31 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 		break;
 	}
 	collider->Draw(graphicsDevice, camera);
+}
+
+void Demo::Player::SetFollowCamera(bool followCamera)
+{
+	this->followCamera = followCamera;
+}
+
+float Demo::Player::GetVelocity() const
+{
+	return VELOCITY;
+}
+
+float Demo::Player::SetVelocity(float velocity)
+{
+	return this->VELOCITY = velocity;
+}
+
+bool Demo::Player::TakeDamage(float damage)
+{
+	health -= damage;
+	if (health < 0) health = 0;
+	return IsDead();
+}
+
+bool Demo::Player::IsDead() const
+{
+	return health <= 0;
 }

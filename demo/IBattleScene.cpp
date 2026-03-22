@@ -123,6 +123,11 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	RemoveEnemyCardsInRemoveArea();
 }
 
+void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
+{
+	player->Update(deltaTime);
+}
+
 void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
 {
 	fleeButton->Draw(game->GetGraphicsDevice(), deltaTime);
@@ -159,16 +164,27 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 
 void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 {
+	player->Draw(deltaTime);
 }
 
 void Demo::IBattleScene::Init()
 {
-	// Create buttons
-	const auto buttonWidth = 100;
-	const auto buttonHeight = 50;
+	// Init components
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 20);
+	// Setup player
+	player->SetFollowCamera(false);
+	previousPlayerTransformHandle = player->GetTransformHandle();
+	previousSceneTransformManager = player->GetTransformManager();
+	previousPlayerVelocity = player->GetVelocity();
+	player->SetTransformManager(transformManager);
+	player->SetTransformHandle(player->CreateTransform());
+	player->SetVelocity(125);
+
+	// Create buttons
+	const auto buttonWidth = 100;
+	const auto buttonHeight = 50;
 	attackButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Attack", font.get(), [&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerAttack;
@@ -185,6 +201,10 @@ void Demo::IBattleScene::Init()
 			auto sceMan = game->GetSceneManager();
 			sceMan->PopScene();
 			sceMan->GoToPrevious();
+			player->SetFollowCamera(true);
+			player->SetTransformHandle(previousPlayerTransformHandle);
+			player->SetTransformManager(previousSceneTransformManager);
+			player->SetVelocity(previousPlayerVelocity);
 			markFinished();
 		}));
 	});
