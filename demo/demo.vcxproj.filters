@@ -54,6 +54,9 @@
     <ClCompile Include="IconButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MainMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -77,6 +80,9 @@
     <ClInclude Include="World1Scene.h">
       <Filter>Header Files\World1</Filter>
     </ClInclude>
+    <ClInclude Include="MainMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="uiter.aseprite">
@@ -88,6 +94,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="uiter-Sheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="test-background.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="test-title.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
