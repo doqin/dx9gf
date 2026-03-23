@@ -112,6 +112,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)core\DX9GFExtras;;../core;../includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,6 +141,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)core\DX9GFExtras;;../core;../includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -204,9 +206,11 @@
   <ItemGroup>
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="IconButton.cpp" />
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IDraggable.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Create</PrecompiledHeader>
@@ -214,12 +218,16 @@
     </ClCompile>
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="World1Scene.cpp" />
+    <ClCompile Include="TextButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="IButton.h" />
+    <ClInclude Include="IconButton.h" />
     <ClInclude Include="IContainer.h" />
     <ClInclude Include="IDraggable.h" />
+    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="World1Scene.h" />
@@ -233,12 +241,27 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="test-background.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="test-title.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="uiter-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc" />
+    <ClInclude Include="TextButton.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ui-pack-2.bmp">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="ui-pack.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
