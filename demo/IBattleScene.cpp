@@ -210,14 +210,14 @@ void Demo::IBattleScene::Init()
 	itemsButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Items", font.get(), [](DX9GF::ITrigger* thisObj) {
 	});
 	fleeButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Flee", font.get(), [&](DX9GF::ITrigger* thisObj) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
-			auto sceMan = game->GetSceneManager();
-			sceMan->PopScene();
-			sceMan->GoToPrevious();
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
 			player->SetFollowCamera(true);
 			player->SetTransformHandle(previousPlayerTransformHandle);
 			player->SetTransformManager(previousSceneTransformManager);
 			player->SetVelocity(previousPlayerVelocity);
+			auto sceMan = game->GetSceneManager();
+			sceMan->PopScene();
+			sceMan->GoToPrevious();
 			markFinished();
 		}));
 	});
