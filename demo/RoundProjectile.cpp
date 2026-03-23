@@ -48,15 +48,15 @@ void Demo::RoundProjectile::Init()
 
 void Demo::RoundProjectile::Update(unsigned long long deltaTime)
 {
-    if (decayTime != UNSPECIFIED && this->deltaTime >= decayTime) {
+    if (decayTime != UNSPECIFIED && this->elapsed >= decayTime) {
         state = State::Destroyed;
         return;
     }
-    if (this->deltaTime >= delay) {
+    if (this->elapsed >= delay) {
         auto [currentX, currentY] = GetWorldPosition();
-        SetLocalPosition(currentX + trajectory.x * velocity, currentY + trajectory.y * velocity);
+        SetLocalPosition(currentX + trajectory.x * velocity * deltaTime / 1000.f, currentY + trajectory.y * velocity * deltaTime / 1000.f);
     }
-    this->deltaTime += deltaTime;
+    this->elapsed += deltaTime / 1000.f;
 }
 
 void Demo::RoundProjectile::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime)

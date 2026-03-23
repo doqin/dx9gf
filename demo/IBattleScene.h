@@ -23,6 +23,7 @@ namespace Demo {
         State lastEnemyLayoutState = State::EnemyAttack;
 		bool enemyLayoutInitialized = false;
 		bool isExecutingAttacks = false;
+		unsigned int activeAttacks = 0;
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;

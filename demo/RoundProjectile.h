@@ -5,9 +5,10 @@ namespace Demo {
 	constexpr float UNSPECIFIED = -1;
 
 	class RoundProjectile : public IProjectile {
-	private:
+	public:
 		class Builder;
 		friend class Builder;
+	private:
 		std::shared_ptr<DX9GF::EllipseCollider> collider;
 		std::shared_ptr<DX9GF::ISprite> sprite;
 		float colliderWidth;
@@ -15,7 +16,7 @@ namespace Demo {
 		float velocity;
 		D3DXVECTOR2 trajectory;
 		float delay = 0.f;
-		float deltaTime = 0.f;
+		float elapsed = 0.f;
 		float decayTime = UNSPECIFIED;
 	protected:
 		RoundProjectile(
@@ -74,7 +75,7 @@ namespace Demo {
 			std::shared_ptr<DX9GF::ISprite> sprite,
 			float colliderWidth,
 			float colliderHeight
-		) : instance(std::make_shared<RoundProjectile>(tm, player, sprite, colliderWidth, colliderHeight)) {}
+       ) : instance(std::shared_ptr<RoundProjectile>(new RoundProjectile(tm, player, sprite, colliderWidth, colliderHeight))) {}
 		Builder(
 			std::weak_ptr<DX9GF::TransformManager> tm,
 			std::shared_ptr<Player> player,
@@ -86,7 +87,7 @@ namespace Demo {
 			float rotation = 0,
 			float scaleX = 1,
 			float scaleY = 1
-		) : instance(std::make_shared<RoundProjectile>(tm, player, sprite, colliderWidth, colliderHeight, x, y, rotation, scaleX, scaleY)) {}
+       ) : instance(std::shared_ptr<RoundProjectile>(new RoundProjectile(tm, player, sprite, colliderWidth, colliderHeight, x, y, rotation, scaleX, scaleY))) {}
 		Builder(
 			std::weak_ptr<DX9GF::TransformManager> tm,
 			std::weak_ptr<DX9GF::IGameObject> parent,
@@ -99,7 +100,7 @@ namespace Demo {
 			float rotation = 0,
 			float scaleX = 1,
 			float scaleY = 1
-		) : instance(std::make_shared<RoundProjectile>(tm, parent, player, sprite, colliderWidth, colliderHeight, x, y, rotation, scaleX, scaleY)) {}
+       ) : instance(std::shared_ptr<RoundProjectile>(new RoundProjectile(tm, parent, player, sprite, colliderWidth, colliderHeight, x, y, rotation, scaleX, scaleY))) {}
 		Builder& SetTrajectory(D3DXVECTOR2 trajectory);
 		Builder& SetTargetPosition(float x, float y);
 		Builder& SetVelocity(float velocity);

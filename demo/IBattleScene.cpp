@@ -111,6 +111,10 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	if (!mainBlockCard->IsExecuting()) {
 		if (isExecutingAttacks) {
 			state = State::EnemyAttack;
+			for (auto& enemy : enemies) {
+				enemy->StartAttack(player);
+			}
+			EnemyAttackUpdate(deltaTime);
 			return;
 		}
 		backButton->Update(deltaTime);
@@ -126,6 +130,15 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 {
 	player->Update(deltaTime);
+	bool isDoneAttacking = true;
+	for (auto& enemy : enemies) {
+		enemy->Update(deltaTime);
+		isDoneAttacking &= enemy->IsDoneAttacking();
+	}
+	if (isDoneAttacking) {
+		state = State::PlayerStandBy;
+		PlayerStandByUpdate(deltaTime);
+	}
 }
 
 void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)

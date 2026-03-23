@@ -2,6 +2,7 @@
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
 #include "Player.h"
+#include "IProjectile.h"
 #include <functional>
 #include <vector>
 
@@ -21,6 +22,8 @@ namespace Demo {
         std::vector<DamageIndicator> damageIndicators;
 		std::shared_ptr<DX9GF::Font> damageFont;
 		std::shared_ptr<DX9GF::FontSprite> damageFontSprite;
+		std::vector<std::shared_ptr<IProjectile>> projectiles;
+		DX9GF::CommandBuffer commandBuffer;
 	public:
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth) : IGameObject(tm), maxHealth(maxHealth), health(maxHealth) {}
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1) : IGameObject(tm, x, y, rotation, scaleX, scaleY), maxHealth(maxHealth), health(maxHealth) {}
@@ -31,6 +34,7 @@ namespace Demo {
 		virtual void Update(unsigned long long deltaTime);
 		virtual void Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime);
 		virtual bool TakeDamage(float damage);
-		virtual std::vector<std::shared_ptr<DX9GF::ICommand>> GetAttackCommand(std::shared_ptr<Player> player, std::function<void(void)> finishAttack) = 0;
+		virtual void StartAttack(std::shared_ptr<Player> player) = 0;
+		bool IsDoneAttacking();
 	};
 }

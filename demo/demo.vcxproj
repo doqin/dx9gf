@@ -253,14 +253,18 @@
     <ClInclude Include="World1Scene.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="placeholder-round-projectile.aseprite" />
     <None Include="uiter-Sheet.aseprite">
-      <DeploymentContent>true</DeploymentContent>
+      <DeploymentContent>false</DeploymentContent>
     </None>
     <None Include="uiter.aseprite">
-      <DeploymentContent>true</DeploymentContent>
+      <DeploymentContent>false</DeploymentContent>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="placeholder-round-projectile.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="placeholder.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

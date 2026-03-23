@@ -22,3 +22,4 @@
 #include "DX9GFExtras/DX9GFPlaySoundCommand.h"
 #include "DX9GFExtras/DX9GFConcurrentCommand.h"
 #include "DX9GFExtras/DX9GFCustomCommand.h"
+#include "DX9GFExtras/DX9GFDelayCommand.h"

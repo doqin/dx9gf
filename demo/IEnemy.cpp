@@ -25,16 +25,27 @@ bool Demo::IEnemy::IsDead() const
 
 void Demo::IEnemy::Update(unsigned long long deltaTime)
 {
-  if (cardSpawnTrigger) {
+    if (cardSpawnTrigger) {
         cardSpawnTrigger->Update(deltaTime);
     }
-  for (auto& indicator : damageIndicators) {
+    for (auto& indicator : damageIndicators) {
         indicator.elapsed += deltaTime;
         indicator.offsetY -= 20.f * deltaTime / 1000.f;
     }
     damageIndicators.erase(std::remove_if(damageIndicators.begin(), damageIndicators.end(), [](const DamageIndicator& indicator) {
         return indicator.elapsed >= 700;
     }), damageIndicators.end());
+    // Clear out dead projectiles 
+    for (size_t i = 0; i < projectiles.size(); i++) {
+        if (projectiles[i]->GetState() == DX9GF::IGameObject::State::Destroyed) {
+            projectiles.erase(projectiles.begin() + i);
+            --i;
+        }
+    }
+    for (auto& projectile : projectiles) {
+        projectile->Update(deltaTime);
+    }
+    commandBuffer.Update(deltaTime);
 }
 
 void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
@@ -68,6 +79,9 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
         damageFontSprite->Draw(*camera, deltaTime);
     }
     damageFontSprite->End();
+    for (auto& projectile : projectiles) {
+        projectile->Draw(*camera, deltaTime);
+    }
 }
 
 bool Demo::IEnemy::TakeDamage(float damage)
@@ -80,4 +94,9 @@ bool Demo::IEnemy::TakeDamage(float damage)
         0
     });
     return IsDead();
+}
+
+bool Demo::IEnemy::IsDoneAttacking()
+{
+    return !commandBuffer.IsBusy();
 }

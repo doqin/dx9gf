@@ -169,12 +169,18 @@
     <None Include="uiter-Sheet.aseprite">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="placeholder-round-projectile.aseprite">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="uiter-Sheet.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="placeholder.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="placeholder-round-projectile.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
