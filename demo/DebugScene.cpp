@@ -72,6 +72,7 @@ void Demo::DebugScene::Init()
 
 	transformManager->RebuildHierarchy();
 	DX9GF::ITrigger::drawTrigger = true;
+	DX9GF::ICollider::drawCollider = true;
 }
 
 void Demo::DebugScene::Update(unsigned long long deltaTime)

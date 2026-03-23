@@ -25,8 +25,10 @@ bool Demo::IEnemy::IsDead() const
 
 void Demo::IEnemy::Update(unsigned long long deltaTime)
 {
-    if (cardSpawnTrigger) {
-        cardSpawnTrigger->Update(deltaTime);
+    if (!isOnStandby) {
+        if (cardSpawnTrigger) {
+            cardSpawnTrigger->Update(deltaTime);
+        }
     }
     for (auto& indicator : damageIndicators) {
         indicator.elapsed += deltaTime;
@@ -58,7 +60,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
         damageFontSprite = std::make_shared<DX9GF::FontSprite>(damageFont.get());
     }
     if (cardSpawnTrigger) {
-        cardSpawnTrigger->Draw(graphicsDevice, camera);
+        cardSpawnTrigger->Draw(graphicsDevice, *camera);
     }
 
     const auto currentHealth = static_cast<int>(std::round(health));
@@ -94,6 +96,11 @@ bool Demo::IEnemy::TakeDamage(float damage)
         0
     });
     return IsDead();
+}
+
+void Demo::IEnemy::SetState(bool isOnStandby)
+{
+    this->isOnStandby = isOnStandby;
 }
 
 bool Demo::IEnemy::IsDoneAttacking()

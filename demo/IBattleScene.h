@@ -23,20 +23,18 @@ namespace Demo {
         State lastEnemyLayoutState = State::EnemyAttack;
 		bool enemyLayoutInitialized = false;
 		bool isExecutingAttacks = false;
-		unsigned int activeAttacks = 0;
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;
-		DX9GF::TransformHandle previousPlayerTransformHandle;
-		std::weak_ptr<DX9GF::TransformManager> previousSceneTransformManager;
-		float previousPlayerVelocity = 0;
+		std::shared_ptr<Player> battlePlayer;
 		// Managers
 		DX9GF::CommandBuffer commandBuffer;
 		std::shared_ptr<DraggableManager> draggableManager;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		DX9GF::ColliderManager colliderManager;
        // Battle cards
 		std::shared_ptr<MainBlockCard> mainBlockCard;
-		std::vector<std::shared_ptr<IDraggable>> cardDeck;
+		std::vector<std::shared_ptr<IDraggable>> cardHand;
 		std::vector<std::shared_ptr<IEnemy>> enemies;
 		float enemyCardRemoveAreaX = 220.f;
 		float enemyCardRemoveAreaY = -140.f;

@@ -403,4 +403,23 @@ std::optional<std::tuple<float, float>> DX9GF::ICollider::IsIntersecting(std::we
     );
 }
 
+bool DX9GF::ICollider::IsCollided(std::weak_ptr<RectangleCollider> targetCollider, std::weak_ptr<EllipseCollider> otherCollider)
+{
+    auto target = targetCollider.lock();
+    auto other = otherCollider.lock();
+    if (!target || !other) {
+        return false;
+    }
+
+    return IsRectEllipseOverlappingTransformed(
+        *target, target->GetWorldX(), target->GetWorldY(),
+        *other, other->GetWorldX(), other->GetWorldY()
+    );
+}
+
+bool DX9GF::ICollider::IsCollided(std::weak_ptr<EllipseCollider> targetCollider, std::weak_ptr<RectangleCollider> otherCollider)
+{
+    return IsCollided(otherCollider, targetCollider);
+}
+
 bool DX9GF::ICollider::drawCollider = false;

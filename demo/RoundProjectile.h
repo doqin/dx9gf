@@ -18,6 +18,7 @@ namespace Demo {
 		float delay = 0.f;
 		float elapsed = 0.f;
 		float decayTime = UNSPECIFIED;
+		float damage = 0.f;
 	protected:
 		RoundProjectile(
 			std::weak_ptr<DX9GF::TransformManager> tm, 
@@ -106,6 +107,7 @@ namespace Demo {
 		Builder& SetVelocity(float velocity);
 		Builder& SetDelay(float delay);
 		Builder& SetDecayTime(float decayTime);
+		Builder& SetDamage(float dmg);
 		std::shared_ptr<RoundProjectile> Build();
 	};
 }

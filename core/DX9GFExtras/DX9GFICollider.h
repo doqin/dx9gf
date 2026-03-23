@@ -20,7 +20,10 @@ namespace DX9GF {
 		static std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<RectangleCollider> targetCollider, std::weak_ptr<EllipseCollider> otherCollider, float newX, float newY);
 		static std::optional<std::tuple<float, float>> IsIntersecting(std::weak_ptr<EllipseCollider> targetCollider, std::weak_ptr<RectangleCollider> otherCollider, float newX, float newY);
 
+		static bool IsCollided(std::weak_ptr<RectangleCollider> targetCollider, std::weak_ptr<EllipseCollider> otherCollider);
+		static bool IsCollided(std::weak_ptr<EllipseCollider> targetCollider, std::weak_ptr<RectangleCollider> otherCollider);
+
 		static bool drawCollider;
-		virtual void Draw(GraphicsDevice* graphicsDevice, Camera* camera) {}
+		virtual void Draw(GraphicsDevice* graphicsDevice, const Camera& camera) {}
 	};
 }

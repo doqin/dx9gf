@@ -30,7 +30,7 @@ void Demo::TestEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera*
 
 void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player) {
     this->player = player;
-    for (size_t i = 0; i < 10; i++) {
+    for (int i = 0; i < 5; i++) {
         commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, i](std::function<void(void)> markFinished) {
             if (auto lock = this->player.lock()) {
                 projectiles.push_back(
@@ -39,12 +39,13 @@ void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player) {
                         lock,
                         roundProjectileSprite,
                         16, 16,
-                        i * 20, 0
+                        -50 + i * 20, -200
                     )
-                    .SetTargetPosition(lock->GetWorldX(), lock->GetWorldY())
-                    .SetDelay(1.f)
+                    .SetTargetPosition(lock->GetCollider().lock()->GetWorldX(), lock->GetCollider().lock()->GetWorldY())
+                    .SetDelay(.2f)
                     .SetDecayTime(4.f)
-                    .SetVelocity(100.f)
+                    .SetVelocity(150.f)
+                    .SetDamage(5.f)
                     .Build()
                 );
                 projectiles.back()->Init();
@@ -55,7 +56,7 @@ void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player) {
             }
             markFinished();
         }));
-        commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(1.f));
+        commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.1f));
     }
-    commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(1.f));
+    commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(3.f));
 }

@@ -241,7 +241,7 @@ void Demo::IDraggable::Update(unsigned long long deltaTime)
 
 void Demo::IDraggable::Draw(unsigned long long deltaTime)
 {
-	trigger->Draw(graphicsDevice, camera);
+	trigger->Draw(graphicsDevice, *camera);
 	auto thisX = trigger->GetWorldX() - trigger->GetOriginX();
 	auto thisY = trigger->GetWorldY() - trigger->GetOriginY();
 	graphicsDevice->DrawLine(*camera, thisX, thisY, thisX + 1, thisY + 1, 0xFFFF0000);

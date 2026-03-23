@@ -61,5 +61,6 @@ namespace DX9GF {
 		void FlipVertical();
 		//origin
 		void SetOrigin(float x, float y);
+		GraphicsDevice* GetGraphicsDevice();
 	};
 }

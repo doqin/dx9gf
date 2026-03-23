@@ -16,6 +16,7 @@ namespace Demo {
 			float offsetY = 0.f;
 			unsigned long long elapsed = 0;
 		};
+		bool isOnStandby = true;
 		float health;
         std::shared_ptr<DX9GF::RectangleTrigger> cardSpawnTrigger;
 		std::function<void(std::shared_ptr<IEnemy>)> onRequestEnemyCard = [](std::shared_ptr<IEnemy>) {};
@@ -35,6 +36,7 @@ namespace Demo {
 		virtual void Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime);
 		virtual bool TakeDamage(float damage);
 		virtual void StartAttack(std::shared_ptr<Player> player) = 0;
+		void SetState(bool isOnStandby);
 		bool IsDoneAttacking();
 	};
 }

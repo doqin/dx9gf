@@ -26,6 +26,11 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 			targetX = -totalWidth / 2.f + i * horizontalSpacing;
 			targetY = centerLineY;
 		}
+		else if (targetState == State::EnemyAttack) {
+			const float totalHeight = (enemyCount > 1) ? (enemyCount - 1) * verticalSpacing : 0.f;
+			targetX = app->GetScreenWidth() / 1.5f;
+			targetY = -totalHeight / 2.f + i * verticalSpacing;
+		}
 		else {
 			const float totalHeight = (enemyCount > 1) ? (enemyCount - 1) * verticalSpacing : 0.f;
 			targetX = rightSideX;
@@ -47,7 +52,7 @@ void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy)
 {
 	auto card = std::make_shared<EnemyCard>(transformManager, enemy, -260.f, -140.f);
 	card->Init(draggableManager, game->GetGraphicsDevice(), &camera);
-	cardDeck.push_back(card);
+	cardHand.push_back(card);
 }
 
 void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
@@ -57,7 +62,7 @@ void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
 	const float right = enemyCardRemoveAreaX + enemyCardRemoveAreaWidth;
 	const float bottom = enemyCardRemoveAreaY + enemyCardRemoveAreaHeight;
 
-	cardDeck.erase(std::remove_if(cardDeck.begin(), cardDeck.end(), [&](const std::shared_ptr<IDraggable>& card) {
+	cardHand.erase(std::remove_if(cardHand.begin(), cardHand.end(), [&](const std::shared_ptr<IDraggable>& card) {
 		auto enemyCard = std::dynamic_pointer_cast<EnemyCard>(card);
 		if (!enemyCard || enemyCard->IsDragging()) {
 			return false;
@@ -70,7 +75,7 @@ void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
 			return true;
 		}
 		return false;
-	}), cardDeck.end());
+	}), cardHand.end());
 }
 
 void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
@@ -91,6 +96,9 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 	itemsButton->Update(deltaTime);
 	actionButton->Update(deltaTime);
 	attackButton->Update(deltaTime);
+	for (auto& enemy : enemies) {
+		enemy->Update(deltaTime);
+	}
 }
 
 void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
@@ -110,9 +118,29 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	enemyCardRemoveAreaHeight = backButton->GetHeight();
 	if (!mainBlockCard->IsExecuting()) {
 		if (isExecutingAttacks) {
+			for (size_t i = 0; i < enemies.size(); ++i) {
+				if (enemies[i]->IsDead()) {
+					enemies.erase(enemies.begin() + i);
+					--i;
+				}
+			}
+			for (size_t i = 0; i < cardHand.size(); ++i) {
+				auto enemyCard = dynamic_pointer_cast<EnemyCard>(cardHand[i]);
+				if (enemyCard) {
+					cardHand.erase(cardHand.begin() + i);
+					--i;
+					if (auto manager = enemyCard->GetDraggableManager().lock()) {
+						manager->Remove(enemyCard);
+					}
+				}
+			}
 			state = State::EnemyAttack;
+			QueueEnemyLayoutTransition(State::EnemyAttack);
 			for (auto& enemy : enemies) {
-				enemy->StartAttack(player);
+				enemy->SetState(true);
+			}
+			for (auto& enemy : enemies) {
+				enemy->StartAttack(battlePlayer);
 			}
 			EnemyAttackUpdate(deltaTime);
 			return;
@@ -129,7 +157,7 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 
 void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 {
-	player->Update(deltaTime);
+	battlePlayer->Update(deltaTime);
 	bool isDoneAttacking = true;
 	for (auto& enemy : enemies) {
 		enemy->Update(deltaTime);
@@ -177,7 +205,11 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 
 void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 {
-	player->Draw(deltaTime);
+	battlePlayer->Draw(deltaTime);
+	auto app = DX9GF::Application::GetInstance();
+	auto gd = game->GetGraphicsDevice();
+	gd->DrawRectangle(camera, -battlePlayer->GetMaxHealth() / 2, app->GetScreenHeight() / 2.f - 40, battlePlayer->GetMaxHealth(), 20, 0xFFFF0000, true);
+	gd->DrawRectangle(camera, -battlePlayer->GetMaxHealth() / 2, app->GetScreenHeight() / 2.f - 40, battlePlayer->GetHealth(), 20, 0xFF00FF00, true);
 }
 
 void Demo::IBattleScene::Init()
@@ -187,13 +219,11 @@ void Demo::IBattleScene::Init()
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 20);
 	// Setup player
-	player->SetFollowCamera(false);
-	previousPlayerTransformHandle = player->GetTransformHandle();
-	previousSceneTransformManager = player->GetTransformManager();
-	previousPlayerVelocity = player->GetVelocity();
-	player->SetTransformManager(transformManager);
-	player->SetTransformHandle(player->CreateTransform());
-	player->SetVelocity(125);
+	battlePlayer = std::make_shared<Player>(transformManager);
+	battlePlayer->Init(game->GetGraphicsDevice(), &colliderManager, &camera);
+	battlePlayer->SetFollowCamera(false);
+	battlePlayer->SetVelocity(125);
+	battlePlayer->SetHealth(player->GetHealth());
 
 	// Create buttons
 	const auto buttonWidth = 100;
@@ -201,6 +231,9 @@ void Demo::IBattleScene::Init()
 	attackButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Attack", font.get(), [&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerAttack;
+			for (auto& enemy : enemies) {
+				enemy->SetState(false);
+			}
 			markFinished();
 		}));
 		isExecutingAttacks = false;
@@ -211,10 +244,7 @@ void Demo::IBattleScene::Init()
 	});
 	fleeButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Flee", font.get(), [&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
-			player->SetFollowCamera(true);
-			player->SetTransformHandle(previousPlayerTransformHandle);
-			player->SetTransformManager(previousSceneTransformManager);
-			player->SetVelocity(previousPlayerVelocity);
+			player->SetHealth(battlePlayer->GetHealth());
 			auto sceMan = game->GetSceneManager();
 			sceMan->PopScene();
 			sceMan->GoToPrevious();
@@ -224,6 +254,9 @@ void Demo::IBattleScene::Init()
 	backButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Back", font.get(), [&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerStandBy;
+			for (auto& enemy : enemies) {
+				enemy->SetState(true);
+			}
 			markFinished();
 		}));
 	});
@@ -279,10 +312,10 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
 	gd->Clear();
-	for (auto& enemy : enemies) {
-		enemy->Draw(game->GetGraphicsDevice(), &camera, deltaTime);
-	}
 	if (SUCCEEDED(gd->BeginDraw())) {
+		for (auto& enemy : enemies) {
+			enemy->Draw(game->GetGraphicsDevice(), &camera, deltaTime);
+		}
 		switch (state) {
 		case State::PlayerStandBy:
 			PlayerStandByDraw(deltaTime);

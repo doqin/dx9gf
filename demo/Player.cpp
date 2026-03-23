@@ -118,82 +118,92 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 			cameraDeltaTime = (std::max)(0.f, cameraDeltaTime - deltaTime);
 		}
 	}
+	if (isInvincible) {
+		if (timeSinceTurnedInvincible > INVINCIBILITY_DURATION) {
+			isInvincible = false;
+		}
+		else {
+			timeSinceTurnedInvincible += deltaTime / 1000.f;
+		}
+	}
 }
 
 void Demo::Player::Draw(unsigned long long deltaTime) {
-	switch (state) {
-	case State::Down: {
-		if (isWalking) {
-			walkingDown->Begin();
-			auto [x, y] = GetWorldPosition();
-			walkingDown->SetPosition(x, y);
-			walkingDown->Draw(*camera, deltaTime);
-			walkingDown->End();
+	if (!isInvincible || static_cast<int>(timeSinceTurnedInvincible / BLINKING_DURATION) % 2) {
+		switch (state) {
+		case State::Down: {
+			if (isWalking) {
+				walkingDown->Begin();
+				auto [x, y] = GetWorldPosition();
+				walkingDown->SetPosition(x, y);
+				walkingDown->Draw(*camera, deltaTime);
+				walkingDown->End();
+			}
+			else {
+				idleDown->Begin();
+				auto [x, y] = GetWorldPosition();
+				idleDown->SetPosition(x, y);
+				idleDown->Draw(*camera, deltaTime);
+				idleDown->End();
+			}
 		}
-		else {
-			idleDown->Begin();
-			auto [x, y] = GetWorldPosition();
-			idleDown->SetPosition(x, y);
-			idleDown->Draw(*camera, deltaTime);
-			idleDown->End();
-		}
-	}
-	break;
-	case State::Up: {
-		if (isWalking) {
-			walkingUp->Begin();
-			auto [x, y] = GetWorldPosition();
-			walkingUp->SetPosition(x, y);
-			walkingUp->Draw(*camera, deltaTime);
-			walkingUp->End();
-		}
-		else {
-			idleUp->Begin();
-			auto [x, y] = GetWorldPosition();
-			idleUp->SetPosition(x, y);
-			idleUp->Draw(*camera, deltaTime);
-			idleUp->End();
-		}
-	}
-	break;
-	case State::Right: {
-		if (isWalking) {
-			walkingRight->Begin();
-			auto [x, y] = GetWorldPosition();
-			walkingRight->SetPosition(x, y);
-			walkingRight->Draw(*camera, deltaTime);
-			walkingRight->End();
-		}
-		else {
-			idleRight->Begin();
-			auto [x, y] = GetWorldPosition();
-			idleRight->SetPosition(x, y);
-			idleRight->Draw(*camera, deltaTime);
-			idleRight->End();
-		}
-	}
-	break;
-	case State::Left: {
-		if (isWalking) {
-			walkingLeft->Begin();
-			auto [x, y] = GetWorldPosition();
-			walkingLeft->SetPosition(x, y);
-			walkingLeft->Draw(*camera, deltaTime);
-			walkingLeft->End();
-		}
-		else {
-			idleLeft->Begin();
-			auto [x, y] = GetWorldPosition();
-			idleLeft->SetPosition(x, y);
-			idleLeft->Draw(*camera, deltaTime);
-			idleLeft->End();
-		}
-	}
-	break;
-	default:
 		break;
+		case State::Up: {
+			if (isWalking) {
+				walkingUp->Begin();
+				auto [x, y] = GetWorldPosition();
+				walkingUp->SetPosition(x, y);
+				walkingUp->Draw(*camera, deltaTime);
+				walkingUp->End();
+			}
+			else {
+				idleUp->Begin();
+				auto [x, y] = GetWorldPosition();
+				idleUp->SetPosition(x, y);
+				idleUp->Draw(*camera, deltaTime);
+				idleUp->End();
+			}
+		}
+		break;
+		case State::Right: {
+			if (isWalking) {
+				walkingRight->Begin();
+				auto [x, y] = GetWorldPosition();
+				walkingRight->SetPosition(x, y);
+				walkingRight->Draw(*camera, deltaTime);
+				walkingRight->End();
+			}
+			else {
+				idleRight->Begin();
+				auto [x, y] = GetWorldPosition();
+				idleRight->SetPosition(x, y);
+				idleRight->Draw(*camera, deltaTime);
+				idleRight->End();
+			}
+		}
+		break;
+		case State::Left: {
+			if (isWalking) {
+				walkingLeft->Begin();
+				auto [x, y] = GetWorldPosition();
+				walkingLeft->SetPosition(x, y);
+				walkingLeft->Draw(*camera, deltaTime);
+				walkingLeft->End();
+			}
+			else {
+				idleLeft->Begin();
+				auto [x, y] = GetWorldPosition();
+				idleLeft->SetPosition(x, y);
+				idleLeft->Draw(*camera, deltaTime);
+				idleLeft->End();
+			}
+		}
+		break;
+		default:
+			break;
+		}
 	}
-	collider->Draw(graphicsDevice, camera);
+	collider->Draw(graphicsDevice, *camera);
 }
 
 void Demo::Player::SetFollowCamera(bool followCamera)
@@ -213,7 +223,10 @@ float Demo::Player::SetVelocity(float velocity)
 
 bool Demo::Player::TakeDamage(float damage)
 {
+	if (isInvincible) return IsDead();
 	health -= damage;
+	isInvincible = true;
+	timeSinceTurnedInvincible = 0.f;
 	if (health < 0) health = 0;
 	return IsDead();
 }
@@ -221,4 +234,24 @@ bool Demo::Player::TakeDamage(float damage)
 bool Demo::Player::IsDead() const
 {
 	return health <= 0;
+}
+
+void Demo::Player::SetHealth(float hp)
+{
+	health = hp;
+}
+
+float Demo::Player::GetMaxHealth() const
+{
+	return MAX_HEALTH;
+}
+
+float Demo::Player::GetHealth() const
+{
+	return health;
+}
+
+std::weak_ptr<DX9GF::RectangleCollider> Demo::Player::GetCollider()
+{
+	return collider;
 }

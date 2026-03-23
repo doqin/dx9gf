@@ -106,7 +106,7 @@ float DX9GF::RectangleTrigger::GetHeight() const
     return height;
 }
 
-void DX9GF::RectangleTrigger::Draw(GraphicsDevice* graphicsDevice, Camera* camera)
+void DX9GF::RectangleTrigger::Draw(GraphicsDevice* graphicsDevice, const Camera& camera)
 {
 	if (!ITrigger::drawTrigger) return;
 
@@ -118,7 +118,7 @@ void DX9GF::RectangleTrigger::Draw(GraphicsDevice* graphicsDevice, Camera* camer
 	float ox = GetOriginX();
 	float oy = GetOriginY();
 	graphicsDevice->DrawRectangle(
-		*camera,
+		camera,
 		x,
 		y,
 		width,

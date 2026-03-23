@@ -35,6 +35,12 @@ Demo::RoundProjectile::Builder& Demo::RoundProjectile::Builder::SetDecayTime(flo
     return *this;
 }
 
+Demo::RoundProjectile::Builder& Demo::RoundProjectile::Builder::SetDamage(float dmg)
+{
+    this->instance->damage = dmg;
+    return *this;
+}
+
 std::shared_ptr<Demo::RoundProjectile> Demo::RoundProjectile::Builder::Build()
 {
     return instance;
@@ -56,6 +62,9 @@ void Demo::RoundProjectile::Update(unsigned long long deltaTime)
         auto [currentX, currentY] = GetWorldPosition();
         SetLocalPosition(currentX + trajectory.x * velocity * deltaTime / 1000.f, currentY + trajectory.y * velocity * deltaTime / 1000.f);
     }
+    if (collider->IsCollided(player->GetCollider())) {
+        player->TakeDamage(damage);
+    }
     this->elapsed += deltaTime / 1000.f;
 }
 
@@ -71,4 +80,5 @@ void Demo::RoundProjectile::Draw(const DX9GF::Camera& camera, unsigned long long
     this->sprite->SetRotation(GetWorldRotation());
     this->sprite->Draw(camera, deltaTime);
     this->sprite->End();
+    collider->Draw(sprite->GetGraphicsDevice(), camera);
 }

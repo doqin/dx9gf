@@ -18,12 +18,16 @@ namespace Demo {
 		const float CAMERA_VELOCITY = 25;
 		const float CAMERA_ACCELERATION = 50;
 		const float CAMERA_SNAP_MARGIN = 1.f;
+		const float INVINCIBILITY_DURATION = 1.f;
+		const float BLINKING_DURATION = 0.1f;
 		// States
 		State state = State::Down;
 		bool isWalking = false;
 		float cameraDeltaTime = 0;
 		bool followCamera = true;
 		float health = MAX_HEALTH;
+		bool isInvincible = false;
+		float timeSinceTurnedInvincible = 0.f;
 		// Sprites
 		std::shared_ptr<DX9GF::Texture> spritesheet;
 		std::shared_ptr<DX9GF::StaticSprite> idleDown;
@@ -68,5 +72,9 @@ namespace Demo {
 		float SetVelocity(float velocity);
 		bool TakeDamage(float damage);
 		bool IsDead() const;
+		void SetHealth(float hp);
+		float GetMaxHealth() const;
+		float GetHealth() const;
+		std::weak_ptr<DX9GF::RectangleCollider> GetCollider();
 	};
 }
