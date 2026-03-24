@@ -1,6 +1,11 @@
 ﻿#include "pch.h"
 #include "DebugScene.h"
 
+Demo::DebugScene::DebugScene(Game* game, int sw, int sh) : IScene(sw, sh), game(game), uiCamera(sw, sh)
+{
+	uiCamera.SetPosition(sw / 2.0f, sh / 2.0f);
+}
+
 void Demo::DebugScene::Init()
 {
 	draggableManager = std::make_shared<DraggableManager>();
@@ -19,6 +24,7 @@ void Demo::DebugScene::Init()
 	uiSheetTex->LoadTexture(L"ui-pack.png");	
 	//Everything works fine with .png, but .bmp is causing coordinate issues. Idk how to fix bruh
 	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 24);
+	myFontSprite = std::make_shared<DX9GF::FontSprite>(myFont.get());
 
 	//create 1 text button and 2 icon buttons
 	auto btnTextExit = std::make_shared<Demo::TextButton>(
@@ -76,6 +82,19 @@ void Demo::DebugScene::Update(unsigned long long deltaTime)
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
+	uiCamera.Update();
+	auto inputChars = Demo::TextInputManager::GetInstance()->ReadInput();
+	for (char c : inputChars) {
+		if (c == '\b') {
+			if (typedText.length() > 16) {
+				typedText.pop_back();
+			}
+		}
+		else {
+			typedText += c;
+		}
+	}
+
 	if (inpMan->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
 		auto dX = inpMan->GetRelativeMouseX();
 		auto dY = inpMan->GetRelativeMouseY();
@@ -106,6 +125,15 @@ void Demo::DebugScene::Draw(unsigned long long deltaTime)
 		for (auto& btn : uiButtons)
 		{
 			btn->Draw(&this->camera, gd, deltaTime);
+		}
+
+		if (myFontSprite) {
+			myFontSprite->Begin();
+			myFontSprite->SetPosition(20.0f, 50.0f);
+			myFontSprite->SetColor(0xFF00FF00);
+			myFontSprite->SetText(std::wstring(typedText.begin(), typedText.end()));
+			myFontSprite->Draw(uiCamera, deltaTime);
+			myFontSprite->End();
 		}
 
 		gd->EndDraw();
