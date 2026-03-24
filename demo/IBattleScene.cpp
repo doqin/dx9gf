@@ -1,6 +1,101 @@
 #include "pch.h"
 #include "IBattleScene.h"
 #include <algorithm>
+#include <random>
+
+namespace {
+	constexpr float HiddenPileX = -10000.f;
+	constexpr float HiddenPileY = -10000.f;
+
+	void HidePileCard(const std::shared_ptr<Demo::IDraggable>& card)
+	{
+		if (!card) {
+			return;
+		}
+		if (auto parent = card->GetParent(); parent.has_value()) {
+			card->DetachParent();
+		}
+		card->SetLocalPosition(HiddenPileX, HiddenPileY);
+	}
+}
+
+void Demo::IBattleScene::StartBattle()
+{
+    for (auto& card : drawPile) {
+		HidePileCard(card);
+	}
+	currentTurn = 1;
+	DrawCards(5);
+}
+
+void Demo::IBattleScene::DrawCards(size_t count)
+{
+	for (size_t i = 0; i < count; ++i) {
+		if (drawPile.empty()) {
+			ShuffleDiscardIntoDrawPile();
+		}
+		if (drawPile.empty()) {
+			break;
+		}
+		auto card = drawPile.back();
+		drawPile.pop_back();
+		cardHand.push_back(card);
+		if (handContainer) {
+			handContainer->StoreCard(card);
+		}
+	}
+}
+
+void Demo::IBattleScene::ShuffleDiscardIntoDrawPile()
+{
+	if (discardPile.empty()) {
+		return;
+	}
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::shuffle(discardPile.begin(), discardPile.end(), gen);
+	for (auto& card : discardPile) {
+		HidePileCard(card);
+		drawPile.push_back(card);
+	}
+	discardPile.clear();
+}
+
+void Demo::IBattleScene::MovePlayedPileToDiscardPileIfNeeded()
+{
+	if (currentTurn == 0 || currentTurn % 3 != 0 || playedPile.empty()) {
+		return;
+	}
+	for (auto& card : playedPile) {
+        HidePileCard(card);
+		discardPile.push_back(card);
+	}
+	playedPile.clear();
+}
+
+void Demo::IBattleScene::MoveExecutedHandCardsToPlayedPile()
+{
+	for (size_t i = 0; i < cardHand.size(); ++i) {
+		auto statementCard = std::dynamic_pointer_cast<IStatementCard>(cardHand[i]);
+		if (!statementCard) {
+			continue;
+		}
+		auto parent = statementCard->GetParent();
+		if (!parent.has_value() || parent.value().lock().get() != mainBlockCard.get()) {
+			continue;
+		}
+		playedPile.push_back(statementCard);
+		cardHand.erase(cardHand.begin() + i);
+		--i;
+	}
+}
+
+void Demo::IBattleScene::BeginNextTurn()
+{
+	++currentTurn;
+	MovePlayedPileToDiscardPileIfNeeded();
+	DrawCards(3);
+}
 
 void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 {
@@ -104,8 +199,12 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 {
 	auto app = DX9GF::Application::GetInstance();
-	const float screenWidth = app->GetScreenWidth();
-	const float buttonY = app->GetScreenHeight() / 2.f - 20 - attackButton->GetHeight();
+    const float screenWidth = static_cast<float>(app->GetScreenWidth());
+	const float screenHeight = static_cast<float>(app->GetScreenHeight());
+    if (handContainer) {
+       handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 60.f);
+	}
+    const float buttonY = screenHeight / 2.f - 20 - attackButton->GetHeight();
 	const float sidePadding = 20.f;
 	const float leftX = -screenWidth / 2.f + sidePadding;
 	const float executeX = leftX + backButton->GetWidth() + sidePadding;
@@ -118,6 +217,7 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	enemyCardRemoveAreaHeight = backButton->GetHeight();
 	if (!mainBlockCard->IsExecuting()) {
 		if (isExecutingAttacks) {
+           MoveExecutedHandCardsToPlayedPile();
 			for (size_t i = 0; i < enemies.size(); ++i) {
 				if (enemies[i]->IsDead()) {
 					enemies.erase(enemies.begin() + i);
@@ -164,6 +264,7 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		isDoneAttacking &= enemy->IsDoneAttacking();
 	}
 	if (isDoneAttacking) {
+		BeginNextTurn();
 		state = State::PlayerStandBy;
 		PlayerStandByUpdate(deltaTime);
 	}
@@ -276,6 +377,8 @@ void Demo::IBattleScene::Init()
 
 	mainBlockCard = std::make_shared<MainBlockCard>(transformManager, -100.f, -140.f);
 	mainBlockCard->Init(draggableManager, game->GetGraphicsDevice(), &camera);
+	handContainer = std::make_shared<HandContainer>(transformManager, 180, 40, -250.f, -200.f);
+	handContainer->Init(draggableManager, game->GetGraphicsDevice(), &camera, &playedPile);
 	transformManager->RebuildHierarchy();
 }
 

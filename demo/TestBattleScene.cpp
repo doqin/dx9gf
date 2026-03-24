@@ -17,11 +17,11 @@ void Demo::TestBattleScene::Init()
 	});
 	enemies.push_back(testEnemy);
 
-	cardHand.push_back(std::make_shared<StrikeCard>(transformManager, -260.f, -80.f));
-	cardHand.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
-	cardHand.push_back(std::make_shared<StrikeCard>(transformManager, -260.f, -80.f));
-	cardHand.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
-	cardHand.push_back(std::make_shared<StrikeCard>(transformManager, -260.f, -80.f));
-	cardHand.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
+	for (size_t i = 0; i < 9; ++i) {
+		auto strikeCard = std::make_shared<StrikeCard>(transformManager, -260.f, -80.f);
+		strikeCard->Init(draggableManager, game->GetGraphicsDevice(), &camera);
+		drawPile.push_back(strikeCard);
+	}
+	StartBattle();
 	transformManager->RebuildHierarchy();
 }

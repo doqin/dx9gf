@@ -93,6 +93,9 @@
     <ClCompile Include="RoundProjectile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HandContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -160,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="RoundProjectile.h">
       <Filter>Header Files\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="HandContainer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

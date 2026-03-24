@@ -8,6 +8,7 @@
 #include "MainBlockCard.h"
 #include "StrikeCard.h"
 #include "EnemyCard.h"
+#include "HandContainer.h"
 #include "TestEnemy.h"
 
 namespace Demo {
@@ -34,7 +35,12 @@ namespace Demo {
 		DX9GF::ColliderManager colliderManager;
        // Battle cards
 		std::shared_ptr<MainBlockCard> mainBlockCard;
+		std::shared_ptr<HandContainer> handContainer;
 		std::vector<std::shared_ptr<IDraggable>> cardHand;
+		std::vector<std::shared_ptr<IDraggable>> drawPile;
+		std::vector<std::shared_ptr<IDraggable>> playedPile;
+		std::vector<std::shared_ptr<IDraggable>> discardPile;
+		size_t currentTurn = 0;
 		std::vector<std::shared_ptr<IEnemy>> enemies;
 		float enemyCardRemoveAreaX = 220.f;
 		float enemyCardRemoveAreaY = -140.f;
@@ -49,8 +55,14 @@ namespace Demo {
 		std::shared_ptr<TextButton> backButton;
 		std::shared_ptr<TextButton> executeButton;
 		void CreateEnemyCard(std::shared_ptr<IEnemy> enemy);
+		void StartBattle();
 		
 	private:
+      void DrawCards(size_t count);
+		void ShuffleDiscardIntoDrawPile();
+		void MovePlayedPileToDiscardPileIfNeeded();
+		void MoveExecutedHandCardsToPlayedPile();
+		void BeginNextTurn();
 		// Updates
 		void PlayerStandByUpdate(unsigned long long deltaTime);
 		void PlayerAttackUpdate(unsigned long long deltaTime);
