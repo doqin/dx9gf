@@ -8,14 +8,18 @@
 #include "DX9GFFont.h"
 #include "TextButton.h"
 #include "IconButton.h"
+#include "IConversation.h"
 
 namespace Demo {
 	class DebugScene : public DX9GF::IScene {
 		Game* game;
+		DX9GF::CommandBuffer commandBuffer;
+		std::shared_ptr<DX9GF::FontSprite> myFontSprite;
 		std::shared_ptr<DraggableManager> draggableManager;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
 		std::vector<std::shared_ptr<IContainer>> containers;
 		std::vector<std::shared_ptr<IDraggable>> draggables;
+		std::shared_ptr<IConversation> activeConversation;
 
 		//UI component
 		std::vector<std::shared_ptr<Demo::IButton>> uiButtons;
