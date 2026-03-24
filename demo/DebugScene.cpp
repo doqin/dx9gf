@@ -1,6 +1,11 @@
 ﻿#include "pch.h"
 #include "DebugScene.h"
 
+Demo::DebugScene::DebugScene(Game* game, int sw, int sh) : IScene(sw, sh), game(game), uiCamera(sw, sh)
+{
+	uiCamera.SetPosition(sw / 2.0f, sh / 2.0f);
+}
+
 void Demo::DebugScene::Init()
 {
 	draggableManager = std::make_shared<DraggableManager>();
@@ -77,8 +82,29 @@ void Demo::DebugScene::Update(unsigned long long deltaTime)
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
-
 	if (!commandBuffer.IsBusy()) {
+		uiCamera.Update();
+		if (inpMan->KeyDown(DIK_SPACE)) {
+			auto [w, h] = camera.GetScreenResolution();
+			activeConversation = std::make_shared<IConversation>(myFontSprite, w, h);
+
+			activeConversation->AddLine({ std::nullopt, std::nullopt, L"Player", L"Bấm chuột trái để qua câu nha!" });
+			activeConversation->AddLine({ std::nullopt, std::nullopt, L"Chó", L"Gâu Gâu!" });
+
+			commandBuffer.PushCommand(activeConversation);
+		}
+		auto inputChars = Demo::TextInputManager::GetInstance()->ReadInput();
+		for (char c : inputChars) {
+			if (c == '\b') {
+				if (typedText.length() > 16) {
+					typedText.pop_back();
+				}
+			}
+			else {
+				typedText += c;
+			}
+		}
+
 		if (inpMan->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
 			auto dX = inpMan->GetRelativeMouseX();
 			auto dY = inpMan->GetRelativeMouseY();
@@ -89,20 +115,11 @@ void Demo::DebugScene::Update(unsigned long long deltaTime)
 		auto camZoom = camera.GetZoom();
 		camera.SetZoom(camZoom + dZ / static_cast<float>(1000));
 		draggableManager->Update(deltaTime);
+		transformManager->UpdateAll();
 
 		//update all UI button
 		for (auto& btn : uiButtons) {
 			btn->Update(deltaTime);
-		}
-
-		if (inpMan->KeyDown(DIK_SPACE)) {
-			auto [w, h] = camera.GetScreenResolution();
-			activeConversation = std::make_shared<IConversation>(myFontSprite, w, h);
-
-			activeConversation->AddLine({ std::nullopt, std::nullopt, L"Player", L"Bấm chuột trái để qua câu nha!" });
-			activeConversation->AddLine({ std::nullopt, std::nullopt, L"Chó", L"Gâu Gâu!" });
-
-			commandBuffer.PushCommand(activeConversation);
 		}
 	}
 
@@ -122,6 +139,15 @@ void Demo::DebugScene::Draw(unsigned long long deltaTime)
 		for (auto& btn : uiButtons)
 		{
 			btn->Draw(&this->camera, gd, deltaTime);
+		}
+
+		if (myFontSprite) {
+			myFontSprite->Begin();
+			myFontSprite->SetPosition(20.0f, 50.0f);
+			myFontSprite->SetColor(0xFF00FF00);
+			myFontSprite->SetText(std::wstring(typedText.begin(), typedText.end()));
+			myFontSprite->Draw(uiCamera, deltaTime);
+			myFontSprite->End();
 		}
 
 		if (activeConversation && !activeConversation->IsFinished()) {

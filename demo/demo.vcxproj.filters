@@ -60,6 +60,9 @@
     <ClCompile Include="IConversation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextInputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -90,6 +93,9 @@
       <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="IConversation.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TextInputManager.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
   </ItemGroup>
