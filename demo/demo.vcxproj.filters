@@ -57,6 +57,9 @@
     <ClCompile Include="MainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IConversation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="TextInputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -85,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="MainMenu.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogueLine.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="IConversation.h">
+      <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="TextInputManager.h">
       <Filter>Header Files\Components</Filter>
