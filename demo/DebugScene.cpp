@@ -19,6 +19,7 @@ void Demo::DebugScene::Init()
 	uiSheetTex->LoadTexture(L"ui-pack.png");	
 	//Everything works fine with .png, but .bmp is causing coordinate issues. Idk how to fix bruh
 	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 24);
+	myFontSprite = std::make_shared<DX9GF::FontSprite>(myFont.get());
 
 	//create 1 text button and 2 icon buttons
 	auto btnTextExit = std::make_shared<Demo::TextButton>(
@@ -76,22 +77,37 @@ void Demo::DebugScene::Update(unsigned long long deltaTime)
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
-	if (inpMan->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
-		auto dX = inpMan->GetRelativeMouseX();
-		auto dY = inpMan->GetRelativeMouseY();
-		auto camPos = camera.GetPosition();
-		camera.SetPosition(camPos.x - dX, camPos.y - dY);
-	}
-	auto dZ = inpMan->GetMouseScroll();
-	auto camZoom = camera.GetZoom();
-	camera.SetZoom(camZoom + dZ / static_cast<float>(1000));
-	draggableManager->Update(deltaTime);
-	transformManager->UpdateAll();
 
-	//update all UI button
-	for (auto& btn : uiButtons) {
-		btn->Update(deltaTime);
+	if (!commandBuffer.IsBusy()) {
+		if (inpMan->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
+			auto dX = inpMan->GetRelativeMouseX();
+			auto dY = inpMan->GetRelativeMouseY();
+			auto camPos = camera.GetPosition();
+			camera.SetPosition(camPos.x - dX, camPos.y - dY);
+		}
+		auto dZ = inpMan->GetMouseScroll();
+		auto camZoom = camera.GetZoom();
+		camera.SetZoom(camZoom + dZ / static_cast<float>(1000));
+		draggableManager->Update(deltaTime);
+
+		//update all UI button
+		for (auto& btn : uiButtons) {
+			btn->Update(deltaTime);
+		}
+
+		if (inpMan->KeyDown(DIK_SPACE)) {
+			auto [w, h] = camera.GetScreenResolution();
+			activeConversation = std::make_shared<IConversation>(myFontSprite, w, h);
+
+			activeConversation->AddLine({ std::nullopt, std::nullopt, L"Player", L"Bấm chuột trái để qua câu nha!" });
+			activeConversation->AddLine({ std::nullopt, std::nullopt, L"Chó", L"Gâu Gâu!" });
+
+			commandBuffer.PushCommand(activeConversation);
+		}
 	}
+
+	commandBuffer.Update(deltaTime);
+	transformManager->UpdateAll();
 	camera.Update();
 }
 
@@ -106,6 +122,10 @@ void Demo::DebugScene::Draw(unsigned long long deltaTime)
 		for (auto& btn : uiButtons)
 		{
 			btn->Draw(&this->camera, gd, deltaTime);
+		}
+
+		if (activeConversation && !activeConversation->IsFinished()) {
+			activeConversation->Draw(gd, deltaTime);
 		}
 
 		gd->EndDraw();
