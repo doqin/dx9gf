@@ -45,7 +45,7 @@ void Demo::IBattleScene::DrawCards(size_t count)
 		auto card = drawPile.back();
 		drawPile.pop_back();
 		card->DetachParent();
-		y += 20;
+		y += 30;
 		std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
 			std::make_shared<DX9GF::SetPositionCommand>(card, -static_cast<float>(screenWidth), y),
 			std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
@@ -53,9 +53,9 @@ void Demo::IBattleScene::DrawCards(size_t count)
 				markFinished();
 			}),
 			std::make_shared<DX9GF::DelayCommand>(i * .2f),
-			std::make_shared<DX9GF::GoToCommand>(card, x, y, 1000),
-			std::make_shared<DX9GF::DelayCommand>(0.5),
-			std::make_shared<DX9GF::GoToCommand>(card, x, screenHeight, 1000),
+			std::make_shared<DX9GF::GoToCommand>(card, x, y, 0.5f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}),
+			std::make_shared<DX9GF::DelayCommand>(0.75f),
+			std::make_shared<DX9GF::GoToCommand>(card, x, screenHeight, 0.75f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}),
 			std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
 				this->queuedToDraw.erase(std::find(queuedToDraw.begin(), queuedToDraw.end(), card));
 				cardHand.push_back(card);
@@ -86,8 +86,16 @@ void Demo::IBattleScene::ShuffleDiscardIntoDrawPile()
 
 void Demo::IBattleScene::MovePlayedPileToDiscardPileIfNeeded()
 {
-	if (currentTurn == 0 || currentTurn % 3 != 0 || playedPile.empty()) {
+	if (currentTurn == 0 || currentTurn % 3 != 1 || playedPile.empty()) {
 		return;
+	}
+	for (size_t i = 0; i < enemyCards.size(); ++i) {
+		auto& enemyCard = enemyCards[i];
+		if (auto manager = enemyCard->GetDraggableManager().lock()) {
+			manager->Remove(enemyCard);
+		}
+		enemyCards.erase(enemyCards.begin() + i);
+		--i;
 	}
 	for (auto& card : playedPile) {
         HidePileCard(card);
@@ -127,7 +135,6 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	}
 
 	const auto app = DX9GF::Application::GetInstance();
-	const float moveVelocity = 1000.f;
 	const float centerLineY = -120.f;
 	const float horizontalSpacing = 120.f;
 	const float verticalSpacing = 100.f;
@@ -155,7 +162,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 			targetY = -totalHeight / 2.f + i * verticalSpacing;
 		}
 
-		auto command = std::make_shared<DX9GF::GoToCommand>(enemies[i], targetX, targetY, moveVelocity);
+		auto command = std::make_shared<DX9GF::GoToCommand>(enemies[i], targetX, targetY, 0.4f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{});
 		if (!hasQueued) {
 			commandBuffer.PushCommand(command);
 			hasQueued = true;
@@ -170,7 +177,7 @@ void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy)
 {
 	auto card = std::make_shared<EnemyCard>(transformManager, enemy, enemy->GetWorldX(), enemy->GetWorldY());
 	card->Init(draggableManager, game->GetGraphicsDevice(), &camera);
-	cardHand.push_back(card);
+	enemyCards.push_back(card);
 }
 
 void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
@@ -225,7 +232,7 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
     const float screenWidth = static_cast<float>(app->GetScreenWidth());
 	const float screenHeight = static_cast<float>(app->GetScreenHeight());
     if (handContainer) {
-       handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 60.f);
+       handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 20.f);
 	}
     const float buttonY = screenHeight / 2.f - 20 - attackButton->GetHeight();
 	const float sidePadding = 20.f;
@@ -240,21 +247,21 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	enemyCardRemoveAreaHeight = backButton->GetHeight();
 	if (!mainBlockCard->IsExecuting()) {
 		if (isExecutingAttacks) {
-           MoveExecutedHandCardsToPlayedPile();
+			MoveExecutedHandCardsToPlayedPile();
+			for (size_t i = 0; i < enemyCards.size(); ++i) {
+				auto& enemyCard = enemyCards[i];
+				if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
+					if (auto manager = enemyCard->GetDraggableManager().lock()) {
+						manager->Remove(enemyCard);
+					}
+					enemyCards.erase(enemyCards.begin() + i);
+					--i;
+				}
+			}
 			for (size_t i = 0; i < enemies.size(); ++i) {
 				if (enemies[i]->IsDead()) {
 					enemies.erase(enemies.begin() + i);
 					--i;
-				}
-			}
-			for (size_t i = 0; i < cardHand.size(); ++i) {
-				auto enemyCard = dynamic_pointer_cast<EnemyCard>(cardHand[i]);
-				if (enemyCard) {
-					cardHand.erase(cardHand.begin() + i);
-					--i;
-					if (auto manager = enemyCard->GetDraggableManager().lock()) {
-						manager->Remove(enemyCard);
-					}
 				}
 			}
 			state = State::EnemyAttack;
@@ -313,12 +320,14 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		true
 	);
 	if (font) {
-		auto removeLabel = std::make_shared<DX9GF::FontSprite>(font.get());
-		removeLabel->Begin();
-		removeLabel->SetPosition(enemyCardRemoveAreaX + 8.f, enemyCardRemoveAreaY + 8.f);
-		removeLabel->SetText(L"Drop EnemyCard Here");
-		removeLabel->Draw(camera, deltaTime);
-		removeLabel->End();
+		fontSprite->Begin();
+		fontSprite->SetPosition(enemyCardRemoveAreaX + 8.f, enemyCardRemoveAreaY + 8.f);
+		fontSprite->SetText(L"Drop EnemyCard Here");
+		fontSprite->Draw(camera, deltaTime);
+		fontSprite->SetPosition(backButton->GetWorldX(), backButton->GetWorldY() - 30.f);
+		fontSprite->SetText(std::to_wstring(3 - (currentTurn - 1) % 3) + L" turns left before program clears");
+		fontSprite->Draw(camera, deltaTime);
+		fontSprite->End();
 	}
 	if (!mainBlockCard->IsExecuting()) {
 		backButton->Draw(game->GetGraphicsDevice(), deltaTime);
@@ -398,6 +407,10 @@ void Demo::IBattleScene::Init()
 	backButton->Init(&camera);
 	executeButton->Init(&camera);
 
+	// Init sprite
+	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+
+	// Init draggables
 	mainBlockCard = std::make_shared<MainBlockCard>(transformManager, -100.f, -140.f);
 	mainBlockCard->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	handContainer = std::make_shared<HandContainer>(transformManager, 180, 40, -250.f, -200.f);

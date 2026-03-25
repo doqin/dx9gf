@@ -33,10 +33,11 @@ namespace Demo {
 		std::shared_ptr<DraggableManager> draggableManager;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
 		DX9GF::ColliderManager colliderManager;
-       // Battle cards
+		// Battle cards
 		std::shared_ptr<MainBlockCard> mainBlockCard;
 		std::shared_ptr<HandContainer> handContainer;
 		std::vector<std::shared_ptr<IDraggable>> cardHand;
+		std::vector<std::shared_ptr<EnemyCard>> enemyCards;
 		std::vector<std::shared_ptr<IDraggable>> drawPile;
 		std::vector<std::shared_ptr<IDraggable>> playedPile;
 		std::vector<std::shared_ptr<IDraggable>> discardPile;
@@ -49,6 +50,7 @@ namespace Demo {
 		float enemyCardRemoveAreaHeight = 80.f;
 		// UI
 		std::shared_ptr<DX9GF::Font> font;
+		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 		std::shared_ptr<TextButton> attackButton;
 		std::shared_ptr<TextButton> actionButton;
 		std::shared_ptr<TextButton> itemsButton;
