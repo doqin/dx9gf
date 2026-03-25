@@ -1,11 +1,11 @@
 ﻿#include "pch.h"
-#include "MainMenu.h"
+#include "SettingsScene.h"
 #include "resource.h"
 #include "IconButton.h"
-#include "SettingsScene.h"
+
 namespace Demo
 {
-	void MainMenu::UpdateLayout(int screenW, int screenH)
+	void SettingsScene::UpdateLayout(int screenW, int screenH)
 	{
 		//BACKGROUND - use aspect fill
 		float bgImageW = (float)bgTex->GetWidth();
@@ -51,7 +51,7 @@ namespace Demo
 		//start drawing from 40% of the screen height
 		float startY = -screenH * 0.10f;
 
-		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };
+		std::shared_ptr<Demo::IButton> buttons[] = { backButton };
 		float currentY = startY;
 
 		for (auto& btn : buttons)
@@ -69,7 +69,7 @@ namespace Demo
 
 	}
 
-	void MainMenu::Init()
+	void SettingsScene::Init()
 	{
 		transformManager = std::make_shared<DX9GF::TransformManager>();
 
@@ -88,37 +88,19 @@ namespace Demo
 		titleTex->LoadTexture(IDB_PNG3);
 
 		//buttons init
-		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
-			buttonSheetTex, 577, 193, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
+		backButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
+			buttonSheetTex, 1, 417, 62, 30, 2, 
+			[this](DX9GF::ITrigger* t) 
+			{ 
+				// Chỉ phất cờ, xin đừng tự sát ở đây!
+				this->isGoingBack = true;
 
-		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
-			buttonSheetTex, 577, 481, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
+			}
+		);
 
-		loadGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
-			buttonSheetTex, 577, 513, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
-
-		optionButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30,
-			buttonSheetTex, 577, 65, 78, 30, 50,
-			[this](DX9GF::ITrigger* t)
-			{
-				auto app = DX9GF::Application::GetInstance();
-
-				//push Settings Scene
-				this->game->GetSceneManager()->PushScene(
-					new SettingsScene(this->game, app->GetScreenWidth(), app->GetScreenHeight())
-				);
-
-				this->game->GetSceneManager()->GoToNext();
-			});
-
-		creditButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30,
-			buttonSheetTex, 577, 1, 78, 30, 50, [](DX9GF::ITrigger* t) { /* Logic */ });
-
-		quitButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 62, 30,
-			buttonSheetTex, 385, 449, 62, 30, 2, [](DX9GF::ITrigger* t) { PostQuitMessage(0); });
 
 		//active buttons
-		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };
+		std::shared_ptr<Demo::IButton> buttons[] = {backButton};
 		for (auto& btn : buttons)
 		{
 			if (btn)
@@ -134,7 +116,7 @@ namespace Demo
 		transformManager->RebuildHierarchy();
 	}
 
-	void MainMenu::Update(unsigned long long deltaTime)
+	void SettingsScene::Update(unsigned long long deltaTime)
 	{
 		auto inpMan = DX9GF::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
@@ -159,9 +141,17 @@ namespace Demo
 
 		transformManager->UpdateAll();
 		camera.Update();
+
+		if (this->isGoingBack)
+		{
+			auto sm = this->game->GetSceneManager();
+			sm->GoToPrevious();
+			sm->PopScene();
+			return;
+		}
 	}
 
-	void MainMenu::Draw(unsigned long long deltaTime)
+	void SettingsScene::Draw(unsigned long long deltaTime)
 	{
 		auto gd = game->GetGraphicsDevice();
 		gd->Clear();

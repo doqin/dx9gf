@@ -63,6 +63,12 @@
     <ClCompile Include="TextInputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SettingsManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -97,6 +103,12 @@
     </ClInclude>
     <ClInclude Include="TextInputManager.h">
       <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsScene.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

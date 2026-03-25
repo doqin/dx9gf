@@ -54,7 +54,7 @@ namespace Demo
 			this->trigger->Update(deltaTime);
 
 			//change button state
-			if (this->trigger->IsHeldLeft(deltaTime))
+			if (this->trigger->IsClicked(deltaTime))
 				this->currentState = ButtonState::CLICKED;
 			else if (this->trigger->IsHovering(deltaTime))
 				this->currentState = ButtonState::HOVER;
