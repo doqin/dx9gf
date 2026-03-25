@@ -107,15 +107,21 @@ void Demo::IBattleScene::MovePlayedPileToDiscardPileIfNeeded()
 void Demo::IBattleScene::MoveExecutedHandCardsToPlayedPile()
 {
 	for (size_t i = 0; i < cardHand.size(); ++i) {
-		auto statementCard = std::dynamic_pointer_cast<IStatementCard>(cardHand[i]);
-		if (!statementCard) {
+		auto parent = cardHand[i]->GetParent();
+		if (parent.has_value() && parent.value().lock().get() == handContainer.get()) {
 			continue;
 		}
-		auto parent = statementCard->GetParent();
-		if (!parent.has_value() || parent.value().lock().get() != mainBlockCard.get()) {
-			continue;
-		}
-		playedPile.push_back(statementCard);
+		playedPile.push_back(cardHand[i]);
+		cardHand.erase(cardHand.begin() + i);
+		--i;
+	}
+}
+
+void Demo::IBattleScene::MoveHandCardsToDiscardPile()
+{
+	for (size_t i = 0; i < cardHand.size(); ++i) {
+		HidePileCard(cardHand[i]);
+		discardPile.push_back(cardHand[i]);
 		cardHand.erase(cardHand.begin() + i);
 		--i;
 	}
@@ -246,8 +252,11 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	enemyCardRemoveAreaWidth = screenWidth / 2.f - sidePadding - enemyCardRemoveAreaX;
 	enemyCardRemoveAreaHeight = backButton->GetHeight();
 	if (!mainBlockCard->IsExecuting()) {
+		// When finished executing attack
 		if (isExecutingAttacks) {
 			MoveExecutedHandCardsToPlayedPile();
+			MoveHandCardsToDiscardPile();
+			// Remove unused enemy cards or enemy cards of dead enemies
 			for (size_t i = 0; i < enemyCards.size(); ++i) {
 				auto& enemyCard = enemyCards[i];
 				if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
@@ -258,6 +267,7 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 					--i;
 				}
 			}
+			// Remove dead enemies
 			for (size_t i = 0; i < enemies.size(); ++i) {
 				if (enemies[i]->IsDead()) {
 					enemies.erase(enemies.begin() + i);

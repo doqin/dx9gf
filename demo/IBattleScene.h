@@ -65,6 +65,7 @@ namespace Demo {
 		void ShuffleDiscardIntoDrawPile();
 		void MovePlayedPileToDiscardPileIfNeeded();
 		void MoveExecutedHandCardsToPlayedPile();
+		void MoveHandCardsToDiscardPile();
 		void BeginNextTurn();
 		// Updates
 		void PlayerStandByUpdate(unsigned long long deltaTime);
