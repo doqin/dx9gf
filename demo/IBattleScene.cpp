@@ -30,6 +30,11 @@ void Demo::IBattleScene::StartBattle()
 
 void Demo::IBattleScene::DrawCards(size_t count)
 {
+	auto app = DX9GF::Application::GetInstance();
+	auto screenWidth = app->GetScreenWidth();
+	auto screenHeight = app->GetScreenHeight();
+	auto x = -static_cast<float>(screenWidth) / 2.f + 20.f;
+	auto y = -static_cast<float>(screenHeight) / 2.f + 20.f;
 	for (size_t i = 0; i < count; ++i) {
 		if (drawPile.empty()) {
 			ShuffleDiscardIntoDrawPile();
@@ -39,10 +44,28 @@ void Demo::IBattleScene::DrawCards(size_t count)
 		}
 		auto card = drawPile.back();
 		drawPile.pop_back();
-		cardHand.push_back(card);
-		if (handContainer) {
-			handContainer->StoreCard(card);
-		}
+		card->DetachParent();
+		y += 20;
+		std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
+			std::make_shared<DX9GF::SetPositionCommand>(card, -static_cast<float>(screenWidth), y),
+			std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
+				this->queuedToDraw.push_back(card);
+				markFinished();
+			}),
+			std::make_shared<DX9GF::DelayCommand>(i * .2f),
+			std::make_shared<DX9GF::GoToCommand>(card, x, y, 1000),
+			std::make_shared<DX9GF::DelayCommand>(0.5),
+			std::make_shared<DX9GF::GoToCommand>(card, x, screenHeight, 1000),
+			std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
+				this->queuedToDraw.erase(std::find(queuedToDraw.begin(), queuedToDraw.end(), card));
+				cardHand.push_back(card);
+				if (handContainer) {
+					handContainer->StoreCard(card);
+				}
+				markFinished();
+			})
+		};
+		commandBuffer.StackCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
 	}
 }
 
@@ -145,7 +168,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 
 void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy)
 {
-	auto card = std::make_shared<EnemyCard>(transformManager, enemy, -260.f, -140.f);
+	auto card = std::make_shared<EnemyCard>(transformManager, enemy, enemy->GetWorldX(), enemy->GetWorldY());
 	card->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	cardHand.push_back(card);
 }
@@ -431,6 +454,9 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 			break;
 		default:
 			throw std::runtime_error("Unexpected state");
+		}
+		for (auto& card : queuedToDraw) {
+			card->Draw(deltaTime);
 		}
 		gd->EndDraw();
 	}

@@ -40,6 +40,7 @@ namespace Demo {
 		std::vector<std::shared_ptr<IDraggable>> drawPile;
 		std::vector<std::shared_ptr<IDraggable>> playedPile;
 		std::vector<std::shared_ptr<IDraggable>> discardPile;
+		std::vector<std::shared_ptr<IDraggable>> queuedToDraw;
 		size_t currentTurn = 0;
 		std::vector<std::shared_ptr<IEnemy>> enemies;
 		float enemyCardRemoveAreaX = 220.f;
@@ -58,7 +59,7 @@ namespace Demo {
 		void StartBattle();
 		
 	private:
-      void DrawCards(size_t count);
+		void DrawCards(size_t count);
 		void ShuffleDiscardIntoDrawPile();
 		void MovePlayedPileToDiscardPileIfNeeded();
 		void MoveExecutedHandCardsToPlayedPile();

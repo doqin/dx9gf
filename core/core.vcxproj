@@ -397,6 +397,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFMultiCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFPlaySoundCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFRectangleCollider.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -419,6 +420,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DX9GFExtras\DX9GFSetPositionCommand.cpp" />
     <ClCompile Include="DX9GFExtras\DX9GFTransformManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Use</PrecompiledHeader>
@@ -514,12 +516,14 @@
     <ClInclude Include="DX9GFExtras\DX9GFITrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFMap.h" />
     <ClInclude Include="DX9GFExtras\DX9GFMapLayer.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFMultiCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFPlaySoundCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleCollider.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRectangleTrigger.h" />
     <ClInclude Include="DX9GFExtras\DX9GFRotateCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFSaveManager.h" />
     <ClInclude Include="DX9GFExtras\DX9GFSetCameraPositionCommand.h" />
+    <ClInclude Include="DX9GFExtras\DX9GFSetPositionCommand.h" />
     <ClInclude Include="DX9GFExtras\DX9GFTransformManager.h" />
     <ClInclude Include="DX9GFExtras\DX9GFZoomCameraCommand.h" />
     <ClInclude Include="DX9GFFont.h" />
