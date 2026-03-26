@@ -1,11 +1,38 @@
 #pragma once
+#include "ICard.h"
 #include "IDraggable.h"
 #include "IEnemy.h"
 
 namespace Demo {
-	class IExpressionCard : public IDraggable {
+ class IExpressionCard : public ICard, public IDraggable {
 	public:
-		using IDraggable::IDraggable;
+       inline IExpressionCard(std::weak_ptr<DX9GF::TransformManager> transformManager)
+			: IGameObject(transformManager), ICard(transformManager), IDraggable(transformManager) {}
+		inline IExpressionCard(
+			std::weak_ptr<DX9GF::TransformManager> transformManager,
+			size_t dragAreaWidth,
+			size_t dragAreaHeight,
+			float x = 0,
+			float y = 0,
+			float rotation = 0,
+			float scaleX = 1,
+			float scaleY = 1
+		) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY),
+			ICard(transformManager, x, y, rotation, scaleX, scaleY),
+			IDraggable(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {}
+		inline IExpressionCard(
+			std::weak_ptr<DX9GF::TransformManager> transformManager,
+			std::weak_ptr<DX9GF::IGameObject> parent,
+			size_t dragAreaWidth,
+			size_t dragAreaHeight,
+			float x = 0,
+			float y = 0,
+			float rotation = 0,
+			float scaleX = 1,
+			float scaleY = 1
+		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY),
+			ICard(transformManager, parent, x, y, rotation, scaleX, scaleY),
+			IDraggable(transformManager, parent, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {}
 		virtual std::shared_ptr<IEnemy> GetValue() = 0;
 	};
 }

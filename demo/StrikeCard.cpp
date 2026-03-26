@@ -4,7 +4,7 @@
 bool Demo::StrikeCard::OnDrop(std::shared_ptr<IDraggable> other)
 {
 	auto incomingEnemyCard = std::dynamic_pointer_cast<EnemyCard>(other);
-	if (!incomingEnemyCard) {
+	if (!incomingEnemyCard || enemyCard.lock()) {
 		return false;
 	}
 	auto [thisX, thisY] = this->GetWorldPosition();
@@ -40,6 +40,21 @@ void Demo::StrikeCard::ResetExecution()
 	isDone = false;
 }
 
+void Demo::StrikeCard::Update(unsigned long long deltaTime)
+{
+	IDraggable::Update(deltaTime);
+	if (auto lock = enemyCard.lock()) {
+		if (auto parent = lock->GetParent(); parent.has_value()) {
+			if (auto parentLock = parent.value().lock()) {
+				if (parentLock.get() == this) {
+					return;
+				}
+			}
+		}
+	}
+	enemyCard.reset();
+}
+
 void Demo::StrikeCard::Draw(unsigned long long deltaTime)
 {
 	IStatementCard::Draw(deltaTime);
@@ -52,6 +67,11 @@ void Demo::StrikeCard::Draw(unsigned long long deltaTime)
 	nameFontSprite->SetText(L"StrikeCard");
 	nameFontSprite->Draw(*camera, deltaTime);
 	nameFontSprite->End();
+}
+
+size_t Demo::StrikeCard::GetCost() const
+{
+	return 1;
 }
 
 size_t Demo::StrikeCard::GetWidth() const

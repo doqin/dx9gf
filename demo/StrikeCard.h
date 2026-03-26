@@ -10,11 +10,14 @@ namespace Demo {
 		std::shared_ptr<DX9GF::Font> nameFont;
 		std::shared_ptr<DX9GF::FontSprite> nameFontSprite;
 	public:
-		StrikeCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0) : IStatementCard(tm, 140, 40, x, y) {}
+		StrikeCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
+			: IGameObject(tm, x, y), IStatementCard(tm, 140, 40, x, y) {}
 		bool OnDrop(std::shared_ptr<IDraggable> other) override;
 		bool Execute() override;
 		void ResetExecution() override;
+		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
+		size_t GetCost() const override;
 		size_t GetWidth() const override;
 	};
 }

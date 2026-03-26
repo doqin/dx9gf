@@ -19,11 +19,16 @@ namespace Demo {
 			PlayerAttack,
 			EnemyAttack
 		};
+		// Constants
+		const int MAX_ENERGY = 3;
 		// States
 		State state = State::PlayerStandBy;
         State lastEnemyLayoutState = State::EnemyAttack;
 		bool enemyLayoutInitialized = false;
 		bool isExecutingAttacks = false;
+		size_t currentTurn = 0;
+		int energy = MAX_ENERGY;
+		int usedEnergy = 0;
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;
@@ -36,13 +41,12 @@ namespace Demo {
 		// Battle cards
 		std::shared_ptr<MainBlockCard> mainBlockCard;
 		std::shared_ptr<HandContainer> handContainer;
-		std::vector<std::shared_ptr<IDraggable>> cardHand;
+		std::vector<std::shared_ptr<ICard>> cardHand;
 		std::vector<std::shared_ptr<EnemyCard>> enemyCards;
-		std::vector<std::shared_ptr<IDraggable>> drawPile;
-		std::vector<std::shared_ptr<IDraggable>> playedPile;
-		std::vector<std::shared_ptr<IDraggable>> discardPile;
-		std::vector<std::shared_ptr<IDraggable>> queuedToDraw;
-		size_t currentTurn = 0;
+		std::vector<std::shared_ptr<ICard>> drawPile;
+		std::vector<std::shared_ptr<ICard>> playedPile;
+		std::vector<std::shared_ptr<ICard>> discardPile;
+		std::vector<std::shared_ptr<ICard>> queuedToDraw;
 		std::vector<std::shared_ptr<IEnemy>> enemies;
 		float enemyCardRemoveAreaX = 220.f;
 		float enemyCardRemoveAreaY = -140.f;

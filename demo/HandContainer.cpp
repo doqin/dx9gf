@@ -8,7 +8,7 @@ void Demo::HandContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF:
 	IContainer::Init(manager, graphicsDevice, camera);
 }
 
-void Demo::HandContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::shared_ptr<IDraggable>>* playedPile)
+void Demo::HandContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::shared_ptr<ICard>>* playedPile)
 {
 	this->Init(manager, graphicsDevice, camera);
 	this->playedPile = playedPile;
@@ -22,20 +22,20 @@ void Demo::HandContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF:
 
 bool Demo::HandContainer::OnDrop(std::shared_ptr<IDraggable> other)
 {
-	if (!std::dynamic_pointer_cast<IStatementCard>(other)) {
+	if (!std::dynamic_pointer_cast<ICard>(other)) {
 		return false;
 	}
 
-	if (std::find_if(playedPile->begin(), playedPile->end(), [&](const std::weak_ptr<IDraggable>& playedCard) {
+	if (std::find_if(playedPile->begin(), playedPile->end(), [&](const std::weak_ptr<ICard>& playedCard) {
 		auto lock = playedCard.lock();
-		return lock && lock.get() == other.get();
+		return lock && lock.get() == dynamic_pointer_cast<ICard>(other).get();
 	}) != playedPile->end()) {
 		return false;
 	}
 	return IContainer::OnDrop(other);
 }
 
-void Demo::HandContainer::StoreCard(std::shared_ptr<IDraggable> card)
+void Demo::HandContainer::StoreCard(std::shared_ptr<ICard> card)
 {
 	if (!card) {
 		return;
@@ -44,12 +44,12 @@ void Demo::HandContainer::StoreCard(std::shared_ptr<IDraggable> card)
 		return;
 	}
 	if (auto parent = card->GetParent(); parent.has_value()) {
-		card->DetachParent();
+		dynamic_pointer_cast<IDraggable>(card)->DetachParent();
 	}
 
 	children.erase(std::remove_if(children.begin(), children.end(), [&](const std::weak_ptr<IDraggable>& child) {
 		auto lock = child.lock();
-		return !lock || lock.get() == card.get();
+		return !lock || lock.get() == dynamic_pointer_cast<IDraggable>(card).get();
 	}), children.end());
 
 	float yPos = static_cast<float>(dragAreaHeight);
@@ -59,7 +59,7 @@ void Demo::HandContainer::StoreCard(std::shared_ptr<IDraggable> card)
 		}
 	}
 
-	card->SetParent(shared_from_this());
+	dynamic_pointer_cast<IDraggable>(card)->SetParent(shared_from_this());
 	card->SetLocalPosition(0.f, yPos);
-	children.push_back(card);
+	children.push_back(dynamic_pointer_cast<IDraggable>(card));
 }

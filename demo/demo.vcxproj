@@ -238,6 +238,7 @@
     <ClInclude Include="IBattleScene.h" />
     <ClInclude Include="IBlockCard.h" />
     <ClInclude Include="IButton.h" />
+    <ClInclude Include="ICard.h" />
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="IContainer.h" />
     <ClInclude Include="IDraggable.h" />

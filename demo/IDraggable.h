@@ -4,7 +4,7 @@
 
 namespace Demo {
 	class DraggableManager;
-	class IDraggable : public DX9GF::IGameObject {
+  class IDraggable : virtual public DX9GF::IGameObject {
 	protected:
 		inline static size_t nextID = 0;
 		std::string id;

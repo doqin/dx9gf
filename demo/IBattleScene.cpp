@@ -7,13 +7,13 @@ namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
 
-	void HidePileCard(const std::shared_ptr<Demo::IDraggable>& card)
+	void HidePileCard(const std::shared_ptr<Demo::ICard>& card)
 	{
 		if (!card) {
 			return;
 		}
 		if (auto parent = card->GetParent(); parent.has_value()) {
-			card->DetachParent();
+			dynamic_pointer_cast<Demo::IDraggable>(card)->DetachParent();
 		}
 		card->SetLocalPosition(HiddenPileX, HiddenPileY);
 	}
@@ -44,7 +44,7 @@ void Demo::IBattleScene::DrawCards(size_t count)
 		}
 		auto card = drawPile.back();
 		drawPile.pop_back();
-		card->DetachParent();
+		dynamic_pointer_cast<IDraggable>(card)->DetachParent();
 		y += 30;
 		std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
 			std::make_shared<DX9GF::SetPositionCommand>(card, -static_cast<float>(screenWidth), y),
@@ -131,7 +131,9 @@ void Demo::IBattleScene::BeginNextTurn()
 {
 	++currentTurn;
 	MovePlayedPileToDiscardPileIfNeeded();
-	DrawCards(3);
+	DrawCards(5);
+	energy = MAX_ENERGY;
+	usedEnergy = 0;
 }
 
 void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
@@ -193,8 +195,7 @@ void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
 	const float right = enemyCardRemoveAreaX + enemyCardRemoveAreaWidth;
 	const float bottom = enemyCardRemoveAreaY + enemyCardRemoveAreaHeight;
 
-	cardHand.erase(std::remove_if(cardHand.begin(), cardHand.end(), [&](const std::shared_ptr<IDraggable>& card) {
-		auto enemyCard = std::dynamic_pointer_cast<EnemyCard>(card);
+	enemyCards.erase(std::remove_if(enemyCards.begin(), enemyCards.end(), [&](const std::shared_ptr<EnemyCard>& enemyCard) {
 		if (!enemyCard || enemyCard->IsDragging()) {
 			return false;
 		}
@@ -206,7 +207,7 @@ void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
 			return true;
 		}
 		return false;
-	}), cardHand.end());
+	}), enemyCards.end());
 }
 
 void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
@@ -237,8 +238,15 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	auto app = DX9GF::Application::GetInstance();
     const float screenWidth = static_cast<float>(app->GetScreenWidth());
 	const float screenHeight = static_cast<float>(app->GetScreenHeight());
-    if (handContainer) {
-       handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 20.f);
+	handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 20.f);
+	usedEnergy = 0;
+	for (auto& card : cardHand) {
+		if (auto parent = card->GetParent(); parent.has_value()) {
+			if (auto lock = parent.value().lock(); lock && lock == handContainer) {
+				continue;
+			}
+		}
+		usedEnergy += card->GetCost();
 	}
     const float buttonY = screenHeight / 2.f - 20 - attackButton->GetHeight();
 	const float sidePadding = 20.f;
@@ -335,6 +343,9 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		fontSprite->SetText(L"Drop EnemyCard Here");
 		fontSprite->Draw(camera, deltaTime);
 		fontSprite->SetPosition(backButton->GetWorldX(), backButton->GetWorldY() - 30.f);
+		fontSprite->SetText(std::to_wstring(energy - usedEnergy) + L"/" + std::to_wstring(MAX_ENERGY));
+		fontSprite->Draw(camera, deltaTime);
+		fontSprite->SetPosition(executeButton->GetWorldX(), executeButton->GetWorldY() - 30.f);
 		fontSprite->SetText(std::to_wstring(3 - (currentTurn - 1) % 3) + L" turns left before program clears");
 		fontSprite->Draw(camera, deltaTime);
 		fontSprite->End();
@@ -404,7 +415,7 @@ void Demo::IBattleScene::Init()
 		}));
 	});
     executeButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Execute", font.get(), [&](DX9GF::ITrigger* thisObj) {
-		if (mainBlockCard && !mainBlockCard->IsExecuting()) {
+		if (mainBlockCard && !mainBlockCard->IsExecuting() && usedEnergy <= energy) {
 			isExecutingAttacks = true;
 			mainBlockCard->StartExecution();
 		}
@@ -479,7 +490,7 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 			throw std::runtime_error("Unexpected state");
 		}
 		for (auto& card : queuedToDraw) {
-			card->Draw(deltaTime);
+			dynamic_pointer_cast<IDraggable>(card)->Draw(deltaTime);
 		}
 		gd->EndDraw();
 	}
