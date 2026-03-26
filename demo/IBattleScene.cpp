@@ -415,7 +415,10 @@ void Demo::IBattleScene::Init()
 		}));
 	});
     executeButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Execute", font.get(), [&](DX9GF::ITrigger* thisObj) {
-		if (mainBlockCard && !mainBlockCard->IsExecuting() && usedEnergy <= energy) {
+		if (usedEnergy > energy) {
+			popUpMessage->QueueMessage(&commandBuffer, L"Not enough energy");
+		}
+		else if (mainBlockCard && !mainBlockCard->IsExecuting()) {
 			isExecutingAttacks = true;
 			mainBlockCard->StartExecution();
 		}
@@ -436,6 +439,11 @@ void Demo::IBattleScene::Init()
 	mainBlockCard->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	handContainer = std::make_shared<HandContainer>(transformManager, 180, 40, -250.f, -200.f);
 	handContainer->Init(draggableManager, game->GetGraphicsDevice(), &camera, &playedPile);
+
+	// Init pop up message
+	popUpMessage = std::make_shared<PopUpMessage>(transformManager);
+	popUpMessage->Init(game->GetGraphicsDevice(), &camera);
+
 	transformManager->RebuildHierarchy();
 }
 
@@ -492,6 +500,7 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 		for (auto& card : queuedToDraw) {
 			dynamic_pointer_cast<IDraggable>(card)->Draw(deltaTime);
 		}
+		popUpMessage->Draw(deltaTime);
 		gd->EndDraw();
 	}
 	gd->Present();

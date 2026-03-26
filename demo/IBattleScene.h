@@ -10,6 +10,7 @@
 #include "EnemyCard.h"
 #include "HandContainer.h"
 #include "TestEnemy.h"
+#include "PopUpMessage.h"
 
 namespace Demo {
 	class IBattleScene : public DX9GF::IScene {
@@ -61,6 +62,7 @@ namespace Demo {
 		std::shared_ptr<TextButton> fleeButton;
 		std::shared_ptr<TextButton> backButton;
 		std::shared_ptr<TextButton> executeButton;
+		std::shared_ptr<PopUpMessage> popUpMessage;
 		void CreateEnemyCard(std::shared_ptr<IEnemy> enemy);
 		void StartBattle();
 		

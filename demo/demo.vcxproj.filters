@@ -96,6 +96,9 @@
     <ClCompile Include="HandContainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PopUpMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -169,6 +172,9 @@
     </ClInclude>
     <ClInclude Include="ICard.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopUpMessage.h">
+      <Filter>Header Files\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
