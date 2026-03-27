@@ -52,8 +52,6 @@ void Demo::IconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaT
 
 	if (this->sprite && uiCamera)
 	{
-		this->sprite->SetPosition(this->GetWorldX(), this->GetWorldY());
-
 		this->sprite->SetSrcRect(this->buttonRects[stateIndex]);
 
 		this->sprite->Begin();

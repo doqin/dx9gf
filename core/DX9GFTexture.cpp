@@ -164,8 +164,6 @@ void DX9GF::Texture::LoadTexture(int resourceId, UINT width, UINT height)
 	if (graphicsDevice->GetDevice() == nullptr) {
 		throw std::runtime_error("Graphics device is null");
 	}
-	if (width == 0) width = D3DX_DEFAULT;
-	if (height == 0) height = D3DX_DEFAULT;
 	D3DXIMAGE_INFO imageInfo{};
 	auto handle = GetModuleHandleW(nullptr);
 	auto resName = MAKEINTRESOURCEW(resourceId);
@@ -182,8 +180,8 @@ void DX9GF::Texture::LoadTexture(int resourceId, UINT width, UINT height)
 		0,
 		D3DFMT_A8R8G8B8,
 		D3DPOOL_MANAGED,
-		D3DX_FILTER_LINEAR,
-		D3DX_FILTER_LINEAR,
+		D3DX_FILTER_NONE,
+		D3DX_FILTER_NONE,
 		0,
 		nullptr,
 		nullptr,
@@ -203,8 +201,8 @@ void DX9GF::Texture::LoadTexture(int resourceId, UINT width, UINT height)
 			0,
 			D3DFMT_UNKNOWN,
 			D3DPOOL_MANAGED,
-			D3DX_FILTER_LINEAR,
-			D3DX_FILTER_LINEAR,
+			D3DX_FILTER_NONE,
+			D3DX_FILTER_NONE,
 			0,
 			nullptr,
 			nullptr,
@@ -245,8 +243,8 @@ void DX9GF::Texture::LoadTexture(int resourceId, UINT width, UINT height)
 			0,
 			D3DFMT_A8R8G8B8,
 			D3DPOOL_MANAGED,
-			D3DX_FILTER_LINEAR,
-			D3DX_FILTER_LINEAR,
+			D3DX_FILTER_NONE,
+			D3DX_FILTER_NONE,
 			0,
 			nullptr,
 			nullptr,
