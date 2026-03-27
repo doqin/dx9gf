@@ -49,11 +49,13 @@ void Demo::IconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaT
 	int stateIndex = 0; //default is IDLE
 	if (this->currentState == ButtonState::HOVER) stateIndex = 1;
 	else if (this->currentState == ButtonState::CLICKED) stateIndex = 2;
+	auto currX = this->GetWorldX();
+	auto currY = this->GetWorldY();
 
 	if (this->sprite && uiCamera)
 	{
 		this->sprite->SetSrcRect(this->buttonRects[stateIndex]);
-
+		this->sprite->SetPosition(currX, currY);
 		this->sprite->Begin();
 		this->sprite->Draw(*uiCamera, deltaTime);
 		this->sprite->End();

@@ -6,11 +6,11 @@
 void Demo::TestEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
 {
     texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-    texture->LoadTexture(IDB_PNG2);
+    texture->LoadTexture(IDB_PNG4);
     sprite = std::make_shared<DX9GF::StaticSprite>(texture.get());
     sprite->SetOrigin(32, 32);
     roundProjectileTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-    roundProjectileTexture->LoadTexture(IDB_PNG3);
+    roundProjectileTexture->LoadTexture(IDB_PNG5);
     roundProjectileSprite = std::make_shared<DX9GF::StaticSprite>(roundProjectileTexture.get());
     roundProjectileSprite->SetOrigin(8, 8);
     InitCardSpawnTrigger(camera, 64.f, 64.f);
