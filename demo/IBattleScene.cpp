@@ -290,6 +290,7 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 			for (auto& enemy : enemies) {
 				enemy->StartAttack(battlePlayer);
 			}
+			battlePlayer->SetLocalPosition(0, 0);
 			EnemyAttackUpdate(deltaTime);
 			return;
 		}
