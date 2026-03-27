@@ -50,10 +50,6 @@ void DX9GF::CommandBuffer::Update(unsigned long long deltaTime)
 	}
 
 	currentCommand->Execute(deltaTime);
-
-	if (currentCommand->IsFinished()) {
-		currentCommand.reset();
-	}
 }
 
 bool DX9GF::CommandBuffer::IsBusy()

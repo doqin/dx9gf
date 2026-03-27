@@ -11,7 +11,8 @@ namespace Demo {
 		std::vector<std::weak_ptr<IDraggable>> children;
 		bool isHovered = false;
 	public:
-		inline IContainer(std::weak_ptr<DX9GF::TransformManager> transformManager) : IDraggable(transformManager) { }
+       inline IContainer(std::weak_ptr<DX9GF::TransformManager> transformManager)
+			: IGameObject(transformManager), IDraggable(transformManager) { }
 		inline IContainer(
 			std::weak_ptr<DX9GF::TransformManager> transformManager, 
 			size_t dragAreaWidth, 
@@ -21,7 +22,7 @@ namespace Demo {
 			float rotation = 0,
 			float scaleX = 1,
 			float scaleY = 1
-		) : IDraggable(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) { }
+     ) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY), IDraggable(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) { }
 		inline IContainer(
 			std::weak_ptr<DX9GF::TransformManager> transformManager,
 			std::weak_ptr<DX9GF::IGameObject> parent,
@@ -32,7 +33,7 @@ namespace Demo {
 			float rotation = 0,
 			float scaleX = 1,
 			float scaleY = 1
-		) : IDraggable(transformManager, parent, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) { }
+     ) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY), IDraggable(transformManager, parent, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) { }
 		bool OnHover(std::shared_ptr<IDraggable> other) override;
 		bool OnDrop(std::shared_ptr<IDraggable> other) override;
 		void Update(unsigned long long deltaTime) override;

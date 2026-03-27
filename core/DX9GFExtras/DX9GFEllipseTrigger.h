@@ -39,6 +39,6 @@ namespace DX9GF {
 		float GetOriginY() const;
 		bool IsHovering(unsigned long long deltaTime) override;
 
-		void Draw(GraphicsDevice* graphicsDevice, Camera* camera) override;
+		void Draw(GraphicsDevice* graphicsDevice, const Camera& camera) override;
 	};
 }

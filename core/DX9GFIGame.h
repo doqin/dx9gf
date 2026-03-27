@@ -12,6 +12,10 @@ namespace DX9GF {
 		LPDIRECT3D9 d3d = nullptr; // Biến "tổng" của toàn bộ thư viện Direct3D
 		HWND hwnd = NULL;
 		D3DPRESENT_PARAMETERS d3dpp;
+		bool pendingDeviceReset = false;
+		UINT pendingWidth = 0;
+		UINT pendingHeight = 0;
+		bool TryResetDevice(UINT width, UINT height);
 	protected:
 		const UINT SCREEN_WIDTH;
 		const UINT SCREEN_HEIGHT;

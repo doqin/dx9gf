@@ -241,46 +241,40 @@ void Demo::IDraggable::Update(unsigned long long deltaTime)
 
 void Demo::IDraggable::Draw(unsigned long long deltaTime)
 {
-	this->graphicsDevice->DrawRectangle(
-		*camera, 
-		trigger->GetWorldX(), 
-		trigger->GetWorldY(), 
-		trigger->GetWidth(), 
-		trigger->GetHeight(),
-		trigger->GetWorldRotation(),
-		trigger->GetWorldScaleX(),
-		trigger->GetWorldScaleY(),
-		trigger->GetOriginX(),
-		trigger->GetOriginY(),
-		color, 
-		true
-	);
-	debugFontSprite->Begin();
-	auto [x, y] = GetWorldPosition();
-	debugFontSprite->SetPosition(x + dragAreaWidth / static_cast<float>(2), y + dragAreaHeight / static_cast<float>(2));
-	std::wstring ws(id.begin(), id.end());
-	debugFontSprite->SetText(std::move(ws));
-	debugFontSprite->Draw(*camera, deltaTime);
-	if (parent.has_value()) {
-		if (auto draggableParent = dynamic_pointer_cast<IDraggable>(parent.value().lock())) {
-			auto id = draggableParent->GetID();
-			std::wstring parentIDWs(id.begin(), id.end());
-			debugFontSprite->SetText(L"Parent: " + parentIDWs);
-			debugFontSprite->SetPosition(x + dragAreaWidth / static_cast<float>(2), y + dragAreaHeight / static_cast<float>(2) + 30);
-			debugFontSprite->Draw(*camera, deltaTime);
+	trigger->Draw(graphicsDevice, *camera);
+	auto thisX = trigger->GetWorldX() - trigger->GetOriginX();
+	auto thisY = trigger->GetWorldY() - trigger->GetOriginY();
+	graphicsDevice->DrawLine(*camera, thisX, thisY, thisX + 1, thisY + 1, 0xFFFF0000);
+	if (debug) {
+		debugFontSprite->Begin();
+		auto [x, y] = GetWorldPosition();
+		debugFontSprite->SetPosition(x + dragAreaWidth / static_cast<float>(2), y + dragAreaHeight / static_cast<float>(2));
+		std::wstring ws(id.begin(), id.end());
+		debugFontSprite->SetText(std::move(ws));
+		debugFontSprite->Draw(*camera, deltaTime);
+		if (parent.has_value()) {
+			if (auto draggableParent = dynamic_pointer_cast<IDraggable>(parent.value().lock())) {
+				auto id = draggableParent->GetID();
+				std::wstring parentIDWs(id.begin(), id.end());
+				debugFontSprite->SetText(L"Parent: " + parentIDWs);
+				debugFontSprite->SetPosition(x + dragAreaWidth / static_cast<float>(2), y + dragAreaHeight / static_cast<float>(2) + 30);
+				debugFontSprite->Draw(*camera, deltaTime);
+			}
 		}
+		debugFontSprite->End();
 	}
-	debugFontSprite->End();
 }
 
 bool Demo::IDraggable::OnDrop(std::shared_ptr<IDraggable> other)
 {
-	auto [thisX, thisY] = this->GetWorldPosition();
-	auto [otherX, otherY] = other->GetWorldPosition();
+	auto thisX = trigger->GetWorldX() - trigger->GetOriginX();
+	auto thisY = trigger->GetWorldY() - trigger->GetOriginY();
+	auto otherX = other->trigger->GetWorldX() - other->trigger->GetOriginX();
+	auto otherY = other->trigger->GetWorldY() - other->trigger->GetOriginY();
 	if (otherX > thisX
-		&& otherX < thisX + dragAreaWidth
+       && otherX < thisX + trigger->GetWidth()
 		&& otherY > thisY
-		&& otherY < thisY + dragAreaHeight) {
+       && otherY < thisY + trigger->GetHeight()) {
 		other->SetParent(shared_from_this());
 		return true;
 	}
@@ -289,12 +283,14 @@ bool Demo::IDraggable::OnDrop(std::shared_ptr<IDraggable> other)
 
 bool Demo::IDraggable::OnHover(std::shared_ptr<IDraggable> other)
 {
-	auto [thisX, thisY] = this->GetWorldPosition();
-	auto [otherX, otherY] = other->GetWorldPosition();
+	auto thisX = trigger->GetWorldX() - trigger->GetOriginX();
+	auto thisY = trigger->GetWorldY() - trigger->GetOriginY();
+	auto otherX = other->trigger->GetWorldX() - other->trigger->GetOriginX();
+	auto otherY = other->trigger->GetWorldY() - other->trigger->GetOriginY();
 	if (otherX > thisX
-		&& otherX < thisX + dragAreaWidth
+       && otherX < thisX + trigger->GetWidth()
 		&& otherY > thisY
-		&& otherY < thisY + dragAreaHeight) {
+       && otherY < thisY + trigger->GetHeight()) {
 		return true;
 	}
 	return false;
