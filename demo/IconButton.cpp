@@ -1,11 +1,24 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "IconButton.h"
-Demo::IconButton* Demo::IconButton::ChangeSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing)
+
+
+Demo::IconButton::IconButton(std::shared_ptr<DX9GF::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
+	std::shared_ptr<DX9GF::Texture> uiSheetTex, int frames)
+	: IButton(tm, displayX, displayY, imgW, imgH, frames)
 {
-	//reuse the logic of the constructor
-	for (int i = 0; i < 3; ++i) {
-		this->buttonRects[i].left = startX + i * (imgW + spacing);
-		this->buttonRects[i].top = startY;
+	if (uiSheetTex) {
+		this->sprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	}
+	this->buttonRects.resize(frames);
+}
+
+Demo::IconButton* Demo::IconButton::SetSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing, bool isVertical)
+{
+	for (int i = 0; i < this->frameCount; ++i) {
+		//Vertical = x fixed, y moves
+		//Horizontal = x moves, y fixed
+		this->buttonRects[i].left = startX + (isVertical ? 0 : i * (imgW + spacing));
+		this->buttonRects[i].top = startY + (isVertical ? i * (imgH + spacing) : 0);
 		this->buttonRects[i].right = this->buttonRects[i].left + imgW;
 		this->buttonRects[i].bottom = this->buttonRects[i].top + imgH;
 	}
@@ -24,22 +37,30 @@ void Demo::IconButton::Init(DX9GF::Camera* cam)
 	this->trigger->SetLocalPosition(0, 0);
 
 	this->trigger->Init(cam);
-	this->trigger->SetOnHeldLeft(this->callback);
+	this->trigger->SetOnReleaseLeft(this->callback);
 }
 
 void Demo::IconButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
-	int stateIndex = 0; //default is IDLE
-	if (this->currentState == ButtonState::HOVER) stateIndex = 1;
-	else if (this->currentState == ButtonState::CLICKED) stateIndex = 2;
+	//prevent from crashing
+	if (!this->sprite || !camera || buttonRects.empty()) return;
 
-	if (this->sprite && camera)
-	{
-		this->sprite->SetSrcRect(this->buttonRects[stateIndex]);
+	//Mapping Trạng thái sang Index mong muốn
+	int expectedIndex = 0;
 
-		this->sprite->Begin();
-		this->sprite->SetPosition(GetWorldX(), GetWorldY());
-		this->sprite->Draw(*camera, deltaTime);
-		this->sprite->End();
-	}
+	if (this->currentState == ButtonState::HOVER) expectedIndex = 1;
+	else if (this->currentState == ButtonState::CLICKED || this->currentState == ButtonState::LISTENING) expectedIndex = 2;
+	else if (this->currentState == ButtonState::DISABLED) expectedIndex = 3;
+
+	// BƯỚC 2: Chốt chặn an toàn (Kẹp giá trị)
+	// Dù index mong muốn là 2 hay 3, nếu nút này chỉ có 2 frame, nó sẽ bị ép về 1.
+	int finalIndex = std::min(expectedIndex, this->frameCount - 1);
+
+	// BƯỚC 3: Vẽ
+	this->sprite->SetSrcRect(this->buttonRects[finalIndex]);
+	this->sprite->Begin();
+	this->sprite->SetPosition(GetWorldX(), GetWorldY());
+	this->sprite->Draw(*camera, deltaTime);
+	this->sprite->End();
+
 }

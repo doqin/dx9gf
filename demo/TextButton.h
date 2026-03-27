@@ -2,8 +2,7 @@
 #include "IButton.h"
 #include "DX9GFFont.h"
 #include <string>
-#include <DX9GF.h>
-#include <functional>
+#include <vector>
 namespace Demo
 {
 	class TextButton : public IButton
@@ -13,38 +12,18 @@ namespace Demo
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 
 		//save state's color + background
-		DWORD idleColor, hoverColor, clickedColor, disabledColor;
-		D3DXCOLOR idleBg, hoverBg, clickedBg, disabledBg;
-
+		std::vector<DWORD> textColors;
+		std::vector<D3DXCOLOR> bgColors;
+		
+		//fix memory allocation
+		std::wstring wText;
 	public:
 		TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
 			float x, float y, float w, float h,
 			std::string txtContent, DX9GF::Font* f,
-			std::function<void(DX9GF::ITrigger*)> onClick)
-			: IButton(tm, x, y, w, h)
-		{
-
-			this->text = txtContent;
-			this->fontSprite = std::make_shared<DX9GF::FontSprite>(f);
-
-			//setup text color (HEX)
-			this->idleColor = 0xFFFFFFFF; //white
-			this->hoverColor = 0xFFFFFF00; //yellow 
-			this->clickedColor = 0xFFFF0000; //red
-			this->disabledColor = 0xFF888888; //grey
-
-			//setup background color (RGBA)
-			this->idleBg = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);   //dark grey
-			this->hoverBg = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);  //light grey
-			this->clickedBg = D3DXCOLOR(0.1f, 0.8f, 0.1f, 1.0f); //green
-			this->disabledBg = D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f);
-
-			//save the behavior to use on Init (->trigger)
-			this->SetOnClicked(onClick);
-		}
+			std::function<void(DX9GF::ITrigger*)> onClick);
 
 		//setters
-		
 		TextButton* SetText(std::string newText);
 		TextButton* SetBackgroundColors(D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled = D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f));
 		TextButton* SetTextColors(DWORD idle, DWORD hover, DWORD click, DWORD disabled = 0xFF888888);
