@@ -190,7 +190,7 @@ namespace Demo
 
 			for (auto& btn : uiButtons)
 			{
-				btn->Draw(&this->camera, gd, deltaTime);
+				btn->Draw(gd, deltaTime);
 			}
 			gd->EndDraw();
 		}

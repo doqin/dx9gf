@@ -228,7 +228,7 @@ void MainScene::Draw(unsigned long long deltaTime)
 		textureRec->End();
 		rect->Draw(deltaTime);
 		for (auto& collider : map->GetColliders()) {
-			collider->Draw(game->GetGraphicsDevice(), &camera);
+			collider->Draw(game->GetGraphicsDevice(), camera);
 		}
 		dev->DrawEllipse(
 			camera,

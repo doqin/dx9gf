@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "DebugScene.h"
+#include "TestBattleScene.h"
 
 Demo::DebugScene::DebugScene(Game* game, int sw, int sh) : IScene(sw, sh), game(game), uiCamera(sw, sh)
 {
@@ -10,6 +11,8 @@ void Demo::DebugScene::Init()
 {
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
+	player = std::make_shared<Player>(transformManager);
+	player->Init(game->GetGraphicsDevice(), &colliderManager, &camera);
 	draggables.push_back(std::make_shared<IDraggable>(transformManager, 50, 70));
 	draggables.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	draggables.push_back(std::make_shared<IDraggable>(transformManager, 75, 90, 90, 100));
@@ -37,7 +40,7 @@ void Demo::DebugScene::Init()
 			PostQuitMessage(0);
 		}
 	);
-	btnTextExit->Init(&camera);
+	btnTextExit->Init(&uiCamera);
 	uiButtons.push_back(btnTextExit);
 
 	// Test TextButton setter
@@ -62,6 +65,8 @@ void Demo::DebugScene::Init()
 	//continueBtn->ChangeSpriteCoords(500, 2, 60, 32, 20);
 
 	transformManager->RebuildHierarchy();
+	DX9GF::ITrigger::drawTrigger = true;
+	DX9GF::ICollider::drawCollider = true;
 }
 
 void Demo::DebugScene::Update(unsigned long long deltaTime)
@@ -90,6 +95,16 @@ void Demo::DebugScene::Update(unsigned long long deltaTime)
 			else {
 				typedText += c;
 			}
+		}
+		if (inpMan->KeyDown(DIK_F2)) {
+			DX9GF::ITrigger::drawTrigger = !DX9GF::ITrigger::drawTrigger;
+		}
+		if (inpMan->KeyDown(DIK_F5)) {
+			auto app = DX9GF::Application::GetInstance();
+			auto sceMan = game->GetSceneManager();
+			sceMan->PushScene(new TestBattleScene(game, player, app->GetScreenWidth(), app->GetScreenHeight()));
+			sceMan->GoToNext();
+			return;
 		}
 
 		if (inpMan->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
@@ -125,7 +140,7 @@ void Demo::DebugScene::Draw(unsigned long long deltaTime)
 		//draw all UI button
 		for (auto& btn : uiButtons)
 		{
-			btn->Draw(&this->camera, gd, deltaTime);
+			btn->Draw(gd, deltaTime);
 		}
 
 		if (myFontSprite) {

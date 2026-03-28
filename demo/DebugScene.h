@@ -4,7 +4,7 @@
 #include "Game.h"
 #include "IDraggable.h"
 #include "IContainer.h"
-
+#include "Player.h"
 #include "DX9GFFont.h"
 #include "TextButton.h"
 #include "IconButton.h"
@@ -17,12 +17,17 @@ namespace Demo {
 		DX9GF::CommandBuffer commandBuffer;
 		std::shared_ptr<DX9GF::FontSprite> myFontSprite;
 		std::string typedText = "Go chu vao day: ";
+		// Managers
 		std::shared_ptr<DraggableManager> draggableManager;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		DX9GF::ColliderManager colliderManager;
+
+		// Objects
 		std::vector<std::shared_ptr<IContainer>> containers;
 		std::vector<std::shared_ptr<IDraggable>> draggables;
 		std::shared_ptr<IConversation> activeConversation;
 		DX9GF::Camera uiCamera;
+		std::shared_ptr<Player> player;
 
 		//UI component
 		std::vector<std::shared_ptr<Demo::IButton>> uiButtons;

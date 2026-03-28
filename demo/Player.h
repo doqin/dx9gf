@@ -11,10 +11,23 @@ namespace Demo {
 			Up,
 			Down
 		};
+		// Constants
+		const float MAX_HEALTH = 25;
+		float VELOCITY = 75;
+		const float SPRINT_MULTIPLIER = 1.5f;
+		const float CAMERA_VELOCITY = 25;
+		const float CAMERA_ACCELERATION = 50;
+		const float CAMERA_SNAP_MARGIN = 1.f;
+		const float INVINCIBILITY_DURATION = 1.f;
+		const float BLINKING_DURATION = 0.1f;
 		// States
 		State state = State::Down;
 		bool isWalking = false;
 		float cameraDeltaTime = 0;
+		bool followCamera = true;
+		float health = MAX_HEALTH;
+		bool isInvincible = false;
+		float timeSinceTurnedInvincible = 0.f;
 		// Sprites
 		std::shared_ptr<DX9GF::Texture> spritesheet;
 		std::shared_ptr<DX9GF::StaticSprite> idleDown;
@@ -31,12 +44,6 @@ namespace Demo {
 		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
 		DX9GF::ColliderManager* colliderManager = nullptr;
 		DX9GF::Camera* camera = nullptr;
-		// Constants
-		const float VELOCITY = 75;
-		const float SPRINT_MULTIPLIER = 1.5f;
-		const float CAMERA_VELOCITY = 25;
-		const float CAMERA_ACCELERATION = 50;
-		const float CAMERA_SNAP_MARGIN = 1.f;
 	public:
 		Player(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) { }
 		Player(
@@ -60,5 +67,14 @@ namespace Demo {
 		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderManager* colliderManager, DX9GF::Camera* camera);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
+		void SetFollowCamera(bool followCamera);
+		float GetVelocity() const;
+		float SetVelocity(float velocity);
+		bool TakeDamage(float damage);
+		bool IsDead() const;
+		void SetHealth(float hp);
+		float GetMaxHealth() const;
+		float GetHealth() const;
+		std::weak_ptr<DX9GF::RectangleCollider> GetCollider();
 	};
 }

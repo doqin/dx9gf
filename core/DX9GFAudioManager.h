@@ -43,10 +43,18 @@ namespace DX9GF {
 		void STDMETHODCALLTYPE OnVoiceError(void*, HRESULT) override {}
 	};
 
+	enum class AudioType 
+	{
+		SFX,
+		MUSIC
+	};
+
 	struct ActiveVoice
 	{
 		IXAudio2SourceVoice* pVoice;
 		VoiceCallback* pCallback;
+		AudioType type;
+		float baseVolume; //save the volume level when play
 	};
 
 	bool LoadWavFromResource(int resourceID, SoundBuffer& out_audio);
@@ -57,6 +65,11 @@ namespace DX9GF {
 		IXAudio2MasteringVoice* pMasterVoice = nullptr; //output
 		std::map<std::string, SoundBuffer*> cache; //cache will save the loaded file (avoid disk loading latency)
 		std::vector<ActiveVoice*> activeVoices; //list of playing sound
+
+		//settings manager will push values to these vars
+		float currentMusicVolume = 1.0f;
+		float currentSfxVolume = 1.0f;
+
 		AudioManager() {}
 		~AudioManager() { if (instance) delete instance; }
 		static AudioManager* instance;
@@ -67,11 +80,13 @@ namespace DX9GF {
 		//load sound from file to cache
 		void Load(std::string name, int resID);
 
-		void Play(std::string name, bool loop = false, float volume = 1.0f);
+		void Play(std::string name, bool loop = false, float volume = 1.0f, AudioType type = AudioType::SFX);
 		void Update();
 		void Shutdown();
 
 		//set game volume
 		void SetMasterVolume(float volume);
+		void SetMusicVolume(float volume);
+		void SetSfxVolume(float volume);
 	};
 }

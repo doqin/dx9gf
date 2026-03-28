@@ -65,7 +65,7 @@ void Demo::TextButton::Init(DX9GF::Camera* cam)
 	this->trigger->SetOnReleaseLeft(this->callback);
 }
 
-void Demo::TextButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::TextButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 
 	if (!this->fontSprite) return;
@@ -83,9 +83,9 @@ void Demo::TextButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, un
 	auto currY = this->GetWorldY();
 
 	////draw button's background
-	if (gd && camera) {
+	if (gd && uiCamera) {
 		gd->DrawRectangle(
-			*camera,
+			*uiCamera,
 			currX, currY, this->width, this->height,
 			0, 1, 1, 0, 0,
 			bgColors[stateIndex],
@@ -94,12 +94,12 @@ void Demo::TextButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, un
 	}
 
 	//draw button's text
-	if (fontSprite && camera) {
+	if (fontSprite && uiCamera) {
 		fontSprite->Begin();
 		fontSprite->SetPosition(currX, currY);
 		fontSprite->SetColor(textColors[stateIndex]);
 		fontSprite->SetText(std::wstring(this->wText));
-		fontSprite->Draw(*camera, deltaTime);
+		fontSprite->Draw(*uiCamera, deltaTime);
 		fontSprite->End();
 	}
 

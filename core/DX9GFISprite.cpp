@@ -153,3 +153,8 @@ void DX9GF::ISprite::SetOrigin(float x, float y)
 	origin.y = y;
 	needUpdate = true;
 }
+
+DX9GF::GraphicsDevice* DX9GF::ISprite::GetGraphicsDevice()
+{
+	return graphicsDevice;
+}

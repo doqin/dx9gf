@@ -25,7 +25,7 @@ Demo::IconButton* Demo::IconButton::SetSpriteCoords(int startX, int startY, int 
 	return this;
 }
 
-void Demo::IconButton::Init(DX9GF::Camera* cam)
+void Demo::IconButton::Init(DX9GF::Camera* uiCamera)
 {
 	this->trigger = std::make_shared<DX9GF::RectangleTrigger>
 		(
@@ -35,15 +35,15 @@ void Demo::IconButton::Init(DX9GF::Camera* cam)
 
 	//lock the trigger
 	this->trigger->SetLocalPosition(0, 0);
-
-	this->trigger->Init(cam);
+	this->uiCamera = uiCamera;
+	this->trigger->Init(uiCamera);
 	this->trigger->SetOnReleaseLeft(this->callback);
 }
 
-void Demo::IconButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::IconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	//prevent from crashing
-	if (!this->sprite || !camera || buttonRects.empty()) return;
+	if (!this->sprite || !this->uiCamera || buttonRects.empty()) return;
 
 	//Mapping Trạng thái sang Index mong muốn
 	int expectedIndex = 0;
@@ -60,7 +60,7 @@ void Demo::IconButton::Draw(DX9GF::Camera* camera, DX9GF::GraphicsDevice* gd, un
 	this->sprite->SetSrcRect(this->buttonRects[finalIndex]);
 	this->sprite->Begin();
 	this->sprite->SetPosition(GetWorldX(), GetWorldY());
-	this->sprite->Draw(*camera, deltaTime);
+	this->sprite->Draw(*uiCamera, deltaTime);
 	this->sprite->End();
 
 }

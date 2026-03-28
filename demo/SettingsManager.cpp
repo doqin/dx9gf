@@ -2,114 +2,122 @@
 #include "SettingsManager.h"
 #include <fstream>
 #include <cctype> 
-Demo::SettingsManager* Demo::SettingsManager::instance = nullptr;
-Demo::SettingsManager::SettingsManager() {}
-void Demo::SettingsManager::SetDefaultSettings()
+#include "DX9GFAudioManager.h"
+
+namespace Demo
 {
-	this->musicVolume = 1;
-	this->sfxVolume = 1;
-	this->masterVolume = 1;
+	SettingsManager* SettingsManager::instance = nullptr;
+	SettingsManager::SettingsManager() {}
 
-	keybinds["MOVE_LEFT"] = 65; //a
-	keybinds["MOVE_UP"] = 87; //w
-	keybinds["MOVE_RIGHT"] = 68; //d
-	keybinds["MOVE_DOWN"] = 83; //s
-}
-
-bool Demo::SettingsManager::LoadSettings()
-{
-	std::ifstream fileInput("config.ini");
-
-	if (!fileInput.is_open())
+	void SettingsManager::SetDefaultSettings()
 	{
-		this->SetDefaultSettings();
+		this->SetMusicVolume(1.0f);
+		this->SetSfxVolume(1.0f);
+		this->SetMasterVolume(1.0f);
+
+		keybinds["MOVE_LEFT"] = 65; //a
+		keybinds["MOVE_UP"] = 87; //w
+		keybinds["MOVE_RIGHT"] = 68; //d
+		keybinds["MOVE_DOWN"] = 83; //s
+	}
+
+	bool SettingsManager::LoadSettings()
+	{
+		std::ifstream fileInput("config.ini");
+
+		if (!fileInput.is_open())
+		{
+			this->SetDefaultSettings();
+			return true;
+		}
+
+		std::string line;
+
+		while (std::getline(fileInput, line))
+		{
+			//skip empty line
+			if (line.empty())
+				continue;
+
+			//find '=' to split string
+			size_t delimiterPos = line.find('=');
+			if (delimiterPos == std::string::npos) continue; //skip line without '='
+
+			std::string key = line.substr(0, delimiterPos);
+			std::string value = line.substr(delimiterPos + 1);
+
+			//classify data
+			if (key == "MASTER_VOL") 
+			{
+				this->SetMasterVolume(std::stof(value));
+			}
+			else if (key == "MUSIC_VOL") 
+			{
+				this->SetMusicVolume(std::stof(value));
+			}
+			else if (key == "SFX_VOL") 
+			{
+				this->SetSfxVolume(std::stof(value));
+			}
+			else 
+			{
+				this->keybinds[key] = std::stoi(value);
+			}
+		}
+
+		fileInput.close();
+		return true;
+	}
+	bool SettingsManager::SaveSettings()
+	{
+		std::ofstream file("config.ini");
+		if (!file.is_open()) return false;
+
+		file << "MASTER_VOL=" << masterVolume << "\n";
+		file << "MUSIC_VOL=" << musicVolume << "\n";
+		file << "SFX_VOL=" << sfxVolume << "\n";
+
+		for (const auto& pair : keybinds)
+		{
+			file << pair.first << "=" << pair.second << "\n";
+		}
+
+		file.close();
 		return true;
 	}
 
-	std::string line;
-	//đọc từng dòng
-
-	while (std::getline(fileInput, line))
+	void SettingsManager::SetMusicVolume(float vol)
 	{
-		// Bỏ qua dòng trống
-		if (line.empty()) continue;
-
-		// Tìm vị trí dấu '='
-		size_t delimiterPos = line.find('=');
-		if (delimiterPos == std::string::npos) continue; // Dòng bị lỗi, không có '=', bỏ qua
-
-		// Cắt đôi chuỗi tại dấu '='
-		std::string key = line.substr(0, delimiterPos);
-		std::string value = line.substr(delimiterPos + 1);
-
-		// PHÂN LOẠI DATA
-		if (key == "MASTER_VOL") {
-			this->masterVolume = std::stof(value); // stof = String TO Float
-		}
-		else if (key == "MUSIC_VOL") {
-			this->musicVolume = std::stof(value);
-		}
-		else if (key == "SFX_VOL") {
-			this->sfxVolume = std::stof(value);
-		}
-		else {
-			// Nếu không phải Volume, thì chắc chắn nó là Keybind!
-			this->keybinds[key] = std::stoi(value); // stoi = String TO Int
-		}
+		this->musicVolume = vol;
+		DX9GF::AudioManager::GetInstance()->SetMusicVolume(vol); //connect to AudioManager and push vol
 	}
 
-	fileInput.close();
-	return true;
-}
-bool Demo::SettingsManager::SaveSettings()
-{
-	std::ofstream file;
-	file.open("config.ini", std::ios::out);
-	if (!file.is_open())
+	void SettingsManager::SetMasterVolume(float vol)
 	{
-		return false;
+		this->masterVolume = vol;
+		DX9GF::AudioManager::GetInstance()->SetMasterVolume(vol);
 	}
 
-
-	file << "MASTER_VOL=" << masterVolume << "\n";
-	file << "MUSIC_VOL=" << musicVolume << "\n";
-	file << "SFX_VOL=" << sfxVolume << "\n";
-
-	for (const auto& pair : keybinds) 
+	void SettingsManager::SetSfxVolume(float vol)
 	{
-		file << pair.first << "=" << pair.second << "\n";
-	}
-	return true;
-}
-
-void Demo::SettingsManager::SetMusicVolume(float vol)
-{
-	this->musicVolume = vol;
-}
-
-void Demo::SettingsManager::SetMasterVolume(float vol)
-{
-	this->masterVolume = vol;
-}
-
-void Demo::SettingsManager::SetSfxVolume(float vol)
-{
-	this->sfxVolume = vol;
-}
-
-void Demo::SettingsManager::SetKeybind(std::string actionName, int keyCode)
-{
-	this->keybinds[actionName] = keyCode;
-}
-int Demo::SettingsManager::GetKeybind(std::string actionName)
-{
-	// Tìm thử xem actionName có trong map không
-	auto it = keybinds.find(actionName);
-
-	if (it != keybinds.end()) {
-		return it->second; // Tìm thấy -> Trả về mã phím
+		this->sfxVolume = vol;
+		DX9GF::AudioManager::GetInstance()->SetSfxVolume(vol);
 	}
 
-	// Không tìm thấy (có thể file config bị lỗi) -> Trả về 0 hoặc 1 phím mặc định
-	return 0;
+	void SettingsManager::SetKeybind(std::string actionName, int keyCode)
+	{
+		this->keybinds[actionName] = keyCode;
+	}
+	int SettingsManager::GetKeybind(std::string actionName)
+	{
+		// find actionName in keybinds map
+		auto it = keybinds.find(actionName);
+
+		if (it != keybinds.end()) 
+		{
+			return it->second;
+		}
+
+		return 0;
+	}
 }

@@ -40,6 +40,6 @@ namespace DX9GF {
 		void Update(unsigned long long deltaTime);
 
 		static bool drawTrigger;
-		virtual void Draw(GraphicsDevice* graphicsDevice, Camera* camera) {}
+		virtual void Draw(GraphicsDevice* graphicsDevice, const Camera& camera) {}
 	};
 }

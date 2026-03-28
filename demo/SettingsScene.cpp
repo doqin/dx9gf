@@ -3,13 +3,11 @@
 #include "resource.h"
 #include "IconButton.h"
 #include "SettingsManager.h"
-#include <algorithm> // Bổ sung cho std::max, std::min
+#include <algorithm>
 
 namespace Demo
 {
-	// ==========================================
-	// HELPER LẤY TÊN PHÍM & CHUỖI
-	// ==========================================
+	//Extra helpers, use to get keyname and string
 	std::wstring ToWString(const std::string& s)
 	{
 		return std::wstring(s.begin(), s.end());
@@ -28,9 +26,7 @@ namespace Demo
 		return "Key " + std::to_string(vkCode);
 	}
 
-	// ==========================================
-	// CÁC HÀM VẼ (DRAW)
-	// ==========================================
+	//Draw functions for scene (to avoid code duplication)
 	void SettingsScene::DrawString(std::wstring text, float x, float y, D3DCOLOR color, DWORD format)
 	{
 		if (!font) return;
@@ -38,17 +34,26 @@ namespace Demo
 		int screenY = (int)(lastScreenHeight / 2.0f + y);
 
 		RECT rect;
-		if (format & DT_RIGHT) SetRect(&rect, screenX - 500, screenY, screenX, screenY + 50);
-		else if (format & DT_CENTER) SetRect(&rect, screenX - 100, screenY, screenX + 100, screenY + 50);
-		else SetRect(&rect, screenX, screenY, screenX + 300, screenY + 50);
+		if (format & DT_RIGHT)
+			SetRect(&rect, screenX - 500, screenY, screenX, screenY + 50);
+		else if (format & DT_CENTER)
+			SetRect(&rect, screenX - 100, screenY, screenX + 100, screenY + 50);
+		else
+			SetRect(&rect, screenX, screenY, screenX + 300, screenY + 50);
 
 		font->GetRawFont()->DrawTextW(NULL, text.c_str(), -1, &rect, format | DT_NOCLIP, color);
 	}
 
 	void SettingsScene::DrawVolumeTrack(std::shared_ptr<DX9GF::StaticSprite> bg, std::shared_ptr<DX9GF::StaticSprite> fill, float vol, RECT originalRect, unsigned long long deltaTime)
 	{
-		if (bg) { bg->Begin(); bg->Draw(camera, deltaTime); bg->End(); }
-		if (fill && bg) {
+		if (bg)
+		{
+			bg->Begin();
+			bg->Draw(camera, deltaTime);
+			bg->End();
+		}
+		if (fill && bg)
+		{
 			RECT r = originalRect;
 			float fullWidth = (float)(originalRect.right - originalRect.left);
 			r.right = r.left + (LONG)(fullWidth * vol);
@@ -71,16 +76,13 @@ namespace Demo
 		RECT r;
 		SetRect(&r, btnScreenX, btnScreenY, btnScreenX + (int)btn->GetWidth(), btnScreenY + (int)btn->GetHeight());
 
-		// Bù trừ visual offset bằng Hằng Số (Không còn hardcode dơ)
 		r.top += BTN_VISUAL_SHADOW_OFFSET;
 		r.bottom += BTN_VISUAL_SHADOW_OFFSET;
 
 		font->GetRawFont()->DrawTextW(NULL, text.c_str(), -1, &r, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOCLIP, color);
 	}
 
-	// ==========================================
-	// KHỞI TẠO VÀ CẬP NHẬT (INIT & UPDATE)
-	// ==========================================
+	//Update functions for component
 	void SettingsScene::ResetListening()
 	{
 		isListeningUp = isListeningDown = isListeningLeft = isListeningRight = false;
@@ -92,10 +94,11 @@ namespace Demo
 
 	void SettingsScene::UpdateLayout(int screenW, int screenH)
 	{
-		// 1. Background
+		//Background
 		float bgImageW = (float)bgTex->GetWidth();
 		float bgImageH = (float)bgTex->GetHeight();
-		if (!bgSprite) {
+		if (!bgSprite)
+		{
 			bgSprite = std::make_shared<DX9GF::StaticSprite>(bgTex.get());
 			bgSprite->SetSrcRect({ 0, 0, (LONG)bgImageW, (LONG)bgImageH });
 		}
@@ -103,10 +106,11 @@ namespace Demo
 		bgSprite->SetOrigin(bgImageW / 2.0f, bgImageH / 2.0f);
 		bgSprite->SetPosition(0, 0);
 
-		// 2. Title
+		//Title
 		float titleImageW = (float)titleTex->GetWidth();
 		float titleImageH = (float)titleTex->GetHeight();
-		if (!titleSprite) {
+		if (!titleSprite)
+		{
 			titleSprite = std::make_shared<DX9GF::StaticSprite>(titleTex.get());
 			titleSprite->SetSrcRect({ 0, 0, (LONG)titleImageW, (LONG)titleImageH });
 		}
@@ -114,23 +118,26 @@ namespace Demo
 		titleSprite->SetOrigin(titleImageW / 2.0f, titleImageH / 2.0f);
 		titleSprite->SetPosition(0, -screenH * 0.20f);
 
-		// 3. UI Elements (Dùng hằng số)
+		//UI Elements
 		float startY = -screenH * 0.02f;
 
-		// Hàm cục bộ giúp set vị trí Row Slider cho gọn
+		//LOCAL FUNCTION to set Row Slider positions to keep the code clean
 		auto SetVolumeRowPosition = [&](std::shared_ptr<DX9GF::StaticSprite> track, std::shared_ptr<DX9GF::StaticSprite> fill,
-			std::shared_ptr<IconButton> btnD, std::shared_ptr<IconButton> btnI, float y) {
+			std::shared_ptr<IconButton> btnD, std::shared_ptr<IconButton> btnI, float y)
+			{
+				float gap = 5.0f; //gap between track and inc,desc buttons
+				float btnWidth = 12.0f;
 
-				float gap = 5.0f;       // Cố định khoảng cách 2 bên đều là 5 pixel
-				float btnWidth = 12.0f; // Bề ngang của cái nút (theo đúng SrcRect cậu cắt)
+				if (track)
+				{
+					track->SetPosition(SLIDER_COLUMN_X, y + ALIGN_OFFSET_Y);
+					track->SetScale(SLIDER_SCALE_X, 1.0f);
+				}
 
-				if (track) { track->SetPosition(SLIDER_COLUMN_X, y + ALIGN_OFFSET_Y); track->SetScale(SLIDER_SCALE_X, 1.0f); }
 				if (fill) fill->SetPosition(SLIDER_COLUMN_X, y + ALIGN_OFFSET_Y);
 
-				// Lùi về trái = Đúng chiều rộng của nút + gap
 				if (btnD) btnD->SetLocalPosition(SLIDER_COLUMN_X - btnWidth - gap, y + ALIGN_OFFSET_Y - 2.0f);
 
-				// Đẩy sang phải = Đúng chiều dài của track + gap
 				if (btnI) btnI->SetLocalPosition(SLIDER_COLUMN_X + SLIDER_DESIRED_WIDTH + gap, y + ALIGN_OFFSET_Y - 2.0f);
 			};
 
@@ -153,7 +160,7 @@ namespace Demo
 		lastScreenWidth = app->GetScreenWidth();
 		lastScreenHeight = app->GetScreenHeight();
 
-		// Load assets
+		//Load assets
 		DX9GF::Font::AddFont(L"arcade-among-2-r46pv.ttf");
 		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arcade Among 2 R46PV", 24, 0, FW_BOLD);
 
@@ -161,7 +168,7 @@ namespace Demo
 		bgTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice()); bgTex->LoadTexture(IDB_PNG2);
 		titleTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice()); titleTex->LoadTexture(IDB_PNG3);
 
-		// Hàm hỗ trợ khởi tạo Track và Fill
+		//LOCAL FUNCTION to init track and trackfill
 		auto InitTrack = [&](std::shared_ptr<DX9GF::StaticSprite>& track, std::shared_ptr<DX9GF::StaticSprite>& fill, RECT trackR, RECT fillR) {
 			track = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get()); track->SetSrcRect(trackR);
 			fill = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get()); fill->SetSrcRect(fillR);
@@ -171,16 +178,16 @@ namespace Demo
 		InitTrack(trackMusic, trackMusicFill, { 113, 499, 160, 506 }, { 65, 499, 112, 506 });
 		InitTrack(trackSFX, trackSFXFill, { 113, 515, 160, 522 }, { 65, 515, 112, 522 });
 
-		// Hàm hỗ trợ khởi tạo Nút Cộng/Trừ (Tránh lặp code)
+		//LOCAL FUNCTION to init decs,inc buttons
 		auto CreateVolBtn = [&](int srcX, int srcY, const std::function<void(DX9GF::ITrigger*)>& action) {
 			auto btn = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 12, 11, uiSheetTex, 1);
 			btn->SetSpriteCoords(srcX, srcY, 12, 11, 0);
 
-			// --- SỬA Ở ĐÂY: Bọc cái action lại và gọi thêm hàm SaveSettings ---
-			btn->SetOnReleaseLeft([action](DX9GF::ITrigger* t) {
-				action(t); // Thực thi việc tăng/giảm Volume
-				SettingsManager::GetInstance()->SaveSettings(); // LƯU NGAY LẬP TỨC!
-				});			
+			btn->SetOnReleaseLeft([action](DX9GF::ITrigger* t) 
+				{
+				action(t);
+				SettingsManager::GetInstance()->SaveSettings();
+				});
 			return btn;
 			};
 
@@ -194,7 +201,6 @@ namespace Demo
 		btnSFXDec = CreateVolBtn(82, 82, [](DX9GF::ITrigger*) { SettingsManager::GetInstance()->SetSfxVolume(std::max(0.0f, SettingsManager::GetInstance()->GetSfxVolume() - 0.2f)); });
 		btnSFXInc = CreateVolBtn(82, 71, [](DX9GF::ITrigger*) { SettingsManager::GetInstance()->SetSfxVolume(std::min(1.0f, SettingsManager::GetInstance()->GetSfxVolume() + 0.2f)); });
 
-		// Nút điều hướng & Back
 		backButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 62, 30, uiSheetTex, 3);
 		backButton->SetSpriteCoords(1, 417, 62, 30, 2);
 		backButton->SetOnReleaseLeft([this](DX9GF::ITrigger*) { this->isGoingBack = true; });
@@ -202,7 +208,7 @@ namespace Demo
 		//Use the same placeholder image for all control buttons for now.
 		btnUp = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 30, 30, uiSheetTex, 2);
 		btnUp->SetSpriteCoords(1, 481, 30, 30, 2);
-		btnUp->SetOnReleaseLeft([this](DX9GF::ITrigger*) 
+		btnUp->SetOnReleaseLeft([this](DX9GF::ITrigger*)
 			{
 				this->ResetListening();
 				this->isListeningUp = true;
@@ -237,10 +243,9 @@ namespace Demo
 			});
 
 
-
 		// Active Buttons
 		std::shared_ptr<Demo::IButton> buttons[] = { backButton, btnUp, btnDown, btnLeft,btnRight, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc };
-		for (auto& btn : buttons) 
+		for (auto& btn : buttons)
 		{
 			if (btn)
 			{
@@ -260,7 +265,8 @@ namespace Demo
 		inpMan->ReadKeyboard(deltaTime);
 
 		auto app = DX9GF::Application::GetInstance();
-		if (app->GetScreenWidth() != lastScreenWidth || app->GetScreenHeight() != lastScreenHeight) {
+		if (app->GetScreenWidth() != lastScreenWidth || app->GetScreenHeight() != lastScreenHeight) 
+		{
 			lastScreenWidth = app->GetScreenWidth();
 			lastScreenHeight = app->GetScreenHeight();
 			UpdateLayout(lastScreenWidth, lastScreenHeight);
@@ -272,71 +278,32 @@ namespace Demo
 		transformManager->UpdateAll();
 		camera.Update();
 
-		if (isListeningUp) 
-		{
-			for (int i = 0x07; i <= 0xFE; i++) 
+		//LOCAL FUNCTION to handle key presses
+		auto HandleKeybind = [&](bool& isListeningFlag, const std::string& actionName, std::shared_ptr<IconButton> btn)
 			{
-				if (GetAsyncKeyState(i) & 0x8000) 
-				{
-					if (i >= 1 && i <= 6) continue;
-					SettingsManager::GetInstance()->SetKeybind("MOVE_UP", i);
-					btnUp->SetState(IButton::ButtonState::IDLE);
-					isListeningUp = false;
-					SettingsManager::GetInstance()->SaveSettings();
-					break;
-				}
-			}
-		}
+				if (!isListeningFlag) return;
 
-		if (isListeningDown) 
+				for (int i = 0x07; i <= 0xFE; i++)
+				{
+					if (GetAsyncKeyState(i) & 0x8000)
+					{
+						if (i >= 1 && i <= 6) continue; // Bỏ qua chuột
+
+						SettingsManager::GetInstance()->SetKeybind(actionName, i);
+						btn->SetState(IButton::ButtonState::IDLE);
+						isListeningFlag = false; // Tắt đúng cờ của nó nhờ truyền tham chiếu (bool&)
+						SettingsManager::GetInstance()->SaveSettings();
+						break;
+					}
+				}
+			};
+		HandleKeybind(isListeningUp, "MOVE_UP", btnUp);
+		HandleKeybind(isListeningDown, "MOVE_DOWN", btnDown);
+		HandleKeybind(isListeningLeft, "MOVE_LEFT", btnLeft);
+		HandleKeybind(isListeningRight, "MOVE_RIGHT", btnRight);
+
+		if (this->isGoingBack) 
 		{
-			for (int i = 0x07; i <= 0xFE; i++) 
-			{
-				if (GetAsyncKeyState(i) & 0x8000) 
-				{
-					if (i >= 1 && i <= 6) continue;
-					SettingsManager::GetInstance()->SetKeybind("MOVE_DOWN", i);
-					btnDown->SetState(IButton::ButtonState::IDLE);
-					isListeningUp = false;
-					SettingsManager::GetInstance()->SaveSettings();
-					break;
-				}
-			}
-		}
-
-		if (isListeningLeft) 
-		{
-			for (int i = 0x07; i <= 0xFE; i++) 
-			{
-				if (GetAsyncKeyState(i) & 0x8000) 
-				{
-					if (i >= 1 && i <= 6) continue;
-					SettingsManager::GetInstance()->SetKeybind("MOVE_LEFT", i);
-					btnLeft->SetState(IButton::ButtonState::IDLE);
-					isListeningUp = false;
-					SettingsManager::GetInstance()->SaveSettings();
-					break;
-				}
-			}
-		}
-
-		if (isListeningRight) 
-		{
-			for (int i = 0x07; i <= 0xFE; i++) 
-			{
-				if (GetAsyncKeyState(i) & 0x8000) 
-				{
-					if (i >= 1 && i <= 6) continue;
-					SettingsManager::GetInstance()->SetKeybind("MOVE_RIGHT", i);
-					btnRight->SetState(IButton::ButtonState::IDLE);
-					isListeningUp = false;
-					SettingsManager::GetInstance()->SaveSettings();
-					break;
-				}
-			}
-		}
-
-		if (this->isGoingBack) {
 			auto sm = this->game->GetSceneManager();
 			sm->GoToPrevious();
 			sm->PopScene();
@@ -354,7 +321,7 @@ namespace Demo
 
 			float startY = -lastScreenHeight * 0.02f;
 
-			// Vẽ Label Text
+			//Draw label
 			DrawString(L"MASTER VOLUME", LABEL_COLUMN_X, startY, D3DCOLOR_XRGB(255, 255, 255));
 			DrawString(L"MUSIC VOLUME", LABEL_COLUMN_X, startY + SPACING_Y, D3DCOLOR_XRGB(255, 255, 255));
 			DrawString(L"SFX VOLUME", LABEL_COLUMN_X, startY + SPACING_Y * 2, D3DCOLOR_XRGB(255, 255, 255));
@@ -363,16 +330,16 @@ namespace Demo
 			DrawString(L"MOVE LEFT", LABEL_COLUMN_X, startY + SPACING_Y * 6.5f, D3DCOLOR_XRGB(200, 200, 255));
 			DrawString(L"MOVE RIGHT", LABEL_COLUMN_X, startY + SPACING_Y * 8.0f, D3DCOLOR_XRGB(200, 200, 255));
 
-			// Vẽ Tracks
+			//draw tracks
 			auto sm = SettingsManager::GetInstance();
 			DrawVolumeTrack(trackMaster, trackMasterFill, sm->GetMasterVolume(), { 65, 483, 112, 490 }, deltaTime);
 			DrawVolumeTrack(trackMusic, trackMusicFill, sm->GetMusicVolume(), { 65, 499, 112, 506 }, deltaTime);
 			DrawVolumeTrack(trackSFX, trackSFXFill, sm->GetSfxVolume(), { 65, 515, 112, 522 }, deltaTime);
 
-			// Vẽ Buttons
-			for (auto& btn : uiButtons) btn->Draw(&this->camera, gd, deltaTime);
+			//draw buttons
+			for (auto& btn : uiButtons) btn->Draw(gd, deltaTime);
 
-			// Vẽ Text trên Button Keybind
+			//draw text onto keybind
 			DrawKeybindButton("MOVE_UP", btnUp, isListeningUp);
 			DrawKeybindButton("MOVE_DOWN", btnDown, isListeningDown);
 			DrawKeybindButton("MOVE_LEFT", btnLeft, isListeningLeft);

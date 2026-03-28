@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "DX9GFAudioManager.h"
 
 
@@ -76,7 +76,7 @@ void DX9GF::AudioManager::Load(std::string name, int resID)
 	}
 }
 
-void DX9GF::AudioManager::Play(std::string name, bool loop, float volume)
+void DX9GF::AudioManager::Play(std::string name, bool loop, float volume, AudioType type)
 {
 	//can't find sound name from cache
 	if (!cache.count(name)) return;
@@ -105,14 +105,15 @@ void DX9GF::AudioManager::Play(std::string name, bool loop, float volume)
 		data->buffer.LoopCount = 0;
 	}
 
-	pVoice->SetVolume(volume);
+	float typeVol = (type == AudioType::MUSIC) ? currentMusicVolume : currentSfxVolume;
+	pVoice->SetVolume(volume * typeVol);
 
 	//play the sound
 	pVoice->SubmitSourceBuffer(&data->buffer);
 	pVoice->Start(0);
 
 	//save into list to control it easily
-	activeVoices.push_back(new ActiveVoice{ pVoice, cb });
+	activeVoices.push_back(new ActiveVoice{ pVoice, cb,type, volume });
 }
 
 void DX9GF::AudioManager::Update() {
@@ -160,5 +161,30 @@ void DX9GF::AudioManager::SetMasterVolume(float volume)
 	if (pMasterVoice)
 	{
 		pMasterVoice->SetVolume(volume);
+	}
+}
+
+// --- TRIỂN KHAI CẬP NHẬT THỜI GIAN THỰC (REAL-TIME UPDATE) ---
+void DX9GF::AudioManager::SetMusicVolume(float volume)
+{
+	currentMusicVolume = volume;
+	for (auto av : activeVoices) 
+	{
+		if (av->type == AudioType::MUSIC) 
+		{
+			av->pVoice->SetVolume(av->baseVolume * currentMusicVolume);
+		}
+	}
+}
+
+void DX9GF::AudioManager::SetSfxVolume(float volume)
+{
+	currentSfxVolume = volume;
+	for (auto av : activeVoices) 
+	{
+		if (av->type == AudioType::SFX) 
+		{
+			av->pVoice->SetVolume(av->baseVolume * currentSfxVolume);
+		}
 	}
 }

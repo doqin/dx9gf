@@ -2,22 +2,20 @@
 #include "Windows.h"
 #include "DX9GF.h"
 
-namespace Demo{
+namespace Demo
+{
 	class SettingsManager
 	{
 	private:
 		static SettingsManager* instance;
 		SettingsManager();
 
-		//Khu vực âm thanh
 		float masterVolume;
 		float musicVolume;
 		float sfxVolume;
 
-		//Khu vực bàn phím
 		std::map<std::string, int> keybinds;
 
-		//
 		std::string configFilePath;
 
 	public:

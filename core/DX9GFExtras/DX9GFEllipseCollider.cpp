@@ -149,13 +149,16 @@ bool DX9GF::EllipseCollider::IsCollidedEllipse(std::weak_ptr<DX9GF::EllipseColli
 
 bool DX9GF::EllipseCollider::IsCollided(std::weak_ptr<ICollider> other)
 {
-    auto lock = other.lock();
-    if (auto ellipseCollider = dynamic_pointer_cast<EllipseCollider>(lock)) {
-        return IsCollidedEllipse(ellipseCollider);
-    }
-    else {
-        throw std::runtime_error("Unknown collider, method has not implemented logic");
-    }
+	auto lock = other.lock();
+	if (auto ellipseCollider = dynamic_pointer_cast<EllipseCollider>(lock)) {
+		return IsCollidedEllipse(ellipseCollider);
+	}
+	else if (auto rectangleCollider = dynamic_pointer_cast<RectangleCollider>(lock)) {
+		return ICollider::IsCollided(dynamic_pointer_cast<EllipseCollider>(shared_from_this()), rectangleCollider);
+	}
+	else {
+		throw std::runtime_error("Unknown collider, method has not implemented logic");
+	}
 }
 
 float DX9GF::EllipseCollider::GetWidth() const
@@ -294,11 +297,11 @@ float DX9GF::EllipseCollider::GetOriginY() const
 	return originY;
 }
 
-void DX9GF::EllipseCollider::Draw(GraphicsDevice* graphicsDevice, Camera* camera)
+void DX9GF::EllipseCollider::Draw(GraphicsDevice* graphicsDevice, const Camera& camera)
 {
 	if (!drawCollider) return;
 	graphicsDevice->DrawEllipse(
-		*camera, 
+		camera, 
 		GetWorldX(), 
 		GetWorldY(), 
 		width, 

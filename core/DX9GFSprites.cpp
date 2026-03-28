@@ -159,6 +159,36 @@ void DX9GF::FontSprite::SetColor(D3DCOLOR color)
 	this->color = color;
 }
 
+LONG DX9GF::FontSprite::GetWidth() const
+{
+	RECT rect{};
+	DWORD format = DT_CALCRECT;
+	if (p_src != nullptr) {
+		rect = *p_src;
+		format |= DT_TOP | DT_LEFT;
+	}
+	else {
+		format |= DT_NOCLIP;
+	}
+	font->GetRawFont()->DrawText(nullptr, text.c_str(), -1, &rect, format, color);
+	return rect.right - rect.left;
+}
+
+LONG DX9GF::FontSprite::GetHeight() const
+{
+	RECT rect{};
+	DWORD format = DT_CALCRECT;
+	if (p_src != nullptr) {
+		rect = *p_src;
+		format |= DT_TOP | DT_LEFT;
+	}
+	else {
+		format |= DT_NOCLIP;
+	}
+	font->GetRawFont()->DrawText(nullptr, text.c_str(), -1, &rect, format, color);
+	return rect.bottom - rect.top;
+}
+
 void DX9GF::FontSprite::Begin()
 {
 	p_sprite->OnLostDevice();

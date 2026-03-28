@@ -12,8 +12,8 @@ namespace DX9GF {
 			Destroyed
 		};
 	private:
-		State state = State::Active;
 	protected:
+		State state = State::Active;
 		TransformHandle transformHandle;
 		std::weak_ptr<TransformManager> transformManager;
 		std::optional<std::weak_ptr<IGameObject>> parent;
@@ -26,6 +26,13 @@ namespace DX9GF {
 		std::optional<std::weak_ptr<IGameObject>> GetParent() const;
 		TransformHandle GetTransformHandle() const;
 		std::weak_ptr<TransformManager> GetTransformManager();
+		// Very dangerous, use when you know what you're doing =)
+		void SetTransformHandle(TransformHandle handle);
+		void SetTransformManager(std::weak_ptr<TransformManager> transformManager);
+		TransformHandle CreateTransform();
+		TransformHandle CreateTransform(float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1);
+		TransformHandle CreateTransform(std::weak_ptr<IGameObject> parent, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1);
+		// Transforms
 		void SetLocalX(float x);
 		void SetLocalY(float y);
 		void SetLocalPosition(float x, float y);

@@ -4,7 +4,7 @@
 
 namespace Demo {
 	class DraggableManager;
-	class IDraggable : public DX9GF::IGameObject {
+  class IDraggable : virtual public DX9GF::IGameObject {
 	protected:
 		inline static size_t nextID = 0;
 		std::string id;
@@ -19,6 +19,7 @@ namespace Demo {
 		static std::shared_ptr<DX9GF::FontSprite> debugFontSprite;
 		bool isDragging = false;
 	public:
+		inline static bool debug = false;
 		inline IDraggable(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager), dragAreaWidth(0), dragAreaHeight(0) { 
 			id = "draggable" + std::to_string(nextID++); 
 		}

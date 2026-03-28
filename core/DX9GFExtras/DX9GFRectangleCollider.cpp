@@ -153,13 +153,16 @@ bool DX9GF::RectangleCollider::IsCollidedRectangle(std::weak_ptr<RectangleCollid
 
 bool DX9GF::RectangleCollider::IsCollided(std::weak_ptr<ICollider> other)
 {
-    auto lock = other.lock();
-    if (auto rectangleCollider = dynamic_pointer_cast<RectangleCollider>(lock)) {
-        return IsCollidedRectangle(rectangleCollider, true);
-    }
-    else {
-        throw std::runtime_error("Unknown collider, method has not implemented logic");
-    }
+	auto lock = other.lock();
+	if (auto rectangleCollider = dynamic_pointer_cast<RectangleCollider>(lock)) {
+		return IsCollidedRectangle(rectangleCollider, true);
+	}
+	else if (auto ellipseCollider = dynamic_pointer_cast<EllipseCollider>(lock)) {
+		return ICollider::IsCollided(dynamic_pointer_cast<RectangleCollider>(shared_from_this()), ellipseCollider);
+	}
+	else {
+		throw std::runtime_error("Unknown collider, method has not implemented logic");
+	}
 }
 
 bool DX9GF::RectangleCollider::CheckAxisIntersection(float current, float delta, float expandedMin, float expandedMax, float& tNear, float& tFar) const
@@ -320,7 +323,7 @@ float DX9GF::RectangleCollider::GetHeight() const
     return height;
 }
 
-void DX9GF::RectangleCollider::Draw(GraphicsDevice* graphicsDevice, Camera* camera)
+void DX9GF::RectangleCollider::Draw(GraphicsDevice* graphicsDevice, const Camera& camera)
 {
 	if (!ICollider::drawCollider) return;
 
@@ -332,7 +335,7 @@ void DX9GF::RectangleCollider::Draw(GraphicsDevice* graphicsDevice, Camera* came
 	float ox = GetOriginX();
 	float oy = GetOriginY();
 	graphicsDevice->DrawRectangle(
-		*camera,
+		camera,
 		x,
 		y,
 		width,
