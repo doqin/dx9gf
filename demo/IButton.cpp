@@ -21,6 +21,12 @@ void Demo::IButton::Update(unsigned long long deltaTime)
 	//update trigger
 	this->trigger->Update(deltaTime);
 
+
+	if (this->currentState == ButtonState::LISTENING || this->currentState == ButtonState::DISABLED)
+	{
+		return;
+	}
+
 	//change button state
 	if (this->trigger->IsHeldLeft(deltaTime)) {
 		this->currentState = ButtonState::CLICKED;

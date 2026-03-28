@@ -117,7 +117,6 @@ namespace Demo
 		{
 			return it->second;
 		}
-
 		return 0;
 	}
 }
