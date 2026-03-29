@@ -1,34 +1,31 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "IconButton.h"
-Demo::IconButton::IconButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h, std::shared_ptr<DX9GF::Texture> uiSheetTex, int startX, int startY, int imgW, int imgH, int spacing, std::function<void(DX9GF::ITrigger*)> onClick)
-	: IButton(tm, x, y, w, h)
+
+
+Demo::IconButton::IconButton(std::shared_ptr<DX9GF::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
+	std::shared_ptr<DX9GF::Texture> uiSheetTex, int frames)
+	: IButton(tm, displayX, displayY, imgW, imgH, frames)
 {
 	if (uiSheetTex) {
 		this->sprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
 	}
-
-	for (int i = 0; i < 3; ++i) {
-		//x_n = x_0 + n * (width + spacing) ->>> Horizontal 
-		buttonRects[i].left = startX + i * (imgW + spacing);
-		buttonRects[i].top = startY;
-		buttonRects[i].right = buttonRects[i].left + imgW;
-		buttonRects[i].bottom = buttonRects[i].top + imgH;
-	}
-	this->callback = onClick;
+	this->buttonRects.resize(frames);
 }
-Demo::IconButton* Demo::IconButton::ChangeSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing)
+
+Demo::IconButton* Demo::IconButton::SetSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing, bool isVertical)
 {
-	//reuse the logic of the constructor
-	for (int i = 0; i < 3; ++i) {
-		this->buttonRects[i].left = startX + i * (imgW + spacing);
-		this->buttonRects[i].top = startY;
+	for (int i = 0; i < this->frameCount; ++i) {
+		//Vertical = x fixed, y moves
+		//Horizontal = x moves, y fixed
+		this->buttonRects[i].left = startX + (isVertical ? 0 : i * (imgW + spacing));
+		this->buttonRects[i].top = startY + (isVertical ? i * (imgH + spacing) : 0);
 		this->buttonRects[i].right = this->buttonRects[i].left + imgW;
 		this->buttonRects[i].bottom = this->buttonRects[i].top + imgH;
 	}
 	return this;
 }
 
-void Demo::IconButton::Init(DX9GF::Camera* cam)
+void Demo::IconButton::Init(DX9GF::Camera* uiCamera)
 {
 	this->trigger = std::make_shared<DX9GF::RectangleTrigger>
 		(
@@ -38,26 +35,32 @@ void Demo::IconButton::Init(DX9GF::Camera* cam)
 
 	//lock the trigger
 	this->trigger->SetLocalPosition(0, 0);
-
-	this->trigger->Init(cam);
-	this->SetOnClicked(this->callback);
-	this->uiCamera = cam;
+	this->uiCamera = uiCamera;
+	this->trigger->Init(uiCamera);
+	this->trigger->SetOnReleaseLeft(this->callback);
 }
 
 void Demo::IconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
-	int stateIndex = 0; //default is IDLE
-	if (this->currentState == ButtonState::HOVER) stateIndex = 1;
-	else if (this->currentState == ButtonState::CLICKED) stateIndex = 2;
-	auto currX = this->GetWorldX();
-	auto currY = this->GetWorldY();
+	//prevent from crashing
+	if (!this->sprite || !this->uiCamera || buttonRects.empty()) return;
 
-	if (this->sprite && uiCamera)
-	{
-		this->sprite->SetSrcRect(this->buttonRects[stateIndex]);
-		this->sprite->SetPosition(currX, currY);
-		this->sprite->Begin();
-		this->sprite->Draw(*uiCamera, deltaTime);
-		this->sprite->End();
-	}
+	//Mapping Trạng thái sang Index mong muốn
+	int expectedIndex = 0;
+
+	if (this->currentState == ButtonState::HOVER) expectedIndex = 1;
+	else if (this->currentState == ButtonState::CLICKED || this->currentState == ButtonState::LISTENING) expectedIndex = 2;
+	else if (this->currentState == ButtonState::DISABLED) expectedIndex = 3;
+
+	// BƯỚC 2: Chốt chặn an toàn (Kẹp giá trị)
+	// Dù index mong muốn là 2 hay 3, nếu nút này chỉ có 2 frame, nó sẽ bị ép về 1.
+	int finalIndex = std::min(expectedIndex, this->frameCount - 1);
+
+	// BƯỚC 3: Vẽ
+	this->sprite->SetSrcRect(this->buttonRects[finalIndex]);
+	this->sprite->Begin();
+	this->sprite->SetPosition(GetWorldX(), GetWorldY());
+	this->sprite->Draw(*uiCamera, deltaTime);
+	this->sprite->End();
+
 }

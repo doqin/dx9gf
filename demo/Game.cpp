@@ -3,6 +3,7 @@
 #include "DebugScene.h"
 #include "World1Scene.h"
 #include "MainMenu.h"
+#include "SettingsScene.h"
 void Demo::Game::Init()
 {
 	IGame::Init();
