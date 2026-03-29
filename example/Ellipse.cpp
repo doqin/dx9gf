@@ -81,8 +81,8 @@ void GO::Ellipse::Draw(unsigned long long deltaTime)
 		0xFF00FF00, 
 		true
 	);
-	trigger->Draw(graphicsDevice, camera);
-	collider->Draw(graphicsDevice, camera);
+	trigger->Draw(graphicsDevice, *camera);
+	collider->Draw(graphicsDevice, *camera);
 	
 }
 

@@ -43,6 +43,6 @@ namespace DX9GF {
 		float GetWidth() const;
 		float GetHeight() const;
 
-		void Draw(GraphicsDevice* graphicsDevice, Camera* camera) override;
+		void Draw(GraphicsDevice* graphicsDevice, const Camera& camera) override;
 	};
 }

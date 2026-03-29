@@ -19,8 +19,17 @@
     <Filter Include="Header Files\World1">
       <UniqueIdentifier>{fffef1c3-8feb-466e-a01c-8efcbbd39f95}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Shared">
-      <UniqueIdentifier>{ada9d79c-2bb0-4a78-af4e-e277f4e41710}</UniqueIdentifier>
+    <Filter Include="Header Files\Debug">
+      <UniqueIdentifier>{99567bee-d7b8-40fc-b904-c6fa9e3b39dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Interfaces">
+      <UniqueIdentifier>{e69e475f-eb35-4802-9d2d-d5c653483fba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Cards">
+      <UniqueIdentifier>{19e82f88-b9c9-49d7-a9f2-df60961c3582}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Projectiles">
+      <UniqueIdentifier>{970c8ab7-c2dc-41a4-b4cc-833515485537}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -54,22 +63,55 @@
     <ClCompile Include="IconButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IBattleScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestBattleScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyCard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IBlockCard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IEnemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainBlockCard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StrikeCard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestEnemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RoundProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HandContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PopUpMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="MainMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IConversation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextInputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IContainer.h">
-      <Filter>Header Files\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="IDraggable.h">
-      <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
@@ -80,8 +122,80 @@
     <ClInclude Include="World1Scene.h">
       <Filter>Header Files\World1</Filter>
     </ClInclude>
+    <ClInclude Include="EnemyCard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugScene.h">
+      <Filter>Header Files\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="TestBattleScene.h">
+      <Filter>Header Files\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="TestEnemy.h">
+      <Filter>Header Files\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="IBattleScene.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IBlockCard.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IButton.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IContainer.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IDraggable.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IEnemy.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IExpressionCard.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IStatementCard.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IconButton.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TextButton.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="StrikeCard.h">
+      <Filter>Header Files\Cards</Filter>
+    </ClInclude>
+    <ClInclude Include="MainBlockCard.h">
+      <Filter>Header Files\Cards</Filter>
+    </ClInclude>
+    <ClInclude Include="IProjectile.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="RoundProjectile.h">
+      <Filter>Header Files\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="HandContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ICard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopUpMessage.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
     <ClInclude Include="MainMenu.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogueLine.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="IConversation.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TextInputManager.h">
+      <Filter>Header Files\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +203,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="uiter-Sheet.aseprite">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="placeholder-round-projectile.aseprite">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -102,20 +219,17 @@
     <Image Include="test-title.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="placeholder.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="placeholder-round-projectile.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-    <ClInclude Include="IButton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TextButton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IconButton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ui-pack.png">

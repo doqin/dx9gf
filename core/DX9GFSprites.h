@@ -51,6 +51,8 @@ namespace DX9GF {
 		~FontSprite();
 		void SetText(std::wstring&& text);
 		void SetColor(D3DCOLOR color);
+      LONG GetWidth() const;
+		LONG GetHeight() const;
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;
 		void End() override;

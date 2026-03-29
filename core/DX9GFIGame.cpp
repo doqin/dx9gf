@@ -30,6 +30,22 @@ void DX9GF::IGame::Update(unsigned long long deltaTime)
 
 void DX9GF::IGame::Draw(unsigned long long deltaTime)
 {
+  if (pendingDeviceReset) {
+		if (!TryResetDevice(pendingWidth, pendingHeight)) {
+			return;
+		}
+	}
+
+	auto deviceState = graphicsDevice->IsValid();
+	if (deviceState == D3DERR_DEVICELOST) {
+		return;
+	}
+	if (deviceState == D3DERR_DEVICENOTRESET) {
+		if (!TryResetDevice(pendingWidth, pendingHeight)) {
+			return;
+		}
+	}
+
 	sceneManager->Draw(deltaTime);
 }
 
@@ -71,6 +87,21 @@ void DX9GF::IGame::OnResize(UINT width, UINT height)
 	if (graphicsDevice == nullptr || graphicsDevice->GetDevice() == nullptr) return;
 	if (width == 0 || height == 0) return;
 
+	sceneManager->OnResize(width, height);
+
+	pendingWidth = width;
+	pendingHeight = height;
+
+	if (!TryResetDevice(width, height)) {
+		pendingDeviceReset = true;
+	}
+}
+
+bool DX9GF::IGame::TryResetDevice(UINT width, UINT height)
+{
+	if (graphicsDevice == nullptr || graphicsDevice->GetDevice() == nullptr) return false;
+	if (width == 0 || height == 0) return false;
+
 	if (graphicsDevice->GetBackBuffer() != nullptr) {
 		graphicsDevice->GetBackBuffer()->Release();
 		graphicsDevice->GetBackBuffer() = nullptr;
@@ -79,11 +110,16 @@ void DX9GF::IGame::OnResize(UINT width, UINT height)
 	d3dpp.BackBufferWidth = width;
 	d3dpp.BackBufferHeight = height;
 
-	if (SUCCEEDED(graphicsDevice->GetDevice()->Reset(&d3dpp))) {
-		graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
-		graphicsDevice->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+	HRESULT resetResult = graphicsDevice->GetDevice()->Reset(&d3dpp);
+	if (FAILED(resetResult)) {
+		pendingDeviceReset = true;
+		return false;
 	}
-	sceneManager->OnResize(width, height);
+
+	graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
+	graphicsDevice->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+	pendingDeviceReset = false;
+	return true;
 }
 
 void DX9GF::IGame::Dispose()

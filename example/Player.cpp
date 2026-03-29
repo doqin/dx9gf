@@ -69,7 +69,7 @@ void GO::Player::Draw(unsigned long long deltaTime)
 		mario->Begin();
 		mario->Draw(*camera, deltaTime);
 		mario->End();
-		collider->Draw(graphicsDevice, camera);
+		collider->Draw(graphicsDevice, *camera);
 		//this->graphicsDevice->DrawRectangle(
 		//	*camera,
 		//	collider->GetWorldX(),

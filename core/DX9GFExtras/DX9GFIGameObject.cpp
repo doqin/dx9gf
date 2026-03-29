@@ -3,18 +3,17 @@
 
 DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager) : transformManager(transformManager)
 {
-    this->transformHandle = transformManager.lock()->CreateTransform();
+    this->transformHandle = CreateTransform();
 }
 
 DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager, float x, float y, float rotation, float scaleX, float scaleY) : transformManager(transformManager)
 {
-    this->transformHandle = transformManager.lock()->CreateTransform(NO_PARENT, x, y, rotation, scaleX, scaleY);
+    this->transformHandle = CreateTransform(x, y, rotation, scaleX, scaleY);
 }
 
 DX9GF::IGameObject::IGameObject(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<IGameObject> parent, float x, float y, float rotation, float scaleX, float scaleY) : transformManager(transformManager)
 {
-    this->transformHandle = transformManager.lock()->CreateTransform(parent.lock()->GetTransformHandle().slotIndex, x, y, rotation, scaleX, scaleY);
-    this->parent = parent;
+    this->transformHandle = CreateTransform(parent, x, y, rotation, scaleX, scaleY);
 }
 
 DX9GF::IGameObject::~IGameObject()
@@ -38,9 +37,37 @@ DX9GF::TransformHandle DX9GF::IGameObject::GetTransformHandle() const
     return transformHandle;
 }
 
+void DX9GF::IGameObject::SetTransformHandle(TransformHandle handle)
+{
+    this->transformHandle = handle;
+}
+
 std::weak_ptr<DX9GF::TransformManager> DX9GF::IGameObject::GetTransformManager()
 {
     return transformManager;
+}
+
+void DX9GF::IGameObject::SetTransformManager(std::weak_ptr<TransformManager> transformManager)
+{
+    this->transformManager = transformManager;
+}
+
+DX9GF::TransformHandle DX9GF::IGameObject::CreateTransform()
+{
+    if (parent.has_value()) parent = std::nullopt;
+    return transformManager.lock()->CreateTransform();
+}
+
+DX9GF::TransformHandle DX9GF::IGameObject::CreateTransform(float x, float y, float rotation, float scaleX, float scaleY)
+{
+    if (parent.has_value()) parent = std::nullopt;
+    return transformManager.lock()->CreateTransform(NO_PARENT, x, y, rotation, scaleX, scaleY);
+}
+
+DX9GF::TransformHandle DX9GF::IGameObject::CreateTransform(std::weak_ptr<IGameObject> parent, float x, float y, float rotation, float scaleX, float scaleY)
+{
+    this->parent = parent;
+    return transformManager.lock()->CreateTransform(parent.lock()->GetTransformHandle().slotIndex, x, y, rotation, scaleX, scaleY);
 }
 
 void DX9GF::IGameObject::SetLocalX(float x)

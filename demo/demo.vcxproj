@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -206,8 +206,12 @@
   <ItemGroup>
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="HandContainer.cpp" />
+    <ClCompile Include="IBattleScene.cpp" />
+    <ClCompile Include="IButton.cpp" />
     <ClCompile Include="IconButton.cpp" />
     <ClCompile Include="IContainer.cpp" />
+    <ClCompile Include="IConversation.cpp" />
     <ClCompile Include="IDraggable.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
@@ -217,27 +221,56 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="TextInputManager.cpp" />
+    <ClCompile Include="PopUpMessage.cpp" />
+    <ClCompile Include="RoundProjectile.cpp" />
+    <ClCompile Include="TestBattleScene.cpp" />
     <ClCompile Include="World1Scene.cpp" />
     <ClCompile Include="TextButton.cpp" />
+    <ClCompile Include="EnemyCard.cpp" />
+    <ClCompile Include="IBlockCard.cpp" />
+    <ClCompile Include="IEnemy.cpp" />
+    <ClCompile Include="MainBlockCard.cpp" />
+    <ClCompile Include="StrikeCard.cpp" />
+    <ClCompile Include="TestEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugScene.h" />
+    <ClInclude Include="DialogueLine.h" />
+    <ClInclude Include="EnemyCard.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="HandContainer.h" />
+    <ClInclude Include="IBattleScene.h" />
+    <ClInclude Include="IBlockCard.h" />
     <ClInclude Include="IButton.h" />
+    <ClInclude Include="ICard.h" />
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="IContainer.h" />
+    <ClInclude Include="IConversation.h" />
     <ClInclude Include="IDraggable.h" />
     <ClInclude Include="MainMenu.h" />
+    <ClInclude Include="IEnemy.h" />
+    <ClInclude Include="IExpressionCard.h" />
+    <ClInclude Include="IProjectile.h" />
+    <ClInclude Include="IStatementCard.h" />
+    <ClInclude Include="MainBlockCard.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PopUpMessage.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="TextInputManager.h" />
+    <ClInclude Include="RoundProjectile.h" />
+    <ClInclude Include="StrikeCard.h" />
+    <ClInclude Include="TestBattleScene.h" />
+    <ClInclude Include="TestEnemy.h" />
     <ClInclude Include="World1Scene.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="placeholder-round-projectile.aseprite" />
     <None Include="uiter-Sheet.aseprite">
-      <DeploymentContent>true</DeploymentContent>
+      <DeploymentContent>false</DeploymentContent>
     </None>
     <None Include="uiter.aseprite">
-      <DeploymentContent>true</DeploymentContent>
+      <DeploymentContent>false</DeploymentContent>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -245,6 +278,12 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="test-title.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="placeholder-round-projectile.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="placeholder.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="uiter-Sheet.png">
