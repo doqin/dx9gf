@@ -61,6 +61,7 @@ void Demo::TextButton::Init(DX9GF::Camera* cam)
 	//lock the trigger
 	this->trigger->SetLocalPosition(0, 0);
 
+	this->uiCamera = cam;
 	this->trigger->Init(cam);
 	this->trigger->SetOnReleaseLeft(this->callback);
 }
