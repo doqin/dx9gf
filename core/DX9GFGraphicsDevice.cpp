@@ -77,6 +77,11 @@ HRESULT DX9GF::GraphicsDevice::BeginDraw()
 	return d3ddev->BeginScene();
 }
 
+HRESULT DX9GF::GraphicsDevice::Clear(D3DXCOLOR color)
+{
+	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, color, 1.0f, 0);
+}
+
 HRESULT DX9GF::GraphicsDevice::Clear()
 {
 	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);

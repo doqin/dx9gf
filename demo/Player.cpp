@@ -96,26 +96,37 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 		auto cameraPos = camera->GetPosition();
 		auto [playerPosX, playerPosY] = GetLocalPosition();
 		D3DXVECTOR2 vec{ playerPosX - cameraPos.x, playerPosY - cameraPos.y };
-		// Update only if there is difference in distance
-		if (vec.x != 0 || vec.y != 0) {
-			if (std::sqrt(std::pow(vec.x, 2) + std::pow(vec.y, 2)) < CAMERA_SNAP_MARGIN) {
+		const float EPSILON = 0.0001f;
+		const float CAMERA_EASE_IN_TIME_MS = 220.f;
+		const float CAMERA_EASE_OUT_DISTANCE = 64.f;
+		auto smoothStep = [](float t) {
+			t = (std::max)(0.f, (std::min)(1.f, t));
+			return t * t * (3.f - 2.f * t);
+		};
+
+		const float distanceSq = vec.x * vec.x + vec.y * vec.y;
+		if (distanceSq > EPSILON * EPSILON) {
+			const float distance = std::sqrt(distanceSq);
+			if (distance <= CAMERA_SNAP_MARGIN + EPSILON) {
 				camera->SetPosition(playerPosX, playerPosY);
+				cameraDeltaTime = 0.f;
 			}
 			else {
-				D3DXVECTOR2 vecNorm;
-				D3DXVec2Normalize(&vecNorm, &vec);
-				float speedX = vecNorm.x * (std::min)(isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY, (CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f)) * deltaTime / 1000.f;
-				float speedY = vecNorm.y * (std::min)(isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY, (CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f)) * deltaTime / 1000.f;
-				camera->SetPosition(cameraPos.x + speedX, cameraPos.y + speedY);
-			}
-			cameraDeltaTime += deltaTime;
-			if ((CAMERA_VELOCITY + CAMERA_ACCELERATION * cameraDeltaTime / 1000.f) > (isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY)) {
-				cameraDeltaTime = ((isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY) - CAMERA_VELOCITY) / CAMERA_ACCELERATION * 1000.f;
+				cameraDeltaTime += deltaTime;
+				const float maxSpeed = isRunning ? VELOCITY * SPRINT_MULTIPLIER : VELOCITY;
+				const float easeIn = smoothStep(cameraDeltaTime / CAMERA_EASE_IN_TIME_MS);
+				const float easeOut = smoothStep(distance / CAMERA_EASE_OUT_DISTANCE);
+				const float easeFactor = easeIn * easeOut;
+				const float stepDistance = (std::min)(distance, maxSpeed * (std::max)(0.05f, easeFactor) * deltaTime / 1000.f);
+
+				const float invDistance = 1.f / distance;
+				const float stepX = vec.x * invDistance * stepDistance;
+				const float stepY = vec.y * invDistance * stepDistance;
+				camera->SetPosition(cameraPos.x + stepX, cameraPos.y + stepY);
 			}
 		}
 		else {
-
-			cameraDeltaTime = (std::max)(0.f, cameraDeltaTime - deltaTime);
+			cameraDeltaTime = 0.f;
 		}
 	}
 	if (isInvincible) {

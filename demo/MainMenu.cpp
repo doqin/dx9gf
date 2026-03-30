@@ -3,6 +3,8 @@
 #include "resource.h"
 #include "IconButton.h"
 #include "SettingsScene.h"
+#include "TutorialWorldScene.h"
+
 namespace Demo
 {
 	void MainMenu::UpdateLayout(int screenW, int screenH)
@@ -96,7 +98,13 @@ namespace Demo
 		//New Game Button
 		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);
 		newGameButton->SetSpriteCoords(577, 481, 94, 30, 34);
-		newGameButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
+		newGameButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { 
+			auto app = DX9GF::Application::GetInstance();
+			game->GetSceneManager()->PushScene(
+				new TutorialWorldScene(game, app->GetScreenWidth(), app->GetScreenHeight())
+			);
+			game->GetSceneManager()->GoToNext();
+		});
 
 		//Load Game Button
 		loadGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);

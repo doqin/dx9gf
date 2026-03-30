@@ -35,6 +35,7 @@ namespace DX9GF {
 		HRESULT SetViewport(DWORD x, DWORD y, DWORD width, DWORD height, float minZ, float maxZ);
 		HRESULT SetViewport(D3DVIEWPORT9 viewport);
 		HRESULT BeginDraw();
+		HRESULT Clear(D3DXCOLOR color);
 		HRESULT Clear();
 		HRESULT EndDraw();
 		HRESULT Present();

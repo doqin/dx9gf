@@ -227,6 +227,7 @@
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
     <ClCompile Include="TestBattleScene.cpp" />
+    <ClCompile Include="TutorialWorldScene.cpp" />
     <ClCompile Include="World1Scene.cpp" />
     <ClCompile Include="TextButton.cpp" />
     <ClCompile Include="EnemyCard.cpp" />
@@ -266,10 +267,20 @@
     <ClInclude Include="StrikeCard.h" />
     <ClInclude Include="TestBattleScene.h" />
     <ClInclude Include="TestEnemy.h" />
+    <ClInclude Include="TutorialWorldScene.h" />
     <ClInclude Include="World1Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="placeholder-round-projectile.aseprite" />
+    <None Include="tutorial.aseprite">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="tutorial.tmx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="tutorial.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="uiter-Sheet.aseprite">
       <DeploymentContent>false</DeploymentContent>
     </None>
@@ -288,6 +299,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="placeholder.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="tutorial.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="uiter-Sheet.png">
