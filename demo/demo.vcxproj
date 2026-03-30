@@ -304,6 +304,9 @@
     <Image Include="tutorial.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="ui.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="uiter-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

@@ -258,6 +258,9 @@
     <Image Include="tutorial.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="ui.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc">

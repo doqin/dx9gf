@@ -380,24 +380,95 @@ void Demo::IBattleScene::Init()
 	battlePlayer->SetVelocity(125);
 	battlePlayer->SetHealth(player->GetHealth());
 
+	// Initialize texture sheet
+	uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	uiSheetTex->LoadTexture(L"ui.png");
+
 	// Create buttons
-	const auto buttonWidth = 100;
-	const auto buttonHeight = 50;
-	attackButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Attack", font.get(), [&](DX9GF::ITrigger* thisObj) {
+	const auto buttonWidth = 96;
+	const auto buttonHeight = 32;
+	attackButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
+	attackButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerAttack;
 			for (auto& enemy : enemies) {
 				enemy->SetState(false);
 			}
 			markFinished();
-		}));
+			}));
 		isExecutingAttacks = false;
 	});
-	actionButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Action", font.get(), [](DX9GF::ITrigger* thisObj) {
+	attackButton->SetSpriteRects({
+		{
+			.left=0,
+			.top=48,
+			.right=48,
+			.bottom=64
+		},
+		{
+			.left=0,
+			.top=64,
+			.right=48,
+			.bottom=80
+		},
+		{
+			.left=0,
+			.top=80,
+			.right=48,
+			.bottom=96
+		}
 	});
-	itemsButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Items", font.get(), [](DX9GF::ITrigger* thisObj) {
+	attackButton->SetSpriteScale(2.f, 2.f);
+	actionButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
+	actionButton->SetSpriteRects({
+		{
+			.left = 48,
+			.top = 48,
+			.right = 96,
+			.bottom = 64
+		},
+		{
+			.left = 48,
+			.top = 64,
+			.right = 96,
+			.bottom = 80
+		},
+		{
+			.left = 48,
+			.top = 80,
+			.right = 96,
+			.bottom = 96
+		}
 	});
-	fleeButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Flee", font.get(), [&](DX9GF::ITrigger* thisObj) {
+	actionButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	});
+	actionButton->SetSpriteScale(2.f, 2.f);
+	itemsButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
+	itemsButton->SetSpriteRects({
+		{
+			.left = 0,
+			.top = 96,
+			.right = 48,
+			.bottom = 112
+		},
+		{
+			.left = 0,
+			.top = 112,
+			.right = 48,
+			.bottom = 128
+		},
+		{
+			.left = 0,
+			.top = 128,
+			.right = 48,
+			.bottom = 144
+		}
+	});
+	itemsButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	});
+	itemsButton->SetSpriteScale(2.f, 2.f);
+	fleeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
+	fleeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
 			player->SetHealth(battlePlayer->GetHealth());
 			auto sceMan = game->GetSceneManager();
@@ -406,6 +477,27 @@ void Demo::IBattleScene::Init()
 			markFinished();
 		}));
 	});
+	fleeButton->SetSpriteRects({
+		{
+			.left = 48,
+			.top = 96,
+			.right = 96,
+			.bottom = 112
+		},
+		{
+			.left = 48,
+			.top = 112,
+			.right = 96,
+			.bottom = 128
+		},
+		{
+			.left = 48,
+			.top = 128,
+			.right = 96,
+			.bottom = 144
+		}
+	});
+	fleeButton->SetSpriteScale(2.f, 2.f);
 	backButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Back", font.get(), [&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerStandBy;
@@ -480,7 +572,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
-	gd->Clear();
+	gd->Clear(0xFFFFFFFF);
 	if (SUCCEEDED(gd->BeginDraw())) {
 		for (auto& enemy : enemies) {
 			enemy->Draw(game->GetGraphicsDevice(), &camera, deltaTime);
