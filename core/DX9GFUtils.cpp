@@ -27,6 +27,20 @@ std::vector<RECT> DX9GF::Utils::CreateFrames(UINT sheetWidth, UINT sheetHeight, 
 	return frames;
 }
 
+std::vector<RECT> DX9GF::Utils::CreateRectsVertical(long x, long y, long width, long height, long count)
+{
+	std::vector<RECT> rects(count);
+	for (int i = 0; i < count; i++) {
+		rects[i] = {
+			.left = x,
+			.top = y + i * height,
+			.right = x + width,
+			.bottom = y + (i + 1) * height
+		};
+	}
+	return rects;
+}
+
 bool DX9GF::Utils::IsWithinRectangle(float pointX, float pointY, float rectX, float rectY, float rectWidth, float rectHeight)
 {
 	return pointX > rectX 
