@@ -275,4 +275,12 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="arcade-among-2-r46pv.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="statusplz.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+  </ItemGroup>
 </Project>

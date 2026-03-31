@@ -161,8 +161,7 @@ namespace Demo
 		lastScreenHeight = app->GetScreenHeight();
 
 		//Load assets
-		DX9GF::Font::AddFont(L"arcade-among-2-r46pv.ttf");
-		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arcade Among 2 R46PV", 24, 0, FW_BOLD);
+		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arcade Among 2 R46PV", 24, 0, FW_NORMAL);
 
 		uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice()); uiSheetTex->LoadTexture(L"ui-pack.png");
 		bgTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice()); bgTex->LoadTexture(IDB_PNG2);
@@ -322,13 +321,13 @@ namespace Demo
 			float startY = -lastScreenHeight * 0.02f;
 
 			//Draw label
-			DrawString(L"MASTER VOLUME", LABEL_COLUMN_X, startY, D3DCOLOR_XRGB(255, 255, 255));
-			DrawString(L"MUSIC VOLUME", LABEL_COLUMN_X, startY + SPACING_Y, D3DCOLOR_XRGB(255, 255, 255));
-			DrawString(L"SFX VOLUME", LABEL_COLUMN_X, startY + SPACING_Y * 2, D3DCOLOR_XRGB(255, 255, 255));
-			DrawString(L"MOVE UP", LABEL_COLUMN_X, startY + SPACING_Y * 3.5f, D3DCOLOR_XRGB(200, 200, 255));
-			DrawString(L"MOVE DOWN", LABEL_COLUMN_X, startY + SPACING_Y * 5.0f, D3DCOLOR_XRGB(200, 200, 255));
-			DrawString(L"MOVE LEFT", LABEL_COLUMN_X, startY + SPACING_Y * 6.5f, D3DCOLOR_XRGB(200, 200, 255));
-			DrawString(L"MOVE RIGHT", LABEL_COLUMN_X, startY + SPACING_Y * 8.0f, D3DCOLOR_XRGB(200, 200, 255));
+			DrawString(L"Master Volume", LABEL_COLUMN_X, startY, D3DCOLOR_XRGB(255, 255, 255));
+			DrawString(L"Music Volume", LABEL_COLUMN_X, startY + SPACING_Y, D3DCOLOR_XRGB(255, 255, 255));
+			DrawString(L"Sfx Volume", LABEL_COLUMN_X, startY + SPACING_Y * 2, D3DCOLOR_XRGB(255, 255, 255));
+			DrawString(L"Move up", LABEL_COLUMN_X, startY + SPACING_Y * 3.5f, D3DCOLOR_XRGB(200, 200, 255));
+			DrawString(L"Move down", LABEL_COLUMN_X, startY + SPACING_Y * 5.0f, D3DCOLOR_XRGB(200, 200, 255));
+			DrawString(L"Move left", LABEL_COLUMN_X, startY + SPACING_Y * 6.5f, D3DCOLOR_XRGB(200, 200, 255));
+			DrawString(L"Move right", LABEL_COLUMN_X, startY + SPACING_Y * 8.0f, D3DCOLOR_XRGB(200, 200, 255));
 
 			//draw tracks
 			auto sm = SettingsManager::GetInstance();

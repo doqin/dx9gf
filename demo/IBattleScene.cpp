@@ -372,7 +372,7 @@ void Demo::IBattleScene::Init()
 	// Init components
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
-	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 20);
+	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
 	// Setup player
 	battlePlayer = std::make_shared<Player>(transformManager);
 	battlePlayer->Init(game->GetGraphicsDevice(), &colliderManager, &camera);
@@ -498,16 +498,59 @@ void Demo::IBattleScene::Init()
 		}
 	});
 	fleeButton->SetSpriteScale(2.f, 2.f);
-	backButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Back", font.get(), [&](DX9GF::ITrigger* thisObj) {
+	backButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
+	backButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerStandBy;
 			for (auto& enemy : enemies) {
 				enemy->SetState(true);
 			}
 			markFinished();
-		}));
+			}));
 	});
-    executeButton = std::make_shared<TextButton>(transformManager, 0, 0, buttonWidth, buttonHeight, "Execute", font.get(), [&](DX9GF::ITrigger* thisObj) {
+	backButton->SetSpriteRects({
+		{
+			.left=96,
+			.top=48,
+			.right=144, 
+			.bottom=64
+		},
+		{
+			.left=96,
+			.top=64,
+			.right=144, 
+			.bottom=80
+		},
+		{
+			.left=96,
+			.top=80,
+			.right=144,
+			.bottom=96
+		}
+	});
+	backButton->SetSpriteScale(2.f, 2.f);
+    executeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
+	executeButton->SetSpriteRects({
+		{
+			.left=96,
+			.top=96,
+			.right=144,
+			.bottom=112
+		},
+		{
+			.left=96,
+			.top=112,
+			.right=144,
+			.bottom=128
+		},
+		{
+			.left=96,
+			.top=128,
+			.right=144,
+			.bottom=144
+		}
+	});
+	executeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
 		if (usedEnergy > energy) {
 			popUpMessage->QueueMessage(&commandBuffer, L"Not enough energy");
 		}
@@ -516,6 +559,7 @@ void Demo::IBattleScene::Init()
 			mainBlockCard->StartExecution();
 		}
 	});
+	executeButton->SetSpriteScale(2.f, 2.f);
 	// Init buttons
 	attackButton->Init(&camera);
 	actionButton->Init(&camera);
@@ -526,6 +570,7 @@ void Demo::IBattleScene::Init()
 
 	// Init sprite
 	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+	fontSprite->SetColor(0xFF000000);
 
 	// Init draggables
 	mainBlockCard = std::make_shared<MainBlockCard>(transformManager, -100.f, -140.f);

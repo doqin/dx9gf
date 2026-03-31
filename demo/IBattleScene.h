@@ -62,8 +62,8 @@ namespace Demo {
 		std::shared_ptr<IconButton> actionButton;
 		std::shared_ptr<IconButton> itemsButton;
 		std::shared_ptr<IconButton> fleeButton;
-		std::shared_ptr<TextButton> backButton;
-		std::shared_ptr<TextButton> executeButton;
+		std::shared_ptr<IconButton> backButton;
+		std::shared_ptr<IconButton> executeButton;
 		std::shared_ptr<PopUpMessage> popUpMessage;
 		void CreateEnemyCard(std::shared_ptr<IEnemy> enemy);
 		void StartBattle();

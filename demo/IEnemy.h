@@ -21,8 +21,8 @@ namespace Demo {
         std::shared_ptr<DX9GF::RectangleTrigger> cardSpawnTrigger;
 		std::function<void(std::shared_ptr<IEnemy>)> onRequestEnemyCard = [](std::shared_ptr<IEnemy>) {};
         std::vector<DamageIndicator> damageIndicators;
-		std::shared_ptr<DX9GF::Font> damageFont;
-		std::shared_ptr<DX9GF::FontSprite> damageFontSprite;
+		std::shared_ptr<DX9GF::Font> font;
+		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 		std::vector<std::shared_ptr<IProjectile>> projectiles;
 		DX9GF::CommandBuffer commandBuffer;
 	public:
