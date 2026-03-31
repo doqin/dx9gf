@@ -65,6 +65,8 @@ namespace Demo {
 		std::shared_ptr<IconButton> backButton;
 		std::shared_ptr<IconButton> executeButton;
 		std::shared_ptr<PopUpMessage> popUpMessage;
+		std::shared_ptr<DX9GF::StaticSprite> energyIcon;
+		std::shared_ptr<DX9GF::StaticSprite> hourglassIcon;
 		void CreateEnemyCard(std::shared_ptr<IEnemy> enemy);
 		void StartBattle();
 		

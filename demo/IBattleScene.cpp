@@ -338,19 +338,25 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		D3DXCOLOR(0.7f, 0.1f, 0.1f, 0.5f),
 		true
 	);
-	if (font) {
-		fontSprite->Begin();
-		fontSprite->SetPosition(enemyCardRemoveAreaX + 8.f, enemyCardRemoveAreaY + 8.f);
-		fontSprite->SetText(L"Drop EnemyCard Here");
-		fontSprite->Draw(camera, deltaTime);
-		fontSprite->SetPosition(backButton->GetWorldX(), backButton->GetWorldY() - 30.f);
-		fontSprite->SetText(std::to_wstring(energy - usedEnergy) + L"/" + std::to_wstring(MAX_ENERGY));
-		fontSprite->Draw(camera, deltaTime);
-		fontSprite->SetPosition(executeButton->GetWorldX(), executeButton->GetWorldY() - 30.f);
-		fontSprite->SetText(std::to_wstring(3 - (currentTurn - 1) % 3) + L" turns left before program clears");
-		fontSprite->Draw(camera, deltaTime);
-		fontSprite->End();
-	}
+	fontSprite->Begin();
+	fontSprite->SetPosition(enemyCardRemoveAreaX + 8.f, enemyCardRemoveAreaY + 8.f);
+	fontSprite->SetText(L"Drop EnemyCard Here");
+	fontSprite->Draw(camera, deltaTime);
+	fontSprite->SetPosition(backButton->GetWorldX() + 32.f, backButton->GetWorldY() - 30.f);
+	fontSprite->SetText(std::to_wstring(energy - usedEnergy) + L"/" + std::to_wstring(MAX_ENERGY));
+	fontSprite->Draw(camera, deltaTime);
+	fontSprite->SetPosition(executeButton->GetWorldX() + 32.f, executeButton->GetWorldY() - 30.f);
+	fontSprite->SetText(std::to_wstring(3 - (currentTurn - 1) % 3) + L" turns left before program clears");
+	fontSprite->Draw(camera, deltaTime);
+	fontSprite->End();
+	energyIcon->SetPosition(backButton->GetWorldX(), backButton->GetWorldY() - 36.f);
+	energyIcon->Begin();
+	energyIcon->Draw(camera, deltaTime);
+	energyIcon->End();
+	hourglassIcon->Begin();
+	hourglassIcon->SetPosition(executeButton->GetWorldX(), executeButton->GetWorldY() - 36.f);
+	hourglassIcon->Draw(camera, deltaTime);
+	hourglassIcon->End();
 	if (!mainBlockCard->IsExecuting()) {
 		backButton->Draw(game->GetGraphicsDevice(), deltaTime);
 		executeButton->Draw(game->GetGraphicsDevice(), deltaTime);
@@ -571,6 +577,22 @@ void Demo::IBattleScene::Init()
 	// Init sprite
 	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 	fontSprite->SetColor(0xFF000000);
+	energyIcon = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	energyIcon->SetSrcRect({
+		.left=96,
+		.top=0,
+		.right=112,
+		.bottom=16
+	});
+	energyIcon->SetScale(2.f);
+	hourglassIcon = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	hourglassIcon->SetSrcRect({
+		.left=112,
+		.top=0,
+		.right=128,
+		.bottom=16
+	});
+	hourglassIcon->SetScale(2.f);
 
 	// Init draggables
 	mainBlockCard = std::make_shared<MainBlockCard>(transformManager, -100.f, -140.f);
