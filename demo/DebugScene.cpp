@@ -24,7 +24,7 @@ void Demo::DebugScene::Init()
 
 	//just load resource (texture, font) 1 time and reuse it all over again
 	uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
-	uiSheetTex->LoadTexture(L"ui-pack.png");	
+	uiSheetTex->LoadTexture(L"ui-pack.png");
 	//Everything works fine with .png, but .bmp is causing coordinate issues. Idk how to fix bruh
 	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 24);
 	myFontSprite = std::make_shared<DX9GF::FontSprite>(myFont.get());
@@ -56,7 +56,16 @@ void Demo::DebugScene::Init()
 
 	auto continueBtn = std::make_shared<Demo::IconButton>(transformManager, 150, 150, 94, 30, uiSheetTex, 3);
 	continueBtn->SetSpriteCoords(577, 193, 94, 30, 34);
-	continueBtn->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* switch scene(?) */ });
+
+	continueBtn->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		auto [sw, sh] = this->camera.GetScreenResolution();
+		auto sceMan = this->game->GetSceneManager();
+		this->game->GetSceneManager()->PushScene(
+			new Demo::CardShop(this->game, this->player.get(), sw, sh)
+		);
+		sceMan->GoToNext();
+
+		});
 
 	continueBtn->Init(&camera);
 	uiButtons.push_back(continueBtn);

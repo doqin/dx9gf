@@ -204,6 +204,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CardShop.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HandContainer.cpp" />
@@ -223,6 +224,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="SettingsScene.cpp" />
+    <ClCompile Include="IShopScene.cpp" />
     <ClCompile Include="TextInputManager.cpp" />
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
@@ -237,6 +239,7 @@
     <ClCompile Include="TestEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CardShop.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="DialogueLine.h" />
     <ClInclude Include="EnemyCard.h" />
@@ -261,6 +264,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="SettingsManager.h" />
     <ClInclude Include="SettingsScene.h" />
+    <ClInclude Include="IShopScene.h" />
     <ClInclude Include="TextInputManager.h" />
     <ClInclude Include="RoundProjectile.h" />
     <ClInclude Include="StrikeCard.h" />
