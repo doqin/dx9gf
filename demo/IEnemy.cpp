@@ -107,3 +107,39 @@ bool Demo::IEnemy::IsDoneAttacking()
 {
     return !commandBuffer.IsBusy();
 }
+
+void Demo::IEnemy::ApplyStatus(StatusType type, int duration, float value) {
+    for (auto& status : activeStatuses) {
+        if (status.type == type) {
+            status.duration += duration;
+            status.value = std::max(status.value, value);
+            return;
+        }
+    }
+    activeStatuses.push_back({ type, duration, value });
+}
+
+bool Demo::IEnemy::HasStatus(StatusType type) const {
+    for (const auto& status : activeStatuses) {
+        if (status.type == type && status.duration > 0) return true;
+    }
+    return false;
+}
+
+void Demo::IEnemy::TickStatuses() {
+    for (auto it = activeStatuses.begin(); it != activeStatuses.end(); ) {
+        if (it->type == StatusType::POISON && it->duration > 0) {
+            health -= it->value;
+            damageIndicators.push_back(DamageIndicator{ L"-" + std::to_wstring(static_cast<int>(it->value)) + L" (Poison)", 0.f, 0 });
+        }
+
+        it->duration--;
+
+        if (it->duration <= 0) {
+            it = activeStatuses.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}

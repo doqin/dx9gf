@@ -11,6 +11,7 @@
 #include "HandContainer.h"
 #include "TestEnemy.h"
 #include "PopUpMessage.h"
+#include "AdvancedCards.h"
 
 namespace Demo {
 	class IBattleScene : public DX9GF::IScene {

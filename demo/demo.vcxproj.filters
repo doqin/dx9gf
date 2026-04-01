@@ -120,6 +120,9 @@
     <ClCompile Include="CardShop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MultiTargetCard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -220,6 +223,12 @@
     </ClInclude>
     <ClInclude Include="CardShop.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiTargetCard.h">
+      <Filter>Header Files\Cards</Filter>
+    </ClInclude>
+    <ClInclude Include="AdvancedCards.h">
+      <Filter>Header Files\Cards</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
