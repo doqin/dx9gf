@@ -114,7 +114,7 @@
     <ClCompile Include="SettingsScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShopScene.cpp">
+    <ClCompile Include="IShopScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CardShop.cpp">
@@ -215,7 +215,7 @@
     <ClInclude Include="SettingsScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ShopScene.h">
+    <ClInclude Include="IShopScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CardShop.h">
