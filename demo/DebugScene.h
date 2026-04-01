@@ -10,6 +10,7 @@
 #include "IconButton.h"
 #include "TextInputManager.h"
 #include "IConversation.h"
+#include "CardShop.h"
 
 namespace Demo {
 	class DebugScene : public DX9GF::IScene {
