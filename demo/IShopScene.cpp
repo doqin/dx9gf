@@ -1,13 +1,13 @@
 #include "pch.h"
-#include "ShopScene.h"
+#include "IShopScene.h"
 
-Demo::ShopScene::ShopScene(Game* game, Player* player, int sw, int sh, std::string title)
+Demo::IShopScene::IShopScene(Game* game, Player* player, int sw, int sh, std::string title)
 	: IScene(sw, sh), game(game), player(player), uiCamera(sw, sh), shopTitle(title)
 {
 	uiCamera.SetPosition(sw / 2.0f, sh / 2.0f);
 }
 
-void Demo::ShopScene::Init()
+void Demo::IShopScene::Init()
 {
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 24);
@@ -20,7 +20,7 @@ void Demo::ShopScene::Init()
 	transformManager->RebuildHierarchy();
 }
 
-void Demo::ShopScene::BuildUI()
+void Demo::IShopScene::BuildUI()
 {
 	float startY = 160.0f;
 	for (size_t i = 0; i < itemsForSale.size(); ++i) {
@@ -63,12 +63,12 @@ void Demo::ShopScene::BuildUI()
 	uiButtons.push_back(leaveBtn);
 }
 
-void Demo::ShopScene::ShowMessage(std::string msg) {
+void Demo::IShopScene::ShowMessage(std::string msg) {
 	statusMessage = msg;
 	messageTimer = 2.0f;
 }
 
-void Demo::ShopScene::Update(unsigned long long deltaTime)
+void Demo::IShopScene::Update(unsigned long long deltaTime)
 {
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
@@ -89,7 +89,7 @@ void Demo::ShopScene::Update(unsigned long long deltaTime)
 	}
 }
 
-void Demo::ShopScene::Draw(unsigned long long deltaTime)
+void Demo::IShopScene::Draw(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
 	gd->Clear();

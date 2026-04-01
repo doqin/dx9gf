@@ -146,7 +146,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	const float centerLineY = -120.f;
 	const float horizontalSpacing = 120.f;
 	const float verticalSpacing = 100.f;
-	const float rightSideX = app->GetScreenWidth() / 2.f - 120.f;
+	const float rightSideX = app->GetScreenWidth() / 2.f - 150.f;
 
 	bool hasQueued = false;
 	const size_t enemyCount = enemies.size();
@@ -288,6 +288,9 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 				enemy->SetState(true);
 			}
 			for (auto& enemy : enemies) {
+				if (enemy->HasStatus(StatusType::STUN)) {
+					continue;
+				}
 				enemy->StartAttack(battlePlayer);
 			}
 			battlePlayer->SetLocalPosition(0, 0);
@@ -313,6 +316,9 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		isDoneAttacking &= enemy->IsDoneAttacking();
 	}
 	if (isDoneAttacking) {
+		for (auto& enemy : enemies) {
+			enemy->TickStatuses();
+		}
 		BeginNextTurn();
 		state = State::PlayerStandBy;
 		PlayerStandByUpdate(deltaTime);

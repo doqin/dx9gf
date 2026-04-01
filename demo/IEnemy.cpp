@@ -80,6 +80,29 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
         damageFontSprite->SetText(std::move(text));
         damageFontSprite->Draw(*camera, deltaTime);
     }
+
+   float statusOffsetX = 30.f;
+   float statusOffsetY = -20.f;
+
+   for (const auto& status : activeStatuses) {
+       std::wstring statusName = L"Unknown";
+       if (status.type == StatusType::POISON) statusName = L"Poison";
+       else if (status.type == StatusType::VULNERABLE) statusName = L"Vulnerable";
+       else if (status.type == StatusType::WEAK) statusName = L"Weak";
+       else if (status.type == StatusType::STUN) statusName = L"Stun";
+
+       std::wstring statusText = statusName + L" (" + std::to_wstring(status.duration) + L")";
+
+       damageFontSprite->SetColor(0xFFFFFF00);
+
+       damageFontSprite->SetPosition(GetWorldX() + statusOffsetX, GetWorldY() + statusOffsetY);
+
+       damageFontSprite->SetText(std::move(statusText));
+       damageFontSprite->Draw(*camera, deltaTime);
+
+       statusOffsetY += 16.f;
+   }
+
     damageFontSprite->End();
     for (auto& projectile : projectiles) {
         projectile->Draw(*camera, deltaTime);

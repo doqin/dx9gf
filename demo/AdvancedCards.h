@@ -10,6 +10,9 @@ namespace Demo {
 		HeavyStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Heavy Strike", x, y) {
 		}
+
+		size_t GetCost() const override { return 2; }
+
 		bool Execute() override {
 			if (isDone) return true;
 			if (!targets.empty()) {
@@ -29,6 +32,9 @@ namespace Demo {
 		TwinStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Twin Strike", x, y) {
 		}
+
+		size_t GetCost() const override { return 1; }
+
 		bool Execute() override {
 			if (isDone) return true;
 			if (!targets.empty()) {
@@ -54,6 +60,9 @@ namespace Demo {
 		CleaveCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 2, L"Cleave", x, y) {
 		}
+
+		size_t GetCost() const override { return 2; }
+
 		bool Execute() override {
 			if (isDone) return true;
 			for (auto& wp : targets) {
@@ -71,6 +80,9 @@ namespace Demo {
 		ChainLightningCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 3, L"Chain L.", x, y) {
 		}
+
+		size_t GetCost() const override { return 3; }
+
 		bool Execute() override {
 			if (isDone) return true;
 			float damages[] = { 6.f, 4.f, 2.f };
@@ -91,6 +103,9 @@ namespace Demo {
 		PoisonCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Poison", x, y) {
 		}
+
+		size_t GetCost() const override { return 1; }
+
 		bool Execute() override {
 			if (isDone) return true;
 			if (!targets.empty()) {
@@ -108,6 +123,9 @@ namespace Demo {
 		VulnerableCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Vulnerable", x, y) {
 		}
+
+		size_t GetCost() const override { return 1; }
+
 		bool Execute() override {
 			if (isDone) return true;
 			if (!targets.empty()) {
@@ -125,6 +143,9 @@ namespace Demo {
 		WeaknessCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 2, L"Weakness", x, y) {
 		}
+
+		size_t GetCost() const override { return 1; }
+
 		bool Execute() override {
 			if (isDone) return true;
 			for (auto& wp : targets) {
@@ -142,6 +163,9 @@ namespace Demo {
 		StunCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Stun", x, y) {
 		}
+
+		size_t GetCost() const override { return 2; }
+
 		bool Execute() override {
 			if (isDone) return true;
 			if (!targets.empty()) {

@@ -1,8 +1,8 @@
 #pragma once
-#include "ShopScene.h"
+#include "IShopScene.h"
 
 namespace Demo {
-	class CardShop : public ShopScene {
+	class CardShop : public IShopScene {
 	public:
 		CardShop(Game* game, Player* player, int screenWidth, int screenHeight);
 

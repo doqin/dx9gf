@@ -16,7 +16,7 @@ namespace Demo {
 		std::function<void()> onBuyAction;
 	};
 
-	class ShopScene : public DX9GF::IScene {
+	class IShopScene : public DX9GF::IScene {
 	protected: 
 		Game* game;
 		Player* player;
@@ -38,8 +38,8 @@ namespace Demo {
 		void BuildUI();
 
 	public:
-		ShopScene(Game* game, Player* player, int screenWidth, int screenHeight, std::string title);
-		virtual ~ShopScene() = default;
+		IShopScene(Game* game, Player* player, int screenWidth, int screenHeight, std::string title);
+		virtual ~IShopScene() = default;
 
 		virtual void LoadItems() = 0;
 
