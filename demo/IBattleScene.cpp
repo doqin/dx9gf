@@ -287,11 +287,34 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 			for (auto& enemy : enemies) {
 				enemy->SetState(true);
 			}
+
 			for (auto& enemy : enemies) {
-				if (enemy->HasStatus(StatusType::STUN)) {
+				bool isStunned = enemy->HasStatus(StatusType::STUN);
+				enemy->TickStatuses();
+				if (enemy->IsDead()) {
+					continue;
+				}
+				if (isStunned) {
 					continue;
 				}
 				enemy->StartAttack(battlePlayer);
+			}
+
+			for (size_t i = 0; i < enemyCards.size(); ++i) {
+				auto& enemyCard = enemyCards[i];
+				if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
+					if (auto manager = enemyCard->GetDraggableManager().lock()) {
+						manager->Remove(enemyCard);
+					}
+					enemyCards.erase(enemyCards.begin() + i);
+					--i;
+				}
+			}
+			for (size_t i = 0; i < enemies.size(); ++i) {
+				if (enemies[i]->IsDead()) {
+					enemies.erase(enemies.begin() + i);
+					--i;
+				}
 			}
 			battlePlayer->SetLocalPosition(0, 0);
 			EnemyAttackUpdate(deltaTime);
@@ -316,25 +339,6 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		isDoneAttacking &= enemy->IsDoneAttacking();
 	}
 	if (isDoneAttacking) {
-		for (auto& enemy : enemies) {
-			enemy->TickStatuses();
-		}
-		for (size_t i = 0; i < enemyCards.size(); ++i) {
-			auto& enemyCard = enemyCards[i];
-			if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
-				if (auto manager = enemyCard->GetDraggableManager().lock()) {
-					manager->Remove(enemyCard);
-				}
-				enemyCards.erase(enemyCards.begin() + i);
-				--i;
-			}
-		}
-		for (size_t i = 0; i < enemies.size(); ++i) {
-			if (enemies[i]->IsDead()) {
-				enemies.erase(enemies.begin() + i);
-				--i;
-			}
-		}
 		BeginNextTurn();
 		state = State::PlayerStandBy;
 		PlayerStandByUpdate(deltaTime);
