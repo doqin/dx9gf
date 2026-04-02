@@ -7,6 +7,14 @@
 #include <vector>
 
 namespace Demo {
+	enum class StatusType { POISON, VULNERABLE, WEAK, STUN };
+
+	struct StatusEffect {
+		StatusType type;
+		int duration; 
+		float value; 
+	};
+
 	class IEnemy : public DX9GF::IGameObject {
 	private:
 		const float maxHealth;
@@ -25,6 +33,8 @@ namespace Demo {
 		std::shared_ptr<DX9GF::FontSprite> damageFontSprite;
 		std::vector<std::shared_ptr<IProjectile>> projectiles;
 		DX9GF::CommandBuffer commandBuffer;
+
+		std::vector<StatusEffect> activeStatuses;
 	public:
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth) : IGameObject(tm), maxHealth(maxHealth), health(maxHealth) {}
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1) : IGameObject(tm, x, y, rotation, scaleX, scaleY), maxHealth(maxHealth), health(maxHealth) {}
@@ -38,5 +48,10 @@ namespace Demo {
 		virtual void StartAttack(std::shared_ptr<Player> player) = 0;
 		void SetState(bool isOnStandby);
 		bool IsDoneAttacking();
+
+		virtual void ApplyStatus(StatusType type, int duration, float value = 0.0f);
+		virtual void TickStatuses();
+		bool HasStatus(StatusType type) const;
+		float GetOutgoingDamage(float baseDamage) const;
 	};
 }

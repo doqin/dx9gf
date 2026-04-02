@@ -216,6 +216,7 @@
     <ClCompile Include="IDraggable.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="MultiTargetCard.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Create</PrecompiledHeader>
@@ -239,6 +240,7 @@
     <ClCompile Include="TestEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AdvancedCards.h" />
     <ClInclude Include="CardShop.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="DialogueLine.h" />
@@ -259,6 +261,7 @@
     <ClInclude Include="IProjectile.h" />
     <ClInclude Include="IStatementCard.h" />
     <ClInclude Include="MainBlockCard.h" />
+    <ClInclude Include="MultiTargetCard.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PopUpMessage.h" />
     <ClInclude Include="resource.h" />
