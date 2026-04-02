@@ -158,6 +158,7 @@ void Demo::IEnemy::TickStatuses() {
     for (auto it = activeStatuses.begin(); it != activeStatuses.end(); ) {
         if (it->type == StatusType::POISON && it->duration > 0) {
             health -= it->value;
+            if (health < 0) health = 0;
             damageIndicators.push_back(DamageIndicator{ L"-" + std::to_wstring(static_cast<int>(it->value)) + L" (Poison)", 0.f, 0 });
         }
 

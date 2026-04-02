@@ -35,18 +35,9 @@ void DX9GF::SceneManager::PushScene(IScene* scene)
 
 void DX9GF::SceneManager::PopScene()
 {
-	if (scenes.empty()) return;
-
 	auto scene = scenes.back();
 	delete scene;
 	scenes.pop_back();
-
-	if (index >= scenes.size() && !scenes.empty()) {
-		index = scenes.size() - 1;
-	}
-	else if (scenes.empty()) {
-		index = 0;
-	}
 }
 
 void DX9GF::SceneManager::Update(unsigned long long deltaTime)
@@ -54,9 +45,6 @@ void DX9GF::SceneManager::Update(unsigned long long deltaTime)
 	if (scenes.empty()) {
 		throw std::runtime_error("No scene to update!");
 	}
-
-	if (index >= scenes.size()) index = scenes.size() - 1;
-
 	scenes[index]->Update(deltaTime);
 }
 
@@ -65,9 +53,6 @@ void DX9GF::SceneManager::Draw(unsigned long long deltaTime)
 	if (scenes.empty()) {
 		throw std::runtime_error("No scene to draw!");
 	}
-
-	if (index >= scenes.size()) index = scenes.size() - 1;
-
 	scenes[index]->Draw(deltaTime);
 }
 

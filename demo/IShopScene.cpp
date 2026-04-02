@@ -85,7 +85,10 @@ void Demo::IShopScene::Update(unsigned long long deltaTime)
 	}
 
 	if (shouldLeave) {
-		this->game->GetSceneManager()->PopScene();
+		auto sceMan = this->game->GetSceneManager();
+
+		sceMan->PopScene();
+		sceMan->GoToPrevious();
 	}
 }
 

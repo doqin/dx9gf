@@ -319,6 +319,22 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		for (auto& enemy : enemies) {
 			enemy->TickStatuses();
 		}
+		for (size_t i = 0; i < enemyCards.size(); ++i) {
+			auto& enemyCard = enemyCards[i];
+			if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
+				if (auto manager = enemyCard->GetDraggableManager().lock()) {
+					manager->Remove(enemyCard);
+				}
+				enemyCards.erase(enemyCards.begin() + i);
+				--i;
+			}
+		}
+		for (size_t i = 0; i < enemies.size(); ++i) {
+			if (enemies[i]->IsDead()) {
+				enemies.erase(enemies.begin() + i);
+				--i;
+			}
+		}
 		BeginNextTurn();
 		state = State::PlayerStandBy;
 		PlayerStandByUpdate(deltaTime);
