@@ -111,10 +111,15 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 
 bool Demo::IEnemy::TakeDamage(float damage)
 {
-    health -= damage;
+    float finalDamage = damage;
+
+    if (HasStatus(StatusType::VULNERABLE)) {
+        finalDamage *= 1.5f;
+    }
+    health -= finalDamage;
     if (health < 0) health = 0;
     damageIndicators.push_back(DamageIndicator{
-        L"-" + std::to_wstring(static_cast<int>(std::round(damage))),
+        L"-" + std::to_wstring(static_cast<int>(std::round(finalDamage))),
         0.f,
         0
     });
@@ -165,4 +170,15 @@ void Demo::IEnemy::TickStatuses() {
             ++it;
         }
     }
+}
+
+float Demo::IEnemy::GetOutgoingDamage(float baseDamage) const
+{
+    float finalDamage = baseDamage;
+
+    if (HasStatus(StatusType::WEAK)) {
+        finalDamage *= 0.75f;
+    }
+
+    return finalDamage;
 }

@@ -52,5 +52,6 @@ namespace Demo {
 		virtual void ApplyStatus(StatusType type, int duration, float value = 0.0f);
 		virtual void TickStatuses();
 		bool HasStatus(StatusType type) const;
+		float GetOutgoingDamage(float baseDamage) const;
 	};
 }
