@@ -33,8 +33,20 @@ void Demo::IButton::Update(unsigned long long deltaTime)
 	}
 		
 	else if (this->trigger->IsHovering(deltaTime))
+	{
 		this->currentState = ButtonState::HOVER;
+	}
 	else
 		this->currentState = ButtonState::IDLE;
+
+	//isolate logic between button's state / cursor's state
+	if (this->trigger->IsHovering(deltaTime)) {
+		if (this->trigger->IsHeldLeft(deltaTime)) {
+			DX9GF::InputManager::GetInstance()->SwitchCursor(DX9GF::InputManager::CursorType::CLICK);
+		}
+		else {
+			DX9GF::InputManager::GetInstance()->SwitchCursor(DX9GF::InputManager::CursorType::POINTER);
+		}
+	}
 }
 

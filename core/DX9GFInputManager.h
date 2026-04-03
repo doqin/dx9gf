@@ -1,8 +1,16 @@
-#pragma once
+﻿#pragma once
 #include "dinput.h"
+//
+#include "DX9GFSprites.h"
+#include "DX9GFCamera.h"
+#include <memory>
+//
 #define KEYBOARD_BUFFER_SIZE 1024
 #define KEYBOARD_LAST_PRESS_TIME 125
 #define MOUSE_LAST_PRESS_TIME 125
+
+
+
 
 namespace DX9GF {
 	class InputManager final {
@@ -12,6 +20,16 @@ namespace DX9GF {
 			Right = 1,
 			Middle = 2
 		};
+
+		enum class CursorType //i use enum class becuz it's more secure, i guess
+		{
+			CURSOR,
+			POINTER,
+			CLICK,
+			GRAB,
+			TEXTSELECT,
+		};
+
 	private:
 		static InputManager* instance;
 
@@ -24,6 +42,14 @@ namespace DX9GF {
 		POINT lastMousePos = {0, 0};
 		POINT relativeMousePos = {0, 0};
 		bool hasMousePos = false;
+
+		//CUSTOM CURSOR VARS
+		std::map<CursorType, std::shared_ptr<DX9GF::Texture>> cursorTextures;
+		std::map<CursorType, std::shared_ptr<DX9GF::StaticSprite>> cursorSprites;
+		std::map<CursorType, float> hotspotsX; // = 
+		std::map<CursorType, float> hotspotsY;
+		CursorType currentCursorType = CursorType::CURSOR; //save state, cursor default
+		bool isCustomCursorActive = false;
 
 		InputManager() {}
 		~InputManager() {}
@@ -65,6 +91,10 @@ namespace DX9GF {
 		long GetAbsoluteMouseY() const;
 		POINT GetAbsoluteMousePos() const;
 		long GetMouseScroll() const;
+		void AddCursor(CursorType type, DX9GF::GraphicsDevice* gd, const std::wstring& path, float scale, float hX, float hY);
+		void SwitchCursor(CursorType type);
+		void EnableCustomCursor(bool enable);
+		void DrawCursor(DX9GF::Camera* uiCamera, unsigned long long deltaTime);
 		void Dispose();
 	};
 }

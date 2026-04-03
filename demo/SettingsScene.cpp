@@ -168,6 +168,12 @@ namespace Demo
 		bgTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice()); bgTex->LoadTexture(IDB_PNG2);
 		titleTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice()); titleTex->LoadTexture(IDB_PNG3);
 
+		//disable custom cursor to use the Windows default system cursor.
+		//DX9GF::InputManager::GetInstance()->EnableCustomCursor(false);
+
+		//to hide the cursor during cutscenes, enable the custom cursor but do not call the draw function.
+		//DX9GF::InputManager::GetInstance()->EnableCustomCursor(true);
+
 		//LOCAL FUNCTION to init track and trackfill
 		auto InitTrack = [&](std::shared_ptr<DX9GF::StaticSprite>& track, std::shared_ptr<DX9GF::StaticSprite>& fill, RECT trackR, RECT fillR) {
 			track = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get()); track->SetSrcRect(trackR);
@@ -183,10 +189,10 @@ namespace Demo
 			auto btn = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 12, 11, uiSheetTex, 1);
 			btn->SetSpriteCoords(srcX, srcY, 12, 11, 0);
 
-			btn->SetOnReleaseLeft([action](DX9GF::ITrigger* t) 
+			btn->SetOnReleaseLeft([action](DX9GF::ITrigger* t)
 				{
-				action(t);
-				SettingsManager::GetInstance()->SaveSettings();
+					action(t);
+					SettingsManager::GetInstance()->SaveSettings();
 				});
 			return btn;
 			};
@@ -265,7 +271,7 @@ namespace Demo
 		inpMan->ReadKeyboard(deltaTime);
 
 		auto app = DX9GF::Application::GetInstance();
-		if (app->GetScreenWidth() != lastScreenWidth || app->GetScreenHeight() != lastScreenHeight) 
+		if (app->GetScreenWidth() != lastScreenWidth || app->GetScreenHeight() != lastScreenHeight)
 		{
 			lastScreenWidth = app->GetScreenWidth();
 			lastScreenHeight = app->GetScreenHeight();
@@ -302,7 +308,7 @@ namespace Demo
 		HandleKeybind(isListeningLeft, "MOVE_LEFT", btnLeft);
 		HandleKeybind(isListeningRight, "MOVE_RIGHT", btnRight);
 
-		if (this->isGoingBack) 
+		if (this->isGoingBack)
 		{
 			auto sm = this->game->GetSceneManager();
 			sm->GoToPrevious();
@@ -344,6 +350,9 @@ namespace Demo
 			DrawKeybindButton("MOVE_DOWN", btnDown, isListeningDown);
 			DrawKeybindButton("MOVE_LEFT", btnLeft, isListeningLeft);
 			DrawKeybindButton("MOVE_RIGHT", btnRight, isListeningRight);
+
+			//remember to call drawcursor if want to use custom cursor
+			DX9GF::InputManager::GetInstance()->DrawCursor(&this->camera, deltaTime);
 
 			gd->EndDraw();
 		}
