@@ -87,6 +87,17 @@ namespace Demo
 		titleTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		titleTex->LoadTexture(IDB_PNG3);
 
+		//Load cursor textures
+		auto input = DX9GF::InputManager::GetInstance();
+		auto gd = game->GetGraphicsDevice();
+
+		//hotspot (hX, hY) must be multiplied by the scale factor
+		input->AddCursor(DX9GF::InputManager::CursorType::CURSOR, gd, L"cursor.png", 0.2f, 0.0f, 0.0f);
+		input->AddCursor(DX9GF::InputManager::CursorType::POINTER, gd, L"pointer.png", 0.2f, 0.0f, 0.0f);
+		input->AddCursor(DX9GF::InputManager::CursorType::CLICK, gd, L"click.png", 0.2f, 4.0f, 6.0f);
+		input->AddCursor(DX9GF::InputManager::CursorType::GRAB, gd, L"grab.png", 0.2f, 14.8f, 14.8);
+		input->AddCursor(DX9GF::InputManager::CursorType::TEXTSELECT, gd, L"text-select.png", 0.2f, 10.0f, 16.0f);
+
 		//BUTTONS INIT
 		//Continue Button
 		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);
@@ -192,6 +203,7 @@ namespace Demo
 			{
 				btn->Draw(gd, deltaTime);
 			}
+			DX9GF::InputManager::GetInstance()->DrawCursor(&this->camera, deltaTime);
 			gd->EndDraw();
 		}
 		gd->Present();

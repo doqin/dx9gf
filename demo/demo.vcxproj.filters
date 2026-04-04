@@ -258,6 +258,21 @@
     <Image Include="placeholder-round-projectile.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="pointer.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="text-select.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="click.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="grab.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc">

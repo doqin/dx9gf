@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "DX9GFInputManager.h"
 #include <stdexcept>
 #include <DxErr.h>
@@ -222,6 +222,79 @@ POINT DX9GF::InputManager::GetAbsoluteMousePos() const
 long DX9GF::InputManager::GetMouseScroll() const
 {
     return diMouseState.lZ;
+}
+//
+void DX9GF::InputManager::EnableCustomCursor(bool enable)
+{
+    //if the state is the same, do nothing to prevent the counter from jamming
+    if (this->isCustomCursorActive == enable) return;
+
+    this->isCustomCursorActive = enable;
+
+    if (enable) 
+    {
+        //hide win default cursor when the counter is positive
+        while (ShowCursor(FALSE) >= 0);
+    }
+    else 
+    {
+        //show win default cursor when the counter is negative
+        while (ShowCursor(TRUE) < 0);
+    }
+}
+void DX9GF::InputManager::AddCursor(CursorType type, DX9GF::GraphicsDevice* gd, const std::wstring& path, float scale, float hX, float hY)
+{
+    auto tex = std::make_shared<DX9GF::Texture>(gd);
+    tex->LoadTexture(path);
+    if (tex->GetRawTexture()) {
+        auto sprite = std::make_shared<DX9GF::StaticSprite>(tex.get());
+        sprite->SetScale(scale, scale);
+        this->cursorTextures[type] = tex;
+        this->cursorSprites[type] = sprite;
+        this->hotspotsX[type] = hX;
+        this->hotspotsY[type] = hY;
+        this->EnableCustomCursor(true);
+    }
+}
+
+void DX9GF::InputManager::SwitchCursor(CursorType type)
+{
+    if (this->cursorSprites.count(type)) {
+        this->currentCursorType = type;
+    }
+}
+
+void DX9GF::InputManager::DrawCursor(DX9GF::Camera* uiCamera, unsigned long long deltaTime)
+{
+    if (!isCustomCursorActive || !uiCamera || !cursorSprites.count(currentCursorType)) return;
+
+    auto activeSprite = cursorSprites[currentCursorType];
+    float hX = hotspotsX[currentCursorType];
+    float hY = hotspotsY[currentCursorType];
+
+    auto app = DX9GF::Application::GetInstance();
+    POINT mousePos;
+    GetCursorPos(&mousePos);
+    ScreenToClient(app->GetHWnd(), &mousePos);
+
+    float drawX = (float)mousePos.x - (app->GetScreenWidth() / 2.0f) - hX;
+    float drawY = (float)mousePos.y - (app->GetScreenHeight() / 2.0f) - hY;
+
+    activeSprite->SetPosition(drawX, drawY);
+    activeSprite->Begin();
+    activeSprite->Draw(*uiCamera, deltaTime);
+    activeSprite->End();
+
+    //auto reset state for next frame
+    if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)//check hold left mouse
+
+    {
+        this->currentCursorType = CursorType::GRAB;
+    }
+    else 
+    {
+        this->currentCursorType = CursorType::CURSOR;
+    }
 }
 
 void DX9GF::InputManager::Dispose()
