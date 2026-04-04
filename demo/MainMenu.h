@@ -41,9 +41,7 @@ namespace Demo
 
 		MainMenu(Game* game, int screenWidth, int screenHeight)
 			: IScene(screenWidth, screenHeight),
-			game(game)
-		{
-		}		
+			game(game){}
 		void Init() override;
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;

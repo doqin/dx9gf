@@ -30,6 +30,8 @@ void Demo::TestEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera*
 
 void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player) {
     this->player = player;
+    float baseDamage = 5.f;
+    float projDamage = GetOutgoingDamage(baseDamage);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> xDist(-200, 200);
@@ -38,7 +40,7 @@ void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player) {
     for (int i = 0; i < 40; i++) {
         auto x = xDist(gen);
         auto y = yDist(gen);
-        commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, x, y](std::function<void(void)> markFinished) {
+        commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, x, y, projDamage](std::function<void(void)> markFinished) {
             if (auto lock = this->player.lock()) {
                 projectiles.push_back(
                     RoundProjectile::Builder(
@@ -52,7 +54,7 @@ void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player) {
                     .SetDelay(.2f)
                     .SetDecayTime(4.f)
                     .SetVelocity(200.f)
-                    .SetDamage(5.f)
+                    .SetDamage(projDamage)
                     .Build()
                 );
                 projectiles.back()->Init();

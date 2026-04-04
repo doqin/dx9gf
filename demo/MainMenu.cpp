@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "MainMenu.h"
-// Include các class cụ thể kế thừa từ IButton (ví dụ: TextButton, IconButton)
 #include "resource.h"
 #include "IconButton.h"
+#include "SettingsScene.h"
 namespace Demo
 {
 	void MainMenu::UpdateLayout(int screenW, int screenH)
@@ -49,7 +49,7 @@ namespace Demo
 		//spacing between buttons
 		float spacingY = 10.0f;
 		//start drawing from 40% of the screen height
-		float startY = - screenH * 0.10f;
+		float startY = -screenH * 0.10f;
 
 		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };
 		float currentY = startY;
@@ -87,24 +87,43 @@ namespace Demo
 		titleTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		titleTex->LoadTexture(IDB_PNG3);
 
-		//buttons init
-		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
-			buttonSheetTex, 577, 193, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
+		//BUTTONS INIT
+		//Continue Button
+		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);
+		continueButton->SetSpriteCoords(577, 193, 94, 30, 34);
+		continueButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 
-		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
-			buttonSheetTex, 577, 481, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
+		//New Game Button
+		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);
+		newGameButton->SetSpriteCoords(577, 481, 94, 30, 34);
+		newGameButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 
-		loadGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30,
-			buttonSheetTex, 577, 513, 94, 30, 34, [](DX9GF::ITrigger* t) { /* Logic */ });
+		//Load Game Button
+		loadGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);
+		loadGameButton->SetSpriteCoords(577, 513, 94, 30, 34);
+		loadGameButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 
-		optionButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30,
-			buttonSheetTex, 577, 65, 78, 30, 50, [](DX9GF::ITrigger* t) { /* Logic */ });
+		//Options Button
+		optionButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30, buttonSheetTex, 3);
+		optionButton->SetSpriteCoords(577, 65, 78, 30, 50);
+		optionButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			auto app = DX9GF::Application::GetInstance();
+			//push Settings Scene
+			this->game->GetSceneManager()->PushScene(
+				new SettingsScene(this->game, app->GetScreenWidth(), app->GetScreenHeight())
+			);
+			this->game->GetSceneManager()->GoToNext();
+			});
 
-		creditButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30,
-			buttonSheetTex, 577, 1, 78, 30, 50, [](DX9GF::ITrigger* t) { /* Logic */ });
+		//Credits Button
+		creditButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30, buttonSheetTex, 3);
+		creditButton->SetSpriteCoords(577, 1, 78, 30, 50);
+		creditButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 
-		quitButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 62, 30,
-			buttonSheetTex, 385, 449, 62, 30, 2, [](DX9GF::ITrigger* t) { PostQuitMessage(0); });
+		//Quit Button
+		quitButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 62, 30, buttonSheetTex, 3);
+		quitButton->SetSpriteCoords(385, 449, 62, 30, 2);
+		quitButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { PostQuitMessage(0); });
 
 		//active buttons
 		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };

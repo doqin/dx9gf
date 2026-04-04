@@ -80,6 +80,29 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
         damageFontSprite->SetText(std::move(text));
         damageFontSprite->Draw(*camera, deltaTime);
     }
+
+   float statusOffsetX = 30.f;
+   float statusOffsetY = -20.f;
+
+   for (const auto& status : activeStatuses) {
+       std::wstring statusName = L"Unknown";
+       if (status.type == StatusType::POISON) statusName = L"Poison";
+       else if (status.type == StatusType::VULNERABLE) statusName = L"Vulnerable";
+       else if (status.type == StatusType::WEAK) statusName = L"Weak";
+       else if (status.type == StatusType::STUN) statusName = L"Stun";
+
+       std::wstring statusText = statusName + L" (" + std::to_wstring(status.duration) + L")";
+
+       damageFontSprite->SetColor(0xFFFFFF00);
+
+       damageFontSprite->SetPosition(GetWorldX() + statusOffsetX, GetWorldY() + statusOffsetY);
+
+       damageFontSprite->SetText(std::move(statusText));
+       damageFontSprite->Draw(*camera, deltaTime);
+
+       statusOffsetY += 16.f;
+   }
+
     damageFontSprite->End();
     for (auto& projectile : projectiles) {
         projectile->Draw(*camera, deltaTime);
@@ -88,10 +111,15 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 
 bool Demo::IEnemy::TakeDamage(float damage)
 {
-    health -= damage;
+    float finalDamage = damage;
+
+    if (HasStatus(StatusType::VULNERABLE)) {
+        finalDamage *= 1.5f;
+    }
+    health -= finalDamage;
     if (health < 0) health = 0;
     damageIndicators.push_back(DamageIndicator{
-        L"-" + std::to_wstring(static_cast<int>(std::round(damage))),
+        L"-" + std::to_wstring(static_cast<int>(std::round(finalDamage))),
         0.f,
         0
     });
@@ -106,4 +134,52 @@ void Demo::IEnemy::SetState(bool isOnStandby)
 bool Demo::IEnemy::IsDoneAttacking()
 {
     return !commandBuffer.IsBusy();
+}
+
+void Demo::IEnemy::ApplyStatus(StatusType type, int duration, float value) {
+    for (auto& status : activeStatuses) {
+        if (status.type == type) {
+            status.duration += duration;
+            status.value = std::max(status.value, value);
+            return;
+        }
+    }
+    activeStatuses.push_back({ type, duration, value });
+}
+
+bool Demo::IEnemy::HasStatus(StatusType type) const {
+    for (const auto& status : activeStatuses) {
+        if (status.type == type && status.duration > 0) return true;
+    }
+    return false;
+}
+
+void Demo::IEnemy::TickStatuses() {
+    for (auto it = activeStatuses.begin(); it != activeStatuses.end(); ) {
+        if (it->type == StatusType::POISON && it->duration > 0) {
+            health -= it->value;
+            if (health < 0) health = 0;
+            damageIndicators.push_back(DamageIndicator{ L"-" + std::to_wstring(static_cast<int>(it->value)) + L" (Poison)", 0.f, 0 });
+        }
+
+        it->duration--;
+
+        if (it->duration <= 0) {
+            it = activeStatuses.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+float Demo::IEnemy::GetOutgoingDamage(float baseDamage) const
+{
+    float finalDamage = baseDamage;
+
+    if (HasStatus(StatusType::WEAK)) {
+        finalDamage *= 0.75f;
+    }
+
+    return finalDamage;
 }

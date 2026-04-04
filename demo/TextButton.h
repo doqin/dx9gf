@@ -2,8 +2,7 @@
 #include "IButton.h"
 #include "DX9GFFont.h"
 #include <string>
-#include <DX9GF.h>
-#include <functional>
+#include <vector>
 namespace Demo
 {
 	class TextButton : public IButton
@@ -13,9 +12,11 @@ namespace Demo
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 
 		//save state's color + background
-		DWORD idleColor, hoverColor, clickedColor, disabledColor;
-		D3DXCOLOR idleBg, hoverBg, clickedBg, disabledBg;
-
+		std::vector<DWORD> textColors;
+		std::vector<D3DXCOLOR> bgColors;
+		
+		//fix memory allocation
+		std::wstring wText;
 	public:
 		TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
 			float x, float y, float w, float h,
@@ -23,7 +24,6 @@ namespace Demo
 			std::function<void(DX9GF::ITrigger*)> onClick);
 
 		//setters
-		
 		TextButton* SetText(std::string newText);
 		TextButton* SetBackgroundColors(D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled = D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f));
 		TextButton* SetTextColors(DWORD idle, DWORD hover, DWORD click, DWORD disabled = 0xFF888888);

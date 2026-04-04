@@ -24,7 +24,7 @@ void Demo::DebugScene::Init()
 
 	//just load resource (texture, font) 1 time and reuse it all over again
 	uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
-	uiSheetTex->LoadTexture(L"ui-pack.png");	
+	uiSheetTex->LoadTexture(L"ui-pack.png");
 	//Everything works fine with .png, but .bmp is causing coordinate issues. Idk how to fix bruh
 	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 24);
 	myFontSprite = std::make_shared<DX9GF::FontSprite>(myFont.get());
@@ -43,34 +43,31 @@ void Demo::DebugScene::Init()
 	btnTextExit->Init(&uiCamera);
 	uiButtons.push_back(btnTextExit);
 
-	//test textbutton setter
-	//btnTextExit->SetBackgroundColors(D3DXCOLOR(0.8f, 0, 0, 1), D3DXCOLOR(1, 0, 0, 1), D3DXCOLOR(0, 1, 0, 1))
-	//         ->SetTextColors(0xFFFFA500, 0xFF000000, 0xFFFFFFFF);
+	// Test TextButton setter
+	btnTextExit->SetBackgroundColors(D3DXCOLOR(0.8f, 0, 0, 1), D3DXCOLOR(1, 0, 0, 1), D3DXCOLOR(0, 1, 0, 1))
+		->SetTextColors(0xFFFFA500, 0xFF000000, 0xFFFFFFFF);
 
-	auto quitBtn = std::make_shared<Demo::IconButton>(
-		transformManager,
-		200, 200, 62, 30, //x,y,w,h display
-		uiSheetTex,
-		385, 449, 62, 30, 2, //startX, startY, w, h, spacing
-		[](DX9GF::ITrigger* t)
-		{
-			PostQuitMessage(0); //set button's logic here
-		}
-	);
-	quitBtn->Init(&uiCamera);
-	uiButtons.push_back(quitBtn);
+	btnTextExit->Init(&camera);
+	uiButtons.push_back(btnTextExit);
 
-	auto continueBtn = std::make_shared<Demo::IconButton>(
-		transformManager,
-		150, 150, 94, 30,
-		uiSheetTex,
-		577, 193, 94, 30, 34,
-		[](DX9GF::ITrigger* t)
-		{
-			//switch scene(?)
-		}
-	);
-	continueBtn->Init(&uiCamera);
+	auto quitBtn = std::make_shared<Demo::IconButton>(transformManager, 200, 200, 62, 30, uiSheetTex, 3);
+	quitBtn->SetSpriteCoords(385, 449, 62, 30, 2);
+	quitBtn->SetOnReleaseLeft([](DX9GF::ITrigger* t) { PostQuitMessage(0); });
+
+	auto continueBtn = std::make_shared<Demo::IconButton>(transformManager, 150, 150, 94, 30, uiSheetTex, 3);
+	continueBtn->SetSpriteCoords(577, 193, 94, 30, 34);
+
+	continueBtn->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		auto [sw, sh] = this->camera.GetScreenResolution();
+		auto sceMan = this->game->GetSceneManager();
+		this->game->GetSceneManager()->PushScene(
+			new Demo::CardShop(this->game, this->player.get(), sw, sh)
+		);
+		sceMan->GoToNext();
+
+		});
+
+	continueBtn->Init(&camera);
 	uiButtons.push_back(continueBtn);
 
 	//test function

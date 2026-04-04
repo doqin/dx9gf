@@ -204,6 +204,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CardShop.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HandContainer.cpp" />
@@ -215,12 +216,16 @@
     <ClCompile Include="IDraggable.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="MultiTargetCard.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SettingsManager.cpp" />
+    <ClCompile Include="SettingsScene.cpp" />
+    <ClCompile Include="IShopScene.cpp" />
     <ClCompile Include="TextInputManager.cpp" />
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
@@ -235,6 +240,8 @@
     <ClCompile Include="TestEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AdvancedCards.h" />
+    <ClInclude Include="CardShop.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="DialogueLine.h" />
     <ClInclude Include="EnemyCard.h" />
@@ -254,9 +261,13 @@
     <ClInclude Include="IProjectile.h" />
     <ClInclude Include="IStatementCard.h" />
     <ClInclude Include="MainBlockCard.h" />
+    <ClInclude Include="MultiTargetCard.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PopUpMessage.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SettingsManager.h" />
+    <ClInclude Include="SettingsScene.h" />
+    <ClInclude Include="IShopScene.h" />
     <ClInclude Include="TextInputManager.h" />
     <ClInclude Include="RoundProjectile.h" />
     <ClInclude Include="StrikeCard.h" />
