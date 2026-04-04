@@ -285,10 +285,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="click.png" />
-    <Image Include="cursor.png" />
-    <Image Include="grab.png" />
-    <Image Include="pointer.png" />
+    <Image Include="click.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="cursor.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="grab.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="pointer.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="test-background.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -301,7 +309,9 @@
     <Image Include="placeholder.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
-    <Image Include="text-select.png" />
+    <Image Include="text-select.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="uiter-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
