@@ -230,6 +230,7 @@
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
     <ClCompile Include="TestBattleScene.cpp" />
+    <ClCompile Include="TutorialWorldScene.cpp" />
     <ClCompile Include="World1Scene.cpp" />
     <ClCompile Include="TextButton.cpp" />
     <ClCompile Include="EnemyCard.cpp" />
@@ -273,10 +274,20 @@
     <ClInclude Include="StrikeCard.h" />
     <ClInclude Include="TestBattleScene.h" />
     <ClInclude Include="TestEnemy.h" />
+    <ClInclude Include="TutorialWorldScene.h" />
     <ClInclude Include="World1Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="placeholder-round-projectile.aseprite" />
+    <None Include="tutorial.aseprite">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="tutorial.tmx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="tutorial.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="uiter-Sheet.aseprite">
       <DeploymentContent>false</DeploymentContent>
     </None>
@@ -285,6 +296,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="click.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="cursor.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="grab.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="pointer.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="test-background.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -295,6 +318,15 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="placeholder.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="tutorial.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="ui.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="text-select.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="uiter-Sheet.png">
@@ -312,6 +344,14 @@
     <Image Include="ui-pack.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="arcade-among-2-r46pv.ttf">
+      <DeploymentContent>true</DeploymentContent>
+    </Font>
+    <Font Include="statusplz.ttf">
+      <DeploymentContent>true</DeploymentContent>
+    </Font>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -31,6 +31,9 @@
     <Filter Include="Header Files\Projectiles">
       <UniqueIdentifier>{970c8ab7-c2dc-41a4-b4cc-833515485537}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\TutorialWorld">
+      <UniqueIdentifier>{64312bd6-53cf-4d03-9884-4ca4c5a86c83}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -121,6 +124,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MultiTargetCard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TutorialWorldScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -230,6 +236,9 @@
     <ClInclude Include="AdvancedCards.h">
       <Filter>Header Files\Cards</Filter>
     </ClInclude>
+    <ClInclude Include="TutorialWorldScene.h">
+      <Filter>Header Files\TutorialWorld</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="uiter.aseprite">
@@ -239,6 +248,15 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="placeholder-round-projectile.aseprite">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="tutorial.tmx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="tutorial.aseprite">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="tutorial.tsx">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -258,6 +276,27 @@
     <Image Include="placeholder-round-projectile.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="pointer.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="text-select.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="click.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="grab.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="tutorial.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ui.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc">
@@ -271,5 +310,13 @@
     <Image Include="ui-pack-2.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="arcade-among-2-r46pv.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
+    <Font Include="statusplz.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
   </ItemGroup>
 </Project>

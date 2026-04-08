@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "IDraggable.h"
 #include "TextButton.h"
+#include "IconButton.h"
 #include "MainBlockCard.h"
 #include "StrikeCard.h"
 #include "EnemyCard.h"
@@ -57,13 +58,16 @@ namespace Demo {
 		// UI
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
-		std::shared_ptr<TextButton> attackButton;
-		std::shared_ptr<TextButton> actionButton;
-		std::shared_ptr<TextButton> itemsButton;
-		std::shared_ptr<TextButton> fleeButton;
-		std::shared_ptr<TextButton> backButton;
-		std::shared_ptr<TextButton> executeButton;
+		std::shared_ptr<DX9GF::Texture> uiSheetTex;
+		std::shared_ptr<IconButton> attackButton;
+		std::shared_ptr<IconButton> actionButton;
+		std::shared_ptr<IconButton> itemsButton;
+		std::shared_ptr<IconButton> fleeButton;
+		std::shared_ptr<IconButton> backButton;
+		std::shared_ptr<IconButton> executeButton;
 		std::shared_ptr<PopUpMessage> popUpMessage;
+		std::shared_ptr<DX9GF::StaticSprite> energyIcon;
+		std::shared_ptr<DX9GF::StaticSprite> hourglassIcon;
 		void CreateEnemyCard(std::shared_ptr<IEnemy> enemy);
 		void StartBattle();
 		
