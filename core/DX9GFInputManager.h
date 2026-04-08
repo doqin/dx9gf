@@ -3,6 +3,7 @@
 //
 #include "DX9GFSprites.h"
 #include "DX9GFCamera.h"
+#include <map>
 #include <memory>
 //
 #define KEYBOARD_BUFFER_SIZE 1024

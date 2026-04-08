@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "DX9GFSaveManager.h"
 #include <filesystem>
+#include <fstream>
 
 void DX9GF::SaveManager::Register(ISaveable* saveable)
 {

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "DX9GFTransformManager.h"
 #include "pch.h"
+#include <stdexcept>
 
 void DX9GF::TransformManager::ComputeTransform(int dataIndex) {
 	auto& t = transforms[dataIndex];

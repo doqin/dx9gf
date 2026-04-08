@@ -138,6 +138,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);D:\hochanh\game\directx9-game-framework\external;D:\hochanh\game\directx9-game-framework\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <Link>
@@ -168,6 +169,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);D:\hochanh\game\directx9-game-framework\external;D:\hochanh\game\directx9-game-framework\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <Link>
@@ -200,6 +202,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);D:\hochanh\game\directx9-game-framework\external;D:\hochanh\game\directx9-game-framework\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <Link>
@@ -538,6 +541,7 @@
     <ClInclude Include="DX9GFUtils.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="DX9GFAudioManager.h" />
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
