@@ -8,6 +8,8 @@ void Demo::Game::Init()
 {
 	IGame::Init();
 	auto app = DX9GF::Application::GetInstance();
+	DX9GF::Font::AddFont(L"arcade-among-2-r46pv.ttf");
+	DX9GF::Font::AddFont(L"statusplz.ttf");
 #ifdef TESTING
 	this->sceneManager->PushScene(new DebugScene(this, app->GetScreenWidth(), app->GetScreenHeight()));
 #else

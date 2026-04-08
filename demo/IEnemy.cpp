@@ -55,9 +55,9 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
     if (!graphicsDevice || !camera) {
         return;
     }
-    if (!damageFont) {
-        damageFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"Arial", 18);
-        damageFontSprite = std::make_shared<DX9GF::FontSprite>(damageFont.get());
+    if (!font) {
+        font = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+        fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
     }
     if (cardSpawnTrigger) {
         cardSpawnTrigger->Draw(graphicsDevice, *camera);
@@ -67,18 +67,18 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
     const auto totalHealth = static_cast<int>(std::round(maxHealth));
     auto healthText = std::to_wstring(currentHealth) + L"/" + std::to_wstring(totalHealth);
 
-    damageFontSprite->Begin();
-    damageFontSprite->SetColor(0xFFFFFFFF);
-    damageFontSprite->SetPosition(GetWorldX(), GetWorldY() - 48.f);
-    damageFontSprite->SetText(std::move(healthText));
-    damageFontSprite->Draw(*camera, deltaTime);
+    fontSprite->Begin();
+    fontSprite->SetColor(0xFF000000);
+    fontSprite->SetPosition(GetWorldX(), GetWorldY() - 48.f);
+    fontSprite->SetText(std::move(healthText));
+    fontSprite->Draw(*camera, deltaTime);
 
    for (size_t i = 0; i < damageIndicators.size(); ++i) {
         auto text = damageIndicators[i].text;
-        damageFontSprite->SetColor(0xFFFF4444);
-     damageFontSprite->SetPosition(GetWorldX(), GetWorldY() - 30.f + damageIndicators[i].offsetY - i * 14.f);
-        damageFontSprite->SetText(std::move(text));
-        damageFontSprite->Draw(*camera, deltaTime);
+        fontSprite->SetColor(0xFFFF4444);
+        fontSprite->SetPosition(GetWorldX(), GetWorldY() - 30.f + damageIndicators[i].offsetY - i * 14.f);
+        fontSprite->SetText(std::move(text));
+        fontSprite->Draw(*camera, deltaTime);
     }
 
    float statusOffsetX = 30.f;
@@ -93,17 +93,17 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 
        std::wstring statusText = statusName + L" (" + std::to_wstring(status.duration) + L")";
 
-       damageFontSprite->SetColor(0xFFFFFF00);
+       fontSprite->SetColor(0xFFFFFF00);
 
-       damageFontSprite->SetPosition(GetWorldX() + statusOffsetX, GetWorldY() + statusOffsetY);
+       fontSprite->SetPosition(GetWorldX() + statusOffsetX, GetWorldY() + statusOffsetY);
 
-       damageFontSprite->SetText(std::move(statusText));
-       damageFontSprite->Draw(*camera, deltaTime);
+       fontSprite->SetText(std::move(statusText));
+       fontSprite->Draw(*camera, deltaTime);
 
        statusOffsetY += 16.f;
    }
 
-    damageFontSprite->End();
+   fontSprite->End();
     for (auto& projectile : projectiles) {
         projectile->Draw(*camera, deltaTime);
     }

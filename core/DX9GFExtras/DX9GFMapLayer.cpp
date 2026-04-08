@@ -19,6 +19,8 @@ void DX9GF::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 	const auto mapSize = tmxMap.getTileCount(); // the size of the map in number of tiles per axis
 	const auto gridSize = tmxMap.getTileSize(); // returns the size of a grid
 	const auto& tileSets = tmxMap.getTilesets();
+	const auto tilesView = layer.getTiles() | std::views::transform([](const tmx::TileLayer::Tile& tile) { return tile.ID; });
+	const std::vector<std::uint32_t> tileIDs(tilesView.begin(), tilesView.end());
 	const auto tintColour = layer.getTintColour();
 	D3DXCOLOR vertexColour(
 		static_cast<float>(tintColour.r) / 0xFF, 
@@ -28,14 +30,11 @@ void DX9GF::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 	);
 	for (auto i = 0u; i < tileSets.size(); ++i) {
 		const auto& tileSet = tileSets[i];
-		// Convert the transform view to a vector
-		// TODO: Handle when the map is infinite
-		const auto tilesView = layer.getTiles() | std::views::transform([](const tmx::TileLayer::Tile& tile) { return tile.ID; });
-		const std::vector<std::uint32_t> tileIDs(tilesView.begin(), tilesView.end());
 		const auto& [textureSizeX, textureSizeY] = textures[i]->GetSize();
 		const auto& tileSetTileSize = tileSet.getTileSize();
-		const auto tileCountX = textureSizeX / gridSize.x;
-		const auto tileCountY = textureSizeY / gridSize.y;
+		const auto tileCountX = tileSet.getColumnCount();
+		const auto tileSpacing = tileSet.getSpacing();
+		const auto tileMargin = tileSet.getMargin();
 		const float uNorm = static_cast<float>(tileSetTileSize.x) / textureSizeX;
 		const float vNorm = static_cast<float>(tileSetTileSize.y) / textureSizeY;
 		std::vector<TileVertex> vertices;
@@ -45,8 +44,10 @@ void DX9GF::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 				if (!IsTileIDInTileSet(idx, tileIDs, tileSet)) continue;
 				// texture coords
 				auto idIndex = (tileIDs[idx] - tileSet.getFirstGID());
-				float u = static_cast<float>(idIndex % tileCountX) * tileSetTileSize.x / textures[i]->GetWidth();
-				float v = static_cast<float>(idIndex / tileCountX) * tileSetTileSize.y / textures[i]->GetHeight();
+				const auto tileX = idIndex % tileCountX;
+				const auto tileY = idIndex / tileCountX;
+				float u = static_cast<float>(tileMargin + tileX * (tileSetTileSize.x + tileSpacing)) / textureSizeX;
+				float v = static_cast<float>(tileMargin + tileY * (tileSetTileSize.y + tileSpacing)) / textureSizeY;
 				// vertex pos
 				const float tilePosX = static_cast<float>(x) * gridSize.x;
 				const float tilePosY = (static_cast<float>(y) * gridSize.y);
@@ -59,7 +60,7 @@ void DX9GF::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 				// second triangle
 				// top right, bottom right, bottom left
 				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v }); 
-				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v + uNorm }); 
+				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v + vNorm }); 
 				vertices.push_back({ .x = tilePosX, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u, .v = v + vNorm });
 			}
 		}

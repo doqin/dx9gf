@@ -25,6 +25,12 @@ Demo::IconButton* Demo::IconButton::SetSpriteCoords(int startX, int startY, int 
 	return this;
 }
 
+Demo::IconButton* Demo::IconButton::SetSpriteRects(std::vector<RECT> rects)
+{
+	this->buttonRects = rects;
+	return this;
+}
+
 void Demo::IconButton::Init(DX9GF::Camera* uiCamera)
 {
 	this->trigger = std::make_shared<DX9GF::RectangleTrigger>
@@ -38,6 +44,11 @@ void Demo::IconButton::Init(DX9GF::Camera* uiCamera)
 	this->uiCamera = uiCamera;
 	this->trigger->Init(uiCamera);
 	this->trigger->SetOnReleaseLeft(this->callback);
+}
+
+void Demo::IconButton::SetSpriteScale(float scaleX, float scaleY)
+{
+	this->sprite->SetScale(scaleX, scaleY);
 }
 
 void Demo::IconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
