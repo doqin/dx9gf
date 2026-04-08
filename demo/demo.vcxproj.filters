@@ -117,6 +117,15 @@
     <ClCompile Include="SettingsScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IShopScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CardShop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiTargetCard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="TutorialWorldScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -215,6 +224,18 @@
     <ClInclude Include="SettingsScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IShopScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CardShop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiTargetCard.h">
+      <Filter>Header Files\Cards</Filter>
+    </ClInclude>
+    <ClInclude Include="AdvancedCards.h">
+      <Filter>Header Files\Cards</Filter>
+    </ClInclude>
     <ClInclude Include="TutorialWorldScene.h">
       <Filter>Header Files\TutorialWorld</Filter>
     </ClInclude>
@@ -253,6 +274,21 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="placeholder-round-projectile.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="pointer.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="text-select.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="click.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="grab.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="tutorial.png">

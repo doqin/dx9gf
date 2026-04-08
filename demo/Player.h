@@ -1,6 +1,7 @@
 #pragma once
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
+#include "ICard.h"
 
 namespace Demo {
 	class Player : public DX9GF::IGameObject {
@@ -44,6 +45,9 @@ namespace Demo {
 		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
 		DX9GF::ColliderManager* colliderManager = nullptr;
 		DX9GF::Camera* camera = nullptr;
+		
+		int gold = 100;
+		std::vector<std::shared_ptr<ICard>> deck;
 	public:
 		Player(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) { }
 		Player(
@@ -76,5 +80,10 @@ namespace Demo {
 		float GetMaxHealth() const;
 		float GetHealth() const;
 		std::weak_ptr<DX9GF::RectangleCollider> GetCollider();
+
+		int GetGold() const { return gold; }
+		void AddGold(int amount) { gold += amount; }
+		void AddCardToDeck(std::shared_ptr<ICard> card) { deck.push_back(card); }
+		const std::vector<std::shared_ptr<ICard>>& GetDeck() const { return deck; }
 	};
 }

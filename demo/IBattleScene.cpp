@@ -146,7 +146,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	const float centerLineY = -120.f;
 	const float horizontalSpacing = 120.f;
 	const float verticalSpacing = 100.f;
-	const float rightSideX = app->GetScreenWidth() / 2.f - 120.f;
+	const float rightSideX = app->GetScreenWidth() / 2.f - 150.f;
 
 	bool hasQueued = false;
 	const size_t enemyCount = enemies.size();
@@ -287,8 +287,34 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 			for (auto& enemy : enemies) {
 				enemy->SetState(true);
 			}
+
 			for (auto& enemy : enemies) {
+				bool isStunned = enemy->HasStatus(StatusType::STUN);
+				enemy->TickStatuses();
+				if (enemy->IsDead()) {
+					continue;
+				}
+				if (isStunned) {
+					continue;
+				}
 				enemy->StartAttack(battlePlayer);
+			}
+
+			for (size_t i = 0; i < enemyCards.size(); ++i) {
+				auto& enemyCard = enemyCards[i];
+				if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
+					if (auto manager = enemyCard->GetDraggableManager().lock()) {
+						manager->Remove(enemyCard);
+					}
+					enemyCards.erase(enemyCards.begin() + i);
+					--i;
+				}
+			}
+			for (size_t i = 0; i < enemies.size(); ++i) {
+				if (enemies[i]->IsDead()) {
+					enemies.erase(enemies.begin() + i);
+					--i;
+				}
 			}
 			battlePlayer->SetLocalPosition(0, 0);
 			EnemyAttackUpdate(deltaTime);
