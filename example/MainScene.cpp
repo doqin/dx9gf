@@ -13,7 +13,7 @@ void MainScene::Init()
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
-	map->Create(transformManager, colliderManager, "./Resources/example.tmx");
+	map->Create(transformManager, colliderManager, "./Resources/map.tmx");
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
 	whiteTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	whiteTexture->CreatePlainTexture(0xFFFFFFFF, 500, 500);

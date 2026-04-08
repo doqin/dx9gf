@@ -177,16 +177,25 @@
     <ClInclude Include="SubScene.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\dx9gf1\example\Resources\Alo_Vu_a_Vu.png" />
     <Image Include="Resources\Actor1.png" />
     <Image Include="Resources\Alo_Vu_a_Vu.png" />
     <Image Include="Resources\dawg.jpg">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Resources\First Asset pack.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Resources\icon.jpg" />
     <Image Include="Resources\mario_full.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="Resources\spritesheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Resources\tutorial.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Resources\XP.jpg">
       <DeploymentContent>true</DeploymentContent>
     </Image>
   </ItemGroup>
@@ -194,9 +203,19 @@
     <None Include="Resources\example.tmx">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="Resources\icon.tsx" />
+    <None Include="Resources\map.tmx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="Resources\test.tsx">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="Resources\tilemap.tsx" />
+    <None Include="Resources\tutorial.aseprite">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Resources\tutorial.tsx" />
+    <None Include="Resources\XP.tsx" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="example.rc" />
