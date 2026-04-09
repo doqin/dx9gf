@@ -213,21 +213,7 @@ bool Demo::IEnemy::HasStatus(StatusType type) const {
 void Demo::IEnemy::TickStatuses() {
     for (auto it = activeStatuses.begin(); it != activeStatuses.end(); ) {
         if (it->type == StatusType::POISON && it->duration > 0) {
-            health -= it->value;
-            if (health < 0) health = 0;
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<float> vxDis(-40.f, 40.f);
-            std::uniform_real_distribution<float> vyDis(-200.f, -100.f);
-
-            damageIndicators.push_back(DamageIndicator{ 
-                L"-" + std::to_wstring(static_cast<int>(it->value)) + L" (Poison)", 
-                0.f, 
-                0.f,
-                vxDis(gen),
-                vyDis(gen),
-                0 
-            });
+			this->TakeDamage(it->value);
         }
 
         it->duration--;
