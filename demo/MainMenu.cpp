@@ -4,6 +4,8 @@
 #include "IconButton.h"
 #include "SettingsScene.h"
 #include "TutorialWorldScene.h"
+#include <fstream>
+#include <cstdio>
 
 namespace Demo
 {
@@ -95,14 +97,34 @@ namespace Demo
 		//Continue Button
 		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 4);
 		continueButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(144, 96, 48, 16, 4));
-		continueButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
+		//continueButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 		continueButton->SetSpriteScale(2.f, 2.f);
-		continueButton->SetState(IButton::ButtonState::DISABLED);
+		/*continueButton->SetState(IButton::ButtonState::DISABLED);*/
+
+		std::ifstream f("savegame.json");
+		if (f.good()) {
+			continueButton->SetState(IButton::ButtonState::IDLE);
+		}
+		else {
+			continueButton->SetState(IButton::ButtonState::DISABLED);
+		}
+		f.close();
+
+		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			auto app = DX9GF::Application::GetInstance();
+			auto world = new TutorialWorldScene(game, app->GetScreenWidth(), app->GetScreenHeight());
+
+			world->SetLoadSave(true);
+
+			game->GetSceneManager()->PushScene(world);
+			game->GetSceneManager()->GoToNext();
+			});
 
 		//New Game Button
 		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
 		newGameButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(144, 48, 48, 16, 3));
 		newGameButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { 
+			std::remove("savegame.json");
 			auto app = DX9GF::Application::GetInstance();
 			game->GetSceneManager()->PushScene(
 				new TutorialWorldScene(game, app->GetScreenWidth(), app->GetScreenHeight())
@@ -162,6 +184,20 @@ namespace Demo
 		auto app = DX9GF::Application::GetInstance();
 		int currentWidth = app->GetScreenWidth();
 		int currentHeight = app->GetScreenHeight();
+
+		static float timer = 0;
+		timer += deltaTime;
+		if (timer > 0) {
+			std::ifstream f("savegame.json");
+			if (f.good()) {
+				continueButton->SetState(IButton::ButtonState::IDLE);
+			}
+			else {
+				continueButton->SetState(IButton::ButtonState::DISABLED);
+			}
+			f.close();
+			timer = 0;
+		}
 
 		UpdateLayout(currentWidth, currentHeight);
 
