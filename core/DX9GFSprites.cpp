@@ -67,7 +67,17 @@ void DX9GF::StaticSprite::SetSrcRect(RECT srcRect)
 	this->p_src = new RECT(srcRect);
 }
 
-DX9GF::AnimatedSprite::AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate) : ISprite(spritesheet->GetGraphicsDevice()), frames(frames), frameRate(frameRate), texture(spritesheet) {
+DX9GF::AnimatedSprite::AnimatedSprite(
+	Texture* spritesheet, 
+	std::vector<RECT> frames, 
+	UINT frameRate, 
+	bool isLooped
+) : ISprite(spritesheet->GetGraphicsDevice()), 
+	frames(frames), 
+	frameRate(frameRate), 
+	texture(spritesheet), 
+	isLooped(isLooped) 
+{
 	HRESULT result = D3DXCreateSprite(graphicsDevice->GetDevice(), &p_sprite);
 
 	if (result != D3D_OK) {
@@ -92,6 +102,17 @@ void DX9GF::AnimatedSprite::SetFrameRate(unsigned int frameRate)
 	this->frameRate = frameRate;
 }
 
+void DX9GF::AnimatedSprite::SetLooped(bool isLooped)
+{
+	this->isLooped = isLooped;
+}
+
+bool DX9GF::AnimatedSprite::IsFinished() const
+{
+	if (isLooped) return false;
+	return frame_index >= frames.size() - 1;
+}
+
 void DX9GF::AnimatedSprite::Begin()
 {
 	p_sprite->OnLostDevice();
@@ -111,6 +132,9 @@ void DX9GF::AnimatedSprite::Draw(const Camera& camera, unsigned long long deltaT
 	if (delta > 1000 / frameRate) {
 		frame_index += delta / (1000 / frameRate); // this will handle skipping more than 1 frame if delta is worth 2+ frame time
 		delta = 0;
+	}
+	if (!isLooped && frame_index >= frames.size()) {
+		frame_index = frames.size() - 1;
 	}
 	frame_index %= frames.size();
 	auto p_src = &frames.at(frame_index);

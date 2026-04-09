@@ -13,7 +13,6 @@ namespace Demo {
 		bool isDone = false;
 		std::shared_ptr<DX9GF::Font> nameFont;
 		std::shared_ptr<DX9GF::FontSprite> nameFontSprite;
-
 	public:
 		MultiTargetCard(std::weak_ptr<DX9GF::TransformManager> tm, size_t maxTargets, std::wstring name, float x = 0, float y = 0);
 

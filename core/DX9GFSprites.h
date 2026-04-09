@@ -31,11 +31,14 @@ namespace DX9GF {
 		UINT frame_index = 0;
 		unsigned int frameRate = 24;
 		unsigned long long delta = 0;
+		bool isLooped;
 	public:
-		AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate = 24);
+		AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate = 24, bool isLooped = true);
 		~AnimatedSprite();
 		void SetFrame(unsigned int frameIndex);
 		void SetFrameRate(unsigned int frameRate);
+		void SetLooped(bool isLooped);
+		bool IsFinished() const; // returns true if the animation has finished playing (only relevant if isLooped is false)
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;
 		void End() override;

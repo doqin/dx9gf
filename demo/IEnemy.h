@@ -33,8 +33,11 @@ namespace Demo {
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 		std::vector<std::shared_ptr<IProjectile>> projectiles;
 		DX9GF::CommandBuffer commandBuffer;
-
+		DX9GF::CommandBuffer animationBuffer;
+		std::shared_ptr<DX9GF::Texture> hitImpactTexture;
+		std::vector<std::shared_ptr<DX9GF::AnimatedSprite>> hitImpactSprites;
 		std::vector<StatusEffect> activeStatuses;
+		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
 	public:
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth) : IGameObject(tm), maxHealth(maxHealth), health(maxHealth) {}
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth, float x, float y, float rotation = 0, float scaleX = 1, float scaleY = 1) : IGameObject(tm, x, y, rotation, scaleX, scaleY), maxHealth(maxHealth), health(maxHealth) {}

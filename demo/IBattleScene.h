@@ -32,6 +32,7 @@ namespace Demo {
 		size_t currentTurn = 0;
 		int energy = MAX_ENERGY;
 		int usedEnergy = 0;
+		bool isTransitioning = false;
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;

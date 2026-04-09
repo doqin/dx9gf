@@ -305,6 +305,9 @@
     <Image Include="grab.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="hitimpact-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="pointer.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

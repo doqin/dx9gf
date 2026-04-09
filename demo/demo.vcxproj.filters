@@ -200,9 +200,6 @@
     <ClInclude Include="HandContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ICard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PopUpMessage.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
@@ -224,9 +221,6 @@
     <ClInclude Include="SettingsScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IShopScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CardShop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -238,6 +232,12 @@
     </ClInclude>
     <ClInclude Include="TutorialWorldScene.h">
       <Filter>Header Files\TutorialWorld</Filter>
+    </ClInclude>
+    <ClInclude Include="ICard.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="IShopScene.h">
+      <Filter>Header Files\Interfaces</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -295,6 +295,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="ui.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="hitimpact-Sheet.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
