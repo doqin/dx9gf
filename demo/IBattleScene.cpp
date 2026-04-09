@@ -21,9 +21,12 @@ namespace {
 
 void Demo::IBattleScene::StartBattle()
 {
-    for (auto& card : drawPile) {
+	for (auto& card : drawPile) {
 		HidePileCard(card);
 	}
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::shuffle(drawPile.begin(), drawPile.end(), gen);
 	currentTurn = 1;
 	DrawCards(5);
 }

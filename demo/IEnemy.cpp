@@ -32,7 +32,9 @@ void Demo::IEnemy::Update(unsigned long long deltaTime)
     }
     for (auto& indicator : damageIndicators) {
         indicator.elapsed += deltaTime;
-        indicator.offsetY -= 20.f * deltaTime / 1000.f;
+        indicator.vy += 800.f * deltaTime / 1000.f; // gravity
+        indicator.offsetX += indicator.vx * deltaTime / 1000.f;
+        indicator.offsetY += indicator.vy * deltaTime / 1000.f;
     }
     damageIndicators.erase(std::remove_if(damageIndicators.begin(), damageIndicators.end(), [](const DamageIndicator& indicator) {
         return indicator.elapsed >= 700;
@@ -91,10 +93,16 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
     for (size_t i = 0; i < damageIndicators.size(); ++i) {
         auto text = damageIndicators[i].text;
         fontSprite->SetColor(0xFFFF4444);
-        fontSprite->SetPosition(GetWorldX(), GetWorldY() - 30.f + damageIndicators[i].offsetY - i * 14.f);
+        fontSprite->SetOutline(true, 0xFF000000);
+        fontSprite->SetBold(true);
+        fontSprite->SetScale(2.f);
+        fontSprite->SetPosition(GetWorldX() + damageIndicators[i].offsetX, GetWorldY() - 30.f + damageIndicators[i].offsetY);
         fontSprite->SetText(std::move(text));
         fontSprite->Draw(*camera, deltaTime);
     }
+	fontSprite->SetBold(false);
+	fontSprite->SetOutline(false);
+	fontSprite->SetScale(1.f);
 
     float statusOffsetX = 30.f;
     float statusOffsetY = -20.f;
@@ -133,19 +141,25 @@ bool Demo::IEnemy::TakeDamage(float damage)
     }
     health -= finalDamage;
     if (health < 0) health = 0;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> vxDis(-64.f, 64.f);
+    std::uniform_real_distribution<float> vyDis(-200.f, -100.f);
+
     damageIndicators.push_back(DamageIndicator{
         L"-" + std::to_wstring(static_cast<int>(std::round(finalDamage))),
         0.f,
+        0.f,
+        vxDis(gen),
+        vyDis(gen),
         0
     });
 	if (!hitImpactTexture && graphicsDevice) { // graphicsDevice should be not null by now
-        hitImpactTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		hitImpactTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
 		hitImpactTexture->LoadTexture(L"hitimpact-Sheet.png");
-    }
+	}
 	hitImpactSprites.push_back(std::make_shared<DX9GF::AnimatedSprite>(hitImpactTexture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 4), 24, false));
-	std::random_device rd;
-	std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dis(-16.f, 16.f);
+	std::uniform_real_distribution<float> dis(-16.f, 16.f);
 	std::uniform_real_distribution<float> scaleDis(2.f, 3.f);
 	std::uniform_real_distribution<float> rotDis(-0.5f, 0.5f);
 	hitImpactSprites.back()->SetPosition(GetWorldX() + dis(gen), GetWorldY() + dis(gen));
@@ -201,7 +215,19 @@ void Demo::IEnemy::TickStatuses() {
         if (it->type == StatusType::POISON && it->duration > 0) {
             health -= it->value;
             if (health < 0) health = 0;
-            damageIndicators.push_back(DamageIndicator{ L"-" + std::to_wstring(static_cast<int>(it->value)) + L" (Poison)", 0.f, 0 });
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<float> vxDis(-40.f, 40.f);
+            std::uniform_real_distribution<float> vyDis(-200.f, -100.f);
+
+            damageIndicators.push_back(DamageIndicator{ 
+                L"-" + std::to_wstring(static_cast<int>(it->value)) + L" (Poison)", 
+                0.f, 
+                0.f,
+                vxDis(gen),
+                vyDis(gen),
+                0 
+            });
         }
 
         it->duration--;

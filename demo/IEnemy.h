@@ -19,9 +19,12 @@ namespace Demo {
 	private:
 		const float maxHealth;
 	protected:
-       struct DamageIndicator {
+	   struct DamageIndicator {
 			std::wstring text;
+			float offsetX = 0.f;
 			float offsetY = 0.f;
+			float vx = 0.f;
+			float vy = 0.f;
 			unsigned long long elapsed = 0;
 		};
 		bool isOnStandby = true;

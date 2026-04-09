@@ -49,12 +49,17 @@ namespace DX9GF {
 		RECT* p_src = nullptr;
 		Font* font = nullptr;
 		std::wstring text;
+		bool isBold = false;
+		bool isOutline = false;
+		D3DCOLOR outlineColor = 0xFF000000;
 	public:
 		FontSprite(Font* font);
 		~FontSprite();
 		void SetText(std::wstring&& text);
 		void SetColor(D3DCOLOR color);
-      LONG GetWidth() const;
+		void SetBold(bool bold);
+		void SetOutline(bool outline, D3DCOLOR color = 0xFF000000);
+	  LONG GetWidth() const;
 		LONG GetHeight() const;
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;
