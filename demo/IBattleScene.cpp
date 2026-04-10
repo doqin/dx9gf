@@ -682,6 +682,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
+	auto inpMan = DX9GF::InputManager::GetInstance();
 	gd->Clear(0xFFFFFFFF);
 	if (SUCCEEDED(gd->BeginDraw())) {
 		for (auto& enemy : enemies) {
@@ -704,6 +705,7 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 			dynamic_pointer_cast<IDraggable>(card)->Draw(deltaTime);
 		}
 		popUpMessage->Draw(deltaTime);
+		inpMan->DrawCursor(&camera, deltaTime);
 		gd->EndDraw();
 	}
 	gd->Present();

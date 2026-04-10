@@ -314,6 +314,9 @@
     <Image Include="pointer.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="savepoint-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="test-background.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
