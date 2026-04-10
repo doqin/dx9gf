@@ -13,7 +13,7 @@ void Demo::TutorialWorldScene::Init()
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
 
 	savePoint = std::make_shared<SavePoint>(transformManager, 200.0f, 150.0f);
-	savePoint->Init(game->GetGraphicsDevice(), &camera, player, saveManager, font);
+	savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font);
 	savePoint->SetVisible(true);
 	transformManager->RebuildHierarchy();
 }
