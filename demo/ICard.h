@@ -23,5 +23,6 @@ namespace Demo {
 			float scaleY = 1
 		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY) {}
 		virtual size_t GetCost() const { return 0; }
+		virtual std::wstring GetDescription() const { return L""; }
 	};
 }

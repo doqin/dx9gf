@@ -21,5 +21,6 @@ namespace Demo {
 		void Draw(unsigned long long deltaTime) override;
 		size_t GetWidth() const override;
 		void ResetExecution() override;
+		std::wstring GetInputsDescription() const override;
 	};
 }

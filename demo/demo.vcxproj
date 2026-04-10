@@ -214,6 +214,7 @@
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IConversation.cpp" />
     <ClCompile Include="IDraggable.cpp" />
+    <ClCompile Include="IStatementCard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="MultiTargetCard.cpp" />
