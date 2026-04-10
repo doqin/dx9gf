@@ -299,6 +299,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="arrow.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="click.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

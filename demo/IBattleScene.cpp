@@ -412,8 +412,14 @@ void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 	battlePlayer->Draw(deltaTime);
 	auto app = DX9GF::Application::GetInstance();
 	auto gd = game->GetGraphicsDevice();
-	gd->DrawRectangle(camera, -battlePlayer->GetMaxHealth() / 2, app->GetScreenHeight() / 2.f - 40, battlePlayer->GetMaxHealth(), 20, 0xFFFF0000, true);
-	gd->DrawRectangle(camera, -battlePlayer->GetMaxHealth() / 2, app->GetScreenHeight() / 2.f - 40, battlePlayer->GetHealth(), 20, 0xFF00FF00, true);
+	const float spacing = 5.f;
+	const float w = battlePlayer->GetMaxHealth() * spacing;
+	const float w_ = battlePlayer->GetHealth() * spacing;
+	const float x = -w / 2;
+	const float y = app->GetScreenHeight() / 2.f - 40;
+	gd->DrawRectangle(camera, x, y, w, 20, 0xFFFF0000, true);
+	gd->DrawRectangle(camera, x, y, w_, 20, 0xFF00FF00, true);
+	gd->DrawRectangle(camera, x, y, w, 20, 0xFF000000, false);
 }
 
 void Demo::IBattleScene::Init()

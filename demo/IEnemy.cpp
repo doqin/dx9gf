@@ -72,6 +72,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
     auto healthText = std::to_wstring(currentHealth) + L"/" + std::to_wstring(totalHealth);
 
     fontSprite->Begin();
+	fontSprite->SetOutline(false);
     fontSprite->SetColor(0xFF000000);
     fontSprite->SetPosition(GetWorldX(), GetWorldY() - 48.f);
     fontSprite->SetText(std::move(healthText));
@@ -117,7 +118,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
         std::wstring statusText = statusName + L" (" + std::to_wstring(status.duration) + L")";
 
         fontSprite->SetColor(0xFFFFFF00);
-
+		fontSprite->SetOutline(true, 0xFF000000);
         fontSprite->SetPosition(GetWorldX() + statusOffsetX, GetWorldY() + statusOffsetY);
 
         fontSprite->SetText(std::move(statusText));

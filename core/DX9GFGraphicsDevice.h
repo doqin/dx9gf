@@ -41,8 +41,8 @@ namespace DX9GF {
 		HRESULT Present();
 		HRESULT IsValid();
 
-		void DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color);
-		void DrawLine(const DX9GF::Camera& camera, float x1, float y1, float x2, float y2, D3DCOLOR color);
+		void DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness = 1.0f);
+		void DrawLine(const DX9GF::Camera& camera, float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness = 1.0f);
 		void DrawRectangle(float x, float y, float width, float height, D3DCOLOR color, bool isFilled);
 		void DrawRectangle(const DX9GF::Camera& camera, float x, float y, float width, float height, D3DCOLOR color, bool isFilled);
 		void DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
