@@ -312,6 +312,9 @@
     <Image Include="savepoint-Sheet.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="arrow.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc">
