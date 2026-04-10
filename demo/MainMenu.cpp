@@ -62,6 +62,7 @@ namespace Demo
 	{
 
 		transformManager = std::make_shared<DX9GF::TransformManager>();
+		saveManager = std::make_shared<DX9GF::SaveManager>();
 
 		auto app = DX9GF::Application::GetInstance();
 		lastScreenWidth = app->GetScreenWidth();
@@ -112,13 +113,13 @@ namespace Demo
 
 		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 			auto app = DX9GF::Application::GetInstance();
-			auto world = new TutorialWorldScene(game, app->GetScreenWidth(), app->GetScreenHeight());
-
-			world->SetLoadSave(true);
-
+			auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
+			saveManager->Clear();
+			saveManager->Register(world);
 			game->GetSceneManager()->PushScene(world);
+			saveManager->Load("savegame.json");
 			game->GetSceneManager()->GoToNext();
-			});
+		});
 
 		//New Game Button
 		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
@@ -126,9 +127,10 @@ namespace Demo
 		newGameButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { 
 			std::remove("savegame.json");
 			auto app = DX9GF::Application::GetInstance();
-			game->GetSceneManager()->PushScene(
-				new TutorialWorldScene(game, app->GetScreenWidth(), app->GetScreenHeight())
-			);
+			auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
+			saveManager->Clear();
+			saveManager->Register(world);
+			game->GetSceneManager()->PushScene(world);
 			game->GetSceneManager()->GoToNext();
 		});
 		newGameButton->SetSpriteScale(2.f, 2.f);
@@ -177,6 +179,11 @@ namespace Demo
 
 	void MainMenu::Update(unsigned long long deltaTime)
 	{
+		auto [currW, currH] = camera.GetScreenResolution();
+		auto [lastWidth, lastHeight] = uiCamera.GetScreenResolution();
+		if (currW != lastWidth || currH != lastHeight) {
+			uiCamera.SetScreenResolution(currW, currH);
+		}
 		auto inpMan = DX9GF::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
@@ -199,7 +206,7 @@ namespace Demo
 			timer = 0;
 		}
 
-		UpdateLayout(currentWidth, currentHeight);
+		UpdateLayout(currW, currH);
 
 		for (auto& button : uiButtons)
 		{

@@ -11,12 +11,6 @@ void Demo::TutorialWorldScene::Init()
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
 	map->Create(transformManager, colliderManager, "./tutorial.tmx");
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
-	saveManager = std::make_shared<DX9GF::SaveManager>();
-	saveManager->Register(player.get());
-
-	if (shouldLoadSave) {
-		saveManager->Load("savegame.json");
-	}
 
 	savePoint = std::make_shared<SavePoint>(transformManager, 200.0f, 150.0f);
 	savePoint->Init(game->GetGraphicsDevice(), &camera, player, saveManager, font);
@@ -26,6 +20,11 @@ void Demo::TutorialWorldScene::Init()
 
 void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 {
+	auto [currentWidth, currentHeight] = camera.GetScreenResolution();
+	auto [lastWidth, lastHeight] = uiCamera.GetScreenResolution();
+	if (currentWidth != lastWidth || currentHeight != lastHeight) {
+		uiCamera.SetScreenResolution(currentWidth, currentHeight);
+	}
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
@@ -62,7 +61,31 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 			savePoint->Draw(camera, deltaTime);
 		}
 		player->Draw(deltaTime);
+		DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		gd->EndDraw();
 	}
 	gd->Present();
+}
+
+std::string Demo::TutorialWorldScene::GetSaveID() const
+{
+	return "TutorialWorldScene";
+}
+
+void Demo::TutorialWorldScene::GenerateSaveData(nlohmann::json& outData)
+{
+	player->GenerateSaveData(outData["player"]);
+	auto pos = camera.GetPosition();
+	outData["camera"] = {
+		{"x", pos.x},
+		{"y", pos.y},
+		{"zoom", camera.GetZoom()}
+	};
+}
+
+void Demo::TutorialWorldScene::RestoreSaveData(const nlohmann::json& inData)
+{
+	player->RestoreSaveData(inData["player"]);
+	camera.SetPosition(inData["camera"]["x"], inData["camera"]["y"]);
+	camera.SetZoom(inData["camera"]["zoom"]);
 }

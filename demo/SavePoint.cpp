@@ -16,13 +16,13 @@ namespace Demo {
         auto [x, y] = GetWorldPosition();
 
         btnYes = std::make_shared<Demo::TextButton>(
-            transformManager.lock(), x - 50.f, y - 10.f, 40.f, 20.f, "Co(Y)", font.get(),
+            transformManager.lock(), x - 50.f, y - 10.f, 30.f, 20.f, "Yes", font.get(),
             [](DX9GF::ITrigger* t) {}
         );
         btnYes->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
             if (auto smLock = this->saveManager.lock()) {
                 smLock->Save("savegame.json");
-                OutputDebugStringA("DA LUU GAME THANH CONG!\n");
+                OutputDebugStringA("Successfully saved!\n");
             }
             this->isSaveMenuOpen = false;
             });
@@ -31,7 +31,7 @@ namespace Demo {
         btnYes->Init(camera);
 
         btnNo = std::make_shared<Demo::TextButton>(
-            transformManager.lock(), x + 20.f, y - 10.f, 60.f, 20.f, "Khong(N)", font.get(),
+            transformManager.lock(), x + 20.f, y - 10.f, 30.f, 20.f, "No", font.get(),
             [](DX9GF::ITrigger* t) {}
         );
         btnNo->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
@@ -89,10 +89,21 @@ namespace Demo {
         if (fontSprite) {
             fontSprite->Begin();
             if (isSaveMenuOpen) {
-                if (gd) gd->DrawRectangle(camera, x - 120.f, y - 60.f, 240.f, 80.f, D3DXCOLOR(0, 0, 0, 0.9f), true);
+                const auto padding = 10.f;
+                const auto promptY = y - 40.f;
+                fontSprite->SetText(L"Do you want to save the game?");
+                fontSprite->SetPosition(x - fontSprite->GetWidth() / 2.f, promptY - fontSprite->GetHeight() / 2.f);
+                if (gd) gd->DrawRectangle(
+                    camera, 
+                    x - fontSprite->GetWidth() / 2.f - padding, 
+                    promptY - fontSprite->GetHeight() / 2.f - padding, 
+                    fontSprite->GetWidth() + 2 * padding, 
+                    fontSprite->GetHeight() + 2 * padding, 
+                    D3DXCOLOR(0, 0, 0, 0.9f), true
+                );
                 fontSprite->SetColor(0xFFFFFFFF);
-                fontSprite->SetPosition(x - 100.f, y - 40.f);
-                fontSprite->SetText(L"Ban co muon Luu Game?");
+                fontSprite->SetOutline(false);
+                
                 fontSprite->Draw(camera, deltaTime);
                 fontSprite->End();
 
@@ -100,9 +111,10 @@ namespace Demo {
                 btnNo->Draw(gd, deltaTime);
             }
             else if (isPlayerNear) {
-                fontSprite->SetColor(0xFF000000);
-                fontSprite->SetPosition(x - 60.f, y - 30.f);
-                fontSprite->SetText(L"Nhan E de Luu");
+                fontSprite->SetText(L"E");
+                fontSprite->SetColor(0xFFFFFFFF);
+                fontSprite->SetPosition(x - fontSprite->GetWidth() / 2.f, y - 30.f - fontSprite->GetHeight() / 2.f);
+                fontSprite->SetOutline(true, 0xFF000000);
                 fontSprite->Draw(camera, deltaTime);
                 fontSprite->End();
             }

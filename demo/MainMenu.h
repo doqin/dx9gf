@@ -13,6 +13,7 @@ namespace Demo
 	private:
 		Game* game;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		std::shared_ptr<DX9GF::SaveManager> saveManager;
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 		std::shared_ptr<DX9GF::StaticSprite> bgSprite;
