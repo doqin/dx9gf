@@ -223,6 +223,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SavePoint.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="SettingsScene.cpp" />
     <ClCompile Include="IShopScene.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="PopUpMessage.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SavePoint.h" />
     <ClInclude Include="SettingsManager.h" />
     <ClInclude Include="SettingsScene.h" />
     <ClInclude Include="IShopScene.h" />
