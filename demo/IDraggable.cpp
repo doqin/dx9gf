@@ -158,6 +158,14 @@ void Demo::DraggableManager::Draw(unsigned long long deltaTime)
 	for (auto& draggable : isDraggingDraggables) {
 		draggable->Draw(deltaTime);
 	}
+	while(drawBuffer.IsBusy()) {
+		drawBuffer.Update(deltaTime);
+	}
+}
+
+void Demo::DraggableManager::QueueDraw(std::shared_ptr<DX9GF::ICommand> cmd)
+{
+	drawBuffer.PushCommand(std::move(cmd));
 }
 
 void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)

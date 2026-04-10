@@ -75,6 +75,19 @@ size_t Demo::StrikeCard::GetCost() const
 	return 1;
 }
 
+std::wstring Demo::StrikeCard::GetDescription() const
+{
+	return L"Deal 5 damage to an enemy.";
+}
+
+std::wstring Demo::StrikeCard::GetInputsDescription() const
+{
+	if (enemyCard.lock()) {
+		return L"1/1 Enemy";
+	}
+	return L"0/1 Enemy";
+}
+
 size_t Demo::StrikeCard::GetWidth() const
 {
 	if (auto lock = enemyCard.lock()) {

@@ -12,6 +12,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 2; }
+		std::wstring GetDescription() const override { return L"Deal 12 damage to an enemy."; }
 
 		bool Execute() override {
 			if (isDone) return true;
@@ -34,6 +35,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
+		std::wstring GetDescription() const override { return L"Deal 3 damage to an enemy twice."; }
 
 		bool Execute() override {
 			if (isDone) return true;
@@ -62,6 +64,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 2; }
+		std::wstring GetDescription() const override { return L"Deal 4 damage to up to 2 enemies."; }
 
 		bool Execute() override {
 			if (isDone) return true;
@@ -82,6 +85,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 3; }
+		std::wstring GetDescription() const override { return L"Deal 6, 4, 2 damage to up to 3 enemies."; }
 
 		bool Execute() override {
 			if (isDone) return true;
@@ -105,6 +109,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
+		std::wstring GetDescription() const override { return L"Apply Poison 3 (2 dmg/turn) to an enemy."; }
 
 		bool Execute() override {
 			if (isDone) return true;
@@ -125,6 +130,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
+		std::wstring GetDescription() const override { return L"Apply Vulnerable 2 to an enemy."; }
 
 		bool Execute() override {
 			if (isDone) return true;
@@ -145,6 +151,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
+		std::wstring GetDescription() const override { return L"Apply Weak 2 to up to 2 enemies."; }
 
 		bool Execute() override {
 			if (isDone) return true;
@@ -165,6 +172,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 2; }
+		std::wstring GetDescription() const override { return L"Stun an enemy for 1 turn."; }
 
 		bool Execute() override {
 			if (isDone) return true;
