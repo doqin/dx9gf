@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Player.h"
 #include "resource.h"
-
+#include "DamageTextManager.h"
 std::string Demo::Player::GetSaveID() const {
 	return "Player_Data";
 }
@@ -260,6 +260,8 @@ bool Demo::Player::TakeDamage(float damage)
 	isInvincible = true;
 	timeSinceTurnedInvincible = 0.f;
 	if (health < 0) health = 0;
+	auto [x, y] = GetWorldPosition();
+	Demo::DamageTextManager::GetInstance()->Spawn(damage, x, y - 16.0f, Demo::TextType::TakeDamage); //-16.0f from y so the text pops up from the head
 	return IsDead();
 }
 

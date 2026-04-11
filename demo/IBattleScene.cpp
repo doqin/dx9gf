@@ -2,7 +2,7 @@
 #include "IBattleScene.h"
 #include <algorithm>
 #include <random>
-
+#include "DamageTextManager.h"
 namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
@@ -654,6 +654,7 @@ void Demo::IBattleScene::Init()
 	popUpMessage->Init(game->GetGraphicsDevice(), &camera);
 
 	transformManager->RebuildHierarchy();
+	DamageTextManager::GetInstance()->Init(this->game);
 }
 
 void Demo::IBattleScene::Update(unsigned long long deltaTime)
@@ -681,6 +682,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	default:
 		throw std::runtime_error("Unexpected state");
 	}
+	DamageTextManager::GetInstance()->Update(deltaTime);
 	transformManager->UpdateAll();
 	commandBuffer.Update(deltaTime);
 }
@@ -711,6 +713,7 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 			dynamic_pointer_cast<IDraggable>(card)->Draw(deltaTime);
 		}
 		popUpMessage->Draw(deltaTime);
+		DamageTextManager::GetInstance()->Draw(this->camera, deltaTime);
 		inpMan->DrawCursor(&camera, deltaTime);
 		gd->EndDraw();
 	}

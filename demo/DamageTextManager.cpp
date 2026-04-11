@@ -1,15 +1,32 @@
 #include "pch.h"
 #include "DamageTextManager.h"
+#include <sstream>
+#include <iomanip>
 namespace Demo
 {
 	const float DEFAULT_LIFETIME = 1500.0f;
 	const float FADE_OUT_TIME = 500.0f;
 
+	std::wstring FormatDamageNumber(float value)
+	{
+		std::wstringstream wss;
+
+		if (value == (int)value)
+		{
+			wss << (int)value;
+		}
+		else
+		{
+			wss << std::fixed << std::setprecision(1) << value;
+		}
+		return wss.str();
+	}
+
 	void DamageTextManager::Init(Game* gameContext)
 	{
 		this->game = gameContext;
 		//set font and size for damage text, should not use fontsize < 11
-		font = std::make_unique<DX9GF::Font>(game->GetGraphicsDevice(), L"Arcade Among 2 R46V", 12);
+		font = std::make_unique<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 12);
 		fontSprite = std::make_unique<DX9GF::FontSprite>(font.get());
 	}
 
@@ -21,7 +38,7 @@ namespace Demo
 		this->game = nullptr;
 	}
 
-	void DamageTextManager::Spawn(int damageValue, float x, float y, TextType type)
+	void DamageTextManager::Spawn(float damageValue, float x, float y, TextType type)
 	{
 		for (int i = 0; i < MAX_TEXTS; i++)
 		{
@@ -36,21 +53,21 @@ namespace Demo
 				switch (type)
 				{
 				case TextType::TakeDamage:
-					pool[i].displayText = L"-" + std::to_wstring(damageValue);
+					pool[i].displayText = L"-" + FormatDamageNumber(damageValue);
 					pool[i].displayColor = D3DCOLOR_ARGB(255, 255, 0, 0);
 					pool[i].velocityY = -0.05f;
 					pool[i].textSize = 1.0f;
 					break;
 
 				case TextType::Heal:
-					pool[i].displayText = L"+" + std::to_wstring(damageValue);
+					pool[i].displayText = L"+" + FormatDamageNumber(damageValue);
 					pool[i].displayColor = D3DCOLOR_ARGB(255, 0, 255, 0);
 					pool[i].velocityY = -0.02f;
 					pool[i].textSize = 1.0f;
 					break;
 
 				case TextType::Critical:
-					pool[i].displayText = L"-" + std::to_wstring(damageValue) + L"!";
+					pool[i].displayText = L"-" + FormatDamageNumber(damageValue) + L"!";
 					pool[i].displayColor = D3DCOLOR_ARGB(255, 255, 165, 0);
 					pool[i].velocityY = -0.08f;
 					pool[i].textSize = 1.5f;

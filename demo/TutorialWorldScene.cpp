@@ -1,8 +1,5 @@
 #include "pch.h"
 #include "TutorialWorldScene.h"
-//
-#include "DamageTextManager.h"
-//
 void Demo::TutorialWorldScene::Init()
 {
 	camera.SetZoom(2.0f);
@@ -18,10 +15,6 @@ void Demo::TutorialWorldScene::Init()
 	savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font);
 	savePoint->SetVisible(true);
 	transformManager->RebuildHierarchy();
-
-	//
-	Demo::DamageTextManager::GetInstance()->Init(this->game);
-	//
 }
 
 void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
@@ -55,27 +48,6 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 		transformManager->UpdateAll();
 		camera.Update();
 	}
-
-	//
-	if (inpMan->KeyDown(DIK_SPACE)) //press space to test
-	{
-		float spawnX = 200.0f;
-		float spawnY = 100.0f;
-
-		int randomDamage = rand() % 90 + 10;
-		Demo::DamageTextManager::GetInstance()->Spawn(randomDamage, spawnX, spawnY, Demo::TextType::TakeDamage);
-
-		randomDamage = rand() % 900 + 100;
-		Demo::DamageTextManager::GetInstance()->Spawn(randomDamage, spawnX, spawnY, Demo::TextType::Critical);
-
-		randomDamage = rand() % 90 + 10;
-		Demo::DamageTextManager::GetInstance()->Spawn(randomDamage, spawnX, spawnY, Demo::TextType::Heal);
-
-		Demo::DamageTextManager::GetInstance()->Spawn(0, spawnX, spawnY, Demo::TextType::Dodge);
-	}
-
-	Demo::DamageTextManager::GetInstance()->Update(deltaTime);
-	//
 }
 
 void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
@@ -88,11 +60,6 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 			savePoint->Draw(camera, deltaTime);
 		}
 		player->Draw(deltaTime);
-
-		//
-		Demo::DamageTextManager::GetInstance()->Draw(this->camera, deltaTime);
-		//
-
 		DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		gd->EndDraw();
 	}

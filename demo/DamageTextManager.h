@@ -50,7 +50,7 @@ namespace Demo
 		void Init(Game* gameContext);
 		void Release();
 		//use const and pass by ref to enhance perf 
-		void Spawn(int damageValue, float x, float y, TextType type);
+		void Spawn(float damageValue, float x, float y, TextType type);
 		void Update(unsigned long long deltaTime);
 		void Draw(DX9GF::Camera& camera, unsigned long long deltaTime);
 	};
