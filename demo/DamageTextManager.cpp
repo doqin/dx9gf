@@ -121,6 +121,7 @@ namespace Demo
 				D3DCOLOR finalColor = addColor | alpha;
 
 				fontSprite->SetColor(finalColor);
+				fontSprite->SetOutline(true, alpha);
 				fontSprite->SetText(std::wstring(pool[i].displayText));
 				fontSprite->SetPosition(pool[i].displayX, pool[i].displayY);
 				fontSprite->SetScale(pool[i].textSize, pool[i].textSize);
