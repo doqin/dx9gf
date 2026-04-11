@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "TutorialWorldScene.h"
-
 void Demo::TutorialWorldScene::Init()
 {
 	camera.SetZoom(2.0f);

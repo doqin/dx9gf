@@ -205,6 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CardShop.cpp" />
+    <ClCompile Include="DamageTextManager.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HandContainer.cpp" />
@@ -245,6 +246,7 @@
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
     <ClInclude Include="CardShop.h" />
+    <ClInclude Include="DamageTextManager.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="DialogueLine.h" />
     <ClInclude Include="EnemyCard.h" />
