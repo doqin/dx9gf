@@ -48,6 +48,8 @@ namespace Demo {
 		
 		int gold = 100;
 		std::vector<std::shared_ptr<ICard>> deck;
+
+		std::vector<std::shared_ptr<ICard>> inventoryCards;
 	public:
 		Player(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) { }
 		Player(
@@ -85,6 +87,10 @@ namespace Demo {
 		void AddGold(int amount) { gold += amount; }
 		void AddCardToDeck(std::shared_ptr<ICard> card) { deck.push_back(card); }
 		const std::vector<std::shared_ptr<ICard>>& GetDeck() const { return deck; }
+		void ClearDeck() { deck.clear(); }
+		const std::vector<std::shared_ptr<ICard>>& GetInventoryCards() const { return inventoryCards; }
+		void AddCardToInventory(std::shared_ptr<ICard> card) { inventoryCards.push_back(card); }
+		void ClearInventory() { inventoryCards.clear(); }
 		virtual std::string GetSaveID() const override;
 		virtual void GenerateSaveData(nlohmann::json& outData) override;
 		virtual void RestoreSaveData(const nlohmann::json& inData) override;

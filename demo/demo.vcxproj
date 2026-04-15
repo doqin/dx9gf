@@ -215,6 +215,7 @@
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IConversation.cpp" />
     <ClCompile Include="IDraggable.cpp" />
+    <ClCompile Include="InventoryMenu.cpp" />
     <ClCompile Include="IStatementCard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="IContainer.h" />
     <ClInclude Include="IConversation.h" />
     <ClInclude Include="IDraggable.h" />
+    <ClInclude Include="InventoryMenu.h" />
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="IEnemy.h" />
     <ClInclude Include="IExpressionCard.h" />

@@ -4,6 +4,8 @@
 #include "Game.h"
 #include "Player.h"
 #include "SavePoint.h"
+#include "InventoryMenu.h"
+#include "StrikeCard.h"
 
 namespace Demo {
 	class TutorialWorldScene : public DX9GF::IScene, public DX9GF::ISaveable {
@@ -11,6 +13,8 @@ namespace Demo {
 		DX9GF::Camera uiCamera;
 		std::shared_ptr<DX9GF::ColliderManager> colliderManager;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		std::shared_ptr<Demo::DraggableManager> draggableManager;
+		std::shared_ptr<InventoryMenu> inventoryMenu;
 		std::shared_ptr<DX9GF::SaveManager> saveManager;
 
 		std::shared_ptr<SavePoint> savePoint;
