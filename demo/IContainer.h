@@ -38,5 +38,8 @@ namespace Demo {
 		bool OnDrop(std::shared_ptr<IDraggable> other) override;
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
+		void AddChildProgrammatically(std::shared_ptr<IDraggable> child);
+		const std::vector<std::weak_ptr<IDraggable>>& GetChildren() const { return children; }
+		void ClearChildren();
 	};
 }

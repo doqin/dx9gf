@@ -14,6 +14,10 @@ void Demo::TutorialWorldScene::Init()
 	savePoint = std::make_shared<SavePoint>(transformManager, 200.0f, 150.0f);
 	savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font);
 	savePoint->SetVisible(true);
+
+	draggableManager = std::make_shared<Demo::DraggableManager>();
+	inventoryMenu = std::make_shared<InventoryMenu>(game, player, transformManager, draggableManager, &uiCamera, font.get());
+	inventoryMenu->Init();
 	transformManager->RebuildHierarchy();
 }
 
@@ -24,29 +28,49 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 	if (currentWidth != lastWidth || currentHeight != lastHeight) {
 		uiCamera.SetScreenResolution(currentWidth, currentHeight);
 	}
+
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
-	if (inpMan->KeyPress(DIK_ESCAPE)) {
-		auto sceMan = game->GetSceneManager();
-		sceMan->PopScene();   
-		sceMan->GoToPrevious();
-		return;
+
+	static float escCooldown = 0.0f;
+	if (escCooldown > 0) escCooldown -= deltaTime;
+
+	if (inpMan->KeyPress(DIK_ESCAPE) && escCooldown <= 0) {
+		if (inventoryMenu) inventoryMenu->Toggle();
+		escCooldown = 300.0f;
 	}
+
 	bool isGamePaused = false;
+
 	if (savePoint) {
 		savePoint->Update(deltaTime);
-
-		if (savePoint->IsMenuOpen()) {
-			isGamePaused = true;
-			inpMan->ReadMouse(deltaTime);
-			inpMan->ReadKeyboard(deltaTime);
-		}
+		if (savePoint->IsMenuOpen()) isGamePaused = true;
 	}
+
+	if (inventoryMenu && inventoryMenu->IsOpen()) {
+		isGamePaused = true;
+		inventoryMenu->Update(deltaTime);
+	}
+
 	if (!isGamePaused) {
 		player->Update(deltaTime);
-		transformManager->UpdateAll();
 		camera.Update();
+	}
+
+	transformManager->UpdateAll();
+
+
+	if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
+		draggableManager->Update(deltaTime);
+	}
+
+
+	if (inventoryMenu && inventoryMenu->IsPendingLeave()) {
+		auto sceMan = game->GetSceneManager();
+		sceMan->PopScene();
+		sceMan->GoToPrevious();
+		return;
 	}
 }
 
@@ -60,6 +84,10 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 			savePoint->Draw(camera, deltaTime);
 		}
 		player->Draw(deltaTime);
+		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
+		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
+			draggableManager->Draw(deltaTime);
+		}
 		DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		gd->EndDraw();
 	}

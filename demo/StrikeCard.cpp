@@ -57,6 +57,10 @@ void Demo::StrikeCard::Update(unsigned long long deltaTime)
 
 void Demo::StrikeCard::Draw(unsigned long long deltaTime)
 {
+	if (graphicsDevice && camera && dragAreaWidth > 0) {
+		graphicsDevice->DrawRectangle(*camera, GetWorldX(), GetWorldY(), dragAreaWidth, dragAreaHeight, 0xFFEEEEEE, true);
+		graphicsDevice->DrawRectangle(*camera, GetWorldX(), GetWorldY(), dragAreaWidth, dragAreaHeight, 0xFF000000, false);
+	}
 	IStatementCard::Draw(deltaTime);
 	if (!nameFont) {
 		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
