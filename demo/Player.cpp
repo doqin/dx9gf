@@ -1,6 +1,27 @@
 #include "pch.h"
 #include "Player.h"
 #include "resource.h"
+#include "DamageTextManager.h"
+std::string Demo::Player::GetSaveID() const {
+	return "Player_Data";
+}
+
+void Demo::Player::GenerateSaveData(nlohmann::json& outData) {
+	auto [x, y] = GetLocalPosition();
+
+	outData["x"] = x;
+	outData["y"] = y;
+}
+
+void Demo::Player::RestoreSaveData(const nlohmann::json& inData) {
+	auto [currentX, currentY] = GetLocalPosition();
+	float savedX = currentX, savedY = currentY;
+
+	if (inData.contains("x")) savedX = inData["x"];
+	if (inData.contains("y")) savedY = inData["y"];
+
+	SetLocalPosition(savedX, savedY);
+}
 
 Demo::Player::~Player() {
 	colliderManager->Remove(collider);
@@ -239,6 +260,8 @@ bool Demo::Player::TakeDamage(float damage)
 	isInvincible = true;
 	timeSinceTurnedInvincible = 0.f;
 	if (health < 0) health = 0;
+	auto [x, y] = GetWorldPosition();
+	Demo::DamageTextManager::GetInstance()->Spawn(damage, x, y - 16.0f, Demo::TextType::TakeDamage); //-16.0f from y so the text pops up from the head
 	return IsDead();
 }
 

@@ -4,7 +4,7 @@
 #include "ICard.h"
 
 namespace Demo {
-	class Player : public DX9GF::IGameObject {
+	class Player : public DX9GF::IGameObject, public DX9GF::ISaveable {
 	private:
 		enum class State {
 			Left,
@@ -85,5 +85,8 @@ namespace Demo {
 		void AddGold(int amount) { gold += amount; }
 		void AddCardToDeck(std::shared_ptr<ICard> card) { deck.push_back(card); }
 		const std::vector<std::shared_ptr<ICard>>& GetDeck() const { return deck; }
+		virtual std::string GetSaveID() const override;
+		virtual void GenerateSaveData(nlohmann::json& outData) override;
+		virtual void RestoreSaveData(const nlohmann::json& inData) override;
 	};
 }

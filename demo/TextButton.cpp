@@ -27,6 +27,12 @@ Demo::TextButton::TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
 		D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f)  // 3: DISABLED (slightly transparent)
 	};
 
+	this->hasOutline = false;
+	this->outlineThickness = 0.0f;
+	this->paddingX = 0.0f;
+	this->paddingY = 0.0f;
+	this->outlineColors = { D3DXCOLOR(0,0,0,1), D3DXCOLOR(0,0,0,1), D3DXCOLOR(0,0,0,1), D3DXCOLOR(0,0,0,0.5f) };
+
 	this->SetOnReleaseLeft(onClick);
 }
 
@@ -50,12 +56,30 @@ Demo::TextButton* Demo::TextButton::SetTextColors(DWORD idle, DWORD hover, DWORD
 	return this;
 }
 
+Demo::TextButton* Demo::TextButton::SetOutline(float thickness, D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled)
+{
+	this->hasOutline = true;
+	this->outlineThickness = thickness;
+	this->outlineColors[0] = idle;
+	this->outlineColors[1] = hover;
+	this->outlineColors[2] = click;
+	this->outlineColors[3] = disabled;
+	return this;
+}
+
+Demo::TextButton* Demo::TextButton::SetPadding(float px, float py)
+{
+	this->paddingX = px;
+	this->paddingY = py;
+	return this;
+}
+
 void Demo::TextButton::Init(DX9GF::Camera* cam)
 {
 	this->trigger = std::make_shared<DX9GF::RectangleTrigger>
 		(
 			this->GetTransformManager(), shared_from_this(),
-			this->width, this->height, 0, 0, 0, 1, 1
+			this->width + this->paddingX * 2, this->height + this->paddingY * 2, 0, 0, 0, 1, 1
 		);
 
 	//lock the trigger
@@ -83,11 +107,26 @@ void Demo::TextButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaT
 	auto currX = this->GetWorldX();
 	auto currY = this->GetWorldY();
 
+	if (hasOutline && gd && uiCamera) {
+		float outW = (this->width + paddingX * 2 + outlineThickness * 2) * GetWorldScaleX();
+		float outH = (this->height + paddingY * 2 + outlineThickness * 2) * GetWorldScaleY();
+		float offX = outlineThickness * GetWorldScaleX();
+		float offY = outlineThickness * GetWorldScaleY();
+
+		gd->DrawRectangle(
+			*uiCamera,
+			currX, currY, outW, outH,
+			0, 1, 1, offX, offY,
+			outlineColors[stateIndex],
+			true
+		);
+	}
+
 	////draw button's background
 	if (gd && uiCamera) {
 		gd->DrawRectangle(
 			*uiCamera,
-			currX, currY, this->width, this->height,
+			currX, currY, (this->width + paddingX * 2) * GetWorldScaleX(), (this->height + paddingY * 2) * GetWorldScaleY(),
 			0, 1, 1, 0, 0,
 			bgColors[stateIndex],
 			true
@@ -97,7 +136,8 @@ void Demo::TextButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaT
 	//draw button's text
 	if (fontSprite && uiCamera) {
 		fontSprite->Begin();
-		fontSprite->SetPosition(currX, currY);
+		fontSprite->SetScale(GetWorldScaleX(), GetWorldScaleY());
+		fontSprite->SetPosition(currX + paddingX * GetWorldScaleX(), currY + paddingY * GetWorldScaleY());
 		fontSprite->SetColor(textColors[stateIndex]);
 		fontSprite->SetText(std::wstring(this->wText));
 		fontSprite->Draw(*uiCamera, deltaTime);

@@ -91,4 +91,8 @@ namespace Demo {
 	void MultiTargetCard::ResetExecution() {
 		isDone = false;
 	}
+
+	std::wstring MultiTargetCard::GetInputsDescription() const {
+		return std::to_wstring(targets.size()) + L"/" + std::to_wstring(maxTargets) + L" Enemies";
+	}
 }

@@ -205,6 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CardShop.cpp" />
+    <ClCompile Include="DamageTextManager.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HandContainer.cpp" />
@@ -214,6 +215,7 @@
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IConversation.cpp" />
     <ClCompile Include="IDraggable.cpp" />
+    <ClCompile Include="IStatementCard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="MultiTargetCard.cpp" />
@@ -223,6 +225,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SavePoint.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="SettingsScene.cpp" />
     <ClCompile Include="IShopScene.cpp" />
@@ -243,6 +246,7 @@
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
     <ClInclude Include="CardShop.h" />
+    <ClInclude Include="DamageTextManager.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="DialogueLine.h" />
     <ClInclude Include="EnemyCard.h" />
@@ -266,6 +270,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="PopUpMessage.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SavePoint.h" />
     <ClInclude Include="SettingsManager.h" />
     <ClInclude Include="SettingsScene.h" />
     <ClInclude Include="IShopScene.h" />
@@ -296,6 +301,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="arrow.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="click.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -305,7 +313,13 @@
     <Image Include="grab.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="hitimpact-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="pointer.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="savepoint-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="test-background.png">

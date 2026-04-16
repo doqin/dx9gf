@@ -4,6 +4,8 @@
 #include "IconButton.h"
 #include "SettingsScene.h"
 #include "TutorialWorldScene.h"
+#include <fstream>
+#include <cstdio>
 
 namespace Demo
 {
@@ -60,6 +62,7 @@ namespace Demo
 	{
 
 		transformManager = std::make_shared<DX9GF::TransformManager>();
+		saveManager = std::make_shared<DX9GF::SaveManager>();
 
 		auto app = DX9GF::Application::GetInstance();
 		lastScreenWidth = app->GetScreenWidth();
@@ -75,16 +78,6 @@ namespace Demo
 		titleTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		titleTex->LoadTexture(IDB_PNG3);
 
-		//Load cursor textures
-		auto input = DX9GF::InputManager::GetInstance();
-		auto gd = game->GetGraphicsDevice();
-
-		//hotspot (hX, hY) must be multiplied by the scale factor
-		input->AddCursor(DX9GF::InputManager::CursorType::CURSOR, gd, L"cursor.png", 0.2f, 0.0f, 0.0f);
-		input->AddCursor(DX9GF::InputManager::CursorType::POINTER, gd, L"pointer.png", 0.2f, 0.0f, 0.0f);
-		input->AddCursor(DX9GF::InputManager::CursorType::CLICK, gd, L"click.png", 0.2f, 4.0f, 6.0f);
-		input->AddCursor(DX9GF::InputManager::CursorType::GRAB, gd, L"grab.png", 0.2f, 14.8f, 14.8);
-		input->AddCursor(DX9GF::InputManager::CursorType::TEXTSELECT, gd, L"text-select.png", 0.2f, 10.0f, 16.0f);
 
 		// Sprites
 		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
@@ -95,18 +88,39 @@ namespace Demo
 		//Continue Button
 		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 4);
 		continueButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(144, 96, 48, 16, 4));
-		continueButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
+		//continueButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 		continueButton->SetSpriteScale(2.f, 2.f);
-		continueButton->SetState(IButton::ButtonState::DISABLED);
+		/*continueButton->SetState(IButton::ButtonState::DISABLED);*/
+
+		std::ifstream f("savegame.json");
+		if (f.good()) {
+			continueButton->SetState(IButton::ButtonState::IDLE);
+		}
+		else {
+			continueButton->SetState(IButton::ButtonState::DISABLED);
+		}
+		f.close();
+
+		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			auto app = DX9GF::Application::GetInstance();
+			auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
+			saveManager->Clear();
+			saveManager->Register(world);
+			game->GetSceneManager()->PushScene(world);
+			saveManager->Load("savegame.json");
+			game->GetSceneManager()->GoToNext();
+		});
 
 		//New Game Button
 		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
 		newGameButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(144, 48, 48, 16, 3));
 		newGameButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { 
+			std::remove("savegame.json");
 			auto app = DX9GF::Application::GetInstance();
-			game->GetSceneManager()->PushScene(
-				new TutorialWorldScene(game, app->GetScreenWidth(), app->GetScreenHeight())
-			);
+			auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
+			saveManager->Clear();
+			saveManager->Register(world);
+			game->GetSceneManager()->PushScene(world);
 			game->GetSceneManager()->GoToNext();
 		});
 		newGameButton->SetSpriteScale(2.f, 2.f);
@@ -155,6 +169,11 @@ namespace Demo
 
 	void MainMenu::Update(unsigned long long deltaTime)
 	{
+		auto [currW, currH] = camera.GetScreenResolution();
+		auto [lastWidth, lastHeight] = uiCamera.GetScreenResolution();
+		if (currW != lastWidth || currH != lastHeight) {
+			uiCamera.SetScreenResolution(currW, currH);
+		}
 		auto inpMan = DX9GF::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
@@ -163,7 +182,21 @@ namespace Demo
 		int currentWidth = app->GetScreenWidth();
 		int currentHeight = app->GetScreenHeight();
 
-		UpdateLayout(currentWidth, currentHeight);
+		static float timer = 0;
+		timer += deltaTime;
+		if (timer > 0) {
+			std::ifstream f("savegame.json");
+			if (f.good()) {
+				continueButton->SetState(IButton::ButtonState::IDLE);
+			}
+			else {
+				continueButton->SetState(IButton::ButtonState::DISABLED);
+			}
+			f.close();
+			timer = 0;
+		}
+
+		UpdateLayout(currW, currH);
 
 		for (auto& button : uiButtons)
 		{

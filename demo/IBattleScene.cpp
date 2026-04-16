@@ -2,7 +2,7 @@
 #include "IBattleScene.h"
 #include <algorithm>
 #include <random>
-
+#include "DamageTextManager.h"
 namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
@@ -21,9 +21,12 @@ namespace {
 
 void Demo::IBattleScene::StartBattle()
 {
-    for (auto& card : drawPile) {
+	for (auto& card : drawPile) {
 		HidePileCard(card);
 	}
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::shuffle(drawPile.begin(), drawPile.end(), gen);
 	currentTurn = 1;
 	DrawCards(5);
 }
@@ -262,72 +265,86 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	if (!mainBlockCard->IsExecuting()) {
 		// When finished executing attack
 		if (isExecutingAttacks) {
-			MoveExecutedHandCardsToPlayedPile();
-			MoveHandCardsToDiscardPile();
-			// Remove unused enemy cards or enemy cards of dead enemies
-			for (size_t i = 0; i < enemyCards.size(); ++i) {
-				auto& enemyCard = enemyCards[i];
-				if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
-					if (auto manager = enemyCard->GetDraggableManager().lock()) {
-						manager->Remove(enemyCard);
+			isTransitioning = true;
+			isExecutingAttacks = false;
+			std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
+				std::make_shared<DX9GF::DelayCommand>(1.0f),
+				std::make_shared<DX9GF::CustomCommand>([this, deltaTime](std::function<void(void)> markFinished) {
+					this->MoveExecutedHandCardsToPlayedPile();
+					this->MoveHandCardsToDiscardPile();
+					// Remove unused enemy cards or enemy cards of dead enemies
+					for (size_t i = 0; i < this->enemyCards.size(); ++i) {
+						auto& enemyCard = this->enemyCards[i];
+						if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
+							if (auto manager = enemyCard->GetDraggableManager().lock()) {
+								manager->Remove(enemyCard);
+							}
+							this->enemyCards.erase(this->enemyCards.begin() + i);
+							--i;
+						}
 					}
-					enemyCards.erase(enemyCards.begin() + i);
-					--i;
-				}
-			}
-			// Remove dead enemies
-			for (size_t i = 0; i < enemies.size(); ++i) {
-				if (enemies[i]->IsDead()) {
-					enemies.erase(enemies.begin() + i);
-					--i;
-				}
-			}
-			state = State::EnemyAttack;
-			QueueEnemyLayoutTransition(State::EnemyAttack);
-			for (auto& enemy : enemies) {
-				enemy->SetState(true);
-			}
-
-			for (auto& enemy : enemies) {
-				bool isStunned = enemy->HasStatus(StatusType::STUN);
-				enemy->TickStatuses();
-				if (enemy->IsDead()) {
-					continue;
-				}
-				if (isStunned) {
-					continue;
-				}
-				enemy->StartAttack(battlePlayer);
-			}
-
-			for (size_t i = 0; i < enemyCards.size(); ++i) {
-				auto& enemyCard = enemyCards[i];
-				if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
-					if (auto manager = enemyCard->GetDraggableManager().lock()) {
-						manager->Remove(enemyCard);
+					// Remove dead enemies
+					for (size_t i = 0; i < this->enemies.size(); ++i) {
+						if (this->enemies[i]->IsDead()) {
+							this->enemies.erase(this->enemies.begin() + i);
+							--i;
+						}
 					}
-					enemyCards.erase(enemyCards.begin() + i);
-					--i;
-				}
-			}
-			for (size_t i = 0; i < enemies.size(); ++i) {
-				if (enemies[i]->IsDead()) {
-					enemies.erase(enemies.begin() + i);
-					--i;
-				}
-			}
-			battlePlayer->SetLocalPosition(0, 0);
-			EnemyAttackUpdate(deltaTime);
+					this->state = State::EnemyAttack;
+					this->QueueEnemyLayoutTransition(State::EnemyAttack);
+					for (auto& enemy : this->enemies) {
+						enemy->SetState(true);
+					}
+
+					for (auto& enemy : this->enemies) {
+						bool isStunned = enemy->HasStatus(StatusType::STUN);
+						enemy->TickStatuses();
+						if (enemy->IsDead()) {
+							continue;
+						}
+						if (isStunned) {
+							continue;
+						}
+						enemy->StartAttack(this->battlePlayer);
+					}
+
+					for (size_t i = 0; i < this->enemyCards.size(); ++i) {
+						auto& enemyCard = this->enemyCards[i];
+						if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
+							if (auto manager = enemyCard->GetDraggableManager().lock()) {
+								manager->Remove(enemyCard);
+							}
+							this->enemyCards.erase(this->enemyCards.begin() + i);
+							--i;
+						}
+					}
+					for (size_t i = 0; i < this->enemies.size(); ++i) {
+						if (this->enemies[i]->IsDead()) {
+							this->enemies.erase(this->enemies.begin() + i);
+							--i;
+						}
+					}
+					this->battlePlayer->SetLocalPosition(0, 0);
+					this->EnemyAttackUpdate(deltaTime);
+					this->isTransitioning = false;
+					markFinished();
+				})
+			};
+			commandBuffer.PushCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
 			return;
 		}
-		backButton->Update(deltaTime);
-		executeButton->Update(deltaTime);
+		if (!isTransitioning) {
+			backButton->Update(deltaTime);
+			executeButton->Update(deltaTime);
+		}
 	}
 	for (auto& enemy : enemies) {
 		enemy->Update(deltaTime);
 	}
-	draggableManager->Update(deltaTime);
-	RemoveEnemyCardsInRemoveArea();
+	if (!isTransitioning) {
+		draggableManager->Update(deltaTime);
+		RemoveEnemyCardsInRemoveArea();
+	}
 }
 
 void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
@@ -383,7 +400,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 	hourglassIcon->SetPosition(executeButton->GetWorldX(), executeButton->GetWorldY() - 36.f);
 	hourglassIcon->Draw(camera, deltaTime);
 	hourglassIcon->End();
-	if (!mainBlockCard->IsExecuting()) {
+	if (!mainBlockCard->IsExecuting() && !isTransitioning) {
 		backButton->Draw(game->GetGraphicsDevice(), deltaTime);
 		executeButton->Draw(game->GetGraphicsDevice(), deltaTime);
 	}
@@ -395,8 +412,14 @@ void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 	battlePlayer->Draw(deltaTime);
 	auto app = DX9GF::Application::GetInstance();
 	auto gd = game->GetGraphicsDevice();
-	gd->DrawRectangle(camera, -battlePlayer->GetMaxHealth() / 2, app->GetScreenHeight() / 2.f - 40, battlePlayer->GetMaxHealth(), 20, 0xFFFF0000, true);
-	gd->DrawRectangle(camera, -battlePlayer->GetMaxHealth() / 2, app->GetScreenHeight() / 2.f - 40, battlePlayer->GetHealth(), 20, 0xFF00FF00, true);
+	const float spacing = 5.f;
+	const float w = battlePlayer->GetMaxHealth() * spacing;
+	const float w_ = battlePlayer->GetHealth() * spacing;
+	const float x = -w / 2;
+	const float y = app->GetScreenHeight() / 2.f - 40;
+	gd->DrawRectangle(camera, x, y, w, 20, 0xFFFF0000, true);
+	gd->DrawRectangle(camera, x, y, w_, 20, 0xFF00FF00, true);
+	gd->DrawRectangle(camera, x, y, w, 20, 0xFF000000, false);
 }
 
 void Demo::IBattleScene::Init()
@@ -631,6 +654,7 @@ void Demo::IBattleScene::Init()
 	popUpMessage->Init(game->GetGraphicsDevice(), &camera);
 
 	transformManager->RebuildHierarchy();
+	DamageTextManager::GetInstance()->Init(this->game);
 }
 
 void Demo::IBattleScene::Update(unsigned long long deltaTime)
@@ -658,6 +682,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	default:
 		throw std::runtime_error("Unexpected state");
 	}
+	DamageTextManager::GetInstance()->Update(deltaTime);
 	transformManager->UpdateAll();
 	commandBuffer.Update(deltaTime);
 }
@@ -665,6 +690,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
+	auto inpMan = DX9GF::InputManager::GetInstance();
 	gd->Clear(0xFFFFFFFF);
 	if (SUCCEEDED(gd->BeginDraw())) {
 		for (auto& enemy : enemies) {
@@ -687,6 +713,8 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 			dynamic_pointer_cast<IDraggable>(card)->Draw(deltaTime);
 		}
 		popUpMessage->Draw(deltaTime);
+		DamageTextManager::GetInstance()->Draw(this->camera, deltaTime);
+		inpMan->DrawCursor(&camera, deltaTime);
 		gd->EndDraw();
 	}
 	gd->Present();
