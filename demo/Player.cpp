@@ -2,6 +2,33 @@
 #include "Player.h"
 #include "resource.h"
 #include "DamageTextManager.h"
+#include "AdvancedCards.h"
+#include "StrikeCard.h"
+#include "MainBlockCard.h"
+
+#include "IDraggable.h"
+
+std::shared_ptr<Demo::ICard> Demo::ICard::CreateCard(const std::string& id, std::weak_ptr<DX9GF::TransformManager> transformManager, std::shared_ptr<DraggableManager> draggableManager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
+	std::shared_ptr<ICard> card;
+	if (id == "HeavyStrikeCard") card = std::make_shared<HeavyStrikeCard>(transformManager);
+	else if (id == "TwinStrikeCard") card = std::make_shared<TwinStrikeCard>(transformManager);
+	else if (id == "CleaveCard") card = std::make_shared<CleaveCard>(transformManager);
+	else if (id == "ChainLightningCard") card = std::make_shared<ChainLightningCard>(transformManager);
+	else if (id == "PoisonCard") card = std::make_shared<PoisonCard>(transformManager);
+	else if (id == "VulnerableCard") card = std::make_shared<VulnerableCard>(transformManager);
+	else if (id == "WeaknessCard") card = std::make_shared<WeaknessCard>(transformManager);
+	else if (id == "StunCard") card = std::make_shared<StunCard>(transformManager);
+	else if (id == "StrikeCard") card = std::make_shared<StrikeCard>(transformManager);
+	else if (id == "MainBlockCard") card = std::make_shared<MainBlockCard>(transformManager);
+
+	if (card && draggableManager && graphicsDevice && camera) {
+		if (auto dragCard = std::dynamic_pointer_cast<IDraggable>(card)) {
+			dragCard->Init(draggableManager, graphicsDevice, camera);
+		}
+	}
+	return card;
+}
+
 std::string Demo::Player::GetSaveID() const {
 	return "Player_Data";
 }
@@ -11,6 +38,17 @@ void Demo::Player::GenerateSaveData(nlohmann::json& outData) {
 
 	outData["x"] = x;
 	outData["y"] = y;
+	outData["health"] = health;
+	outData["gold"] = gold;
+
+	outData["deck"] = nlohmann::json::array();
+	for (auto& card : deck) {
+		outData["deck"].push_back(card);
+	}
+	outData["inventoryCards"] = nlohmann::json::array();
+	for (auto& card : inventoryCards) {
+		outData["inventoryCards"].push_back(card);
+	}
 }
 
 void Demo::Player::RestoreSaveData(const nlohmann::json& inData) {
@@ -19,6 +57,21 @@ void Demo::Player::RestoreSaveData(const nlohmann::json& inData) {
 
 	if (inData.contains("x")) savedX = inData["x"];
 	if (inData.contains("y")) savedY = inData["y"];
+	if (inData.contains("health")) health = inData["health"];
+	if (inData.contains("gold")) gold = inData["gold"];
+
+	if (inData.contains("deck")) {
+		deck.clear();
+		for (auto& item : inData["deck"]) {
+			deck.push_back(item.get<std::string>());
+		}
+	}
+	if (inData.contains("inventoryCards")) {
+		inventoryCards.clear();
+		for (auto& item : inData["inventoryCards"]) {
+			inventoryCards.push_back(item.get<std::string>());
+		}
+	}
 
 	SetLocalPosition(savedX, savedY);
 }
@@ -65,6 +118,7 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 	// Create collider
 	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 8, 4, 0, 14);
 	collider->SetOriginCenter();
+	inventoryCards = { "StrikeCard", "StrikeCard", "StrikeCard" };
 	this->colliderManager->Add(collider);
 }
 

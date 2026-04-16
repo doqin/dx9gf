@@ -60,13 +60,13 @@ namespace Demo {
 	{
 		isOpen = !isOpen;
 		if (isOpen) {
-			for (auto& card : player->GetDeck()) {
-				auto dragCard = std::dynamic_pointer_cast<IDraggable>(card);
+			for (auto& cardId : player->GetDeck()) {
+				auto dragCard = std::dynamic_pointer_cast<IDraggable>(ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), uiCamera));
 				if (dragCard) deckContainer->AddChildProgrammatically(dragCard);
 			}
 
-			for (auto& card : player->GetInventoryCards()) {
-				auto dragCard = std::dynamic_pointer_cast<IDraggable>(card);
+			for (auto& cardId : player->GetInventoryCards()) {
+				auto dragCard = std::dynamic_pointer_cast<IDraggable>(ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), uiCamera));
 				if (dragCard) inventoryContainer->AddChildProgrammatically(dragCard);
 			}
 		}
@@ -76,8 +76,9 @@ namespace Demo {
 				if (auto child = weakChild.lock()) {
 					child->DetachParent();
 					if (auto card = std::dynamic_pointer_cast<ICard>(child)) {
-						player->AddCardToDeck(card);
+						player->AddCardToDeck(card->GetSaveID());
 					}
+					draggableManager->Remove(child);
 				}
 			}
 			deckContainer->ClearChildren();
@@ -87,8 +88,9 @@ namespace Demo {
 				if (auto child = weakChild.lock()) {
 					child->DetachParent();
 					if (auto card = std::dynamic_pointer_cast<ICard>(child)) {
-						player->AddCardToInventory(card);
+						player->AddCardToInventory(card->GetSaveID());
 					}
+					draggableManager->Remove(child);
 				}
 			}
 			inventoryContainer->ClearChildren();

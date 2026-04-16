@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "tutorial.tmx",
+    "activeFile": "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/map.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -19,11 +19,33 @@
         "C:/Users/Admin/source/repos/doqin/directx9-game-framework/example/Resources/test.tsx": {
             "scaleInDock": 1
         },
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/First Asset pack.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/XP.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/icon.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/map.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 11,
+            "viewCenter": {
+                "x": -631.6666666666666,
+                "y": 219.66666666666663
+            }
+        },
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/tutorial.tsx": {
+            "scaleInDock": 2
+        },
         "tutorial.tmx": {
             "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 250,
+                "x": 212.83333333333331,
                 "y": 192.83333333333331
             }
         },
@@ -38,11 +60,16 @@
     "map.tileWidth": 16,
     "openFiles": [
         "tutorial.tsx",
-        "tutorial.tmx"
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/map.tmx",
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/First Asset pack.tsx",
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/XP.tsx"
     ],
     "project": "tutorial.tiled-project",
     "recentFiles": [
         "tutorial.tsx",
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/XP.tsx",
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/First Asset pack.tsx",
+        "C:/Users/Azalea/source/repos/doqin/dx9gf/example/Resources/map.tmx",
         "tutorial.tmx",
         "C:/Users/Admin/source/repos/doqin/directx9-game-framework/example/Resources/example.tmx"
     ],

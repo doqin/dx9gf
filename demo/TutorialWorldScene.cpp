@@ -16,17 +16,6 @@ void Demo::TutorialWorldScene::Init()
 	savePoint->SetVisible(true);
 
 	draggableManager = std::make_shared<Demo::DraggableManager>();
-	auto card1 = std::make_shared<Demo::StrikeCard>(transformManager, 150, 40);
-	card1->Init(draggableManager, game->GetGraphicsDevice(), &uiCamera);
-	player->AddCardToDeck(card1);
-
-	auto card2 = std::make_shared<Demo::StrikeCard>(transformManager, 150, 40);
-	card2->Init(draggableManager, game->GetGraphicsDevice(), &uiCamera);
-	player->AddCardToDeck(card2);
-
-	auto card3 = std::make_shared<Demo::StrikeCard>(transformManager, 150, 40);
-	card3->Init(draggableManager, game->GetGraphicsDevice(), &uiCamera);
-	player->AddCardToInventory(card3);
 	inventoryMenu = std::make_shared<InventoryMenu>(game, player, transformManager, draggableManager, &uiCamera, font.get());
 	inventoryMenu->Init();
 	transformManager->RebuildHierarchy();

@@ -47,9 +47,9 @@ namespace Demo {
 		DX9GF::Camera* camera = nullptr;
 		
 		int gold = 100;
-		std::vector<std::shared_ptr<ICard>> deck;
+		std::vector<std::string> deck;
 
-		std::vector<std::shared_ptr<ICard>> inventoryCards;
+		std::vector<std::string> inventoryCards;
 	public:
 		Player(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) { }
 		Player(
@@ -85,11 +85,11 @@ namespace Demo {
 
 		int GetGold() const { return gold; }
 		void AddGold(int amount) { gold += amount; }
-		void AddCardToDeck(std::shared_ptr<ICard> card) { deck.push_back(card); }
-		const std::vector<std::shared_ptr<ICard>>& GetDeck() const { return deck; }
+		void AddCardToDeck(const std::string& card) { deck.push_back(card); }
+		const std::vector<std::string>& GetDeck() const { return deck; }
 		void ClearDeck() { deck.clear(); }
-		const std::vector<std::shared_ptr<ICard>>& GetInventoryCards() const { return inventoryCards; }
-		void AddCardToInventory(std::shared_ptr<ICard> card) { inventoryCards.push_back(card); }
+		const std::vector<std::string>& GetInventoryCards() const { return inventoryCards; }
+		void AddCardToInventory(const std::string& card) { inventoryCards.push_back(card); }
 		void ClearInventory() { inventoryCards.clear(); }
 		virtual std::string GetSaveID() const override;
 		virtual void GenerateSaveData(nlohmann::json& outData) override;
