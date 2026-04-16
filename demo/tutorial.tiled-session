@@ -43,8 +43,8 @@
             "scale": 4,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 240,
-                "y": 160.125
+                "x": 256,
+                "y": -0.125
             }
         },
         "tutorial.tsx": {
@@ -62,8 +62,8 @@
     ],
     "project": "tutorial.tiled-project",
     "recentFiles": [
-        "tutorial.tmx",
         "tutorial.tsx",
+        "tutorial.tmx",
         "C:/Users/Admin/source/repos/doqin/directx9-game-framework/example/Resources/example.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
