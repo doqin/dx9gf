@@ -150,6 +150,15 @@ namespace Demo {
 		btnOptions->Draw(gd, deltaTime);
 		btnLeaveGame->Draw(gd, deltaTime);
 
+		fontSprite->Begin();
+		fontSprite->SetScale(1.5f, 1.5f);
+		fontSprite->SetColor(0xFFFFFF00);
+		fontSprite->SetPosition(leftEdge + 30.0f, topEdge + 30.0f);
+
+		fontSprite->SetText(L"Current Gold: " + std::to_wstring(player->GetGold()));
+		fontSprite->Draw(*uiCamera, deltaTime);
+		fontSprite->End();
+
 		if (currentTab == Tab::ITEMS) {
 			fontSprite->Begin();
 			fontSprite->SetScale(2.0f, 2.0f);
