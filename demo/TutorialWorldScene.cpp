@@ -5,7 +5,8 @@ void Demo::TutorialWorldScene::Init()
 	camera.SetZoom(2.0f);
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
-	player = std::make_shared<Player>(transformManager);
+	player = std::make_shared<Player>(transformManager, 248, 184);
+	camera.SetPosition(248, 184);
 	player->Init(game->GetGraphicsDevice(), colliderManager.get(), &camera);
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
 	map->Create(transformManager, colliderManager, "./tutorial.tmx");

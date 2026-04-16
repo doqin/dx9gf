@@ -13,8 +13,8 @@ namespace DX9GF {
 		~Texture();
 		void CreatePlainTexture(D3DCOLOR color, UINT width, UINT height);
 		void SetColor(D3DCOLOR color);
-		void LoadTexture(std::wstring filePath, UINT width = D3DX_DEFAULT, UINT height = D3DX_DEFAULT);
-		void LoadTexture(int resourceId, UINT width = D3DX_DEFAULT, UINT height = D3DX_DEFAULT);
+		void LoadTexture(std::wstring filePath, UINT width = D3DX_DEFAULT_NONPOW2, UINT height = D3DX_DEFAULT_NONPOW2);
+		void LoadTexture(int resourceId, UINT width = D3DX_DEFAULT_NONPOW2, UINT height = D3DX_DEFAULT_NONPOW2);
 		IDirect3DTexture9* GetRawTexture();
 		UINT GetWidth() const;
 		UINT GetHeight() const;
