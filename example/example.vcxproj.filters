@@ -117,6 +117,9 @@
     <None Include="Resources\tutorial.tsx">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resources\First Asset pack.tsx">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="example.rc">

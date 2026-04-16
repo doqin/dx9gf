@@ -16,11 +16,8 @@ void DX9GF::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 	const auto& textures = map->textures;
 	assert(layers[layerIndex]->getType() == tmx::Layer::Type::Tile);
 	const auto& layer = layers[layerIndex]->getLayerAs<tmx::TileLayer>();
-	const auto mapSize = tmxMap.getTileCount(); // the size of the map in number of tiles per axis
 	const auto gridSize = tmxMap.getTileSize(); // returns the size of a grid
 	const auto& tileSets = tmxMap.getTilesets();
-	const auto tilesView = layer.getTiles() | std::views::transform([](const tmx::TileLayer::Tile& tile) { return tile.ID; });
-	const std::vector<std::uint32_t> tileIDs(tilesView.begin(), tilesView.end());
 	const auto tintColour = layer.getTintColour();
 	D3DXCOLOR vertexColour(
 		static_cast<float>(tintColour.r) / 0xFF, 
@@ -28,6 +25,19 @@ void DX9GF::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 		static_cast<float>(tintColour.b) / 0xFF,
 		static_cast<float>(tintColour.a) / 0xFF
 	);
+
+	std::vector<tmx::TileLayer::Chunk> chunks;
+	if (tmxMap.isInfinite()) {
+		chunks = layer.getChunks();
+	} else {
+		tmx::TileLayer::Chunk chunk;
+		chunk.position = { 0, 0 };
+		auto mapSize = tmxMap.getTileCount();
+		chunk.size = { static_cast<int>(mapSize.x), static_cast<int>(mapSize.y) };
+		chunk.tiles = layer.getTiles();
+		chunks.push_back(chunk);
+	}
+
 	for (auto i = 0u; i < tileSets.size(); ++i) {
 		const auto& tileSet = tileSets[i];
 		const auto& [textureSizeX, textureSizeY] = textures[i]->GetSize();
@@ -38,30 +48,34 @@ void DX9GF::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 		const float uNorm = static_cast<float>(tileSetTileSize.x) / textureSizeX;
 		const float vNorm = static_cast<float>(tileSetTileSize.y) / textureSizeY;
 		std::vector<TileVertex> vertices;
-		for (auto y = 0u; y < mapSize.y; ++y) {
-			for (auto x = 0u; x < mapSize.x; ++x) { // Fixed: was ++y, should be ++x
-				const auto idx = y * mapSize.x + x;
-				if (!IsTileIDInTileSet(idx, tileIDs, tileSet)) continue;
-				// texture coords
-				auto idIndex = (tileIDs[idx] - tileSet.getFirstGID());
-				const auto tileX = idIndex % tileCountX;
-				const auto tileY = idIndex / tileCountX;
-				float u = static_cast<float>(tileMargin + tileX * (tileSetTileSize.x + tileSpacing)) / textureSizeX;
-				float v = static_cast<float>(tileMargin + tileY * (tileSetTileSize.y + tileSpacing)) / textureSizeY;
-				// vertex pos
-				const float tilePosX = static_cast<float>(x) * gridSize.x;
-				const float tilePosY = (static_cast<float>(y) * gridSize.y);
-				// first triangle
-				// top left, top right, bottom left
-				vertices.push_back({ .x = tilePosX, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u, .v = v }); 
-				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v }); 
-				vertices.push_back({ .x = tilePosX, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u, .v = v + vNorm });
-				
-				// second triangle
-				// top right, bottom right, bottom left
-				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v }); 
-				vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v + vNorm }); 
-				vertices.push_back({ .x = tilePosX, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u, .v = v + vNorm });
+		for (const auto& chunk : chunks) {
+			const auto tilesView = chunk.tiles | std::views::transform([](const tmx::TileLayer::Tile& tile) { return tile.ID; });
+			const std::vector<std::uint32_t> tileIDs(tilesView.begin(), tilesView.end());
+			for (int y = 0; y < chunk.size.y; ++y) {
+				for (int x = 0; x < chunk.size.x; ++x) { // Fixed: was ++y, should be ++x
+					const auto idx = y * chunk.size.x + x;
+					if (!IsTileIDInTileSet(idx, tileIDs, tileSet)) continue;
+					// texture coords
+					auto idIndex = (tileIDs[idx] - tileSet.getFirstGID());
+					const auto tileX = idIndex % tileCountX;
+					const auto tileY = idIndex / tileCountX;
+					float u = static_cast<float>(tileMargin + tileX * (tileSetTileSize.x + tileSpacing)) / textureSizeX;
+					float v = static_cast<float>(tileMargin + tileY * (tileSetTileSize.y + tileSpacing)) / textureSizeY;
+					// vertex pos
+					const float tilePosX = static_cast<float>(x + chunk.position.x) * gridSize.x;
+					const float tilePosY = (static_cast<float>(y + chunk.position.y) * gridSize.y);
+					// first triangle
+					// top left, top right, bottom left
+					vertices.push_back({ .x = tilePosX, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u, .v = v }); 
+					vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v }); 
+					vertices.push_back({ .x = tilePosX, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u, .v = v + vNorm });
+
+					// second triangle
+					// top right, bottom right, bottom left
+					vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v }); 
+					vertices.push_back({ .x = tilePosX + tileSetTileSize.x, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u + uNorm, .v = v + vNorm }); 
+					vertices.push_back({ .x = tilePosX, .y = tilePosY + tileSetTileSize.y, .z = .0f, .color = vertexColour, .u = u, .v = v + vNorm });
+				}
 			}
 		}
 		if (!vertices.empty()) {

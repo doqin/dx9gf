@@ -185,7 +185,9 @@
     <Image Include="Resources\First Asset pack.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
-    <Image Include="Resources\icon.jpg" />
+    <Image Include="Resources\icon.jpg">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="Resources\mario_full.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -203,7 +205,12 @@
     <None Include="Resources\example.tmx">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="Resources\icon.tsx" />
+    <None Include="Resources\First Asset pack.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Resources\icon.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="Resources\map.tmx">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -214,8 +221,12 @@
     <None Include="Resources\tutorial.aseprite">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="Resources\tutorial.tsx" />
-    <None Include="Resources\XP.tsx" />
+    <None Include="Resources\tutorial.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Resources\XP.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="example.rc" />
