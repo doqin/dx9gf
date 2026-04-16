@@ -23,6 +23,7 @@ namespace DX9GF {
 		static void DrawGrid(GraphicsDevice* graphicsDevice, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY, D3DCOLOR lineColor);
 		static void DrawGrid(GraphicsDevice* graphicsDevice, const Camera& camera, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY, D3DCOLOR lineColor);
 
+		//static void DrawAxis(GraphicsDevice* graphicsDevice, const Camera& camera, Application* app, int offsetX, int offsetY, int sreenWidth, int screenHeight, int spacingX, int spacingY,int range, int step, D3DCOLOR color = 0xFFFFFFFF);
 		static void DrawAxis(const Camera& camera, int range, int step, D3DCOLOR color = 0xFFFFFFFF);
 
 		static bool drawGrid;

@@ -13,7 +13,7 @@ void MainScene::Init()
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	colliderManager = std::make_shared<DX9GF::ColliderManager>();
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
-	map->Create(transformManager, colliderManager, "./Resources/example.tmx");
+	map->Create(transformManager, colliderManager, "./Resources/map.tmx");
 	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
 	whiteTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	whiteTexture->CreatePlainTexture(0xFFFFFFFF, 500, 500);
@@ -23,6 +23,13 @@ void MainScene::Init()
 	fontSpriteArial->SetOrigin(16, 16);
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
+
+	DX9GF::Font::AddFont(L"./Resources/detemination.ttf");
+	fontdetemination = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Determination", 32);
+	fontSpritedetemination = std::make_shared<DX9GF::FontSprite>(fontdetemination.get());
+	fontSpritedetemination->SetOrigin(16, 16);
+	fontSpritedetemination->SetPosition(64, -128);
+	fontSpritedetemination->SetText(L"Hello world!!!!!");
 
 	DX9GF::Debug::Init(game->GetGraphicsDevice());
 
@@ -244,6 +251,11 @@ void MainScene::Draw(unsigned long long deltaTime)
 		fontSpriteArial->Begin();
 		fontSpriteArial->Draw(camera, deltaTime);
 		fontSpriteArial->End();
+
+		fontSpritedetemination->Begin();
+		fontSpritedetemination->Draw(camera, deltaTime);
+		fontSpritedetemination->End();
+
 		dev->EndDraw();
 	}
 
