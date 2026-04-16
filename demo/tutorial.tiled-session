@@ -20,11 +20,11 @@
             "scaleInDock": 1
         },
         "tutorial.tmx": {
-            "scale": 3,
-            "selectedLayer": 0,
+            "scale": 4,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 250,
-                "y": 192.83333333333331
+                "x": 283.75,
+                "y": 170.125
             }
         },
         "tutorial.tsx": {
