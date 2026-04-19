@@ -2,7 +2,8 @@
 #include "DX9GF.h"
 #include "DX9GFExtras.h"
 #include "ICard.h"
-
+#include "GameItems.h"
+#include "DamageTextManager.h"
 namespace Demo {
 	class Player : public DX9GF::IGameObject, public DX9GF::ISaveable {
 	private:
@@ -45,13 +46,15 @@ namespace Demo {
 		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
 		DX9GF::ColliderManager* colliderManager = nullptr;
 		DX9GF::Camera* camera = nullptr;
-		
+
 		int gold = 100;
 		std::vector<std::string> deck;
 
 		std::vector<std::string> inventoryCards;
+		ItemInventory inventoryItems;
+		std::vector<ActiveBuff> activeBuffs;
 	public:
-		Player(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) { }
+		Player(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) {}
 		Player(
 			std::weak_ptr<DX9GF::TransformManager> transformManager,
 			float x,
@@ -59,7 +62,7 @@ namespace Demo {
 			float rotation = 0,
 			float scaleX = 1,
 			float scaleY = 1
-		) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY) { }
+		) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY) {}
 		Player(
 			std::weak_ptr<DX9GF::TransformManager> transformManager,
 			std::weak_ptr<DX9GF::IGameObject> parent,
@@ -68,7 +71,7 @@ namespace Demo {
 			float rotation = 0,
 			float scaleX = 1,
 			float scaleY = 1
-		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY) { }
+		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY) {}
 		~Player();
 		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderManager* colliderManager, DX9GF::Camera* camera);
 		void Update(unsigned long long deltaTime);
@@ -77,6 +80,7 @@ namespace Demo {
 		float GetVelocity() const;
 		float SetVelocity(float velocity);
 		bool TakeDamage(float damage);
+		void Heal(float value);
 		bool IsDead() const;
 		void SetHealth(float hp);
 		float GetMaxHealth() const;
@@ -89,10 +93,17 @@ namespace Demo {
 		const std::vector<std::string>& GetDeck() const { return deck; }
 		void ClearDeck() { deck.clear(); }
 		const std::vector<std::string>& GetInventoryCards() const { return inventoryCards; }
+		ItemInventory& GetInventoryItems() { return inventoryItems; }
+		const std::vector<ActiveBuff>& GetActiveBuffs() { return activeBuffs; }
 		void AddCardToInventory(const std::string& card) { inventoryCards.push_back(card); }
 		void ClearInventory() { inventoryCards.clear(); }
 		virtual std::string GetSaveID() const override;
 		virtual void GenerateSaveData(nlohmann::json& outData) override;
 		virtual void RestoreSaveData(const nlohmann::json& inData) override;
+
+		void GiveTestItems();
+		float GetBuffStat(ItemBuffType targetType) const;
+		void UpdateBuffs();
+		void AddActiveBuff(const ActiveBuff& buff);
 	};
 }

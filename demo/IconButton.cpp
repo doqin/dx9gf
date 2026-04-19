@@ -56,18 +56,16 @@ void Demo::IconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaT
 	//prevent from crashing
 	if (!this->sprite || !this->uiCamera || buttonRects.empty()) return;
 
-	//Mapping Trạng thái sang Index mong muốn
+	//mapping index
 	int expectedIndex = 0;
 
 	if (this->currentState == ButtonState::HOVER) expectedIndex = 1;
 	else if (this->currentState == ButtonState::CLICKED || this->currentState == ButtonState::LISTENING) expectedIndex = 2;
 	else if (this->currentState == ButtonState::DISABLED) expectedIndex = 3;
 
-	// BƯỚC 2: Chốt chặn an toàn (Kẹp giá trị)
-	// Dù index mong muốn là 2 hay 3, nếu nút này chỉ có 2 frame, nó sẽ bị ép về 1.
+	//force min index when expectedIndex > frame counts
 	int finalIndex = std::min(expectedIndex, this->frameCount - 1);
 
-	// BƯỚC 3: Vẽ
 	this->sprite->SetSrcRect(this->buttonRects[finalIndex]);
 	this->sprite->Begin();
 	this->sprite->SetPosition(GetWorldX(), GetWorldY());

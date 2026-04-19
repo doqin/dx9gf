@@ -1,8 +1,9 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "IBattleScene.h"
 #include <algorithm>
 #include <random>
 #include "DamageTextManager.h"
+#include "GameItems.h"
 namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
@@ -101,7 +102,7 @@ void Demo::IBattleScene::MovePlayedPileToDiscardPileIfNeeded()
 		--i;
 	}
 	for (auto& card : playedPile) {
-        HidePileCard(card);
+		HidePileCard(card);
 		discardPile.push_back(card);
 	}
 	playedPile.clear();
@@ -132,6 +133,7 @@ void Demo::IBattleScene::MoveHandCardsToDiscardPile()
 
 void Demo::IBattleScene::BeginNextTurn()
 {
+	battlePlayer->UpdateBuffs();
 	++currentTurn;
 	MovePlayedPileToDiscardPileIfNeeded();
 	DrawCards(5);
@@ -210,7 +212,91 @@ void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
 			return true;
 		}
 		return false;
-	}), enemyCards.end());
+		}), enemyCards.end());
+}
+
+void Demo::IBattleScene::RefreshItemMenu()
+{
+	buffItems.clear();
+	auto& inventory = player->GetInventoryItems().GetSlots();
+
+	const auto rawItemWidth = 23.0f;
+	const auto rawItemHeight = 35.0f;
+	const auto rawMenuBgWidth = 192.0f;
+	const auto rawMenuBgHeight = 128.0f;
+
+	//actual size (scaled)
+	float itemWidth = rawItemWidth * 2.0f;
+	float itemHeight = rawItemHeight * 2.0f;
+	float menuBgWidth = rawMenuBgWidth * 3.0f;
+	float menuBgHeight = rawMenuBgHeight * 3.0f;
+
+	float paddingX = 20.0f;
+	float paddingY = 30.0f;
+
+	float halfBgWidth = (menuBgWidth) / 2.0f;
+	float halfBgHeight = (menuBgHeight) / 2.0f;
+
+	int columns = std::floor((menuBgWidth - paddingX) / (itemWidth + paddingX));
+	if (columns < 1) columns = 1;
+
+	float totalGridWidth = (columns * itemWidth) + ((columns - 1) * paddingX);
+	float startX = -halfBgWidth + (menuBgWidth - totalGridWidth) / 2.0f;
+	float startY = -halfBgHeight + paddingY;
+
+	int displayIndex = 0;
+	for (int i = 0; i < inventory.size(); i++)
+	{
+		auto slot = inventory[i];
+
+		if (slot.quantity <= 0) continue;
+
+		const auto* blueprint = Demo::ItemData::GetInstance()->GetItemBlueprint(slot.itemID);
+		if (!blueprint) continue;
+
+		int col = displayIndex % columns;
+		int row = displayIndex / columns;
+
+		float baseX = startX + col * (itemWidth + paddingX);
+		float baseY = startY + row * (itemHeight + paddingY);
+
+		auto btn = std::make_shared<IconButton>(transformManager, 0, 0, itemWidth, itemHeight, tempTex, 1);
+		btn->Init(&camera);
+		btn->SetSpriteScale(2.f, 2.f);
+		btn->SetLocalPosition(baseX, baseY);
+		btn->Update(0);
+
+		btn->SetSpriteRects({ blueprint->GetItemRect() });
+
+		btn->SetOnReleaseLeft([&, slot, blueprint](DX9GF::ITrigger* thisObj) {
+			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&, slot, blueprint](std::function<void(void)> markFinished) {
+
+				if (player->GetInventoryItems().ConsumeItem(slot.itemID)) {
+
+					for (auto& buff : blueprint->GetBuffs()) {
+						if (buff.type == Demo::ItemBuffType::HealHP) {
+							battlePlayer->Heal(buff.value);
+						}
+						else {
+							battlePlayer->AddActiveBuff(buff);
+						}
+					}
+
+					std::wstring msg = L"Used " + blueprint->GetName() + L"!";
+					popUpMessage->QueueMessage(&commandBuffer, msg);
+
+					this->RefreshItemMenu();
+					this->state = State::EnemyAttack;
+				}
+				markFinished();
+				}));
+			});
+
+		buffItems.push_back(btn);
+		displayIndex++;
+	}
+	transformManager->RebuildHierarchy();
+	transformManager->UpdateAll();
 }
 
 void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
@@ -226,7 +312,7 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 	actionButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing, buttonY);
 	itemsButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing + actionButton->GetWidth() + spacing, buttonY);
 	fleeButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing + actionButton->GetWidth() + spacing + itemsButton->GetWidth() + spacing, buttonY);
-	
+
 	fleeButton->Update(deltaTime);
 	itemsButton->Update(deltaTime);
 	actionButton->Update(deltaTime);
@@ -239,7 +325,7 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 {
 	auto app = DX9GF::Application::GetInstance();
-    const float screenWidth = static_cast<float>(app->GetScreenWidth());
+	const float screenWidth = static_cast<float>(app->GetScreenWidth());
 	const float screenHeight = static_cast<float>(app->GetScreenHeight());
 	handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 20.f);
 	usedEnergy = 0;
@@ -251,7 +337,7 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 		}
 		usedEnergy += card->GetCost();
 	}
-    const float buttonY = screenHeight / 2.f - 20 - attackButton->GetHeight();
+	const float buttonY = screenHeight / 2.f - 20 - attackButton->GetHeight();
 	const float sidePadding = 20.f;
 	const float leftX = -screenWidth / 2.f + sidePadding;
 	const float executeX = leftX + backButton->GetWidth() + sidePadding;
@@ -347,6 +433,27 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	}
 }
 
+void Demo::IBattleScene::PlayerOpenItemsUpdate(unsigned long long deltaTime)
+{
+	//Calculate the coordinates to display the close button exactly in the top-right corner of the menu - fixed size
+	const auto rawMenuBgWidth = 192.0f;
+	const auto rawMenuBgHeight = 128.0f;
+	float menuBgWidth = rawMenuBgWidth * 3.0f;
+	float menuBgHeight = rawMenuBgHeight * 3.0f;
+	float halfBgWidth = (menuBgWidth) / 2.0f;
+	float halfBgHeight = (menuBgHeight) / 2.0f;
+
+	float closeX = halfBgWidth - closeItemMenuButton->GetWidth();
+	float closeY = -halfBgHeight;
+
+	closeItemMenuButton->SetLocalPosition(closeX, closeY);
+	closeItemMenuButton->Update(deltaTime);
+
+	for (auto& btn : buffItems) {
+		btn->Update(deltaTime);
+	}
+}
+
 void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 {
 	battlePlayer->Update(deltaTime);
@@ -407,6 +514,42 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 	draggableManager->Draw(deltaTime);
 }
 
+void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
+{
+	itemMenuBackground->Begin();
+	itemMenuBackground->Draw(camera, deltaTime);
+	itemMenuBackground->End();
+
+	closeItemMenuButton->Draw(game->GetGraphicsDevice(), deltaTime);
+
+	for (auto& btn : buffItems) 
+	{
+		btn->Draw(game->GetGraphicsDevice(), deltaTime);
+	}
+
+	auto& inventory = player->GetInventoryItems().GetSlots();
+
+	fontSprite->Begin();
+	int displayIndex = 0;
+	for (int i = 0; i < inventory.size(); i++) {
+		if (inventory[i].quantity <= 0) continue;
+
+		auto btn = buffItems[displayIndex];
+		float textX = btn->GetWorldX()+ 15.0f;
+		float textY = btn->GetWorldY() + 70.0f;
+
+		fontSprite->SetPosition(textX, textY);
+
+		//draw item's quantity below iconbutton
+		fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
+		fontSprite->Draw(camera, deltaTime);
+
+		displayIndex++;
+	}
+	fontSprite->End();
+
+}
+
 void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 {
 	battlePlayer->Draw(deltaTime);
@@ -428,6 +571,8 @@ void Demo::IBattleScene::Init()
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+	ItemData::GetInstance()->LoadData();
+	player->GiveTestItems();
 	// Setup player
 	battlePlayer = std::make_shared<Player>(transformManager);
 	battlePlayer->Init(game->GetGraphicsDevice(), &colliderManager, &camera);
@@ -438,7 +583,8 @@ void Demo::IBattleScene::Init()
 	// Initialize texture sheet
 	uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	uiSheetTex->LoadTexture(L"ui.png");
-
+	tempTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	tempTex->LoadTexture(L"TempTex.png");
 	// Create buttons
 	const auto buttonWidth = 96;
 	const auto buttonHeight = 32;
@@ -452,27 +598,27 @@ void Demo::IBattleScene::Init()
 			markFinished();
 			}));
 		isExecutingAttacks = false;
-	});
+		});
 	attackButton->SetSpriteRects({
 		{
-			.left=0,
-			.top=48,
-			.right=48,
-			.bottom=64
+			.left = 0,
+			.top = 48,
+			.right = 48,
+			.bottom = 64
 		},
 		{
-			.left=0,
-			.top=64,
-			.right=48,
-			.bottom=80
+			.left = 0,
+			.top = 64,
+			.right = 48,
+			.bottom = 80
 		},
 		{
-			.left=0,
-			.top=80,
-			.right=48,
-			.bottom=96
+			.left = 0,
+			.top = 80,
+			.right = 48,
+			.bottom = 96
 		}
-	});
+		});
 	attackButton->SetSpriteScale(2.f, 2.f);
 	actionButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	actionButton->SetSpriteRects({
@@ -494,10 +640,11 @@ void Demo::IBattleScene::Init()
 			.right = 96,
 			.bottom = 96
 		}
-	});
+		});
 	actionButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-	});
+		});
 	actionButton->SetSpriteScale(2.f, 2.f);
+
 	itemsButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	itemsButton->SetSpriteRects({
 		{
@@ -518,9 +665,15 @@ void Demo::IBattleScene::Init()
 			.right = 48,
 			.bottom = 144
 		}
-	});
+		});
 	itemsButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-	});
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+			this->RefreshItemMenu();
+			this->state = State::PlayerOpenItems;
+			//turn off volume or play sfx volume when open a menu here
+			markFinished();
+			}));
+		});
 	itemsButton->SetSpriteScale(2.f, 2.f);
 	fleeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	fleeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
@@ -530,8 +683,8 @@ void Demo::IBattleScene::Init()
 			sceMan->PopScene();
 			sceMan->GoToPrevious();
 			markFinished();
-		}));
-	});
+			}));
+		});
 	fleeButton->SetSpriteRects({
 		{
 			.left = 48,
@@ -551,7 +704,7 @@ void Demo::IBattleScene::Init()
 			.right = 96,
 			.bottom = 144
 		}
-	});
+		});
 	fleeButton->SetSpriteScale(2.f, 2.f);
 	backButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	backButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
@@ -562,49 +715,49 @@ void Demo::IBattleScene::Init()
 			}
 			markFinished();
 			}));
-	});
+		});
 	backButton->SetSpriteRects({
 		{
-			.left=96,
-			.top=48,
-			.right=144, 
-			.bottom=64
+			.left = 96,
+			.top = 48,
+			.right = 144,
+			.bottom = 64
 		},
 		{
-			.left=96,
-			.top=64,
-			.right=144, 
-			.bottom=80
+			.left = 96,
+			.top = 64,
+			.right = 144,
+			.bottom = 80
 		},
 		{
-			.left=96,
-			.top=80,
-			.right=144,
-			.bottom=96
+			.left = 96,
+			.top = 80,
+			.right = 144,
+			.bottom = 96
 		}
-	});
+		});
 	backButton->SetSpriteScale(2.f, 2.f);
-    executeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
+	executeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	executeButton->SetSpriteRects({
 		{
-			.left=96,
-			.top=96,
-			.right=144,
-			.bottom=112
+			.left = 96,
+			.top = 96,
+			.right = 144,
+			.bottom = 112
 		},
 		{
-			.left=96,
-			.top=112,
-			.right=144,
-			.bottom=128
+			.left = 96,
+			.top = 112,
+			.right = 144,
+			.bottom = 128
 		},
 		{
-			.left=96,
-			.top=128,
-			.right=144,
-			.bottom=144
+			.left = 96,
+			.top = 128,
+			.right = 144,
+			.bottom = 144
 		}
-	});
+		});
 	executeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
 		if (usedEnergy > energy) {
 			popUpMessage->QueueMessage(&commandBuffer, L"Not enough energy");
@@ -613,8 +766,39 @@ void Demo::IBattleScene::Init()
 			isExecutingAttacks = true;
 			mainBlockCard->StartExecution();
 		}
-	});
+		});
 	executeButton->SetSpriteScale(2.f, 2.f);
+
+	//temporary copy backbutton texture
+	closeItemMenuButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
+	closeItemMenuButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+			this->state = State::PlayerStandBy;
+			markFinished();
+			}));
+		});
+	closeItemMenuButton->SetSpriteRects({
+		{
+			.left = 96,
+			.top = 48,
+			.right = 144,
+			.bottom = 64
+		},
+		{
+			.left = 96,
+			.top = 64,
+			.right = 144,
+			.bottom = 80
+		},
+		{
+			.left = 96,
+			.top = 80,
+			.right = 144,
+			.bottom = 96
+		}
+		});
+	closeItemMenuButton->SetSpriteScale(2.f, 2.f);
+
 	// Init buttons
 	attackButton->Init(&camera);
 	actionButton->Init(&camera);
@@ -622,26 +806,37 @@ void Demo::IBattleScene::Init()
 	fleeButton->Init(&camera);
 	backButton->Init(&camera);
 	executeButton->Init(&camera);
+	closeItemMenuButton->Init(&camera);
 
 	// Init sprite
 	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 	fontSprite->SetColor(0xFF000000);
 	energyIcon = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
 	energyIcon->SetSrcRect({
-		.left=96,
-		.top=0,
-		.right=112,
-		.bottom=16
-	});
+		.left = 96,
+		.top = 0,
+		.right = 112,
+		.bottom = 16
+		});
 	energyIcon->SetScale(2.f);
 	hourglassIcon = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
 	hourglassIcon->SetSrcRect({
-		.left=112,
-		.top=0,
-		.right=128,
-		.bottom=16
-	});
+		.left = 112,
+		.top = 0,
+		.right = 128,
+		.bottom = 16
+		});
 	hourglassIcon->SetScale(2.f);
+
+
+	itemMenuBackground = std::make_shared<DX9GF::StaticSprite>(tempTex.get());
+	itemMenuBackground->SetSrcRect({
+		.left = 312,
+		.top = 0,
+		.right = 504,
+		.bottom = 128 });
+	itemMenuBackground->SetOrigin(95.5f, 63.5f);
+	itemMenuBackground->SetScale(3.0f, 3.0f);
 
 	// Init draggables
 	mainBlockCard = std::make_shared<MainBlockCard>(transformManager, -100.f, -140.f);
@@ -662,7 +857,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
-    if (!enemyLayoutInitialized || lastEnemyLayoutState != state) {
+	if (!enemyLayoutInitialized || lastEnemyLayoutState != state) {
 		if (state == State::PlayerStandBy || state == State::PlayerAttack) {
 			QueueEnemyLayoutTransition(state);
 			lastEnemyLayoutState = state;
@@ -675,6 +870,9 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 		break;
 	case State::PlayerAttack:
 		PlayerAttackUpdate(deltaTime);
+		break;
+	case State::PlayerOpenItems:
+		PlayerOpenItemsUpdate(deltaTime);
 		break;
 	case State::EnemyAttack:
 		EnemyAttackUpdate(deltaTime);
@@ -702,6 +900,9 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 			break;
 		case State::PlayerAttack:
 			PlayerAttackDraw(deltaTime);
+			break;
+		case State::PlayerOpenItems:
+			PlayerOpenItemsDraw(deltaTime);
 			break;
 		case State::EnemyAttack:
 			EnemyAttackDraw(deltaTime);
