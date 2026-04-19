@@ -343,3 +343,61 @@ std::weak_ptr<DX9GF::RectangleCollider> Demo::Player::GetCollider()
 {
 	return collider;
 }
+
+void Demo::Player::Heal(float value)
+{
+	if (IsDead()) return;
+	health += value;
+	if (health > MAX_HEALTH) health = MAX_HEALTH;
+}
+
+void Demo::Player::GiveTestItems()
+{
+	//10 becuz LoadData func load 10 items
+	inventoryItems.InitFixedInventory(10);
+
+	inventoryItems.AddItem(0, 5);
+	inventoryItems.AddItem(1, 3);
+	inventoryItems.AddItem(2, 2);
+	inventoryItems.AddItem(3, 1);
+	inventoryItems.AddItem(4, 1);
+	inventoryItems.AddItem(5, 1);
+	inventoryItems.AddItem(6, 1);
+	inventoryItems.AddItem(7, 1);
+	inventoryItems.AddItem(8, 1);
+	inventoryItems.AddItem(9, 1);
+}
+
+float Demo::Player::GetBuffStat(ItemBuffType targetType) const
+{
+	float val = 0;
+	for (const auto& buff : activeBuffs)
+	{
+		if (buff.type == targetType)
+		{
+			val += buff.value;
+		}
+	}
+	return val;
+}
+void Demo::Player::UpdateBuffs()
+{
+	for (int i = activeBuffs.size() - 1; i >= 0; i--)
+	{
+		if (activeBuffs[i].isNewlyAdded)
+		{
+			activeBuffs[i].isNewlyAdded = false;
+			continue;
+		}
+
+		activeBuffs[i].turnsLeft--;
+
+		if (activeBuffs[i].turnsLeft <= 0)
+		{
+			activeBuffs.erase(activeBuffs.begin() + i);
+		}
+	}
+}
+void Demo::Player::AddActiveBuff(const ActiveBuff& buff) {
+	activeBuffs.push_back(buff);
+}

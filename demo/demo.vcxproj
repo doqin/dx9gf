@@ -208,6 +208,7 @@
     <ClCompile Include="DamageTextManager.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameItems.cpp" />
     <ClCompile Include="HandContainer.cpp" />
     <ClCompile Include="IBattleScene.cpp" />
     <ClCompile Include="IButton.cpp" />
@@ -252,6 +253,7 @@
     <ClInclude Include="DialogueLine.h" />
     <ClInclude Include="EnemyCard.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameItems.h" />
     <ClInclude Include="HandContainer.h" />
     <ClInclude Include="IBattleScene.h" />
     <ClInclude Include="IBlockCard.h" />
@@ -324,6 +326,7 @@
     <Image Include="savepoint-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="TempTex.png" />
     <Image Include="test-background.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -354,9 +357,6 @@
     <ClInclude Include="TextButton.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="ui-pack-2.bmp">
-      <DeploymentContent>true</DeploymentContent>
-    </Image>
     <Image Include="ui-pack.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
