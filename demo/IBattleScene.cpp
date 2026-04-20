@@ -18,6 +18,25 @@ namespace {
 		}
 		card->SetLocalPosition(HiddenPileX, HiddenPileY);
 	}
+
+	constexpr float RAW_ITEM_W = 23.0f;
+	constexpr float RAW_ITEM_H = 35.0f;
+	constexpr float RAW_BG_W = 192.0f;
+	constexpr float RAW_BG_H = 128.0f;
+
+	constexpr float MENU_SCALE = 3.0f;
+
+	constexpr float ITEM_W = RAW_ITEM_W * MENU_SCALE;
+	constexpr float ITEM_H = RAW_ITEM_H * MENU_SCALE;
+	constexpr float BG_W = RAW_BG_W * MENU_SCALE;
+	constexpr float BG_H = RAW_BG_H * MENU_SCALE;
+
+	constexpr float HALF_BG_W = BG_W / 2.0f;
+	constexpr float HALF_BG_H = BG_H / 2.0f;
+
+	constexpr float PADDING_X = 20.0f;
+	constexpr float PADDING_Y = 30.0f;
+
 }
 
 void Demo::IBattleScene::StartBattle()
@@ -48,6 +67,7 @@ void Demo::IBattleScene::DrawCards(size_t count)
 		}
 		auto card = drawPile.back();
 		drawPile.pop_back();
+		card->SetOwner(battlePlayer.get());
 		dynamic_pointer_cast<IDraggable>(card)->DetachParent();
 		y += 30;
 		std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
@@ -220,29 +240,12 @@ void Demo::IBattleScene::RefreshItemMenu()
 	buffItems.clear();
 	auto& inventory = player->GetInventoryItems().GetSlots();
 
-	const auto rawItemWidth = 23.0f;
-	const auto rawItemHeight = 35.0f;
-	const auto rawMenuBgWidth = 192.0f;
-	const auto rawMenuBgHeight = 128.0f;
-
-	//actual size (scaled)
-	float itemWidth = rawItemWidth * 2.0f;
-	float itemHeight = rawItemHeight * 2.0f;
-	float menuBgWidth = rawMenuBgWidth * 3.0f;
-	float menuBgHeight = rawMenuBgHeight * 3.0f;
-
-	float paddingX = 20.0f;
-	float paddingY = 30.0f;
-
-	float halfBgWidth = (menuBgWidth) / 2.0f;
-	float halfBgHeight = (menuBgHeight) / 2.0f;
-
-	int columns = std::floor((menuBgWidth - paddingX) / (itemWidth + paddingX));
+	int columns = std::floor((BG_W- PADDING_X) / (ITEM_W + PADDING_X));
 	if (columns < 1) columns = 1;
 
-	float totalGridWidth = (columns * itemWidth) + ((columns - 1) * paddingX);
-	float startX = -halfBgWidth + (menuBgWidth - totalGridWidth) / 2.0f;
-	float startY = -halfBgHeight + paddingY;
+	float totalGridWidth = (columns * ITEM_W) + ((columns - 1) * PADDING_X);
+	float startX = -HALF_BG_W + (BG_W - totalGridWidth) / 2.0f;
+	float startY = -HALF_BG_H + PADDING_Y;
 
 	int displayIndex = 0;
 	for (int i = 0; i < inventory.size(); i++)
@@ -257,12 +260,12 @@ void Demo::IBattleScene::RefreshItemMenu()
 		int col = displayIndex % columns;
 		int row = displayIndex / columns;
 
-		float baseX = startX + col * (itemWidth + paddingX);
-		float baseY = startY + row * (itemHeight + paddingY);
+		float baseX = startX + col * (ITEM_W + PADDING_X);
+		float baseY = startY + row * (ITEM_H + PADDING_Y);
 
-		auto btn = std::make_shared<IconButton>(transformManager, 0, 0, itemWidth, itemHeight, tempTex, 1);
+		auto btn = std::make_shared<IconButton>(transformManager, 0, 0, ITEM_W, ITEM_H, tempTex, 1);
 		btn->Init(&camera);
-		btn->SetSpriteScale(2.f, 2.f);
+		btn->SetSpriteScale(MENU_SCALE, MENU_SCALE);
 		btn->SetLocalPosition(baseX, baseY);
 		btn->Update(0);
 
@@ -286,6 +289,7 @@ void Demo::IBattleScene::RefreshItemMenu()
 					popUpMessage->QueueMessage(&commandBuffer, msg);
 
 					this->RefreshItemMenu();
+					this->MoveHandCardsToDiscardPile();
 					this->state = State::EnemyAttack;
 				}
 				markFinished();
@@ -435,16 +439,9 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 
 void Demo::IBattleScene::PlayerOpenItemsUpdate(unsigned long long deltaTime)
 {
-	//Calculate the coordinates to display the close button exactly in the top-right corner of the menu - fixed size
-	const auto rawMenuBgWidth = 192.0f;
-	const auto rawMenuBgHeight = 128.0f;
-	float menuBgWidth = rawMenuBgWidth * 3.0f;
-	float menuBgHeight = rawMenuBgHeight * 3.0f;
-	float halfBgWidth = (menuBgWidth) / 2.0f;
-	float halfBgHeight = (menuBgHeight) / 2.0f;
 
-	float closeX = halfBgWidth - closeItemMenuButton->GetWidth();
-	float closeY = -halfBgHeight;
+	float closeX = HALF_BG_W - closeItemMenuButton->GetWidth();
+	float closeY = -HALF_BG_H;
 
 	closeItemMenuButton->SetLocalPosition(closeX, closeY);
 	closeItemMenuButton->Update(deltaTime);
@@ -522,32 +519,50 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 
 	closeItemMenuButton->Draw(game->GetGraphicsDevice(), deltaTime);
 
-	for (auto& btn : buffItems) 
-	{
-		btn->Draw(game->GetGraphicsDevice(), deltaTime);
-	}
-
 	auto& inventory = player->GetInventoryItems().GetSlots();
+	std::wstring hoverDescription = L"";
 
 	fontSprite->Begin();
+
 	int displayIndex = 0;
 	for (int i = 0; i < inventory.size(); i++) {
+
 		if (inventory[i].quantity <= 0) continue;
 
 		auto btn = buffItems[displayIndex];
-		float textX = btn->GetWorldX()+ 15.0f;
-		float textY = btn->GetWorldY() + 70.0f;
+
+		btn->Draw(game->GetGraphicsDevice(), deltaTime);
+
+		float textX = btn->GetWorldX() + (ITEM_W / 2.0f) - 10.0f;
+		float textY = btn->GetWorldY() + ITEM_H + 5.0f;
 
 		fontSprite->SetPosition(textX, textY);
-
-		//draw item's quantity below iconbutton
 		fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
 		fontSprite->Draw(camera, deltaTime);
 
+		if (btn->GetTrigger()->IsHovering(deltaTime)) {
+			auto blueprint = Demo::ItemData::GetInstance()->GetItemBlueprint(inventory[i].itemID);
+			if (blueprint) {
+				hoverDescription = blueprint->GetDescription();
+			}
+		}
+
 		displayIndex++;
 	}
+
 	fontSprite->End();
 
+	if (!hoverDescription.empty()) {
+		fontSprite->Begin();
+
+		float descX = -HALF_BG_W + PADDING_X;
+		float descY = HALF_BG_H - 40.0f;
+
+		fontSprite->SetPosition(descX, descY);
+		fontSprite->SetText(std::move(hoverDescription));
+		fontSprite->Draw(camera, deltaTime);
+		fontSprite->End();
+	}
 }
 
 void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
@@ -571,8 +586,6 @@ void Demo::IBattleScene::Init()
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
-	ItemData::GetInstance()->LoadData();
-	player->GiveTestItems();
 	// Setup player
 	battlePlayer = std::make_shared<Player>(transformManager);
 	battlePlayer->Init(game->GetGraphicsDevice(), &colliderManager, &camera);

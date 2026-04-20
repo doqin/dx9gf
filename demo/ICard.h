@@ -3,8 +3,10 @@
 
 namespace Demo {
 	class DraggableManager;
-
+	class Player;
 	class ICard : virtual public DX9GF::IGameObject, public DX9GF::ISaveable {
+	protected:
+		Player* owner = nullptr;
 	public:
 		inline ICard(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) {}
 		inline ICard(
@@ -24,6 +26,10 @@ namespace Demo {
 			float scaleX = 1,
 			float scaleY = 1
 		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY) {}
+
+		void SetOwner(Player* p) { owner = p; }
+		Player* GetOwner() const { return owner; }
+
 		virtual size_t GetCost() const { return 0; }
 		virtual std::wstring GetDescription() const { return L""; }
 

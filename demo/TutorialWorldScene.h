@@ -31,5 +31,7 @@ namespace Demo {
 		std::string GetSaveID() const override;
 		void GenerateSaveData(nlohmann::json& outData) override;
 		void RestoreSaveData(const nlohmann::json& inData) override;
+
+		void GiveTestItems();
 	};
 }

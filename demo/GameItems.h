@@ -23,15 +23,17 @@ namespace Demo
 	private:
 		int id;
 		std::wstring name;
+		std::wstring description;
 		std::vector<ActiveBuff> buffs;
 		RECT itemRect;
 	public:
-		ConsumableItem(int _id = -1, std::wstring _name = L"NULL", std::vector<ActiveBuff> _buffs = {}, RECT _itemRect = RECT{ 0,0,0,0 })
-			: id(_id), name(_name), buffs(_buffs), itemRect(_itemRect) {
+		ConsumableItem(int _id = -1, std::wstring _name = L"NULL", std::wstring _desc = L"", std::vector<ActiveBuff> _buffs = {}, RECT _itemRect = RECT{ 0,0,0,0 })
+			: id(_id), name(_name), description(_desc), buffs(_buffs), itemRect(_itemRect) {
 		}
 
 		int GetID() const { return id; }
 		const std::wstring& GetName() const { return name; }
+		const std::wstring& GetDescription() const { return description; }
 		const std::vector<ActiveBuff>& GetBuffs() const { return buffs; }
 		RECT GetItemRect() const { return itemRect; }
 	};

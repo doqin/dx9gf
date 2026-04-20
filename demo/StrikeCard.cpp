@@ -28,7 +28,7 @@ bool Demo::StrikeCard::Execute()
 	}
 	if (auto lock = enemyCard.lock()) {
 		if (auto enemy = lock->GetValue()) {
-			enemy->TakeDamage(5.f);
+			if (!owner) owner->DealDamage(enemy.get(), 5.f);
 		}
 	}
 	isDone = true;

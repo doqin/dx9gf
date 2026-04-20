@@ -1,7 +1,25 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "InventoryMenu.h"
 #include "SettingsScene.h"
+namespace {
+	constexpr float RAW_ITEM_W = 23.0f;
+	constexpr float RAW_ITEM_H = 35.0f;
+	constexpr float RAW_BG_W = 192.0f;
+	constexpr float RAW_BG_H = 128.0f;
 
+	constexpr float MENU_SCALE = 3.0f;
+
+	constexpr float ITEM_W = RAW_ITEM_W * MENU_SCALE;
+	constexpr float ITEM_H = RAW_ITEM_H * MENU_SCALE;
+	constexpr float BG_W = RAW_BG_W * MENU_SCALE;
+	constexpr float BG_H = RAW_BG_H * MENU_SCALE;
+
+	constexpr float HALF_BG_W = BG_W / 2.0f;
+	constexpr float HALF_BG_H = BG_H / 2.0f;
+
+	constexpr float PADDING_X = 20.0f;
+	constexpr float PADDING_Y = 30.0f;
+}
 namespace Demo {
 
 	InventoryMenu::InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::TransformManager> tm, std::shared_ptr<DraggableManager> dm, DX9GF::Camera* cam, DX9GF::Font* f)
@@ -16,6 +34,9 @@ namespace Demo {
 		float centerX = 0.0f;
 		float topY = -sh / 2.0f;
 		float bottomY = sh / 2.0f;
+
+		itemSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		itemSheetTex->LoadTexture(L"TempTex.png");
 
 		btnTabItems = std::make_shared<TextButton>(transformManager, centerX - 100.0f, topY + 50.0f, 80.0f, 30.0f, std::string("ITEMS"), this->font,
 			[this](DX9GF::ITrigger* t) { this->SetTab(Tab::ITEMS); });
@@ -131,6 +152,13 @@ namespace Demo {
 			deckContainer->Update(deltaTime);
 			inventoryContainer->Update(deltaTime);
 		}
+		else if (currentTab == Tab::ITEMS) {
+			if (isItemsDirty) RefreshItemsUI(); //only refresh items when needed
+
+			for (auto& btn : buffItems) {
+				btn->Update(deltaTime);
+			}
+		}
 	}
 
 	void InventoryMenu::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
@@ -159,14 +187,56 @@ namespace Demo {
 		fontSprite->Draw(*uiCamera, deltaTime);
 		fontSprite->End();
 
-		if (currentTab == Tab::ITEMS) {
+		if (currentTab == Tab::ITEMS) 
+		{
+			auto& inventory = player->GetInventoryItems().GetSlots();
+			hoverDescription = L"";
+			int displayIndex = 0;
+
 			fontSprite->Begin();
-			fontSprite->SetScale(2.0f, 2.0f);
+			fontSprite->SetScale(1.0f, 1.0f);
 			fontSprite->SetColor(0xFFFFFFFF);
-			fontSprite->SetPosition(centerX - 80.0f, 0.0f);
-			fontSprite->SetText(L"No Items Yet");
-			fontSprite->Draw(*uiCamera, deltaTime);
+
+			for (int i = 0; i < inventory.size(); i++) {
+				if (inventory[i].quantity <= 0) continue;
+
+				auto blueprint = Demo::ItemData::GetInstance()->GetItemBlueprint(inventory[i].itemID);
+				if (!blueprint) continue;
+
+				if (displayIndex >= buffItems.size()) break;
+
+				auto btn = buffItems[displayIndex];
+
+				btn->Draw(gd, deltaTime);
+
+				float textX = btn->GetWorldX() + (ITEM_W / 2.0f) - 10.0f;
+
+				float textY = btn->GetWorldY() + ITEM_H + 5.0f;
+
+				fontSprite->SetPosition(textX, textY);
+				fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
+				fontSprite->Draw(*uiCamera, deltaTime);
+
+				if (btn->GetTrigger()->IsHovering(deltaTime)) {
+					hoverDescription = blueprint->GetDescription();
+				}
+
+				displayIndex++;
+			}
 			fontSprite->End();
+
+			//Draw description
+			if (!hoverDescription.empty()) {
+				fontSprite->Begin();
+				fontSprite->SetScale(1.2f, 1.2f);
+				fontSprite->SetColor(0xFFDD00FF);
+
+				fontSprite->SetPosition(leftEdge + 50.0f, sh / 2.0f - 100.0f);
+
+				fontSprite->SetText(std::move(hoverDescription));
+				fontSprite->Draw(*uiCamera, deltaTime);
+				fontSprite->End();
+			}
 		}
 		else if (currentTab == Tab::DECK) {
 			float containerW = sw * 0.4f;
@@ -187,5 +257,59 @@ namespace Demo {
 			deckContainer->Draw(deltaTime);
 			inventoryContainer->Draw(deltaTime);
 		}
+	}
+
+	void InventoryMenu::RefreshItemsUI()
+	{
+		buffItems.clear();
+		if (!player) return;
+
+		auto& inventory = player->GetInventoryItems().GetSlots();
+		int displayIndex = 0;
+
+		int columns = std::floor((BG_W - PADDING_X) / (ITEM_W + PADDING_X));
+		if (columns < 1) columns = 1;
+
+		float totalGridWidth = (columns * ITEM_W) + ((columns - 1) * PADDING_X);
+
+		float startX = -HALF_BG_W + (BG_W - totalGridWidth) / 2.0f;
+
+		float startY = -HALF_BG_H + 80.0f;
+
+		for (int i = 0; i < inventory.size(); i++) {
+			auto slot = inventory[i];
+
+			if (slot.quantity <= 0) continue;
+
+			const auto* blueprint = Demo::ItemData::GetInstance()->GetItemBlueprint(slot.itemID);
+			if (!blueprint) continue;
+
+			int col = displayIndex % columns;
+			int row = displayIndex / columns;
+
+			float baseX = startX + col * (ITEM_W + PADDING_X);
+			float baseY = startY + row * (ITEM_H + PADDING_Y);
+
+			auto btn = std::make_shared<IconButton>(transformManager, 0, 0, ITEM_W, ITEM_H, itemSheetTex, 1);
+			btn->Init(uiCamera);
+			btn->SetSpriteScale(MENU_SCALE, MENU_SCALE);
+			btn->SetLocalPosition(baseX, baseY);
+			btn->Update(0);
+
+			btn->SetSpriteRects({ blueprint->GetItemRect() });
+
+			btn->SetOnReleaseLeft([&, slot, blueprint](DX9GF::ITrigger* thisObj) {
+				//Nothing happens
+				});
+
+			buffItems.push_back(btn);
+			displayIndex++;
+		}
+
+		if (transformManager) {
+			transformManager->RebuildHierarchy();
+			transformManager->UpdateAll();
+		}
+		isItemsDirty = false;
 	}
 }

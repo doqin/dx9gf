@@ -5,6 +5,7 @@
 #include "GameItems.h"
 #include "DamageTextManager.h"
 namespace Demo {
+	class IEnemy;
 	class Player : public DX9GF::IGameObject, public DX9GF::ISaveable {
 	private:
 		enum class State {
@@ -80,6 +81,7 @@ namespace Demo {
 		float GetVelocity() const;
 		float SetVelocity(float velocity);
 		bool TakeDamage(float damage);
+		void DealDamage(IEnemy* target, float cardBaseDamage);
 		void Heal(float value);
 		bool IsDead() const;
 		void SetHealth(float hp);
@@ -101,7 +103,6 @@ namespace Demo {
 		virtual void GenerateSaveData(nlohmann::json& outData) override;
 		virtual void RestoreSaveData(const nlohmann::json& inData) override;
 
-		void GiveTestItems();
 		float GetBuffStat(ItemBuffType targetType) const;
 		void UpdateBuffs();
 		void AddActiveBuff(const ActiveBuff& buff);

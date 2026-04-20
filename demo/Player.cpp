@@ -7,7 +7,7 @@
 #include "MainBlockCard.h"
 
 #include "IDraggable.h"
-
+#include "IEnemy.h"
 std::shared_ptr<Demo::ICard> Demo::ICard::CreateCard(const std::string& id, std::weak_ptr<DX9GF::TransformManager> transformManager, std::shared_ptr<DraggableManager> draggableManager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
 	std::shared_ptr<ICard> card;
 	if (id == "HeavyStrikeCard") card = std::make_shared<HeavyStrikeCard>(transformManager);
@@ -90,13 +90,13 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 	spritesheet->LoadTexture(IDB_PNG1);
 	// Create sprites
 	idleDown = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-	idleDown->SetSrcRect({.left = 0, .top = 0, .right = 32, .bottom = 32});
+	idleDown->SetSrcRect({ .left = 0, .top = 0, .right = 32, .bottom = 32 });
 	idleUp = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-	idleUp->SetSrcRect({.left = 0, .top = 32, .right = 32, .bottom = 64});
+	idleUp->SetSrcRect({ .left = 0, .top = 32, .right = 32, .bottom = 64 });
 	idleRight = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-	idleRight->SetSrcRect({.left = 0, .top = 64, .right = 32, .bottom = 96});
+	idleRight->SetSrcRect({ .left = 0, .top = 64, .right = 32, .bottom = 96 });
 	idleLeft = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-	idleLeft->SetSrcRect({.left = 0, .top = 96, .right = 32, .bottom = 128});
+	idleLeft->SetSrcRect({ .left = 0, .top = 96, .right = 32, .bottom = 128 });
 	walkingDown = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 0));
 	walkingUp = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 4));
 	walkingRight = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 8));
@@ -125,7 +125,7 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 void Demo::Player::Update(unsigned long long deltaTime) {
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	// Movement
-	D3DXVECTOR2 dir{0, 0};
+	D3DXVECTOR2 dir{ 0, 0 };
 	if (inpMan->KeyPress(DIK_D)) dir.x += 1;
 	if (inpMan->KeyPress(DIK_A)) dir.x -= 1;
 	if (inpMan->KeyPress(DIK_S)) dir.y += 1;
@@ -177,7 +177,7 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 		auto smoothStep = [](float t) {
 			t = (std::max)(0.f, (std::min)(1.f, t));
 			return t * t * (3.f - 2.f * t);
-		};
+			};
 
 		const float distanceSq = vec.x * vec.x + vec.y * vec.y;
 		if (distanceSq > EPSILON * EPSILON) {
@@ -233,7 +233,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 				idleDown->End();
 			}
 		}
-		break;
+						break;
 		case State::Up: {
 			if (isWalking) {
 				walkingUp->Begin();
@@ -250,7 +250,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 				idleUp->End();
 			}
 		}
-		break;
+					  break;
 		case State::Right: {
 			if (isWalking) {
 				walkingRight->Begin();
@@ -267,7 +267,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 				idleRight->End();
 			}
 		}
-		break;
+						 break;
 		case State::Left: {
 			if (isWalking) {
 				walkingLeft->Begin();
@@ -284,7 +284,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 				idleLeft->End();
 			}
 		}
-		break;
+						break;
 		default:
 			break;
 		}
@@ -310,13 +310,29 @@ float Demo::Player::SetVelocity(float velocity)
 bool Demo::Player::TakeDamage(float damage)
 {
 	if (isInvincible) return IsDead();
-	health -= damage;
+
+	//apply def buff on player, limit max deff = 80% to avoid immortal
+	float currentDef = GetBuffStat(ItemBuffType::BuffDefense);
+	float cappedDef = std::min(currentDef / 100.0f, 0.80f);
+	float actualDamage = damage * (1.0f - cappedDef);
+
+	health -= actualDamage;
 	isInvincible = true;
 	timeSinceTurnedInvincible = 0.f;
 	if (health < 0) health = 0;
 	auto [x, y] = GetWorldPosition();
-	Demo::DamageTextManager::GetInstance()->Spawn(damage, x, y - 16.0f, Demo::TextType::TakeDamage); //-16.0f from y so the text pops up from the head
+	Demo::DamageTextManager::GetInstance()->Spawn(actualDamage, x, y - 16.0f, Demo::TextType::TakeDamage); //-16.0f from y so the text pops up from the head
 	return IsDead();
+}
+
+void Demo::Player::DealDamage(IEnemy* target, float cardBaseDamage)
+{
+	if (!target) return;
+
+	float currentAtk = GetBuffStat(ItemBuffType::BuffDamage);
+	float finalDamage = cardBaseDamage * (1.0f + (currentAtk / 100.0f));
+
+	target->TakeDamage(finalDamage);
 }
 
 bool Demo::Player::IsDead() const
@@ -349,23 +365,6 @@ void Demo::Player::Heal(float value)
 	if (IsDead()) return;
 	health += value;
 	if (health > MAX_HEALTH) health = MAX_HEALTH;
-}
-
-void Demo::Player::GiveTestItems()
-{
-	//10 becuz LoadData func load 10 items
-	inventoryItems.InitFixedInventory(10);
-
-	inventoryItems.AddItem(0, 5);
-	inventoryItems.AddItem(1, 3);
-	inventoryItems.AddItem(2, 2);
-	inventoryItems.AddItem(3, 1);
-	inventoryItems.AddItem(4, 1);
-	inventoryItems.AddItem(5, 1);
-	inventoryItems.AddItem(6, 1);
-	inventoryItems.AddItem(7, 1);
-	inventoryItems.AddItem(8, 1);
-	inventoryItems.AddItem(9, 1);
 }
 
 float Demo::Player::GetBuffStat(ItemBuffType targetType) const
