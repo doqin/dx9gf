@@ -209,6 +209,7 @@
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HandContainer.cpp" />
+    <ClCompile Include="HealingPoint.cpp" />
     <ClCompile Include="IBattleScene.cpp" />
     <ClCompile Include="IButton.cpp" />
     <ClCompile Include="IconButton.cpp" />
@@ -230,6 +231,7 @@
     <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="SettingsScene.cpp" />
     <ClCompile Include="IShopScene.cpp" />
+    <ClCompile Include="ShopPoint.cpp" />
     <ClCompile Include="TextInputManager.cpp" />
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
@@ -253,6 +255,7 @@
     <ClInclude Include="EnemyCard.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="HandContainer.h" />
+    <ClInclude Include="HealingPoint.h" />
     <ClInclude Include="IBattleScene.h" />
     <ClInclude Include="IBlockCard.h" />
     <ClInclude Include="IButton.h" />
@@ -276,6 +279,7 @@
     <ClInclude Include="SettingsManager.h" />
     <ClInclude Include="SettingsScene.h" />
     <ClInclude Include="IShopScene.h" />
+    <ClInclude Include="ShopPoint.h" />
     <ClInclude Include="TextInputManager.h" />
     <ClInclude Include="RoundProjectile.h" />
     <ClInclude Include="StrikeCard.h" />
@@ -306,6 +310,7 @@
     <Image Include="arrow.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="C:\Users\ADMIN\Downloads\SHOP_Label\shop290x248.png" />
     <Image Include="click.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -318,6 +323,7 @@
     <Image Include="hitimpact-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="hp_potion.png" />
     <Image Include="pointer.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

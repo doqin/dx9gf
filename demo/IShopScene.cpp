@@ -133,6 +133,9 @@ void Demo::IShopScene::Draw(unsigned long long deltaTime)
 
 			myFontSprite->End();
 		}
+		auto [sw, sh] = uiCamera.GetScreenResolution();
+		DX9GF::Camera cursorCam(sw, sh);
+		DX9GF::InputManager::GetInstance()->DrawCursor(&cursorCam, deltaTime);
 		gd->EndDraw();
 	}
 	gd->Present();

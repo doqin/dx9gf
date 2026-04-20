@@ -141,6 +141,12 @@
     <ClCompile Include="InventoryMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShopPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HealingPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -260,6 +266,12 @@
     <ClInclude Include="InventoryMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ShopPoint.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="HealingPoint.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="uiter.aseprite">
@@ -325,6 +337,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="arrow.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="C:\Users\ADMIN\Downloads\SHOP_Label\shop290x248.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="hp_potion.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

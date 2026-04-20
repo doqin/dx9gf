@@ -15,6 +15,14 @@ void Demo::TutorialWorldScene::Init()
 	savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font);
 	savePoint->SetVisible(true);
 
+	shopPoint = std::make_shared<ShopPoint>(transformManager, 300.0f, 150.0f);
+	shopPoint->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font);
+	shopPoint->SetVisible(true);
+
+	healingPoint = std::make_shared<HealingPoint>(transformManager, 250.0f, 220.0f);
+	healingPoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font);
+	healingPoint->SetVisible(true);
+
 	draggableManager = std::make_shared<Demo::DraggableManager>();
 	inventoryMenu = std::make_shared<InventoryMenu>(game, player, transformManager, draggableManager, &uiCamera, font.get());
 	inventoryMenu->Init();
@@ -47,6 +55,10 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 		savePoint->Update(deltaTime);
 		if (savePoint->IsMenuOpen()) isGamePaused = true;
 	}
+
+	if (shopPoint) shopPoint->Update(deltaTime);
+
+	if (healingPoint) healingPoint->Update(deltaTime);
 
 	if (inventoryMenu && inventoryMenu->IsOpen()) {
 		isGamePaused = true;
@@ -83,6 +95,8 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 		if (savePoint) {
 			savePoint->Draw(camera, deltaTime);
 		}
+		if (shopPoint) shopPoint->Draw(camera, deltaTime);
+		if (healingPoint) healingPoint->Draw(camera, deltaTime);
 		player->Draw(deltaTime);
 		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
 		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
