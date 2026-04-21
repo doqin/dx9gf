@@ -29,6 +29,7 @@ namespace Demo {
 		float cameraDeltaTime = 0;
 		bool followCamera = true;
 		float health = MAX_HEALTH;
+      float temporaryDefense = 0.f;
 		bool isInvincible = false;
 		float timeSinceTurnedInvincible = 0.f;
 		// Sprites
@@ -87,6 +88,7 @@ namespace Demo {
 		void SetHealth(float hp);
 		float GetMaxHealth() const;
 		float GetHealth() const;
+		float GetTemporaryDefense() const;
 		std::weak_ptr<DX9GF::RectangleCollider> GetCollider();
 
 		int GetGold() const { return gold; }

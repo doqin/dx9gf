@@ -290,6 +290,8 @@ void Demo::IBattleScene::RefreshItemMenu()
 
 					this->RefreshItemMenu();
 					this->MoveHandCardsToDiscardPile();
+					this->QueueEnemyLayoutTransition(State::EnemyAttack);
+                 this->enemyAttackStartPending = true;
 					this->state = State::EnemyAttack;
 				}
 				markFinished();
@@ -454,6 +456,26 @@ void Demo::IBattleScene::PlayerOpenItemsUpdate(unsigned long long deltaTime)
 void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 {
 	battlePlayer->Update(deltaTime);
+    if (enemyAttackStartPending) {
+		if (commandBuffer.IsBusy()) {
+			return;
+		}
+		for (auto& enemy : enemies) {
+			enemy->SetState(true);
+		}
+		for (auto& enemy : enemies) {
+			bool isStunned = enemy->HasStatus(StatusType::STUN);
+			enemy->TickStatuses();
+			if (enemy->IsDead()) {
+				continue;
+			}
+			if (isStunned) {
+				continue;
+			}
+			enemy->StartAttack(this->battlePlayer);
+		}
+		enemyAttackStartPending = false;
+	}
 	bool isDoneAttacking = true;
 	for (auto& enemy : enemies) {
 		enemy->Update(deltaTime);
@@ -462,6 +484,9 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 	if (isDoneAttacking) {
 		BeginNextTurn();
 		state = State::PlayerStandBy;
+     QueueEnemyLayoutTransition(State::PlayerStandBy);
+		lastEnemyLayoutState = State::PlayerStandBy;
+		enemyLayoutInitialized = true;
 		PlayerStandByUpdate(deltaTime);
 	}
 }
@@ -572,9 +597,14 @@ void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 	auto gd = game->GetGraphicsDevice();
 	const float spacing = 5.f;
 	const float w = battlePlayer->GetMaxHealth() * spacing;
+   const float defenseW = (std::max)(0.f, battlePlayer->GetTemporaryDefense()) * spacing;
 	const float w_ = battlePlayer->GetHealth() * spacing;
 	const float x = -w / 2;
 	const float y = app->GetScreenHeight() / 2.f - 40;
+   const float defenseY = y - 24.f;
+	gd->DrawRectangle(camera, x, defenseY, w, 16, 0xFF808080, true);
+	gd->DrawRectangle(camera, x, defenseY, defenseW, 16, 0xFFD0D0D0, true);
+	gd->DrawRectangle(camera, x, defenseY, w, 16, 0xFF000000, false);
 	gd->DrawRectangle(camera, x, y, w, 20, 0xFFFF0000, true);
 	gd->DrawRectangle(camera, x, y, w_, 20, 0xFF00FF00, true);
 	gd->DrawRectangle(camera, x, y, w, 20, 0xFF000000, false);

@@ -311,10 +311,9 @@ bool Demo::Player::TakeDamage(float damage)
 {
 	if (isInvincible) return IsDead();
 
-	//apply def buff on player, limit max deff = 80% to avoid immortal
-	float currentDef = GetBuffStat(ItemBuffType::BuffDefense);
-	float cappedDef = std::min(currentDef / 100.0f, 0.80f);
-	float actualDamage = damage * (1.0f - cappedDef);
+  const float blockedDamage = (std::min)(temporaryDefense, damage);
+	temporaryDefense = (std::max)(0.f, temporaryDefense - blockedDamage);
+	const float actualDamage = (std::max)(0.f, damage - blockedDamage);
 
 	health -= actualDamage;
 	isInvincible = true;
@@ -330,7 +329,7 @@ void Demo::Player::DealDamage(IEnemy* target, float cardBaseDamage)
 	if (!target) return;
 
 	float currentAtk = GetBuffStat(ItemBuffType::BuffDamage);
-	float finalDamage = cardBaseDamage * (1.0f + (currentAtk / 100.0f));
+	float finalDamage = cardBaseDamage + currentAtk;
 
 	target->TakeDamage(finalDamage);
 }
@@ -353,6 +352,11 @@ float Demo::Player::GetMaxHealth() const
 float Demo::Player::GetHealth() const
 {
 	return health;
+}
+
+float Demo::Player::GetTemporaryDefense() const
+{
+	return temporaryDefense;
 }
 
 std::weak_ptr<DX9GF::RectangleCollider> Demo::Player::GetCollider()
@@ -396,7 +400,11 @@ void Demo::Player::UpdateBuffs()
 			activeBuffs.erase(activeBuffs.begin() + i);
 		}
 	}
+   temporaryDefense = (std::max)(0.f, GetBuffStat(ItemBuffType::BuffDefense));
 }
 void Demo::Player::AddActiveBuff(const ActiveBuff& buff) {
 	activeBuffs.push_back(buff);
+   if (buff.type == ItemBuffType::BuffDefense) {
+		temporaryDefense = (std::max)(0.f, GetBuffStat(ItemBuffType::BuffDefense));
+	}
 }

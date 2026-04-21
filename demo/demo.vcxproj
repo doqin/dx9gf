@@ -326,7 +326,9 @@
     <Image Include="savepoint-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
-    <Image Include="TempTex.png" />
+    <Image Include="TempTex.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="test-background.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

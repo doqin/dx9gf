@@ -34,6 +34,7 @@ namespace Demo {
 		int energy = MAX_ENERGY;
 		int usedEnergy = 0;
 		bool isTransitioning = false;
+        bool enemyAttackStartPending = false;
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;
