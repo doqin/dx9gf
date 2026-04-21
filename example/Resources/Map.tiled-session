@@ -1,0 +1,75 @@
+{
+    "activeFile": "map.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "First Asset pack.tsx": {
+            "scaleInDock": 1
+        },
+        "Main_Map_Arean_1_1.tmx": {
+            "scale": 0.7304361979166667,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 768.0342261241587,
+                "y": -128.00570435402642
+            }
+        },
+        "Main_map_Arean_1_0.tmx": {
+            "scale": 0.72140625,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 640.4158544509421,
+                "y": -384.6653671215074
+            }
+        },
+        "Shop.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "XP.tsx": {
+            "scaleInDock": 1
+        },
+        "icon.tsx": {
+            "scaleInDock": 1
+        },
+        "map.tmx": {
+            "scale": 0.25,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": -412,
+                "y": 498
+            }
+        },
+        "map1.tmx": {
+            "scale": 0.2373046875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 4096,
+                "y": 2172.3127572016465
+            }
+        },
+        "tutorial.tsx": {
+            "scaleInDock": 1
+        }
+    },
+    "last.imagePath": "C:/Users/MEIX/source/repos/dx9gf/example/Resources",
+    "openFiles": [
+        "map1.tmx",
+        "map.tmx",
+        "Shop.tsx"
+    ],
+    "project": "Map.tiled-project",
+    "recentFiles": [
+        "map1.tmx",
+        "Shop.tsx",
+        "map.tmx",
+        "Main_map_Arean_1_0.tmx",
+        "Main_Map_Arean_1_1.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
