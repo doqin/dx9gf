@@ -141,6 +141,9 @@
     <ClCompile Include="InventoryMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GameItems.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ShopPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -266,6 +269,9 @@
     <ClInclude Include="InventoryMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameItems.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ShopPoint.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
@@ -339,6 +345,9 @@
     <Image Include="arrow.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="TempTex.png">
+      <Filter>Resource Files</Filter>
+    </Image>
     <Image Include="placeholder-healingpoint.png">
       <Filter>Resource Files</Filter>
     </Image>
@@ -353,9 +362,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="ui-pack.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="ui-pack-2.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

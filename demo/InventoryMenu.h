@@ -5,7 +5,7 @@
 #include "Player.h"
 #include "TextButton.h"
 #include "IContainer.h"
-
+#include "IconButton.h"
 namespace Demo {
 	class InventoryMenu {
 	public:
@@ -35,6 +35,12 @@ namespace Demo {
 		std::shared_ptr<IContainer> deckContainer;
 		std::shared_ptr<IContainer> inventoryContainer;
 
+		//Tab Items
+		std::shared_ptr<DX9GF::Texture> itemSheetTex;
+		std::vector<std::shared_ptr<IconButton>> buffItems;
+		bool isItemsDirty = true;
+		std::wstring hoverDescription = L"";
+
 		bool pendingLeave = false;
 
 	public:
@@ -49,5 +55,6 @@ namespace Demo {
 		void SetTab(Tab tab) { currentTab = tab; }
 		bool IsPendingLeave() const { return pendingLeave; }
 		Tab GetCurrentTab() const { return currentTab; }
+		void RefreshItemsUI();
 	};
 }

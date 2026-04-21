@@ -26,6 +26,10 @@ void Demo::TutorialWorldScene::Init()
 	draggableManager = std::make_shared<Demo::DraggableManager>();
 	inventoryMenu = std::make_shared<InventoryMenu>(game, player, transformManager, draggableManager, &uiCamera, font.get());
 	inventoryMenu->Init();
+
+	ItemData::GetInstance()->LoadData();
+	this->GiveTestItems();
+
 	transformManager->RebuildHierarchy();
 }
 
@@ -129,4 +133,21 @@ void Demo::TutorialWorldScene::RestoreSaveData(const nlohmann::json& inData)
 	player->RestoreSaveData(inData["player"]);
 	camera.SetPosition(inData["camera"]["x"], inData["camera"]["y"]);
 	camera.SetZoom(inData["camera"]["zoom"]);
+}
+
+void Demo::TutorialWorldScene::GiveTestItems()
+{
+	ItemInventory& testItems = this->player->GetInventoryItems();
+	testItems.InitFixedInventory(10);
+
+	testItems.AddItem(0, 5);
+	testItems.AddItem(1, 3);
+	testItems.AddItem(2, 2);
+	testItems.AddItem(3, 1);
+	testItems.AddItem(4, 1);
+	testItems.AddItem(5, 1);
+	testItems.AddItem(6, 1);
+	testItems.AddItem(7, 1);
+	testItems.AddItem(8, 1);
+	testItems.AddItem(9, 1);
 }
