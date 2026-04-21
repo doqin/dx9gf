@@ -13,15 +13,15 @@ namespace Demo {
         player = p;
         fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
         this->gd = gd;
-        collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 32.f, 32.f, GetWorldX(), GetWorldY());
+        collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 80.f, 80.f, GetWorldX(), GetWorldY());
         collider->SetOriginCenter();
         cm->Add(collider);
 
         spritesheet = std::make_shared<DX9GF::Texture>(gd);
-        spritesheet->LoadTexture(L"placeholder-shop.png");
+        spritesheet->LoadTexture(L"Shop-Sheet.png");
 
-        sprite = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-        sprite->SetOrigin(16.f, 16.f);
+        sprite = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 80, 80, 8), 8);
+        sprite->SetOrigin(40.f, 40.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
     }
 
