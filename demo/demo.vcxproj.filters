@@ -339,10 +339,10 @@
     <Image Include="arrow.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="C:\Users\ADMIN\Downloads\SHOP_Label\shop290x248.png">
+    <Image Include="placeholder-healingpoint.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="hp_potion.png">
+    <Image Include="placeholder-shop.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

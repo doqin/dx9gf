@@ -10,7 +10,7 @@ Demo::IShopScene::IShopScene(Game* game, Player* player, int sw, int sh, std::st
 void Demo::IShopScene::Init()
 {
 	transformManager = std::make_shared<DX9GF::TransformManager>();
-	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 24);
+    myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 24);
 	myFontSprite = std::make_shared<DX9GF::FontSprite>(myFont.get());
 
 	LoadItems();
@@ -22,13 +22,20 @@ void Demo::IShopScene::Init()
 
 void Demo::IShopScene::BuildUI()
 {
-	float startY = 160.0f;
+  auto [sw, sh] = uiCamera.GetScreenResolution();
+	float leftPadding = sw * 0.12f;
+	float rightPadding = sw * 0.12f;
+	float listStartY = sh * 0.28f;
+	float rowHeight = 70.0f;
+	float buyButtonW = 110.0f;
+	float buyButtonX = sw - rightPadding - buyButtonW;
+
 	for (size_t i = 0; i < itemsForSale.size(); ++i) {
 		auto item = itemsForSale[i];
 
 		auto buyBtn = std::make_shared<Demo::TextButton>(
 			transformManager,
-			450, startY + (i * 80), 100, 40,
+            buyButtonX, listStartY + (i * rowHeight), buyButtonW, 40,
 			"BUY",
 			myFont.get(),
 			[this, item](DX9GF::ITrigger* t) {
@@ -52,7 +59,7 @@ void Demo::IShopScene::BuildUI()
 
 	auto leaveBtn = std::make_shared<Demo::TextButton>(
 		transformManager,
-		20, 20, 100, 40,
+        leftPadding, sh * 0.12f, 100, 40,
 		"LEAVE",
 		myFont.get(),
 		[this](DX9GF::ITrigger* t) {
@@ -96,8 +103,12 @@ void Demo::IShopScene::Draw(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
 	gd->Clear();
+	auto [sw, sh] = uiCamera.GetScreenResolution();
 
 	if (SUCCEEDED(gd->BeginDraw())) {
+       gd->DrawRectangle(uiCamera, 0.0f, 0.0f, static_cast<float>(sw), static_cast<float>(sh), 0, 1, 1, 0, 0, D3DXCOLOR(0.06f, 0.06f, 0.08f, 1.0f), true);
+		gd->DrawRectangle(uiCamera, sw * 0.08f, sh * 0.14f, sw * 0.84f, sh * 0.72f, 0, 1, 1, 0, 0, D3DXCOLOR(0.12f, 0.12f, 0.16f, 0.95f), true);
+
 		for (auto& btn : uiButtons) {
 			btn->Draw(gd, deltaTime);
 		}
@@ -105,35 +116,33 @@ void Demo::IShopScene::Draw(unsigned long long deltaTime)
 		if (myFontSprite) {
 			myFontSprite->Begin();
 
-			myFontSprite->SetPosition(600.0f, 20.0f);
+           myFontSprite->SetPosition(sw - 170.0f, sh * 0.12f + 5.0f);
 			myFontSprite->SetColor(0xFFFFD700);
-			std::string goldText = "Gold: " + std::to_string(player->GetGold());
-			myFontSprite->SetText(std::wstring(goldText.begin(), goldText.end()));
+            myFontSprite->SetText(std::to_wstring(player->GetGold()) + L"G");
 			myFontSprite->Draw(uiCamera, deltaTime);
 
-			myFontSprite->SetPosition(350.0f, 50.0f);
+           myFontSprite->SetPosition(sw * 0.5f - 130.0f, sh * 0.12f);
 			myFontSprite->SetColor(0xFFFFFFFF);
 			myFontSprite->SetText(std::wstring(shopTitle.begin(), shopTitle.end()));
 			myFontSprite->Draw(uiCamera, deltaTime);
 
-			myFontSprite->SetPosition(350.0f, 400.0f);
+          myFontSprite->SetPosition(sw * 0.5f - 180.0f, sh * 0.82f);
 			myFontSprite->SetColor(0xFF00FFFF);
 			myFontSprite->SetText(std::wstring(statusMessage.begin(), statusMessage.end()));
 			myFontSprite->Draw(uiCamera, deltaTime);
 
-			float startY = 170.0f;
+          float startY = sh * 0.29f;
 			for (size_t i = 0; i < itemsForSale.size(); ++i) {
-				myFontSprite->SetPosition(100.0f, startY + (i * 80));
+               myFontSprite->SetPosition(sw * 0.14f, startY + (i * 70.0f));
 				myFontSprite->SetColor(0xFFFFFFFF);
 
-				std::string itemText = itemsForSale[i].name + " - Cost: " + std::to_string(itemsForSale[i].cost);
+               std::string itemText = itemsForSale[i].name + "  " + std::to_string(itemsForSale[i].cost) + "G";
 				myFontSprite->SetText(std::wstring(itemText.begin(), itemText.end()));
 				myFontSprite->Draw(uiCamera, deltaTime);
 			}
 
 			myFontSprite->End();
 		}
-		auto [sw, sh] = uiCamera.GetScreenResolution();
 		DX9GF::Camera cursorCam(sw, sh);
 		DX9GF::InputManager::GetInstance()->DrawCursor(&cursorCam, deltaTime);
 		gd->EndDraw();

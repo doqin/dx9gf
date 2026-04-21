@@ -18,9 +18,9 @@ namespace Demo {
         cm->Add(collider);
 
         spritesheet = std::make_shared<DX9GF::Texture>(gd);
-        spritesheet->LoadTexture(L"savepoint-Sheet.png");
+        spritesheet->LoadTexture(L"placeholder-shop.png");
 
-        sprite = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 10), 12, true);
+        sprite = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
     }

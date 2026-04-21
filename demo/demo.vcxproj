@@ -310,7 +310,6 @@
     <Image Include="arrow.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
-    <Image Include="C:\Users\ADMIN\Downloads\SHOP_Label\shop290x248.png" />
     <Image Include="click.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -323,11 +322,16 @@
     <Image Include="hitimpact-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
-    <Image Include="hp_potion.png" />
+    <Image Include="placeholder-healingpoint.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="pointer.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="savepoint-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="placeholder-shop.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="test-background.png">
