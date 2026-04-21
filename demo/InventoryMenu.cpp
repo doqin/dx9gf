@@ -253,7 +253,7 @@ namespace Demo {
 				fontSprite->SetScale(1.2f, 1.2f);
 				fontSprite->SetColor(0xFFDD00FF);
 
-				fontSprite->SetPosition(leftEdge + 50.0f, sh / 2.0f - 100.0f);
+				fontSprite->SetPosition(leftEdge + 50.0f, sh / 2.0f - 150.0f);
 
 				fontSprite->SetText(std::move(hoverDescription));
 				fontSprite->Draw(*uiCamera, deltaTime);
@@ -299,7 +299,7 @@ namespace Demo {
 
 		float startX = -HALF_BG_W + (BG_W - totalGridWidth) / 2.0f;
 
-		float startY = -HALF_BG_H + 80.0f;
+		float startY = -HALF_BG_H;
 
 		for (int i = 0; i < inventory.size(); i++) {
 			auto slot = inventory[i];
