@@ -141,6 +141,9 @@
     <ClCompile Include="InventoryMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GameItems.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -260,6 +263,9 @@
     <ClInclude Include="InventoryMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameItems.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="uiter.aseprite">
@@ -327,6 +333,9 @@
     <Image Include="arrow.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="TempTex.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc">
@@ -335,9 +344,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="ui-pack.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="ui-pack-2.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
