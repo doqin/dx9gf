@@ -17,6 +17,8 @@ namespace Demo {
 		void ResetExecution() override;
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
+		std::wstring GetDescription() const override;
+		std::wstring GetInputsDescription() const override;
 		size_t GetCost() const override;
 		size_t GetWidth() const override;
 	};

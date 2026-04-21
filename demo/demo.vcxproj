@@ -205,15 +205,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CardShop.cpp" />
+    <ClCompile Include="DamageTextManager.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameItems.cpp" />
     <ClCompile Include="HandContainer.cpp" />
+    <ClCompile Include="HealingPoint.cpp" />
     <ClCompile Include="IBattleScene.cpp" />
     <ClCompile Include="IButton.cpp" />
     <ClCompile Include="IconButton.cpp" />
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IConversation.cpp" />
     <ClCompile Include="IDraggable.cpp" />
+    <ClCompile Include="InventoryMenu.cpp" />
+    <ClCompile Include="IStatementCard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="MultiTargetCard.cpp" />
@@ -223,9 +228,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SavePoint.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="SettingsScene.cpp" />
     <ClCompile Include="IShopScene.cpp" />
+    <ClCompile Include="ShopPoint.cpp" />
     <ClCompile Include="TextInputManager.cpp" />
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
@@ -243,11 +250,14 @@
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
     <ClInclude Include="CardShop.h" />
+    <ClInclude Include="DamageTextManager.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="DialogueLine.h" />
     <ClInclude Include="EnemyCard.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameItems.h" />
     <ClInclude Include="HandContainer.h" />
+    <ClInclude Include="HealingPoint.h" />
     <ClInclude Include="IBattleScene.h" />
     <ClInclude Include="IBlockCard.h" />
     <ClInclude Include="IButton.h" />
@@ -256,6 +266,7 @@
     <ClInclude Include="IContainer.h" />
     <ClInclude Include="IConversation.h" />
     <ClInclude Include="IDraggable.h" />
+    <ClInclude Include="InventoryMenu.h" />
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="IEnemy.h" />
     <ClInclude Include="IExpressionCard.h" />
@@ -266,9 +277,11 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="PopUpMessage.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SavePoint.h" />
     <ClInclude Include="SettingsManager.h" />
     <ClInclude Include="SettingsScene.h" />
     <ClInclude Include="IShopScene.h" />
+    <ClInclude Include="ShopPoint.h" />
     <ClInclude Include="TextInputManager.h" />
     <ClInclude Include="RoundProjectile.h" />
     <ClInclude Include="StrikeCard.h" />
@@ -296,6 +309,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="arrow.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="click.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -305,7 +321,22 @@
     <Image Include="grab.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="hitimpact-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="placeholder-healingpoint.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="pointer.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="savepoint-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="TempTex.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="placeholder-shop.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="test-background.png">
@@ -338,9 +369,6 @@
     <ClInclude Include="TextButton.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="ui-pack-2.bmp">
-      <DeploymentContent>true</DeploymentContent>
-    </Image>
     <Image Include="ui-pack.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

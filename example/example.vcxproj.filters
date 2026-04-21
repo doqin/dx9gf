@@ -79,7 +79,16 @@
     <Image Include="Resources\Alo_Vu_a_Vu.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\dx9gf1\example\Resources\Alo_Vu_a_Vu.png">
+    <Image Include="Resources\First Asset pack.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\XP.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\tutorial.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\icon.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -88,6 +97,27 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\test.tsx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\map.tmx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\tutorial.aseprite">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\XP.tsx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\icon.tsx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\tilemap.tsx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\tutorial.tsx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\First Asset pack.tsx">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

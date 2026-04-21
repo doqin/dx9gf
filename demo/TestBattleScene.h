@@ -6,5 +6,7 @@ namespace Demo {
 	public:
 		TestBattleScene(Game* game, std::shared_ptr<Player> player, int screenWidth, int screenHeight) : IBattleScene(game, player, screenWidth, screenHeight) {}
 		void Init() override;
+
+		void GiveTestItems();
 	};
 }

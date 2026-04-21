@@ -3,18 +3,39 @@
 #include "DX9GFExtras.h"
 #include "Game.h"
 #include "Player.h"
+#include "SavePoint.h"
+#include "InventoryMenu.h"
+#include "StrikeCard.h"
+#include "ShopPoint.h"
+#include "HealingPoint.h"
 
 namespace Demo {
-	class TutorialWorldScene : public DX9GF::IScene {
+	class TutorialWorldScene : public DX9GF::IScene, public DX9GF::ISaveable {
 		Game* game;
-		std::shared_ptr<Player> player;
+		DX9GF::Camera uiCamera;
 		std::shared_ptr<DX9GF::ColliderManager> colliderManager;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		std::shared_ptr<Demo::DraggableManager> draggableManager;
+		std::shared_ptr<InventoryMenu> inventoryMenu;
+		std::shared_ptr<DX9GF::SaveManager> saveManager;
+
+		std::shared_ptr<SavePoint> savePoint;
+		std::shared_ptr<ShopPoint> shopPoint;
+		std::shared_ptr<HealingPoint> healingPoint;
+		std::shared_ptr<DX9GF::Font> font;
+		std::shared_ptr<Player> player;
 		std::shared_ptr<DX9GF::Map> map;
 	public:
-		TutorialWorldScene(Game* game, UINT sw, UINT sh) : IScene(sw, sh), game(game) {}
+		TutorialWorldScene(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh) : IScene(sw, sh), game(game), saveManager(sm), uiCamera(sw, sh) {}
 		void Init() override;
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
+
+		// Inherited via ISaveable
+		std::string GetSaveID() const override;
+		void GenerateSaveData(nlohmann::json& outData) override;
+		void RestoreSaveData(const nlohmann::json& inData) override;
+
+		void GiveTestItems();
 	};
 }
