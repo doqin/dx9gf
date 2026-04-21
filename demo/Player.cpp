@@ -2,6 +2,33 @@
 #include "Player.h"
 #include "resource.h"
 #include "DamageTextManager.h"
+#include "AdvancedCards.h"
+#include "StrikeCard.h"
+#include "MainBlockCard.h"
+
+#include "IDraggable.h"
+#include "IEnemy.h"
+std::shared_ptr<Demo::ICard> Demo::ICard::CreateCard(const std::string& id, std::weak_ptr<DX9GF::TransformManager> transformManager, std::shared_ptr<DraggableManager> draggableManager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
+	std::shared_ptr<ICard> card;
+	if (id == "HeavyStrikeCard") card = std::make_shared<HeavyStrikeCard>(transformManager);
+	else if (id == "TwinStrikeCard") card = std::make_shared<TwinStrikeCard>(transformManager);
+	else if (id == "CleaveCard") card = std::make_shared<CleaveCard>(transformManager);
+	else if (id == "ChainLightningCard") card = std::make_shared<ChainLightningCard>(transformManager);
+	else if (id == "PoisonCard") card = std::make_shared<PoisonCard>(transformManager);
+	else if (id == "VulnerableCard") card = std::make_shared<VulnerableCard>(transformManager);
+	else if (id == "WeaknessCard") card = std::make_shared<WeaknessCard>(transformManager);
+	else if (id == "StunCard") card = std::make_shared<StunCard>(transformManager);
+	else if (id == "StrikeCard") card = std::make_shared<StrikeCard>(transformManager);
+	else if (id == "MainBlockCard") card = std::make_shared<MainBlockCard>(transformManager);
+
+	if (card && draggableManager && graphicsDevice && camera) {
+		if (auto dragCard = std::dynamic_pointer_cast<IDraggable>(card)) {
+			dragCard->Init(draggableManager, graphicsDevice, camera);
+		}
+	}
+	return card;
+}
+
 std::string Demo::Player::GetSaveID() const {
 	return "Player_Data";
 }
@@ -11,6 +38,17 @@ void Demo::Player::GenerateSaveData(nlohmann::json& outData) {
 
 	outData["x"] = x;
 	outData["y"] = y;
+	outData["health"] = health;
+	outData["gold"] = gold;
+
+	outData["deck"] = nlohmann::json::array();
+	for (auto& card : deck) {
+		outData["deck"].push_back(card);
+	}
+	outData["inventoryCards"] = nlohmann::json::array();
+	for (auto& card : inventoryCards) {
+		outData["inventoryCards"].push_back(card);
+	}
 }
 
 void Demo::Player::RestoreSaveData(const nlohmann::json& inData) {
@@ -19,6 +57,21 @@ void Demo::Player::RestoreSaveData(const nlohmann::json& inData) {
 
 	if (inData.contains("x")) savedX = inData["x"];
 	if (inData.contains("y")) savedY = inData["y"];
+	if (inData.contains("health")) health = inData["health"];
+	if (inData.contains("gold")) gold = inData["gold"];
+
+	if (inData.contains("deck")) {
+		deck.clear();
+		for (auto& item : inData["deck"]) {
+			deck.push_back(item.get<std::string>());
+		}
+	}
+	if (inData.contains("inventoryCards")) {
+		inventoryCards.clear();
+		for (auto& item : inData["inventoryCards"]) {
+			inventoryCards.push_back(item.get<std::string>());
+		}
+	}
 
 	SetLocalPosition(savedX, savedY);
 }
@@ -37,13 +90,13 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 	spritesheet->LoadTexture(IDB_PNG1);
 	// Create sprites
 	idleDown = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-	idleDown->SetSrcRect({.left = 0, .top = 0, .right = 32, .bottom = 32});
+	idleDown->SetSrcRect({ .left = 0, .top = 0, .right = 32, .bottom = 32 });
 	idleUp = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-	idleUp->SetSrcRect({.left = 0, .top = 32, .right = 32, .bottom = 64});
+	idleUp->SetSrcRect({ .left = 0, .top = 32, .right = 32, .bottom = 64 });
 	idleRight = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-	idleRight->SetSrcRect({.left = 0, .top = 64, .right = 32, .bottom = 96});
+	idleRight->SetSrcRect({ .left = 0, .top = 64, .right = 32, .bottom = 96 });
 	idleLeft = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
-	idleLeft->SetSrcRect({.left = 0, .top = 96, .right = 32, .bottom = 128});
+	idleLeft->SetSrcRect({ .left = 0, .top = 96, .right = 32, .bottom = 128 });
 	walkingDown = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 0));
 	walkingUp = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 4));
 	walkingRight = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 8));
@@ -65,13 +118,14 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 	// Create collider
 	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 8, 4, 0, 14);
 	collider->SetOriginCenter();
+	inventoryCards = { "StrikeCard", "StrikeCard", "StrikeCard" };
 	this->colliderManager->Add(collider);
 }
 
 void Demo::Player::Update(unsigned long long deltaTime) {
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	// Movement
-	D3DXVECTOR2 dir{0, 0};
+	D3DXVECTOR2 dir{ 0, 0 };
 	if (inpMan->KeyPress(DIK_D)) dir.x += 1;
 	if (inpMan->KeyPress(DIK_A)) dir.x -= 1;
 	if (inpMan->KeyPress(DIK_S)) dir.y += 1;
@@ -123,7 +177,7 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 		auto smoothStep = [](float t) {
 			t = (std::max)(0.f, (std::min)(1.f, t));
 			return t * t * (3.f - 2.f * t);
-		};
+			};
 
 		const float distanceSq = vec.x * vec.x + vec.y * vec.y;
 		if (distanceSq > EPSILON * EPSILON) {
@@ -179,7 +233,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 				idleDown->End();
 			}
 		}
-		break;
+						break;
 		case State::Up: {
 			if (isWalking) {
 				walkingUp->Begin();
@@ -196,7 +250,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 				idleUp->End();
 			}
 		}
-		break;
+					  break;
 		case State::Right: {
 			if (isWalking) {
 				walkingRight->Begin();
@@ -213,7 +267,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 				idleRight->End();
 			}
 		}
-		break;
+						 break;
 		case State::Left: {
 			if (isWalking) {
 				walkingLeft->Begin();
@@ -230,7 +284,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 				idleLeft->End();
 			}
 		}
-		break;
+						break;
 		default:
 			break;
 		}
@@ -256,13 +310,28 @@ float Demo::Player::SetVelocity(float velocity)
 bool Demo::Player::TakeDamage(float damage)
 {
 	if (isInvincible) return IsDead();
-	health -= damage;
+
+  const float blockedDamage = (std::min)(temporaryDefense, damage);
+	temporaryDefense = (std::max)(0.f, temporaryDefense - blockedDamage);
+	const float actualDamage = (std::max)(0.f, damage - blockedDamage);
+
+	health -= actualDamage;
 	isInvincible = true;
 	timeSinceTurnedInvincible = 0.f;
 	if (health < 0) health = 0;
 	auto [x, y] = GetWorldPosition();
-	Demo::DamageTextManager::GetInstance()->Spawn(damage, x, y - 16.0f, Demo::TextType::TakeDamage); //-16.0f from y so the text pops up from the head
+	Demo::DamageTextManager::GetInstance()->Spawn(actualDamage, x, y - 16.0f, Demo::TextType::TakeDamage); //-16.0f from y so the text pops up from the head
 	return IsDead();
+}
+
+void Demo::Player::DealDamage(IEnemy* target, float cardBaseDamage)
+{
+	if (!target) return;
+
+	float currentAtk = GetBuffStat(ItemBuffType::BuffDamage);
+	float finalDamage = cardBaseDamage + currentAtk;
+
+	target->TakeDamage(finalDamage);
 }
 
 bool Demo::Player::IsDead() const
@@ -285,7 +354,57 @@ float Demo::Player::GetHealth() const
 	return health;
 }
 
+float Demo::Player::GetTemporaryDefense() const
+{
+	return temporaryDefense;
+}
+
 std::weak_ptr<DX9GF::RectangleCollider> Demo::Player::GetCollider()
 {
 	return collider;
+}
+
+void Demo::Player::Heal(float value)
+{
+	if (IsDead()) return;
+	health += value;
+	if (health > MAX_HEALTH) health = MAX_HEALTH;
+}
+
+float Demo::Player::GetBuffStat(ItemBuffType targetType) const
+{
+	float val = 0;
+	for (const auto& buff : activeBuffs)
+	{
+		if (buff.type == targetType)
+		{
+			val += buff.value;
+		}
+	}
+	return val;
+}
+void Demo::Player::UpdateBuffs()
+{
+	for (int i = activeBuffs.size() - 1; i >= 0; i--)
+	{
+		if (activeBuffs[i].isNewlyAdded)
+		{
+			activeBuffs[i].isNewlyAdded = false;
+			continue;
+		}
+
+		activeBuffs[i].turnsLeft--;
+
+		if (activeBuffs[i].turnsLeft <= 0)
+		{
+			activeBuffs.erase(activeBuffs.begin() + i);
+		}
+	}
+   temporaryDefense = (std::max)(0.f, GetBuffStat(ItemBuffType::BuffDefense));
+}
+void Demo::Player::AddActiveBuff(const ActiveBuff& buff) {
+	activeBuffs.push_back(buff);
+   if (buff.type == ItemBuffType::BuffDefense) {
+		temporaryDefense = (std::max)(0.f, GetBuffStat(ItemBuffType::BuffDefense));
+	}
 }

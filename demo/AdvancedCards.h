@@ -18,7 +18,8 @@ namespace Demo {
 			if (isDone) return true;
 			if (!targets.empty()) {
 				if (auto enemy = targets[0].lock()) {
-					if (auto e = enemy->GetValue()) e->TakeDamage(12.f);
+					if (auto e = enemy->GetValue())
+						if (owner) owner->DealDamage(e.get(), 12.f);
 				}
 			}
 			isDone = true;
@@ -41,7 +42,8 @@ namespace Demo {
 			if (isDone) return true;
 			if (!targets.empty()) {
 				if (auto enemy = targets[0].lock()) {
-					if (auto e = enemy->GetValue()) e->TakeDamage(3.f);
+					if (auto e = enemy->GetValue())
+						if (owner) owner->DealDamage(e.get(), 3.f);
 					hits++;
 				}
 			}
@@ -70,7 +72,8 @@ namespace Demo {
 			if (isDone) return true;
 			for (auto& wp : targets) {
 				if (auto enemy = wp.lock()) {
-					if (auto e = enemy->GetValue()) e->TakeDamage(4.f);
+					if (auto e = enemy->GetValue())
+						if (owner) owner->DealDamage(e.get(), 4.f);
 				}
 			}
 			isDone = true;
@@ -92,7 +95,8 @@ namespace Demo {
 			float damages[] = { 6.f, 4.f, 2.f };
 			for (size_t i = 0; i < targets.size() && i < 3; ++i) {
 				if (auto enemy = targets[i].lock()) {
-					if (auto e = enemy->GetValue()) e->TakeDamage(damages[i]);
+					if (auto e = enemy->GetValue())
+						if (owner) owner->DealDamage(e.get(), damages[i]);
 				}
 			}
 			isDone = true;
