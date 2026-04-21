@@ -144,6 +144,12 @@
     <ClCompile Include="GameItems.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShopPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HealingPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -266,6 +272,12 @@
     <ClInclude Include="GameItems.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ShopPoint.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="HealingPoint.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="uiter.aseprite">
@@ -334,6 +346,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="TempTex.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="placeholder-healingpoint.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="placeholder-shop.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
