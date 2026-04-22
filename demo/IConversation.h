@@ -12,6 +12,12 @@ namespace Demo {
 		std::queue<DialogueLine> dialogueQueue;
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 		DX9GF::Camera fixedCamera; 
+		std::wstring displayedContent;
+		size_t currentCharIndex = 0;
+		unsigned long long timer = 0;
+		const unsigned long long MS_PER_CHAR = 30;
+		bool isTyping = false;
+		void ResetAnimation();
 	public:
 		IConversation(std::shared_ptr<DX9GF::FontSprite> fontSprite, int screenWidth, int screenHeight);
 
@@ -22,3 +28,4 @@ namespace Demo {
 		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
 	};
 }
+
