@@ -218,6 +218,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="MultiTargetCard.cpp" />
+    <ClCompile Include="NPC1.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">Create</PrecompiledHeader>
@@ -248,6 +249,11 @@
     <ClInclude Include="EnemyCard.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="HandContainer.h" />
+<<<<<<< Updated upstream
+=======
+    <ClInclude Include="NPC1.h" />
+    <ClInclude Include="HealingPoint.h" />
+>>>>>>> Stashed changes
     <ClInclude Include="IBattleScene.h" />
     <ClInclude Include="IBlockCard.h" />
     <ClInclude Include="IButton.h" />
