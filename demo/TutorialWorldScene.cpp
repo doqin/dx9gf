@@ -11,6 +11,11 @@ void Demo::TutorialWorldScene::Init()
 	map->Create(transformManager, colliderManager, "./tutorial.tmx");
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
 
+	npc1 = std::make_shared<NPC1>(transformManager, 250.0f, 120.0f);
+	npc1->Init(game->GetGraphicsDevice(), player, colliderManager, font);
+	npc1->AddLine(L"NPC", L"Hello! Welcome.");
+	npc1->AddLine(L"NPC", L"How to escape this world? I don't know.");
+
 	savePoint = std::make_shared<SavePoint>(transformManager, 200.0f, 150.0f);
 	savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font);
 	savePoint->SetVisible(true);
@@ -55,6 +60,23 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 
 	bool isGamePaused = false;
 
+	if (npc1) {
+		npc1->Update(deltaTime);
+		if (!currentConversation && npc1->CanInteract() && inpMan->KeyPress(DIK_E)) {
+			auto [sw, sh] = camera.GetScreenResolution();
+			currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+			for (auto& line : npc1->GetDialogueLines()) {
+				currentConversation->AddLine(line);
+			}
+		}
+	}
+
+	if (currentConversation) {
+		isGamePaused = true;
+		currentConversation->Execute(deltaTime);
+		if (currentConversation->IsFinished()) currentConversation = nullptr;
+	}
+
 	if (savePoint) {
 		savePoint->Update(deltaTime);
 		if (savePoint->IsMenuOpen()) isGamePaused = true;
@@ -96,6 +118,8 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 	gd->Clear(0xFFFFFFFF);
 	if (SUCCEEDED(gd->BeginDraw())) {
 		map->Draw(camera);
+		if (npc1) npc1->Draw(camera, deltaTime);
+		if (currentConversation) currentConversation->Draw(gd, deltaTime);
 		if (savePoint) {
 			savePoint->Draw(camera, deltaTime);
 		}

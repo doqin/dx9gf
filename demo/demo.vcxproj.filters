@@ -31,9 +31,6 @@
     <Filter Include="Header Files\Projectiles">
       <UniqueIdentifier>{970c8ab7-c2dc-41a4-b4cc-833515485537}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\TutorialWorld">
-      <UniqueIdentifier>{64312bd6-53cf-4d03-9884-4ca4c5a86c83}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -126,6 +123,8 @@
     <ClCompile Include="MultiTargetCard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< Updated upstream
+=======
     <ClCompile Include="TutorialWorldScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -150,6 +149,10 @@
     <ClCompile Include="HealingPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NPC1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+>>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -221,6 +224,9 @@
     <ClInclude Include="HandContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ICard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="PopUpMessage.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
@@ -242,6 +248,9 @@
     <ClInclude Include="SettingsScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IShopScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="CardShop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -251,6 +260,8 @@
     <ClInclude Include="AdvancedCards.h">
       <Filter>Header Files\Cards</Filter>
     </ClInclude>
+<<<<<<< Updated upstream
+=======
     <ClInclude Include="TutorialWorldScene.h">
       <Filter>Header Files\TutorialWorld</Filter>
     </ClInclude>
@@ -278,6 +289,10 @@
     <ClInclude Include="HealingPoint.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
+    <ClInclude Include="NPC1.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+>>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup>
     <None Include="uiter.aseprite">
@@ -287,15 +302,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="placeholder-round-projectile.aseprite">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="tutorial.tmx">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="tutorial.aseprite">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="tutorial.tsx">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -330,30 +336,6 @@
     <Image Include="grab.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="tutorial.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="ui.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="hitimpact-Sheet.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="savepoint-Sheet.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="arrow.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="TempTex.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="placeholder-healingpoint.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="placeholder-shop.png">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc">
@@ -364,13 +346,8 @@
     <Image Include="ui-pack.png">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="arcade-among-2-r46pv.ttf">
+    <Image Include="ui-pack-2.bmp">
       <Filter>Resource Files</Filter>
-    </Font>
-    <Font Include="statusplz.ttf">
-      <Filter>Resource Files</Filter>
-    </Font>
+    </Image>
   </ItemGroup>
 </Project>

@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "HandContainer.h"
 #include "IBlockCard.h"
-#include "MainBlockCard.h"
 #include <algorithm>
 
 void Demo::HandContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
@@ -23,7 +22,7 @@ void Demo::HandContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF:
 
 bool Demo::HandContainer::OnDrop(std::shared_ptr<IDraggable> other)
 {
-	if (!std::dynamic_pointer_cast<ICard>(other) || std::dynamic_pointer_cast<MainBlockCard>(other)) {
+	if (!std::dynamic_pointer_cast<ICard>(other)) {
 		return false;
 	}
 

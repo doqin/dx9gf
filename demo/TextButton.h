@@ -17,15 +17,6 @@ namespace Demo
 		
 		//fix memory allocation
 		std::wstring wText;
-
-		// outline
-		bool hasOutline;
-		float outlineThickness;
-		std::vector<D3DXCOLOR> outlineColors;
-
-		// padding
-		float paddingX;
-		float paddingY;
 	public:
 		TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
 			float x, float y, float w, float h,
@@ -36,8 +27,6 @@ namespace Demo
 		TextButton* SetText(std::string newText);
 		TextButton* SetBackgroundColors(D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled = D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f));
 		TextButton* SetTextColors(DWORD idle, DWORD hover, DWORD click, DWORD disabled = 0xFF888888);
-		TextButton* SetOutline(float thickness, D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled = D3DXCOLOR(0, 0, 0, 1));
-		TextButton* SetPadding(float x, float y);
 
 		void Init(DX9GF::Camera* cam) override;
 		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;

@@ -7,7 +7,7 @@
 namespace Demo
 {
     //---UI CONSTANTS---
-    constexpr float LABEL_COLUMN_X = -144.0f;
+    constexpr float LABEL_COLUMN_X = -40.0f;
     constexpr float SLIDER_COLUMN_X = 20.0f;
     constexpr float SLIDER_DESIRED_WIDTH = 100.0f;
     constexpr float SLIDER_ORIGINAL_WIDTH = 47.0f; // 160 - 113
@@ -27,11 +27,11 @@ namespace Demo
         std::shared_ptr<DX9GF::TransformManager> transformManager;
 
         std::shared_ptr<DX9GF::StaticSprite> bgSprite;
+        std::shared_ptr<DX9GF::StaticSprite> titleSprite;
         std::shared_ptr<DX9GF::Texture> bgTex;
+        std::shared_ptr<DX9GF::Texture> titleTex;
 
         std::shared_ptr<DX9GF::Font> font;
-        std::shared_ptr<DX9GF::FontSprite> fontSprite;
-        std::shared_ptr<DX9GF::Texture> placeholderTex;
         std::shared_ptr<DX9GF::Texture> uiSheetTex;
         std::vector<std::shared_ptr<Demo::IButton>> uiButtons;
         std::shared_ptr<IconButton> backButton;

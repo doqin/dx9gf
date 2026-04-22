@@ -13,15 +13,14 @@ namespace Demo
 	private:
 		Game* game;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
-		std::shared_ptr<DX9GF::SaveManager> saveManager;
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+
 		std::shared_ptr<DX9GF::StaticSprite> bgSprite;
+		std::shared_ptr<DX9GF::StaticSprite> titleSprite;
 		std::shared_ptr<DX9GF::Texture> bgTex;
 		std::shared_ptr<DX9GF::Texture> titleTex;
-		DX9GF::Camera uiCamera;
 
 		//button component
+		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<DX9GF::Texture> buttonSheetTex;
 		std::vector<std::shared_ptr<Demo::IButton>> uiButtons;
 
@@ -29,8 +28,9 @@ namespace Demo
 
 		std::shared_ptr<IconButton> continueButton;
 		std::shared_ptr<IconButton> newGameButton;
-		std::shared_ptr<IconButton> optionsButton;
-		std::shared_ptr<IconButton> creditsButton;
+		std::shared_ptr<IconButton> loadGameButton;
+		std::shared_ptr<IconButton> optionButton;
+		std::shared_ptr<IconButton> creditButton;
 		std::shared_ptr<IconButton> quitButton;
 
 		//use to scale or relocate the sprite/object
@@ -41,7 +41,7 @@ namespace Demo
 
 		MainMenu(Game* game, int screenWidth, int screenHeight)
 			: IScene(screenWidth, screenHeight),
-			game(game), uiCamera(screenWidth, screenHeight) {}
+			game(game){}
 		void Init() override;
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;

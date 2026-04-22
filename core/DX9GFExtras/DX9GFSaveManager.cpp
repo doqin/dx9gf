@@ -3,8 +3,6 @@
 #include <filesystem>
 #include <fstream>
 
-void DX9GF::SaveManager::Clear() { saveables.clear(); }
-
 void DX9GF::SaveManager::Register(ISaveable* saveable)
 {
 	saveables.push_back(saveable);

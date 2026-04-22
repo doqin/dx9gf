@@ -13,10 +13,6 @@ private:
 	DX9GF::CommandBuffer commandBuffer;
 	std::shared_ptr<DX9GF::Font> fontArial;
 	std::shared_ptr<DX9GF::FontSprite> fontSpriteArial;
-
-	std::shared_ptr<DX9GF::Font> fontdetemination;
-	std::shared_ptr<DX9GF::FontSprite> fontSpritedetemination;
-
 	std::vector<std::shared_ptr<GO::Player>> players;
 	std::shared_ptr<GO::Rectangle> rect;
 	std::shared_ptr<DX9GF::TransformManager> transformManager;

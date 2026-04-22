@@ -15,7 +15,7 @@ void Demo::CardShop::LoadItems()
 		50,
 		[this]() {
 			auto newCard = std::make_shared<StrikeCard>(this->transformManager);
-			this->player->AddCardToDeck(newCard->GetSaveID());
+			this->player->AddCardToDeck(newCard);
 		}
 		});
 
@@ -24,7 +24,7 @@ void Demo::CardShop::LoadItems()
 		75,
 		[this]() {
 			auto newCard = std::make_shared<MainBlockCard>(this->transformManager);
-			this->player->AddCardToDeck(newCard->GetSaveID());
+			this->player->AddCardToDeck(newCard);
 		}
 		});
 }

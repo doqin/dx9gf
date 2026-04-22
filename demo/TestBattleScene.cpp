@@ -4,13 +4,13 @@
 void Demo::TestBattleScene::Init()
 {
 	IBattleScene::Init();
-	auto testEnemy = std::make_shared<TestEnemy>(transformManager, 50.f);
+	auto testEnemy = std::make_shared<TestEnemy>(transformManager, 20.f);
 	testEnemy->Init(game->GetGraphicsDevice(), &camera);
 	testEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) {
 		CreateEnemyCard(enemy);
 	});
 	enemies.push_back(testEnemy);
-	testEnemy = std::make_shared<TestEnemy>(transformManager, 50.f);
+	testEnemy = std::make_shared<TestEnemy>(transformManager, 20.f);
 	testEnemy->Init(game->GetGraphicsDevice(), &camera);
 	testEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) {
 		CreateEnemyCard(enemy);
@@ -68,26 +68,6 @@ void Demo::TestBattleScene::Init()
 	strikeCard->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	drawPile.push_back(strikeCard);
 
-	ItemData::GetInstance()->LoadData();
-	this->GiveTestItems();
-
 	StartBattle();
 	transformManager->RebuildHierarchy();
-}
-
-void Demo::TestBattleScene::GiveTestItems()
-{
-	ItemInventory& testItems = this->player->GetInventoryItems();
-	testItems.InitFixedInventory(10);
-
-	testItems.AddItem(0, 5);
-	testItems.AddItem(1, 3);
-	testItems.AddItem(2, 2);
-	testItems.AddItem(3, 1);
-	testItems.AddItem(4, 1);
-	testItems.AddItem(5, 1);
-	testItems.AddItem(6, 1);
-	testItems.AddItem(7, 1);
-	testItems.AddItem(8, 1);
-	testItems.AddItem(9, 1);
 }

@@ -77,11 +77,6 @@ HRESULT DX9GF::GraphicsDevice::BeginDraw()
 	return d3ddev->BeginScene();
 }
 
-HRESULT DX9GF::GraphicsDevice::Clear(D3DXCOLOR color)
-{
-	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, color, 1.0f, 0);
-}
-
 HRESULT DX9GF::GraphicsDevice::Clear()
 {
 	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
@@ -105,51 +100,22 @@ HRESULT DX9GF::GraphicsDevice::IsValid()
 	return d3ddev->TestCooperativeLevel();
 }
 
-void DX9GF::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness)
+void DX9GF::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color)
 {
-	if (thickness <= 1.0f) {
-		Vertex vertices[] = {
-			{ .x=x1, .y=y1, .z=0.0f, .rhw=1.0f, .color=color },
-			{ .x=x2, .y=y2, .z=0.0f, .rhw=1.0f, .color=color }
-		};
-		d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-		d3ddev->DrawPrimitiveUP(D3DPT_LINELIST, 1, vertices, sizeof(Vertex));
-	}
-	else {
-		float dx = x2 - x1;
-		float dy = y2 - y1;
-		float len = std::sqrt(dx * dx + dy * dy);
-		if (len < 0.00001f) return;
-
-		float nx = -dy / len;
-		float ny = dx / len;
-
-		float halfThickness = thickness * 0.5f;
-
-		Vertex vertices[] = {
-			{ .x = x1 + nx * halfThickness, .y = y1 + ny * halfThickness, .z = 0.0f, .rhw = 1.0f, .color = color },
-			{ .x = x2 + nx * halfThickness, .y = y2 + ny * halfThickness, .z = 0.0f, .rhw = 1.0f, .color = color },
-			{ .x = x1 - nx * halfThickness, .y = y1 - ny * halfThickness, .z = 0.0f, .rhw = 1.0f, .color = color },
-			{ .x = x2 - nx * halfThickness, .y = y2 - ny * halfThickness, .z = 0.0f, .rhw = 1.0f, .color = color }
-		};
-
-		DWORD prevCullMode;
-		d3ddev->GetRenderState(D3DRS_CULLMODE, &prevCullMode);
-		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-
-		d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices, sizeof(Vertex));
-
-		d3ddev->SetRenderState(D3DRS_CULLMODE, prevCullMode);
-	}
+	Vertex vertices[] = {
+		{ .x=x1, .y=y1, .z=0.0f, .rhw=1.0f, .color=color },
+		{ .x=x2, .y=y2, .z=0.0f, .rhw=1.0f, .color=color }
+	};
+	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3ddev->DrawPrimitiveUP(D3DPT_LINELIST, 1, vertices, sizeof(Vertex));
 }
 
-void DX9GF::GraphicsDevice::DrawLine(const DX9GF::Camera& camera, float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness)
+void DX9GF::GraphicsDevice::DrawLine(const DX9GF::Camera& camera, float x1, float y1, float x2, float y2, D3DCOLOR color)
 {
 	auto matCamera = camera.GetTransformMatrix();
 	auto p1 = TransformPoint(matCamera, x1, y1);
 	auto p2 = TransformPoint(matCamera, x2, y2);
-	DrawLine(p1.x, p1.y, p2.x, p2.y, color, thickness);
+	DrawLine(p1.x, p1.y, p2.x, p2.y, color);
 }
 
 void DX9GF::GraphicsDevice::DrawRectangle(float x, float y, float width, float height, D3DCOLOR color, bool isFilled)

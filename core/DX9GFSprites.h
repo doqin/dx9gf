@@ -31,14 +31,11 @@ namespace DX9GF {
 		UINT frame_index = 0;
 		unsigned int frameRate = 24;
 		unsigned long long delta = 0;
-		bool isLooped;
 	public:
-		AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate = 24, bool isLooped = true);
+		AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate = 24);
 		~AnimatedSprite();
 		void SetFrame(unsigned int frameIndex);
 		void SetFrameRate(unsigned int frameRate);
-		void SetLooped(bool isLooped);
-		bool IsFinished() const; // returns true if the animation has finished playing (only relevant if isLooped is false)
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;
 		void End() override;
@@ -49,17 +46,12 @@ namespace DX9GF {
 		RECT* p_src = nullptr;
 		Font* font = nullptr;
 		std::wstring text;
-		bool isBold = false;
-		bool isOutline = false;
-		D3DCOLOR outlineColor = 0xFF000000;
 	public:
 		FontSprite(Font* font);
 		~FontSprite();
 		void SetText(std::wstring&& text);
 		void SetColor(D3DCOLOR color);
-		void SetBold(bool bold);
-		void SetOutline(bool outline, D3DCOLOR color = 0xFF000000);
-	  LONG GetWidth() const;
+      LONG GetWidth() const;
 		LONG GetHeight() const;
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;

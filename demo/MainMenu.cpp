@@ -3,16 +3,10 @@
 #include "resource.h"
 #include "IconButton.h"
 #include "SettingsScene.h"
-#include "TutorialWorldScene.h"
-#include <fstream>
-#include <cstdio>
-
 namespace Demo
 {
 	void MainMenu::UpdateLayout(int screenW, int screenH)
 	{
-		camera.SetPosition({ screenW / 2.f, 0 });
-
 		//BACKGROUND - use aspect fill
 		float bgImageW = (float)bgTex->GetWidth();
 		float bgImageH = (float)bgTex->GetHeight();
@@ -31,12 +25,33 @@ namespace Demo
 		bgSprite->SetOrigin(bgImageW / 2.0f, bgImageH / 2.0f);
 		bgSprite->SetPosition(0, 0);
 
+		//TITLE - use scale to fit (have a limit)
+		float titleImageW = (float)titleTex->GetWidth();
+		float titleImageH = (float)titleTex->GetHeight();
+
+		if (!titleSprite) {
+			titleSprite = std::make_shared<DX9GF::StaticSprite>(titleTex.get());
+			titleSprite->SetSrcRect({ 0, 0, (LONG)titleImageW, (LONG)titleImageH });
+		}
+
+		float maxTitleWidth = screenW * 0.5f;
+		float titleScale = maxTitleWidth / titleImageW;
+		float maxTitleHeight = screenH * 0.4f;
+
+		if ((titleImageH * titleScale) > maxTitleHeight) {
+			titleScale = maxTitleHeight / titleImageH;
+		}
+
+		titleSprite->SetScale(titleScale);
+		titleSprite->SetOrigin(titleImageW / 2.0f, titleImageH / 2.0f);
+		titleSprite->SetPosition(0, -screenH * 0.20f);
+
 		//spacing between buttons
 		float spacingY = 10.0f;
 		//start drawing from 40% of the screen height
 		float startY = -screenH * 0.10f;
 
-		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, optionsButton, creditsButton, quitButton };
+		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };
 		float currentY = startY;
 
 		for (auto& btn : buttons)
@@ -44,7 +59,7 @@ namespace Demo
 			if (btn)
 			{
 				//center X
-				float posX = 64.f;
+				float posX = -(btn->GetWidth() / 2.0f);
 				btn->SetLocalPosition(posX, currentY);
 
 				//button spacing
@@ -52,17 +67,11 @@ namespace Demo
 			}
 		}
 
-		//TITLE
-		auto [_, y] = continueButton->GetLocalPosition();
-		auto height = fontSprite->GetHeight();
-		fontSprite->SetPosition(64.f, y - height * 3 - 32.f);
 	}
 
 	void MainMenu::Init()
 	{
-
 		transformManager = std::make_shared<DX9GF::TransformManager>();
-		saveManager = std::make_shared<DX9GF::SaveManager>();
 
 		auto app = DX9GF::Application::GetInstance();
 		lastScreenWidth = app->GetScreenWidth();
@@ -70,7 +79,7 @@ namespace Demo
 
 		//load textures
 		buttonSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
-		buttonSheetTex->LoadTexture(L"ui.png");
+		buttonSheetTex->LoadTexture(L"ui-pack.png");
 
 		bgTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		bgTex->LoadTexture(IDB_PNG2);
@@ -78,80 +87,57 @@ namespace Demo
 		titleTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		titleTex->LoadTexture(IDB_PNG3);
 
+		//Load cursor textures
+		auto input = DX9GF::InputManager::GetInstance();
+		auto gd = game->GetGraphicsDevice();
 
-		// Sprites
-		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
-		fontSprite->SetColor(0xFF000000);
+		//hotspot (hX, hY) must be multiplied by the scale factor
+		input->AddCursor(DX9GF::InputManager::CursorType::CURSOR, gd, L"cursor.png", 0.2f, 0.0f, 0.0f);
+		input->AddCursor(DX9GF::InputManager::CursorType::POINTER, gd, L"pointer.png", 0.2f, 0.0f, 0.0f);
+		input->AddCursor(DX9GF::InputManager::CursorType::CLICK, gd, L"click.png", 0.2f, 4.0f, 6.0f);
+		input->AddCursor(DX9GF::InputManager::CursorType::GRAB, gd, L"grab.png", 0.2f, 14.8f, 14.8);
+		input->AddCursor(DX9GF::InputManager::CursorType::TEXTSELECT, gd, L"text-select.png", 0.2f, 10.0f, 16.0f);
 
 		//BUTTONS INIT
 		//Continue Button
-		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 4);
-		continueButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(144, 96, 48, 16, 4));
-		//continueButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
-		continueButton->SetSpriteScale(2.f, 2.f);
-		/*continueButton->SetState(IButton::ButtonState::DISABLED);*/
-
-		std::ifstream f("savegame.json");
-		if (f.good()) {
-			continueButton->SetState(IButton::ButtonState::IDLE);
-		}
-		else {
-			continueButton->SetState(IButton::ButtonState::DISABLED);
-		}
-		f.close();
-
-		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
-			auto app = DX9GF::Application::GetInstance();
-			auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
-			saveManager->Clear();
-			saveManager->Register(world);
-			game->GetSceneManager()->PushScene(world);
-			saveManager->Load("savegame.json");
-			game->GetSceneManager()->GoToNext();
-		});
+		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);
+		continueButton->SetSpriteCoords(577, 193, 94, 30, 34);
+		continueButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 
 		//New Game Button
-		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
-		newGameButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(144, 48, 48, 16, 3));
-		newGameButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { 
-			std::remove("savegame.json");
-			auto app = DX9GF::Application::GetInstance();
-			auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
-			saveManager->Clear();
-			saveManager->Register(world);
-			game->GetSceneManager()->PushScene(world);
-			game->GetSceneManager()->GoToNext();
-		});
-		newGameButton->SetSpriteScale(2.f, 2.f);
+		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);
+		newGameButton->SetSpriteCoords(577, 481, 94, 30, 34);
+		newGameButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
+
+		//Load Game Button
+		loadGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 94, 30, buttonSheetTex, 3);
+		loadGameButton->SetSpriteCoords(577, 513, 94, 30, 34);
+		loadGameButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 
 		//Options Button
-		optionsButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
-		optionsButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(192, 48, 48, 16, 3));
-		optionsButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		optionButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30, buttonSheetTex, 3);
+		optionButton->SetSpriteCoords(577, 65, 78, 30, 50);
+		optionButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 			auto app = DX9GF::Application::GetInstance();
 			//push Settings Scene
 			this->game->GetSceneManager()->PushScene(
 				new SettingsScene(this->game, app->GetScreenWidth(), app->GetScreenHeight())
 			);
 			this->game->GetSceneManager()->GoToNext();
-		});
-		optionsButton->SetSpriteScale(2.f, 2.f);
+			});
 
 		//Credits Button
-		creditsButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
-		creditsButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(192, 96, 48, 16, 3));
-		creditsButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
-		creditsButton->SetSpriteScale(2.f, 2.f);
+		creditButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 78, 30, buttonSheetTex, 3);
+		creditButton->SetSpriteCoords(577, 1, 78, 30, 50);
+		creditButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
 
 		//Quit Button
-		quitButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
-		quitButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(240, 48, 48, 16, 3));
+		quitButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 62, 30, buttonSheetTex, 3);
+		quitButton->SetSpriteCoords(385, 449, 62, 30, 2);
 		quitButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { PostQuitMessage(0); });
-		quitButton->SetSpriteScale(2.f, 2.f);
 
 		//active buttons
-		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, optionsButton, creditsButton, quitButton };
+		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, loadGameButton, optionButton, creditButton, quitButton };
 		for (auto& btn : buttons)
 		{
 			if (btn)
@@ -169,11 +155,6 @@ namespace Demo
 
 	void MainMenu::Update(unsigned long long deltaTime)
 	{
-		auto [currW, currH] = camera.GetScreenResolution();
-		auto [lastWidth, lastHeight] = uiCamera.GetScreenResolution();
-		if (currW != lastWidth || currH != lastHeight) {
-			uiCamera.SetScreenResolution(currW, currH);
-		}
 		auto inpMan = DX9GF::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
@@ -182,21 +163,13 @@ namespace Demo
 		int currentWidth = app->GetScreenWidth();
 		int currentHeight = app->GetScreenHeight();
 
-		static float timer = 0;
-		timer += deltaTime;
-		if (timer > 0) {
-			std::ifstream f("savegame.json");
-			if (f.good()) {
-				continueButton->SetState(IButton::ButtonState::IDLE);
-			}
-			else {
-				continueButton->SetState(IButton::ButtonState::DISABLED);
-			}
-			f.close();
-			timer = 0;
+		//check the size and update if there is a change
+		if (currentWidth != lastScreenWidth || currentHeight != lastScreenHeight)
+		{
+			UpdateLayout(currentWidth, currentHeight);
+			lastScreenWidth = currentWidth;
+			lastScreenHeight = currentHeight;
 		}
-
-		UpdateLayout(currW, currH);
 
 		for (auto& button : uiButtons)
 		{
@@ -210,33 +183,27 @@ namespace Demo
 	void MainMenu::Draw(unsigned long long deltaTime)
 	{
 		auto gd = game->GetGraphicsDevice();
-		gd->Clear(0xFFFFFFFF);
+		gd->Clear();
 		if (SUCCEEDED(gd->BeginDraw())) {
-			//if (bgSprite)
-			//{
-			//	bgSprite->Begin();
-			//	bgSprite->Draw(camera, deltaTime);
-			//	bgSprite->End();
-			//}
-			fontSprite->Begin();
-			auto prevPos = fontSprite->GetPosition();
-			auto height = fontSprite->GetHeight();
-			fontSprite->SetText(L"Toi, sinh vien nam 6 UIT,");
-			fontSprite->Draw(camera, deltaTime);
-			fontSprite->SetPosition(prevPos.x, prevPos.y + height);
-			fontSprite->SetText(L"bi hut vao cyberspace");
-			fontSprite->Draw(camera, deltaTime);
-			fontSprite->SetPosition(prevPos.x, prevPos.y + height * 2);
-			fontSprite->SetText(L"vi click vao link doc");
-			fontSprite->Draw(camera, deltaTime);
-			fontSprite->SetPosition(prevPos.x, prevPos.y);
-			fontSprite->End();
+			if (bgSprite)
+			{
+				bgSprite->Begin();
+				bgSprite->Draw(camera, deltaTime);
+				bgSprite->End();
+			}
+
+			if (titleSprite)
+			{
+				titleSprite->Begin();
+				titleSprite->Draw(camera, deltaTime);
+				titleSprite->End();
+			}
 
 			for (auto& btn : uiButtons)
 			{
 				btn->Draw(gd, deltaTime);
 			}
-			DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+			DX9GF::InputManager::GetInstance()->DrawCursor(&this->camera, deltaTime);
 			gd->EndDraw();
 		}
 		gd->Present();

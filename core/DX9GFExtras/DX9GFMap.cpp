@@ -1,13 +1,9 @@
 #include "pch.h"
 #include "DX9GFMap.h"
 #include "../DX9GFUtils.h"
-#include <filesystem>
 
 void DX9GF::Map::Create(std::weak_ptr<TransformManager> transformManager, std::weak_ptr<ColliderManager> colliderManager, std::string pathToTmx)
 {
-	if (!std::filesystem::exists(pathToTmx)) {
-		throw std::invalid_argument("Could not find map file: " + pathToTmx);
-	}
 	if (!map.load(pathToTmx)) {
 		throw std::invalid_argument("Could not load map file: " + pathToTmx);
 	}
@@ -16,13 +12,8 @@ void DX9GF::Map::Create(std::weak_ptr<TransformManager> transformManager, std::w
 	assert(!tileSets.empty());
 	for (const auto& ts : tileSets)
 	{
-		std::string imgPathStr = ts.getImagePath();
-		if (!std::filesystem::exists(imgPathStr)) {
-			// Skip or throw? It's better to throw or log, let's throw.
-			throw std::invalid_argument("Could not find texture file: " + imgPathStr);
-		}
 		textures.emplace_back(std::make_shared<Texture>(graphicsDevice));
-		std::wstring imgPath{ std::from_range, imgPathStr };
+		std::wstring imgPath{ std::from_range, ts.getImagePath() };
 		textures.back()->LoadTexture(imgPath);
 	}
 	// load the layers

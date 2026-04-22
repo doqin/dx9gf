@@ -32,9 +32,7 @@ void Demo::IEnemy::Update(unsigned long long deltaTime)
     }
     for (auto& indicator : damageIndicators) {
         indicator.elapsed += deltaTime;
-        indicator.vy += 800.f * deltaTime / 1000.f; // gravity
-        indicator.offsetX += indicator.vx * deltaTime / 1000.f;
-        indicator.offsetY += indicator.vy * deltaTime / 1000.f;
+        indicator.offsetY -= 20.f * deltaTime / 1000.f;
     }
     damageIndicators.erase(std::remove_if(damageIndicators.begin(), damageIndicators.end(), [](const DamageIndicator& indicator) {
         return indicator.elapsed >= 700;
@@ -50,7 +48,6 @@ void Demo::IEnemy::Update(unsigned long long deltaTime)
         projectile->Update(deltaTime);
     }
     commandBuffer.Update(deltaTime);
-    animationBuffer.Update(deltaTime);
 }
 
 void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
@@ -58,10 +55,9 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
     if (!graphicsDevice || !camera) {
         return;
     }
-    this->graphicsDevice = graphicsDevice;
-    if (!font) {
-        font = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
-        fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+    if (!damageFont) {
+        damageFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"Arial", 18);
+        damageFontSprite = std::make_shared<DX9GF::FontSprite>(damageFont.get());
     }
     if (cardSpawnTrigger) {
         cardSpawnTrigger->Draw(graphicsDevice, *camera);
@@ -71,63 +67,43 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
     const auto totalHealth = static_cast<int>(std::round(maxHealth));
     auto healthText = std::to_wstring(currentHealth) + L"/" + std::to_wstring(totalHealth);
 
-    fontSprite->Begin();
-	fontSprite->SetOutline(false);
-    fontSprite->SetColor(0xFF000000);
-    fontSprite->SetPosition(GetWorldX(), GetWorldY() - 48.f);
-    fontSprite->SetText(std::move(healthText));
-    fontSprite->Draw(*camera, deltaTime);
+    damageFontSprite->Begin();
+    damageFontSprite->SetColor(0xFFFFFFFF);
+    damageFontSprite->SetPosition(GetWorldX(), GetWorldY() - 48.f);
+    damageFontSprite->SetText(std::move(healthText));
+    damageFontSprite->Draw(*camera, deltaTime);
 
-    for (auto it = hitImpactSprites.begin(); it != hitImpactSprites.end(); ) {
-        auto& sprite = *it;
-        sprite->Begin();
-        sprite->Draw(*camera, deltaTime);
-        sprite->End();
-        if (sprite->IsFinished()) {
-            it = hitImpactSprites.erase(it);
-        }
-        else {
-            ++it;
-        }
-    }
-
-    for (size_t i = 0; i < damageIndicators.size(); ++i) {
+   for (size_t i = 0; i < damageIndicators.size(); ++i) {
         auto text = damageIndicators[i].text;
-        fontSprite->SetColor(0xFFFF4444);
-        fontSprite->SetOutline(true, 0xFF000000);
-        fontSprite->SetBold(true);
-        fontSprite->SetScale(2.f);
-        fontSprite->SetPosition(GetWorldX() + damageIndicators[i].offsetX, GetWorldY() - 30.f + damageIndicators[i].offsetY);
-        fontSprite->SetText(std::move(text));
-        fontSprite->Draw(*camera, deltaTime);
-    }
-	fontSprite->SetBold(false);
-	fontSprite->SetOutline(false);
-	fontSprite->SetScale(1.f);
-
-    float statusOffsetX = 30.f;
-    float statusOffsetY = -20.f;
-
-    for (const auto& status : activeStatuses) {
-        std::wstring statusName = L"Unknown";
-        if (status.type == StatusType::POISON) statusName = L"Poison";
-        else if (status.type == StatusType::VULNERABLE) statusName = L"Vulnerable";
-        else if (status.type == StatusType::WEAK) statusName = L"Weak";
-        else if (status.type == StatusType::STUN) statusName = L"Stun";
-
-        std::wstring statusText = statusName + L" (" + std::to_wstring(status.duration) + L")";
-
-        fontSprite->SetColor(0xFFFFFF00);
-		fontSprite->SetOutline(true, 0xFF000000);
-        fontSprite->SetPosition(GetWorldX() + statusOffsetX, GetWorldY() + statusOffsetY);
-
-        fontSprite->SetText(std::move(statusText));
-        fontSprite->Draw(*camera, deltaTime);
-
-        statusOffsetY += 16.f;
+        damageFontSprite->SetColor(0xFFFF4444);
+     damageFontSprite->SetPosition(GetWorldX(), GetWorldY() - 30.f + damageIndicators[i].offsetY - i * 14.f);
+        damageFontSprite->SetText(std::move(text));
+        damageFontSprite->Draw(*camera, deltaTime);
     }
 
-    fontSprite->End();
+   float statusOffsetX = 30.f;
+   float statusOffsetY = -20.f;
+
+   for (const auto& status : activeStatuses) {
+       std::wstring statusName = L"Unknown";
+       if (status.type == StatusType::POISON) statusName = L"Poison";
+       else if (status.type == StatusType::VULNERABLE) statusName = L"Vulnerable";
+       else if (status.type == StatusType::WEAK) statusName = L"Weak";
+       else if (status.type == StatusType::STUN) statusName = L"Stun";
+
+       std::wstring statusText = statusName + L" (" + std::to_wstring(status.duration) + L")";
+
+       damageFontSprite->SetColor(0xFFFFFF00);
+
+       damageFontSprite->SetPosition(GetWorldX() + statusOffsetX, GetWorldY() + statusOffsetY);
+
+       damageFontSprite->SetText(std::move(statusText));
+       damageFontSprite->Draw(*camera, deltaTime);
+
+       statusOffsetY += 16.f;
+   }
+
+    damageFontSprite->End();
     for (auto& projectile : projectiles) {
         projectile->Draw(*camera, deltaTime);
     }
@@ -142,45 +118,12 @@ bool Demo::IEnemy::TakeDamage(float damage)
     }
     health -= finalDamage;
     if (health < 0) health = 0;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> vxDis(-64.f, 64.f);
-    std::uniform_real_distribution<float> vyDis(-200.f, -100.f);
-
     damageIndicators.push_back(DamageIndicator{
         L"-" + std::to_wstring(static_cast<int>(std::round(finalDamage))),
         0.f,
-        0.f,
-        vxDis(gen),
-        vyDis(gen),
         0
     });
-	if (!hitImpactTexture && graphicsDevice) { // graphicsDevice should be not null by now
-		hitImpactTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		hitImpactTexture->LoadTexture(L"hitimpact-Sheet.png");
-	}
-	hitImpactSprites.push_back(std::make_shared<DX9GF::AnimatedSprite>(hitImpactTexture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 4), 24, false));
-	std::uniform_real_distribution<float> dis(-16.f, 16.f);
-	std::uniform_real_distribution<float> scaleDis(2.f, 3.f);
-	std::uniform_real_distribution<float> rotDis(-0.5f, 0.5f);
-	hitImpactSprites.back()->SetPosition(GetWorldX() + dis(gen), GetWorldY() + dis(gen));
-	hitImpactSprites.back()->SetScale(scaleDis(gen));
-	hitImpactSprites.back()->SetRotation(rotDis(gen));
-
-	// Queue shake animation
-	float ox = GetWorldX();
-	float oy = GetWorldY();
-
-	// Only queue if animationBuffer is not busy to prevent drifting from rapid hits
-	if (!animationBuffer.IsBusy()) {
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox - 8.f, oy - 6.f, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox + 8.f, oy + 6.f, 0.1f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox - 4.f, oy - 4.f, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox + 4.f, oy + 2.f, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox, oy, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-	}
-
-	return IsDead();
+    return IsDead();
 }
 
 void Demo::IEnemy::SetState(bool isOnStandby)
@@ -214,7 +157,9 @@ bool Demo::IEnemy::HasStatus(StatusType type) const {
 void Demo::IEnemy::TickStatuses() {
     for (auto it = activeStatuses.begin(); it != activeStatuses.end(); ) {
         if (it->type == StatusType::POISON && it->duration > 0) {
-			this->TakeDamage(it->value);
+            health -= it->value;
+            if (health < 0) health = 0;
+            damageIndicators.push_back(DamageIndicator{ L"-" + std::to_wstring(static_cast<int>(it->value)) + L" (Poison)", 0.f, 0 });
         }
 
         it->duration--;

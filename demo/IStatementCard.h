@@ -3,11 +3,10 @@
 #include "IDraggable.h"
 
 namespace Demo {
-	class IStatementCard : public ICard, public IDraggable {
+  class IStatementCard : public ICard, public IDraggable {
 	public:
-		inline IStatementCard(std::weak_ptr<DX9GF::TransformManager> transformManager)
-			: IGameObject(transformManager), ICard(transformManager), IDraggable(transformManager) {
-		}
+       inline IStatementCard(std::weak_ptr<DX9GF::TransformManager> transformManager)
+			: IGameObject(transformManager), ICard(transformManager), IDraggable(transformManager) {}
 		inline IStatementCard(
 			std::weak_ptr<DX9GF::TransformManager> transformManager,
 			size_t dragAreaWidth,
@@ -19,8 +18,7 @@ namespace Demo {
 			float scaleY = 1
 		) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY),
 			ICard(transformManager, x, y, rotation, scaleX, scaleY),
-			IDraggable(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {
-		}
+			IDraggable(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {}
 		inline IStatementCard(
 			std::weak_ptr<DX9GF::TransformManager> transformManager,
 			std::weak_ptr<DX9GF::IGameObject> parent,
@@ -33,18 +31,8 @@ namespace Demo {
 			float scaleY = 1
 		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY),
 			ICard(transformManager, parent, x, y, rotation, scaleX, scaleY),
-			IDraggable(transformManager, parent, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {
-		}
+			IDraggable(transformManager, parent, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {}
 		virtual bool Execute() = 0;
 		virtual void ResetExecution() {}
-
-		virtual std::wstring GetInputsDescription() const { return L"None"; }
-
-	protected:
-		std::shared_ptr<DX9GF::Font> descFont;
-		std::shared_ptr<DX9GF::FontSprite> descFontSprite;
-
-	public:
-		virtual void Draw(unsigned long long deltaTime) override;
 	};
 }

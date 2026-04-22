@@ -28,7 +28,7 @@ bool Demo::StrikeCard::Execute()
 	}
 	if (auto lock = enemyCard.lock()) {
 		if (auto enemy = lock->GetValue()) {
-			if (!owner) owner->DealDamage(enemy.get(), 5.f);
+			enemy->TakeDamage(5.f);
 		}
 	}
 	isDone = true;
@@ -57,15 +57,10 @@ void Demo::StrikeCard::Update(unsigned long long deltaTime)
 
 void Demo::StrikeCard::Draw(unsigned long long deltaTime)
 {
-	if (graphicsDevice && camera && dragAreaWidth > 0) {
-		graphicsDevice->DrawRectangle(*camera, GetWorldX(), GetWorldY(), dragAreaWidth, dragAreaHeight, 0xFFEEEEEE, true);
-		graphicsDevice->DrawRectangle(*camera, GetWorldX(), GetWorldY(), dragAreaWidth, dragAreaHeight, 0xFF000000, false);
-	}
 	IStatementCard::Draw(deltaTime);
 	if (!nameFont) {
-		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"Arial", 16);
 		nameFontSprite = std::make_shared<DX9GF::FontSprite>(nameFont.get());
-		nameFontSprite->SetColor(0xFF000000);
 	}
 	nameFontSprite->Begin();
 	nameFontSprite->SetPosition(GetWorldX() + 8.f, GetWorldY() + 8.f);
@@ -77,19 +72,6 @@ void Demo::StrikeCard::Draw(unsigned long long deltaTime)
 size_t Demo::StrikeCard::GetCost() const
 {
 	return 1;
-}
-
-std::wstring Demo::StrikeCard::GetDescription() const
-{
-	return L"Deal 5 damage to an enemy.";
-}
-
-std::wstring Demo::StrikeCard::GetInputsDescription() const
-{
-	if (enemyCard.lock()) {
-		return L"1/1 Enemy";
-	}
-	return L"0/1 Enemy";
 }
 
 size_t Demo::StrikeCard::GetWidth() const

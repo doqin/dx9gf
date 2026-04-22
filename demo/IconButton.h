@@ -18,9 +18,7 @@ namespace Demo
 
 		//An extra flag to determine the frame cutting method.
 		IconButton* SetSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing, bool isVertical = false);
-		IconButton* SetSpriteRects(std::vector<RECT> rects);
 		void Init(DX9GF::Camera* cam) override;
-		void SetSpriteScale(float scaleX, float scaleY);
 		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
 	};
 }

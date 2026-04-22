@@ -67,17 +67,7 @@ void DX9GF::StaticSprite::SetSrcRect(RECT srcRect)
 	this->p_src = new RECT(srcRect);
 }
 
-DX9GF::AnimatedSprite::AnimatedSprite(
-	Texture* spritesheet, 
-	std::vector<RECT> frames, 
-	UINT frameRate, 
-	bool isLooped
-) : ISprite(spritesheet->GetGraphicsDevice()), 
-	frames(frames), 
-	frameRate(frameRate), 
-	texture(spritesheet), 
-	isLooped(isLooped) 
-{
+DX9GF::AnimatedSprite::AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate) : ISprite(spritesheet->GetGraphicsDevice()), frames(frames), frameRate(frameRate), texture(spritesheet) {
 	HRESULT result = D3DXCreateSprite(graphicsDevice->GetDevice(), &p_sprite);
 
 	if (result != D3D_OK) {
@@ -102,17 +92,6 @@ void DX9GF::AnimatedSprite::SetFrameRate(unsigned int frameRate)
 	this->frameRate = frameRate;
 }
 
-void DX9GF::AnimatedSprite::SetLooped(bool isLooped)
-{
-	this->isLooped = isLooped;
-}
-
-bool DX9GF::AnimatedSprite::IsFinished() const
-{
-	if (isLooped) return false;
-	return frame_index >= frames.size() - 1;
-}
-
 void DX9GF::AnimatedSprite::Begin()
 {
 	p_sprite->OnLostDevice();
@@ -132,9 +111,6 @@ void DX9GF::AnimatedSprite::Draw(const Camera& camera, unsigned long long deltaT
 	if (delta > 1000 / frameRate) {
 		frame_index += delta / (1000 / frameRate); // this will handle skipping more than 1 frame if delta is worth 2+ frame time
 		delta = 0;
-	}
-	if (!isLooped && frame_index >= frames.size()) {
-		frame_index = frames.size() - 1;
 	}
 	frame_index %= frames.size();
 	auto p_src = &frames.at(frame_index);
@@ -181,17 +157,6 @@ void DX9GF::FontSprite::SetText(std::wstring&& text)
 void DX9GF::FontSprite::SetColor(D3DCOLOR color)
 {
 	this->color = color;
-}
-
-void DX9GF::FontSprite::SetBold(bool bold)
-{
-	this->isBold = bold;
-}
-
-void DX9GF::FontSprite::SetOutline(bool outline, D3DCOLOR color)
-{
-	this->isOutline = outline;
-	this->outlineColor = color;
 }
 
 LONG DX9GF::FontSprite::GetWidth() const
@@ -243,6 +208,7 @@ void DX9GF::FontSprite::Draw(const Camera& camera, unsigned long long deltaTime)
 	auto matWorld = GetTransformMatrix();
 	auto matCamera = camera.GetTransformMatrix();
 	auto matFinal = matWorld * matCamera;
+	p_sprite->SetTransform(&matFinal);
 	RECT rect{};
 	DWORD format = 0;
 	if (p_src == nullptr) {
@@ -256,39 +222,7 @@ void DX9GF::FontSprite::Draw(const Camera& camera, unsigned long long deltaTime)
 		rect = *p_src;
 		format = DT_TOP | DT_LEFT;
 	}
-
-	if (isOutline) {
-		const float offsets[8][2] = {
-			{-1.f, 0.f}, {1.f, 0.f}, {0.f, -1.f}, {0.f, 1.f},
-			{-1.f, -1.f}, {1.f, -1.f}, {-1.f, 1.f}, {1.f, 1.f}
-		};
-		for (int i = 0; i < 8; ++i) {
-			auto matOffsetWorld = matWorld;
-			matOffsetWorld._41 += offsets[i][0];
-			matOffsetWorld._42 += offsets[i][1];
-			auto matOffsetFinal = matOffsetWorld * matCamera;
-			p_sprite->SetTransform(&matOffsetFinal);
-			font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, outlineColor);
-
-			if (isBold) {
-				matOffsetWorld._41 += 1.0f;
-				matOffsetFinal = matOffsetWorld * matCamera;
-				p_sprite->SetTransform(&matOffsetFinal);
-				font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, outlineColor);
-			}
-		}
-	}
-
-	p_sprite->SetTransform(&matFinal);
 	font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, color);
-
-	if (isBold) {
-		auto matOffsetWorld = matWorld;
-		matOffsetWorld._41 += 1.0f; // Offset X by 1
-		auto matOffsetFinal = matOffsetWorld * matCamera;
-		p_sprite->SetTransform(&matOffsetFinal);
-		font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, color);
-	}
 }
 
 void DX9GF::FontSprite::End()

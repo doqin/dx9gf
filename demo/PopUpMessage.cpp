@@ -5,9 +5,8 @@ void Demo::PopUpMessage::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Came
 {
 	this->graphicsDevice = graphicsDevice;
 	this->camera = camera;
-	font = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+	font = std::make_shared<DX9GF::Font>(graphicsDevice, L"Arial", 20);
 	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
-	fontSprite->SetColor(0xFF000000);
 }
 
 void Demo::PopUpMessage::QueueMessage(DX9GF::CommandBuffer* commandBuffer, std::wstring message)
