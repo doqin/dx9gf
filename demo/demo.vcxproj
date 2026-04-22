@@ -326,6 +326,9 @@
     <Image Include="hitimpact-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="NPC1.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="placeholder-healingpoint.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

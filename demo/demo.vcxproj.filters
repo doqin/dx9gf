@@ -360,6 +360,9 @@
     <Image Include="placeholder-shop.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="NPC1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc">
