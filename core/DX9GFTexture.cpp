@@ -128,8 +128,8 @@ void DX9GF::Texture::LoadTexture(std::wstring filePath, UINT width, UINT height)
 	auto result = D3DXCreateTextureFromFileExW(
 		graphicsDevice->GetDevice(),
 		filePath.c_str(),
-		width,
-		height,
+		width == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : width,
+		height == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : height,
 		1,
 		0,
 		D3DFMT_A8R8G8B8,
@@ -148,12 +148,15 @@ void DX9GF::Texture::LoadTexture(std::wstring filePath, UINT width, UINT height)
 	if (result != D3D_OK) {
 		throw MakeDxError(result);
 	}
-	if (width == D3DX_DEFAULT && height == D3DX_DEFAULT) {
+
+	if (width == D3DX_DEFAULT_NONPOW2 || width == D3DX_DEFAULT) {
 		this->width = imageInfo.Width;
-		this->height = imageInfo.Height;
-	}
-	else {
+	} else {
 		this->width = width;
+	}
+	if (height == D3DX_DEFAULT_NONPOW2 || height == D3DX_DEFAULT) {
+		this->height = imageInfo.Height;
+	} else {
 		this->height = height;
 	}
 }
@@ -174,8 +177,8 @@ void DX9GF::Texture::LoadTexture(int resourceId, UINT width, UINT height)
 		graphicsDevice->GetDevice(),
 		handle,
 		resName,
-		width,
-		height,
+		width == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : width,
+		height == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : height,
 		1,
 		0,
 		D3DFMT_A8R8G8B8,
@@ -195,8 +198,8 @@ void DX9GF::Texture::LoadTexture(int resourceId, UINT width, UINT height)
 			graphicsDevice->GetDevice(),
 			handle,
 			resName,
-			width,
-			height,
+			width == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : width,
+			height == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : height,
 			1,
 			0,
 			D3DFMT_UNKNOWN,
@@ -237,8 +240,8 @@ void DX9GF::Texture::LoadTexture(int resourceId, UINT width, UINT height)
 			graphicsDevice->GetDevice(),
 			data,
 			size,
-			width,
-			height,
+			width == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : width,
+			height == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : height,
 			1,
 			0,
 			D3DFMT_A8R8G8B8,
@@ -259,12 +262,14 @@ void DX9GF::Texture::LoadTexture(int resourceId, UINT width, UINT height)
 		throw MakeDxError(createHr);
 	}
 
-	if ((width == D3DX_DEFAULT && height == D3DX_DEFAULT) && SUCCEEDED(infoHr)) {
+	if ((width == D3DX_DEFAULT_NONPOW2 || width == D3DX_DEFAULT) && SUCCEEDED(infoHr)) {
 		this->width = imageInfo.Width;
-		this->height = imageInfo.Height;
-	}
-	else {
+	} else {
 		this->width = width;
+	}
+	if ((height == D3DX_DEFAULT_NONPOW2 || height == D3DX_DEFAULT) && SUCCEEDED(infoHr)) {
+		this->height = imageInfo.Height;
+	} else {
 		this->height = height;
 	}
 }

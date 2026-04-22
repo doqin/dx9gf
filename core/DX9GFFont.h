@@ -19,7 +19,7 @@ namespace DX9GF {
 			BOOL italic = FALSE,
 			DWORD charSet = DEFAULT_CHARSET,
 			DWORD outputPrecision = OUT_DEFAULT_PRECIS,
-			DWORD quality = ANTIALIASED_QUALITY,
+            DWORD quality = NONANTIALIASED_QUALITY,
 			DWORD pitchAndFamily = DEFAULT_PITCH | FF_DONTCARE
 		);
 		~Font();

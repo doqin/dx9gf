@@ -90,3 +90,14 @@ void Demo::IContainer::Draw(unsigned long long deltaTime)
 		true
 	);
 }
+
+void Demo::IContainer::AddChildProgrammatically(std::shared_ptr<IDraggable> child)
+{
+	child->SetParent(shared_from_this());
+	children.push_back(child);
+}
+
+void Demo::IContainer::ClearChildren()
+{
+	children.clear();
+}

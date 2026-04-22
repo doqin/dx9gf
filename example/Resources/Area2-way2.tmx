@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="13" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+ <tileset firstgid="1" source="First Asset pack.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="13" height="8">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+366,366,342,343,315,320,319,344,339,369,39,39,39,
+366,365,319,340,345,317,321,365,321,340,321,321,339,
+0,368,316,343,341,344,315,320,340,321,317,364,39,
+317,341,315,340,339,320,363,340,343,364,365,364,366,
+369,341,341,316,368,365,364,319,364,317,345,39,319,
+344,364,363,321,343,316,344,316,345,318,321,366,369,
+0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

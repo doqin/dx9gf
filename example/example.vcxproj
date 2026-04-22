@@ -178,10 +178,15 @@
     <ClInclude Include="SubScene.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\dx9gf1\example\Resources\Alo_Vu_a_Vu.png" />
     <Image Include="Resources\Actor1.png" />
     <Image Include="Resources\Alo_Vu_a_Vu.png" />
     <Image Include="Resources\dawg.jpg">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Resources\First Asset pack.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Resources\icon.jpg">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="Resources\mario_full.png">
@@ -190,12 +195,37 @@
     <Image Include="Resources\spritesheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Resources\tutorial.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Resources\XP.jpg">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\example.tmx">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="Resources\First Asset pack.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Resources\icon.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Resources\map.tmx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="Resources\test.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Resources\tilemap.tsx" />
+    <None Include="Resources\tutorial.aseprite">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Resources\tutorial.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Resources\XP.tsx">
       <DeploymentContent>true</DeploymentContent>
     </None>
   </ItemGroup>
@@ -209,6 +239,9 @@
     <Media Include="Resources\ALOVU.wav">
       <DeploymentContent>true</DeploymentContent>
     </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Resources\determination.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

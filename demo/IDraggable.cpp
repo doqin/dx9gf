@@ -158,6 +158,14 @@ void Demo::DraggableManager::Draw(unsigned long long deltaTime)
 	for (auto& draggable : isDraggingDraggables) {
 		draggable->Draw(deltaTime);
 	}
+	while(drawBuffer.IsBusy()) {
+		drawBuffer.Update(deltaTime);
+	}
+}
+
+void Demo::DraggableManager::QueueDraw(std::shared_ptr<DX9GF::ICommand> cmd)
+{
+	drawBuffer.PushCommand(std::move(cmd));
 }
 
 void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
@@ -204,10 +212,11 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 	std::uniform_real_distribution<float> dist(0, 1);
 	color = D3DXCOLOR(dist(gen), dist(gen), dist(gen), 1);
 	if (debugFont.get() == nullptr) {
-		IDraggable::debugFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"Arial", 20);
+		IDraggable::debugFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
 	}
 	if (debugFontSprite.get() == nullptr) {
 		IDraggable::debugFontSprite = std::make_shared<DX9GF::FontSprite>(debugFont.get());
+		debugFontSprite->SetColor(0xFF000000);
 	}
 }
 

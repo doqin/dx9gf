@@ -5,13 +5,14 @@
 #include "Game.h"
 #include "IDraggable.h"
 #include "TextButton.h"
+#include "IconButton.h"
 #include "MainBlockCard.h"
 #include "StrikeCard.h"
 #include "EnemyCard.h"
 #include "HandContainer.h"
 #include "TestEnemy.h"
 #include "PopUpMessage.h"
-#include "AdvancedCards.h"
+#include "AdvancedCards.h"	
 
 namespace Demo {
 	class IBattleScene : public DX9GF::IScene {
@@ -19,6 +20,7 @@ namespace Demo {
 		enum class State {
 			PlayerStandBy,
 			PlayerAttack,
+			PlayerOpenItems,
 			EnemyAttack
 		};
 		// Constants
@@ -31,6 +33,8 @@ namespace Demo {
 		size_t currentTurn = 0;
 		int energy = MAX_ENERGY;
 		int usedEnergy = 0;
+		bool isTransitioning = false;
+        bool enemyAttackStartPending = false;
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;
@@ -57,13 +61,20 @@ namespace Demo {
 		// UI
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
-		std::shared_ptr<TextButton> attackButton;
-		std::shared_ptr<TextButton> actionButton;
-		std::shared_ptr<TextButton> itemsButton;
-		std::shared_ptr<TextButton> fleeButton;
-		std::shared_ptr<TextButton> backButton;
-		std::shared_ptr<TextButton> executeButton;
+		std::shared_ptr<DX9GF::Texture> uiSheetTex;
+		std::shared_ptr<DX9GF::Texture> tempTex;
+		std::shared_ptr<IconButton> attackButton;
+		std::shared_ptr<IconButton> actionButton;
+		std::shared_ptr<IconButton> itemsButton;
+		std::shared_ptr<IconButton> fleeButton;
+		std::shared_ptr<IconButton> backButton;
+		std::shared_ptr<IconButton> executeButton;
+		std::shared_ptr<IconButton> closeItemMenuButton;
+		std::vector<std::shared_ptr<IconButton>> buffItems;
 		std::shared_ptr<PopUpMessage> popUpMessage;
+		std::shared_ptr<DX9GF::StaticSprite> energyIcon;
+		std::shared_ptr<DX9GF::StaticSprite> hourglassIcon;
+		std::shared_ptr<DX9GF::StaticSprite> itemMenuBackground;
 		void CreateEnemyCard(std::shared_ptr<IEnemy> enemy);
 		void StartBattle();
 		
@@ -74,15 +85,18 @@ namespace Demo {
 		void MoveExecutedHandCardsToPlayedPile();
 		void MoveHandCardsToDiscardPile();
 		void BeginNextTurn();
+		void RefreshItemMenu();
 		// Updates
 		void PlayerStandByUpdate(unsigned long long deltaTime);
 		void PlayerAttackUpdate(unsigned long long deltaTime);
+		void PlayerOpenItemsUpdate(unsigned long long deltaTime);
 		void EnemyAttackUpdate(unsigned long long deltaTime);
         void QueueEnemyLayoutTransition(State targetState);
         void RemoveEnemyCardsInRemoveArea();
 		// Draws
 		void PlayerStandByDraw(unsigned long long deltaTime);
 		void PlayerAttackDraw(unsigned long long deltaTime);
+		void PlayerOpenItemsDraw(unsigned long long deltaTime);
 		void EnemyAttackDraw(unsigned long long deltaTime);
 	public:
 		IBattleScene(Game* game, std::shared_ptr<Player> player, int screenWidth, int screenHeight) : IScene(screenWidth, screenHeight), game(game), player(player) {}
