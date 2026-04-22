@@ -12,6 +12,9 @@ Demo::IConversation::IConversation(std::shared_ptr<DX9GF::FontSprite> fontSprite
 
 void Demo::IConversation::AddLine(const DialogueLine& line)
 {
+	if (dialogueQueue.empty()) {
+		isTyping = true; 
+	}
 	dialogueQueue.push(line);
 }
 
@@ -22,13 +25,39 @@ void Demo::IConversation::Execute(unsigned long long deltaTime)
 		return;
 	}
 
-	auto input = DX9GF::InputManager::GetInstance();
+	const auto& currentLine = dialogueQueue.front();
 
+	if (isTyping) {
+		timer += deltaTime;
+		if (timer >= MS_PER_CHAR) {
+			timer = 0;
+			if (currentCharIndex < currentLine.content.length()) {
+				currentCharIndex++;
+				displayedContent = currentLine.content.substr(0, currentCharIndex);
+			}
+			else {
+				isTyping = false;
+			}
+		}
+	}
+
+	auto input = DX9GF::InputManager::GetInstance();
 	if (input->MouseDown(DX9GF::InputManager::MouseButton::Left)) {
 		input->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
-		dialogueQueue.pop();
-		if (dialogueQueue.empty()) {
-			MarkFinished();
+
+		if (isTyping) {
+			displayedContent = currentLine.content;
+			currentCharIndex = currentLine.content.length();
+			isTyping = false;
+		}
+		else {
+			dialogueQueue.pop();
+			if (dialogueQueue.empty()) {
+				MarkFinished();
+			}
+			else {
+				ResetAnimation();
+			}
 		}
 	}
 }
@@ -80,9 +109,16 @@ void Demo::IConversation::Draw(DX9GF::GraphicsDevice* gd, unsigned long long del
 		fontSprite->Draw(fixedCamera, deltaTime);
 		fontSprite->SetPosition(boxX + 20.0f, boxY + 50.0f);
 		fontSprite->SetColor(0xFFFFFFFF);
-		fontSprite->SetText(std::wstring(currentLine.content));
+		fontSprite->SetText(std::wstring(displayedContent));
 		fontSprite->Draw(fixedCamera, deltaTime);
 
 		fontSprite->End();
 	}
+}
+
+void Demo::IConversation::ResetAnimation() {
+	displayedContent = L"";
+	currentCharIndex = 0;
+	timer = 0;
+	isTyping = true;
 }
