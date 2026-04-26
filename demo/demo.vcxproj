@@ -205,8 +205,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CardShop.cpp" />
+    <ClCompile Include="CupidEnemy.cpp" />
     <ClCompile Include="DamageTextManager.cpp" />
     <ClCompile Include="DebugScene.cpp" />
+    <ClCompile Include="DemonEyeEnemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameItems.cpp" />
     <ClCompile Include="HandContainer.cpp" />
@@ -234,6 +236,8 @@
     <ClCompile Include="SettingsScene.cpp" />
     <ClCompile Include="IShopScene.cpp" />
     <ClCompile Include="ShopPoint.cpp" />
+    <ClCompile Include="SineWaveProjectile.cpp" />
+    <ClCompile Include="TargetedProjectile.cpp" />
     <ClCompile Include="TextInputManager.cpp" />
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
@@ -251,8 +255,10 @@
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
     <ClInclude Include="CardShop.h" />
+    <ClInclude Include="CupidEnemy.h" />
     <ClInclude Include="DamageTextManager.h" />
     <ClInclude Include="DebugScene.h" />
+    <ClInclude Include="DemonEyeEnemy.h" />
     <ClInclude Include="DialogueLine.h" />
     <ClInclude Include="EnemyCard.h" />
     <ClInclude Include="Game.h" />
@@ -284,6 +290,8 @@
     <ClInclude Include="SettingsScene.h" />
     <ClInclude Include="IShopScene.h" />
     <ClInclude Include="ShopPoint.h" />
+    <ClInclude Include="SineWaveProjectile.h" />
+    <ClInclude Include="TargetedProjectile.h" />
     <ClInclude Include="TextInputManager.h" />
     <ClInclude Include="RoundProjectile.h" />
     <ClInclude Include="StrikeCard.h" />

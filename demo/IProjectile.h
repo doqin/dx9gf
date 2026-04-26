@@ -4,6 +4,8 @@
 #include "Player.h"
 
 namespace Demo {
+	constexpr float UNSPECIFIED = -1;
+
 	class IProjectile : public DX9GF::IGameObject {
 	protected:
 		std::shared_ptr<Player> player;
