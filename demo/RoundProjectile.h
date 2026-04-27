@@ -2,8 +2,6 @@
 #include "IProjectile.h"
 
 namespace Demo {
-	constexpr float UNSPECIFIED = -1;
-
 	class RoundProjectile : public IProjectile {
 	public:
 		class Builder;
