@@ -8,7 +8,8 @@
 #include "StrikeCard.h"
 #include "ShopPoint.h"
 #include "HealingPoint.h"
-#include "NPC1.h"
+#include "DauDauNPC.h"
+#include "IConversation.h"
 
 namespace Demo {
 	class TutorialWorldScene : public DX9GF::IScene, public DX9GF::ISaveable {
@@ -27,7 +28,7 @@ namespace Demo {
 		std::shared_ptr<Player> player;
 		std::shared_ptr<DX9GF::Map> map;
 
-		std::shared_ptr<NPC1> npc1;
+		std::shared_ptr<DauDauNPC> npc1;
 		std::shared_ptr<IConversation> currentConversation;
 	public:
 		TutorialWorldScene(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh) : IScene(sw, sh), game(game), saveManager(sm), uiCamera(sw, sh) {}

@@ -207,6 +207,7 @@
     <ClCompile Include="CardShop.cpp" />
     <ClCompile Include="CupidEnemy.cpp" />
     <ClCompile Include="DamageTextManager.cpp" />
+    <ClCompile Include="DauDauNPC.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="DemonEyeEnemy.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -219,6 +220,7 @@
     <ClCompile Include="IContainer.cpp" />
     <ClCompile Include="IConversation.cpp" />
     <ClCompile Include="IDraggable.cpp" />
+    <ClCompile Include="INPC.cpp" />
     <ClCompile Include="InventoryMenu.cpp" />
     <ClCompile Include="IStatementCard.cpp" />
     <ClCompile Include="main.cpp" />
@@ -257,6 +259,7 @@
     <ClInclude Include="CardShop.h" />
     <ClInclude Include="CupidEnemy.h" />
     <ClInclude Include="DamageTextManager.h" />
+    <ClInclude Include="DauDauNPC.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="DemonEyeEnemy.h" />
     <ClInclude Include="DialogueLine.h" />
@@ -273,6 +276,7 @@
     <ClInclude Include="IContainer.h" />
     <ClInclude Include="IConversation.h" />
     <ClInclude Include="IDraggable.h" />
+    <ClInclude Include="INPC.h" />
     <ClInclude Include="InventoryMenu.h" />
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="IEnemy.h" />
@@ -326,6 +330,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="cursor.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="daudau-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="grab.png">

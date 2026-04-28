@@ -12,7 +12,7 @@ void Demo::TutorialWorldScene::Init()
 	map->Create(transformManager, colliderManager, "./tutorial.tmx");
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
 
-	npc1 = std::make_shared<NPC1>(transformManager, 250.0f, 120.0f);
+	npc1 = std::make_shared<DauDauNPC>(transformManager, 250.0f, 120.0f);
 	npc1->Init(game->GetGraphicsDevice(), player, colliderManager, font);
 	npc1->AddLine(L"NPC", L"Hello! Welcome.");
 	npc1->AddLine(L"NPC", L"How to escape this world? I don't know.");
