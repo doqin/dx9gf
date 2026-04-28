@@ -1,9 +1,11 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "TestBattleScene.h"
-
+#include "DemonEyeEnemy.h"
+#include "CupidEnemy.h"
 void Demo::TestBattleScene::Init()
 {
 	IBattleScene::Init();
+
 	auto testEnemy = std::make_shared<TestEnemy>(transformManager, 50.f);
 	testEnemy->Init(game->GetGraphicsDevice(), &camera);
 	testEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) {
@@ -16,6 +18,20 @@ void Demo::TestBattleScene::Init()
 		CreateEnemyCard(enemy);
 	});
 	enemies.push_back(testEnemy);
+
+	//auto demonEye = std::make_shared<DemonEyeEnemy>(transformManager, 60.f);
+	//demonEye->Init(game->GetGraphicsDevice(), &camera);
+	//demonEye->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) {
+	//	CreateEnemyCard(enemy);
+	//	});
+	//enemies.push_back(demonEye);
+
+	//auto cupid = std::make_shared<CupidEnemy>(transformManager, 50.f);
+	//cupid->Init(game->GetGraphicsDevice(), &camera);
+	//cupid->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) {
+	//	CreateEnemyCard(enemy);
+	//	});
+	//enemies.push_back(cupid);
 
 	/*for (size_t i = 0; i < 9; ++i) {
 		auto strikeCard = std::make_shared<StrikeCard>(transformManager, -260.f, -80.f);

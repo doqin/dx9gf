@@ -150,6 +150,21 @@
     <ClCompile Include="HealingPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NPC1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DemonEyeEnemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SineWaveProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TargetedProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CupidEnemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -278,6 +293,21 @@
     <ClInclude Include="HealingPoint.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
+    <ClInclude Include="NPC1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SineWaveProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TargetedProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DemonEyeEnemy.h">
+      <Filter>Header Files\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="CupidEnemy.h">
+      <Filter>Header Files\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="uiter.aseprite">
@@ -355,6 +385,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Shop-Sheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="NPC1.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
