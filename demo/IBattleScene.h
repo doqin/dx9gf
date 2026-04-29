@@ -63,8 +63,8 @@ namespace Demo {
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 		std::shared_ptr<DX9GF::Texture> uiSheetTex;
 		std::shared_ptr<DX9GF::Texture> tempTex;
+		std::shared_ptr<DX9GF::Texture> itemsTex;
 		std::shared_ptr<IconButton> attackButton;
-		std::shared_ptr<IconButton> actionButton;
 		std::shared_ptr<IconButton> itemsButton;
 		std::shared_ptr<IconButton> fleeButton;
 		std::shared_ptr<IconButton> backButton;

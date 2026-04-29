@@ -263,7 +263,7 @@ void Demo::IBattleScene::RefreshItemMenu()
 		float baseX = startX + col * (ITEM_W + PADDING_X);
 		float baseY = startY + row * (ITEM_H + PADDING_Y);
 
-		auto btn = std::make_shared<IconButton>(transformManager, 0, 0, ITEM_W, ITEM_H, tempTex, 1);
+		auto btn = std::make_shared<IconButton>(transformManager, 0, 0, ITEM_W, ITEM_H, itemsTex, 1);
 		btn->Init(&camera);
 		btn->SetSpriteScale(MENU_SCALE, MENU_SCALE);
 		btn->SetLocalPosition(baseX, baseY);
@@ -311,17 +311,15 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 	// Set position so that it's updated if screen is resized
 	const float buttonY = app->GetScreenHeight() / 2.f - 50 - attackButton->GetHeight();
 	const float spacing = 20.f;
-	const float totalButtonsWidth = attackButton->GetWidth() + actionButton->GetWidth() + itemsButton->GetWidth() + fleeButton->GetWidth() + 3 * spacing;
+	const float totalButtonsWidth = attackButton->GetWidth() + itemsButton->GetWidth() + fleeButton->GetWidth() + 2 * spacing;
 	const float leftX = -totalButtonsWidth / 2;
 
 	attackButton->SetLocalPosition(leftX, buttonY);
-	actionButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing, buttonY);
-	itemsButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing + actionButton->GetWidth() + spacing, buttonY);
-	fleeButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing + actionButton->GetWidth() + spacing + itemsButton->GetWidth() + spacing, buttonY);
+	itemsButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing, buttonY);
+	fleeButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing + itemsButton->GetWidth() + spacing, buttonY);
 
 	fleeButton->Update(deltaTime);
 	itemsButton->Update(deltaTime);
-	actionButton->Update(deltaTime);
 	attackButton->Update(deltaTime);
 	for (auto& enemy : enemies) {
 		enemy->Update(deltaTime);
@@ -442,8 +440,8 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 void Demo::IBattleScene::PlayerOpenItemsUpdate(unsigned long long deltaTime)
 {
 
-	float closeX = HALF_BG_W - closeItemMenuButton->GetWidth();
-	float closeY = -HALF_BG_H;
+	float closeX = -BG_W + 50.f + closeItemMenuButton->GetWidth();
+	float closeY = BG_H - 50.f - closeItemMenuButton->GetHeight();
 
 	closeItemMenuButton->SetLocalPosition(closeX, closeY);
 	closeItemMenuButton->Update(deltaTime);
@@ -495,7 +493,6 @@ void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
 {
 	fleeButton->Draw(game->GetGraphicsDevice(), deltaTime);
 	itemsButton->Draw(game->GetGraphicsDevice(), deltaTime);
-	actionButton->Draw(game->GetGraphicsDevice(), deltaTime);
 	attackButton->Draw(game->GetGraphicsDevice(), deltaTime);
 }
 
@@ -562,6 +559,8 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 		float textY = btn->GetWorldY() + ITEM_H + 5.0f;
 
 		fontSprite->SetPosition(textX, textY);
+		fontSprite->SetColor(0xFFFFFFFF);
+		fontSprite->SetOutline(true, 0xFF000000);
 		fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
 		fontSprite->Draw(camera, deltaTime);
 
@@ -588,6 +587,7 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 		fontSprite->Draw(camera, deltaTime);
 		fontSprite->End();
 	}
+	fontSprite->SetOutline(false);
 }
 
 void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
@@ -628,6 +628,8 @@ void Demo::IBattleScene::Init()
 	uiSheetTex->LoadTexture(L"ui.png");
 	tempTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	tempTex->LoadTexture(L"TempTex.png");
+	itemsTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	itemsTex->LoadTexture(L"items.png");
 	// Create buttons
 	const auto buttonWidth = 96;
 	const auto buttonHeight = 32;
@@ -663,30 +665,6 @@ void Demo::IBattleScene::Init()
 		}
 		});
 	attackButton->SetSpriteScale(2.f, 2.f);
-	actionButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	actionButton->SetSpriteRects({
-		{
-			.left = 48,
-			.top = 48,
-			.right = 96,
-			.bottom = 64
-		},
-		{
-			.left = 48,
-			.top = 64,
-			.right = 96,
-			.bottom = 80
-		},
-		{
-			.left = 48,
-			.top = 80,
-			.right = 96,
-			.bottom = 96
-		}
-		});
-	actionButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-		});
-	actionButton->SetSpriteScale(2.f, 2.f);
 
 	itemsButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	itemsButton->SetSpriteRects({
@@ -844,7 +822,6 @@ void Demo::IBattleScene::Init()
 
 	// Init buttons
 	attackButton->Init(&camera);
-	actionButton->Init(&camera);
 	itemsButton->Init(&camera);
 	fleeButton->Init(&camera);
 	backButton->Init(&camera);

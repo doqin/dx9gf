@@ -47,24 +47,24 @@ namespace Demo {
 		float leaveX = optionsX + 80.0f + bottomGap;
 
 		itemSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
-		itemSheetTex->LoadTexture(L"TempTex.png");
+		itemSheetTex->LoadTexture(L"items.png");
 
 		btnTabItems = std::make_shared<TextButton>(transformManager, centerX - tabGap / 2.0f - 80.0f, tabY, 80.0f, 30.0f, std::string("ITEMS"), this->font,
 			[this](DX9GF::ITrigger* t) { this->SetTab(Tab::ITEMS); });
 		btnTabItems->SetBackgroundColors(D3DXCOLOR(0.2f, 0.2f, 0.2f, 1), D3DXCOLOR(0.4f, 0.4f, 0.4f, 1), D3DXCOLOR(0.8f, 0.5f, 0.1f, 1));
 		btnTabItems->Init(uiCamera);
 
-       btnTabDeck = std::make_shared<TextButton>(transformManager, centerX + tabGap / 2.0f, tabY, 80.0f, 30.0f, std::string("DECK"), this->font,
+		btnTabDeck = std::make_shared<TextButton>(transformManager, centerX + tabGap / 2.0f, tabY, 80.0f, 30.0f, std::string("DECK"), this->font,
 			[this](DX9GF::ITrigger* t) { this->SetTab(Tab::DECK); });
 		btnTabDeck->SetBackgroundColors(D3DXCOLOR(0.2f, 0.2f, 0.2f, 1), D3DXCOLOR(0.4f, 0.4f, 0.4f, 1), D3DXCOLOR(0.8f, 0.5f, 0.1f, 1));
 		btnTabDeck->Init(uiCamera);
 
-      btnResume = std::make_shared<TextButton>(transformManager, resumeX, bottomY - 50.0f, 70.0f, 30.0f, std::string("RESUME"), this->font,
+		btnResume = std::make_shared<TextButton>(transformManager, resumeX, bottomY - 50.0f, 70.0f, 30.0f, std::string("RESUME"), this->font,
 			[this](DX9GF::ITrigger* t) { this->Toggle(); });
 		btnResume->SetBackgroundColors(D3DXCOLOR(0.1f, 0.5f, 0.1f, 1), D3DXCOLOR(0.2f, 0.7f, 0.2f, 1), D3DXCOLOR(0.0f, 1.0f, 0.0f, 1));
 		btnResume->Init(uiCamera);
 
-     btnOptions = std::make_shared<TextButton>(transformManager, optionsX, bottomY - 50.0f, 80.0f, 30.0f, std::string("OPTIONS"), this->font,
+		btnOptions = std::make_shared<TextButton>(transformManager, optionsX, bottomY - 50.0f, 80.0f, 30.0f, std::string("OPTIONS"), this->font,
 			[this, sw, sh](DX9GF::ITrigger* t) {
 				this->game->GetSceneManager()->PushScene(new SettingsScene(this->game, sw, sh));
 				this->game->GetSceneManager()->GoToNext();
@@ -211,6 +211,7 @@ namespace Demo {
 		fontSprite->Begin();
 		fontSprite->SetScale(1.5f, 1.5f);
 		fontSprite->SetColor(0xFFFFFF00);
+		fontSprite->SetOutline(true, 0xFF000000);
 		fontSprite->SetPosition(leftEdge + 30.0f, bottomEdge - 95.0f);
 
         fontSprite->SetText(std::to_wstring(player->GetGold()) + L"G");
@@ -220,6 +221,7 @@ namespace Demo {
 		fontSprite->SetText(std::to_wstring(static_cast<int>(player->GetHealth())) + L"/" + std::to_wstring(static_cast<int>(player->GetMaxHealth())) + L"HP");
 		fontSprite->Draw(*uiCamera, deltaTime);
 		fontSprite->End();
+		fontSprite->SetOutline(false);
 
 		if (currentTab == Tab::ITEMS) 
 		{
@@ -248,6 +250,7 @@ namespace Demo {
 				float textY = btn->GetWorldY() + ITEM_H + 5.0f;
 
 				fontSprite->SetPosition(textX, textY);
+				fontSprite->SetOutline(true, 0xFF000000);
 				fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
 				fontSprite->Draw(*uiCamera, deltaTime);
 
@@ -263,13 +266,15 @@ namespace Demo {
 			if (!hoverDescription.empty()) {
 				fontSprite->Begin();
 				fontSprite->SetScale(1.2f, 1.2f);
-				fontSprite->SetColor(0xFFDD00FF);
+				fontSprite->SetColor(0xFFFFFFFF);
+				fontSprite->SetOutline(true, 0xFF000000);
 
 				fontSprite->SetPosition(leftEdge + 50.0f, sh / 2.0f - 150.0f);
 
 				fontSprite->SetText(std::move(hoverDescription));
 				fontSprite->Draw(*uiCamera, deltaTime);
 				fontSprite->End();
+				fontSprite->SetOutline(false);
 			}
 		}
 		else if (currentTab == Tab::DECK) {
