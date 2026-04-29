@@ -349,6 +349,9 @@
     <Image Include="daudau-Sheet.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="healingpoint-Sheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Font Include="arcade-among-2-r46pv.ttf">

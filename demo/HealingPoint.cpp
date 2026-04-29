@@ -16,9 +16,9 @@ namespace Demo {
         cm->Add(collider);
 
         spritesheet = std::make_shared<DX9GF::Texture>(gd);
-        spritesheet->LoadTexture(L"placeholder-healingpoint.png");
+        spritesheet->LoadTexture(L"healingpoint-Sheet.png");
 
-        sprite = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+        sprite = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5), 12);
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
     }

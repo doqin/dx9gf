@@ -338,6 +338,9 @@
     <Image Include="grab.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="healingpoint-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="hitimpact-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
