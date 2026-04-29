@@ -25,9 +25,9 @@ namespace Demo {
 		// UI Buttons
 		std::shared_ptr<IconButton> btnTabItems;
 		std::shared_ptr<IconButton> btnTabDeck;
-		std::shared_ptr<TextButton> btnResume;
-		std::shared_ptr<TextButton> btnOptions;
-		std::shared_ptr<TextButton> btnLeaveGame;
+		std::shared_ptr<IconButton> btnResume;
+		std::shared_ptr<IconButton> btnOptions;
+		std::shared_ptr<IconButton> btnLeaveGame;
 
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 

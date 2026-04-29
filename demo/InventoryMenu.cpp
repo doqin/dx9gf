@@ -42,9 +42,10 @@ namespace Demo {
 		float containerY = topY + 110.0f;
 		float leftContainerX = -containerGap / 2.0f - containerW;
 		float rightContainerX = containerGap / 2.0f;
-		float resumeX = -(70.0f + bottomGap + 80.0f + bottomGap + 70.0f) / 2.0f;
-		float optionsX = resumeX + 70.0f + bottomGap;
-		float leaveX = optionsX + 80.0f + bottomGap;
+		float buttonW = 48.0f * 2;
+		float resumeX = -(buttonW + bottomGap + buttonW + bottomGap + buttonW) / 2.0f;
+		float optionsX = resumeX + buttonW + bottomGap;
+		float leaveX = optionsX + buttonW + bottomGap;
 
 		itemSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		itemSheetTex->LoadTexture(L"items.png");
@@ -64,23 +65,27 @@ namespace Demo {
 		btnTabDeck->SetSpriteScale(2.f, 2.f);
 		btnTabDeck->Init(uiCamera);
 
-		btnResume = std::make_shared<TextButton>(transformManager, resumeX, bottomY - 50.0f, 70.0f, 30.0f, std::string("RESUME"), this->font,
-			[this](DX9GF::ITrigger* t) { this->Toggle(); });
-		btnResume->SetBackgroundColors(D3DXCOLOR(0.1f, 0.5f, 0.1f, 1), D3DXCOLOR(0.2f, 0.7f, 0.2f, 1), D3DXCOLOR(0.0f, 1.0f, 0.0f, 1));
+		btnResume = std::make_shared<IconButton>(transformManager, resumeX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
+		btnResume->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 176, 48, 32, 3));
+		btnResume->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->Toggle(); });
+		btnResume->SetSpriteScale(2.f, 2.f);
 		btnResume->Init(uiCamera);
 
-		btnOptions = std::make_shared<TextButton>(transformManager, optionsX, bottomY - 50.0f, 80.0f, 30.0f, std::string("OPTIONS"), this->font,
-			[this, sw, sh](DX9GF::ITrigger* t) {
+		btnOptions = std::make_shared<IconButton>(transformManager, optionsX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
+		btnOptions->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 208, 48, 32, 3));
+		btnOptions->SetOnReleaseLeft([this, sw, sh](DX9GF::ITrigger* t) {
 				this->game->GetSceneManager()->PushScene(new SettingsScene(this->game, sw, sh));
 				this->game->GetSceneManager()->GoToNext();
 			});
+		btnOptions->SetSpriteScale(2.f, 2.f);
 		btnOptions->Init(uiCamera);
 
-        btnLeaveGame = std::make_shared<TextButton>(transformManager, leaveX, bottomY - 50.0f, 70.0f, 30.0f, std::string("LEAVE"), this->font,
-			[this](DX9GF::ITrigger* t) {
+		btnLeaveGame = std::make_shared<IconButton>(transformManager, leaveX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
+		btnLeaveGame->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 208, 48, 32, 3));
+		btnLeaveGame->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 				this->pendingLeave = true;
 			});
-		btnLeaveGame->SetBackgroundColors(D3DXCOLOR(0.6f, 0.1f, 0.1f, 1), D3DXCOLOR(0.8f, 0.2f, 0.2f, 1), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1));
+		btnLeaveGame->SetSpriteScale(2.f, 2.f);
 		btnLeaveGame->Init(uiCamera);
 
 		deckContainer = std::make_shared<IContainer>(transformManager, containerW, 40.0f, leftContainerX, containerY);
@@ -154,15 +159,16 @@ namespace Demo {
 		float containerY = topY + 110.0f;
 		float leftContainerX = -containerGap / 2.0f - containerW;
 		float rightContainerX = containerGap / 2.0f;
-		float resumeX = -(70.0f + bottomGap + 80.0f + bottomGap + 70.0f) / 2.0f;
-		float optionsX = resumeX + 70.0f + bottomGap;
-		float leaveX = optionsX + 80.0f + bottomGap;
+		float buttonW = 48.0f * 2;
+		float resumeX = -(buttonW + bottomGap + buttonW + bottomGap + buttonW) / 2.0f;
+		float optionsX = resumeX + buttonW + bottomGap;
+		float leaveX = optionsX + buttonW + bottomGap;
 
 		btnTabItems->SetLocalPosition(centerX - tabGap / 2.0f - btnTabItems->GetWidth(), tabY);
 		btnTabDeck->SetLocalPosition(centerX + tabGap / 2.0f, tabY);
-		btnResume->SetLocalPosition(resumeX, bottomY - 50.0f);
-		btnOptions->SetLocalPosition(optionsX, bottomY - 50.0f);
-		btnLeaveGame->SetLocalPosition(leaveX, bottomY - 50.0f);
+		btnResume->SetLocalPosition(resumeX, bottomY - 80.0f);
+		btnOptions->SetLocalPosition(optionsX, bottomY - 80.0f);
+		btnLeaveGame->SetLocalPosition(leaveX, bottomY - 80.0f);
 
 		deckContainer->SetLocalPosition(leftContainerX, containerY);
 		inventoryContainer->SetLocalPosition(rightContainerX, containerY);
