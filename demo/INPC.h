@@ -18,6 +18,7 @@ namespace Demo {
         std::shared_ptr<DX9GF::Texture> spritesheet;
         std::shared_ptr<DX9GF::RectangleCollider> collider;
         std::shared_ptr<DX9GF::FontSprite> fontSprite;
+        std::weak_ptr<DX9GF::CommandBuffer> drawBuffer;
 
         std::vector<DialogueLine> dialogueLines;
         bool isPlayerNear = false;
@@ -27,7 +28,7 @@ namespace Demo {
         INPC(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y) : DX9GF::IGameObject(tm, x, y), transformManager(tm) {}
         virtual ~INPC() = default;
 
-        virtual void Init(DX9GF::GraphicsDevice* gd, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font);
+        virtual void Init(DX9GF::GraphicsDevice* gd, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer);
         virtual void AddLine(std::wstring name, std::wstring content);
 
         virtual void Update(unsigned long long deltaTime);

@@ -11,22 +11,23 @@ void Demo::TutorialWorldScene::Init()
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
 	map->Create(transformManager, colliderManager, "./tutorial.tmx");
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
 
-	npc1 = std::make_shared<DauDauNPC>(transformManager, 250.0f, 120.0f);
-	npc1->Init(game->GetGraphicsDevice(), player, colliderManager, font);
+   npc1 = std::make_shared<DauDauNPC>(transformManager, 250.0f, 120.0f);
+	npc1->Init(game->GetGraphicsDevice(), player, colliderManager, font, drawBuffer);
 	npc1->AddLine(L"Dau Dau", L"Hello! Welcome.");
 	npc1->AddLine(L"Dau Dau", L"How to escape this world? I don't know.");
 
 	savePoint = std::make_shared<SavePoint>(transformManager, 200.0f, 150.0f);
-	savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font);
+    savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
 	savePoint->SetVisible(true);
 
 	shopPoint = std::make_shared<ShopPoint>(transformManager, 300.0f, 150.0f);
-	shopPoint->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font);
+   shopPoint->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	shopPoint->SetVisible(true);
 
 	healingPoint = std::make_shared<HealingPoint>(transformManager, 250.0f, 220.0f);
-	healingPoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font);
+  healingPoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	healingPoint->SetVisible(true);
 
 	draggableManager = std::make_shared<Demo::DraggableManager>();
@@ -127,7 +128,12 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 		if (shopPoint) shopPoint->Draw(camera, deltaTime);
 		if (healingPoint) healingPoint->Draw(camera, deltaTime);
 		player->Draw(deltaTime);
-		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
+      if (drawBuffer) {
+			while (drawBuffer->IsBusy()) {
+				drawBuffer->Update(deltaTime);
+			}
+		}
+     if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
 		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
 			draggableManager->Draw(deltaTime);
 		}

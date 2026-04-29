@@ -27,6 +27,7 @@ namespace Demo {
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<Player> player;
 		std::shared_ptr<DX9GF::Map> map;
+		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
 
 		std::shared_ptr<DauDauNPC> npc1;
 		std::shared_ptr<IConversation> currentConversation;

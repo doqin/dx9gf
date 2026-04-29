@@ -8,10 +8,11 @@ namespace Demo {
         : IGameObject(tm, x, y), transformManager(tm) {
     }
 
-    void ShopPoint::Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font) {
+    void ShopPoint::Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer) {
         this->game = game;
         player = p;
         fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+        this->drawBuffer = drawBuffer;
         this->gd = gd;
         collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 80.f, 80.f, GetWorldX(), GetWorldY());
         collider->SetOriginCenter();
@@ -60,14 +61,19 @@ namespace Demo {
         sprite->End();
 
         if (fontSprite && isPlayerNear) {
-            fontSprite->Begin();
-            fontSprite->SetText(L"E");
-            fontSprite->SetScale(1.f);
-            fontSprite->SetColor(0xFFFFFFFF);
-            fontSprite->SetPosition(x - fontSprite->GetWidth() / 2.f, y - 30.f - fontSprite->GetHeight() / 2.f);
-            fontSprite->SetOutline(true, 0xFF000000);
-            fontSprite->Draw(camera, deltaTime);
-            fontSprite->End();
+            if (auto bufferLock = drawBuffer.lock()) {
+                bufferLock->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, x, y, &camera, deltaTime](std::function<void(void)> markFinished) {
+                    fontSprite->Begin();
+                    fontSprite->SetText(L"E");
+                    fontSprite->SetScale(1.f);
+                    fontSprite->SetColor(0xFFFFFFFF);
+                    fontSprite->SetPosition(x - fontSprite->GetWidth() / 2.f, y - 30.f - fontSprite->GetHeight() / 2.f);
+                    fontSprite->SetOutline(true, 0xFF000000);
+                    fontSprite->Draw(camera, deltaTime);
+                    fontSprite->End();
+                    markFinished();
+                }));
+            }
         }
     }
 }
