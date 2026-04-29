@@ -14,8 +14,8 @@ void Demo::TutorialWorldScene::Init()
 
 	npc1 = std::make_shared<DauDauNPC>(transformManager, 250.0f, 120.0f);
 	npc1->Init(game->GetGraphicsDevice(), player, colliderManager, font);
-	npc1->AddLine(L"NPC", L"Hello! Welcome.");
-	npc1->AddLine(L"NPC", L"How to escape this world? I don't know.");
+	npc1->AddLine(L"Dau Dau", L"Hello! Welcome.");
+	npc1->AddLine(L"Dau Dau", L"How to escape this world? I don't know.");
 
 	savePoint = std::make_shared<SavePoint>(transformManager, 200.0f, 150.0f);
 	savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font);
