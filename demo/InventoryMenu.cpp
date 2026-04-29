@@ -211,7 +211,7 @@ namespace Demo {
 		fontSprite->Begin();
 		fontSprite->SetScale(1.5f, 1.5f);
 		fontSprite->SetColor(0xFFFFFF00);
-		fontSprite->SetOutline(true, 0xFF000000);
+		fontSprite->SetOutline(true, 0xFF000000, 3.f);
 		fontSprite->SetPosition(leftEdge + 30.0f, bottomEdge - 95.0f);
 
         fontSprite->SetText(std::to_wstring(player->GetGold()) + L"G");
@@ -250,7 +250,7 @@ namespace Demo {
 				float textY = btn->GetWorldY() + ITEM_H + 5.0f;
 
 				fontSprite->SetPosition(textX, textY);
-				fontSprite->SetOutline(true, 0xFF000000);
+				fontSprite->SetOutline(true, 0xFF000000, 3.f);
 				fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
 				fontSprite->Draw(*uiCamera, deltaTime);
 
@@ -267,7 +267,7 @@ namespace Demo {
 				fontSprite->Begin();
 				fontSprite->SetScale(1.2f, 1.2f);
 				fontSprite->SetColor(0xFFFFFFFF);
-				fontSprite->SetOutline(true, 0xFF000000);
+				fontSprite->SetOutline(true, 0xFF000000, 3.f);
 
 				fontSprite->SetPosition(leftEdge + 50.0f, sh / 2.0f - 150.0f);
 
@@ -285,9 +285,10 @@ namespace Demo {
 
 			fontSprite->Begin();
 			fontSprite->SetScale(1.0f, 1.0f);
+			fontSprite->SetOutline(true, 0xFF000000, 3.f);
 			fontSprite->SetColor(0xFFFFFFFF);
 
-           fontSprite->SetPosition(leftContainerX + 10.0f, topEdge + 80.0f);
+			fontSprite->SetPosition(leftContainerX + 10.0f, topEdge + 80.0f);
 			fontSprite->SetText(L"Current Deck");
 			fontSprite->Draw(*uiCamera, deltaTime);
 

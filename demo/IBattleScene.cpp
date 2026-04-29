@@ -508,9 +508,11 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		true
 	);
 	fontSprite->Begin();
+	fontSprite->SetColor(0xFFFFFFFF);
 	fontSprite->SetPosition(enemyCardRemoveAreaX + 8.f, enemyCardRemoveAreaY + 8.f);
 	fontSprite->SetText(L"Drop EnemyCard Here");
 	fontSprite->Draw(camera, deltaTime);
+	fontSprite->SetColor(0xFF000000);
 	fontSprite->SetPosition(backButton->GetWorldX() + 32.f, backButton->GetWorldY() - 30.f);
 	fontSprite->SetText(std::to_wstring(energy - usedEnergy) + L"/" + std::to_wstring(MAX_ENERGY));
 	fontSprite->Draw(camera, deltaTime);
@@ -560,7 +562,7 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 
 		fontSprite->SetPosition(textX, textY);
 		fontSprite->SetColor(0xFFFFFFFF);
-		fontSprite->SetOutline(true, 0xFF000000);
+		fontSprite->SetOutline(true, 0xFF000000, 3.f);
 		fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
 		fontSprite->Draw(camera, deltaTime);
 
