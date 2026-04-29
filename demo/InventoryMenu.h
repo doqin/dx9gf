@@ -41,6 +41,9 @@ namespace Demo {
 		bool isItemsDirty = true;
 		std::wstring hoverDescription = L"";
 
+		std::shared_ptr<DX9GF::Texture> backBufferTexture;
+		std::shared_ptr<DX9GF::StaticSprite> backBufferSprite;
+
 		bool pendingLeave = false;
 
 	public:

@@ -89,6 +89,9 @@ namespace Demo {
 	{
 		isOpen = !isOpen;
 		if (isOpen) {
+			backBufferTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+			backBufferTexture->CaptureCurrentBackBuffer();
+			backBufferSprite = std::make_shared<DX9GF::StaticSprite>(backBufferTexture.get());
 			for (auto& cardId : player->GetDeck()) {
 				auto dragCard = std::dynamic_pointer_cast<IDraggable>(ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), uiCamera));
 				if (dragCard) deckContainer->AddChildProgrammatically(dragCard);
@@ -188,7 +191,16 @@ namespace Demo {
 		float topEdge = -sh / 2.0f;
 		float bottomEdge = sh / 2.0f;
 
-		gd->DrawRectangle(*uiCamera, leftEdge, topEdge, sw, sh, 0, 1, 1, 0, 0, D3DXCOLOR(0, 0, 0, 0.85f), true);
+		if (backBufferSprite) {
+			backBufferSprite->Begin();
+			backBufferSprite->SetPosition(leftEdge, topEdge);
+			backBufferSprite->Draw(*uiCamera, deltaTime);
+			backBufferSprite->End();
+		}
+
+		gd->SetAlphaBlending(true);
+		gd->DrawRectangle(*uiCamera, leftEdge, topEdge, sw, sh, 0, 1, 1, 0, 0, D3DXCOLOR(0, 0, 0, 0.65f), true);
+		gd->SetAlphaBlending(false);
 
 		btnTabItems->Draw(gd, deltaTime);
 		btnTabDeck->Draw(gd, deltaTime);
@@ -199,13 +211,13 @@ namespace Demo {
 		fontSprite->Begin();
 		fontSprite->SetScale(1.5f, 1.5f);
 		fontSprite->SetColor(0xFFFFFF00);
-     fontSprite->SetPosition(leftEdge + 30.0f, bottomEdge - 95.0f);
+		fontSprite->SetPosition(leftEdge + 30.0f, bottomEdge - 95.0f);
 
         fontSprite->SetText(std::to_wstring(player->GetGold()) + L"G");
 		fontSprite->Draw(*uiCamera, deltaTime);
 
-     fontSprite->SetPosition(leftEdge + 30.0f, bottomEdge - 60.0f);
-     fontSprite->SetText(std::to_wstring(static_cast<int>(player->GetHealth())) + L"/" + std::to_wstring(static_cast<int>(player->GetMaxHealth())) + L"HP");
+		fontSprite->SetPosition(leftEdge + 30.0f, bottomEdge - 60.0f);
+		fontSprite->SetText(std::to_wstring(static_cast<int>(player->GetHealth())) + L"/" + std::to_wstring(static_cast<int>(player->GetMaxHealth())) + L"HP");
 		fontSprite->Draw(*uiCamera, deltaTime);
 		fontSprite->End();
 
