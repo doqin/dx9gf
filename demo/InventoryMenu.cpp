@@ -49,14 +49,19 @@ namespace Demo {
 		itemSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		itemSheetTex->LoadTexture(L"items.png");
 
-		btnTabItems = std::make_shared<TextButton>(transformManager, centerX - tabGap / 2.0f - 80.0f, tabY, 80.0f, 30.0f, std::string("ITEMS"), this->font,
-			[this](DX9GF::ITrigger* t) { this->SetTab(Tab::ITEMS); });
-		btnTabItems->SetBackgroundColors(D3DXCOLOR(0.2f, 0.2f, 0.2f, 1), D3DXCOLOR(0.4f, 0.4f, 0.4f, 1), D3DXCOLOR(0.8f, 0.5f, 0.1f, 1));
+		uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		uiTex->LoadTexture(L"ui.png");
+
+		btnTabItems = std::make_shared<IconButton>(transformManager, centerX - tabGap / 2.0f - 80.0f, tabY, 48.0f * 2, 32.0f * 2, uiTex);
+		btnTabItems->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 144, 48, 32, 3));
+		btnTabItems->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->SetTab(Tab::ITEMS); });
+		btnTabItems->SetSpriteScale(2.f, 2.f);
 		btnTabItems->Init(uiCamera);
 
-		btnTabDeck = std::make_shared<TextButton>(transformManager, centerX + tabGap / 2.0f, tabY, 80.0f, 30.0f, std::string("DECK"), this->font,
-			[this](DX9GF::ITrigger* t) { this->SetTab(Tab::DECK); });
-		btnTabDeck->SetBackgroundColors(D3DXCOLOR(0.2f, 0.2f, 0.2f, 1), D3DXCOLOR(0.4f, 0.4f, 0.4f, 1), D3DXCOLOR(0.8f, 0.5f, 0.1f, 1));
+		btnTabDeck = std::make_shared<IconButton>(transformManager, centerX + tabGap / 2.0f, tabY, 48.0f * 2, 32.0f * 2, uiTex);
+		btnTabDeck->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 176, 48, 32, 3));
+		btnTabDeck->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->SetTab(Tab::DECK); });
+		btnTabDeck->SetSpriteScale(2.f, 2.f);
 		btnTabDeck->Init(uiCamera);
 
 		btnResume = std::make_shared<TextButton>(transformManager, resumeX, bottomY - 50.0f, 70.0f, 30.0f, std::string("RESUME"), this->font,
@@ -78,7 +83,7 @@ namespace Demo {
 		btnLeaveGame->SetBackgroundColors(D3DXCOLOR(0.6f, 0.1f, 0.1f, 1), D3DXCOLOR(0.8f, 0.2f, 0.2f, 1), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1));
 		btnLeaveGame->Init(uiCamera);
 
-       deckContainer = std::make_shared<IContainer>(transformManager, containerW, 40.0f, leftContainerX, containerY);
+		deckContainer = std::make_shared<IContainer>(transformManager, containerW, 40.0f, leftContainerX, containerY);
 		deckContainer->Init(draggableManager, game->GetGraphicsDevice(), uiCamera);
 
         inventoryContainer = std::make_shared<IContainer>(transformManager, containerW, 40.0f, rightContainerX, containerY);
@@ -141,7 +146,7 @@ namespace Demo {
 		float centerX = 0.0f;
 		float topY = -sh / 2.0f;
 		float bottomY = sh / 2.0f;
-       float tabY = topY + 40.0f;
+		float tabY = topY + 40.0f;
 		float tabGap = 24.0f;
 		float bottomGap = 20.0f;
 		float containerGap = 40.0f;
@@ -153,7 +158,7 @@ namespace Demo {
 		float optionsX = resumeX + 70.0f + bottomGap;
 		float leaveX = optionsX + 80.0f + bottomGap;
 
-		btnTabItems->SetLocalPosition(centerX - tabGap / 2.0f - 80.0f, tabY);
+		btnTabItems->SetLocalPosition(centerX - tabGap / 2.0f - btnTabItems->GetWidth(), tabY);
 		btnTabDeck->SetLocalPosition(centerX + tabGap / 2.0f, tabY);
 		btnResume->SetLocalPosition(resumeX, bottomY - 50.0f);
 		btnOptions->SetLocalPosition(optionsX, bottomY - 50.0f);
@@ -169,10 +174,12 @@ namespace Demo {
 		btnLeaveGame->Update(deltaTime);
 
 		if (currentTab == Tab::DECK) {
+			btnTabDeck->SetState(Demo::IButton::ButtonState::CLICKED);
 			deckContainer->Update(deltaTime);
 			inventoryContainer->Update(deltaTime);
 		}
 		else if (currentTab == Tab::ITEMS) {
+			btnTabItems->SetState(Demo::IButton::ButtonState::CLICKED);
 			if (isItemsDirty) RefreshItemsUI(); //only refresh items when needed
 
 			for (auto& btn : buffItems) {
@@ -278,22 +285,19 @@ namespace Demo {
 			}
 		}
 		else if (currentTab == Tab::DECK) {
-           float containerGap = 40.0f;
+			float containerGap = 40.0f;
 			float containerW = (sw - 120.0f - containerGap) / 2.0f;
-			float leftContainerX = -containerGap / 2.0f - containerW;
-			float rightContainerX = containerGap / 2.0f;
-
 			fontSprite->Begin();
 			fontSprite->SetScale(1.0f, 1.0f);
 			fontSprite->SetOutline(true, 0xFF000000, 3.f);
 			fontSprite->SetColor(0xFFFFFFFF);
-
-			fontSprite->SetPosition(leftContainerX + 10.0f, topEdge + 80.0f);
 			fontSprite->SetText(L"Current Deck");
+			float leftContainerX = -containerGap / 2.0f - containerW / 2.f - fontSprite->GetWidth() / 2.f;
+			fontSprite->SetPosition(leftContainerX + 10.0f, topEdge + 120.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
-
-            fontSprite->SetPosition(rightContainerX + 10.0f, topEdge + 80.0f);
 			fontSprite->SetText(L"Available Cards");
+			float rightContainerX = containerGap / 2.0f + containerW / 2.f - fontSprite->GetWidth() / 2.f;
+            fontSprite->SetPosition(rightContainerX + 10.0f, topEdge + 120.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
 			fontSprite->End();
 
