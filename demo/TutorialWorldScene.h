@@ -9,7 +9,8 @@
 #include "ShopPoint.h"
 #include "HealingPoint.h"
 #include "NPC1.h"
-
+#include "CardShop.h"
+#include "ItemShop.h"
 namespace Demo {
 	class TutorialWorldScene : public DX9GF::IScene, public DX9GF::ISaveable {
 		Game* game;
@@ -21,7 +22,10 @@ namespace Demo {
 		std::shared_ptr<DX9GF::SaveManager> saveManager;
 
 		std::shared_ptr<SavePoint> savePoint;
-		std::shared_ptr<ShopPoint> shopPoint;
+		std::shared_ptr<ShopPoint> shopPoint_Card;
+		std::shared_ptr<ShopPoint> shopPoint_BSItem;
+		std::shared_ptr<ShopPoint> shopPoint_HBItem;
+		std::shared_ptr<ShopPoint> shopPoint_PMItem;
 		std::shared_ptr<HealingPoint> healingPoint;
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<Player> player;
