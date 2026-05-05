@@ -204,6 +204,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BoomerangProjectile.cpp" />
     <ClCompile Include="CardShop.cpp" />
     <ClCompile Include="CupidEnemy.cpp" />
     <ClCompile Include="DamageTextManager.cpp" />
@@ -224,6 +225,7 @@
     <ClCompile Include="ItemShop.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="MimicEnemy.cpp" />
     <ClCompile Include="MultiTargetCard.cpp" />
     <ClCompile Include="NPC1.cpp" />
     <ClCompile Include="pch.cpp">
@@ -238,12 +240,15 @@
     <ClCompile Include="IShopScene.cpp" />
     <ClCompile Include="ShopPoint.cpp" />
     <ClCompile Include="SineWaveProjectile.cpp" />
+    <ClCompile Include="SpiralProjectile.cpp" />
     <ClCompile Include="TargetedProjectile.cpp" />
     <ClCompile Include="TextInputManager.cpp" />
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
     <ClCompile Include="TestBattleScene.cpp" />
     <ClCompile Include="TutorialWorldScene.cpp" />
+    <ClCompile Include="VampireBatEnemy.cpp" />
+    <ClCompile Include="WarlockEnemy.cpp" />
     <ClCompile Include="World1Scene.cpp" />
     <ClCompile Include="TextButton.cpp" />
     <ClCompile Include="EnemyCard.cpp" />
@@ -255,6 +260,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
+    <ClInclude Include="BoomerangProjectile.h" />
     <ClInclude Include="CardShop.h" />
     <ClInclude Include="CupidEnemy.h" />
     <ClInclude Include="DamageTextManager.h" />
@@ -282,6 +288,7 @@
     <ClInclude Include="IProjectile.h" />
     <ClInclude Include="IStatementCard.h" />
     <ClInclude Include="MainBlockCard.h" />
+    <ClInclude Include="MimicEnemy.h" />
     <ClInclude Include="MultiTargetCard.h" />
     <ClInclude Include="NPC1.h" />
     <ClInclude Include="Player.h" />
@@ -293,6 +300,7 @@
     <ClInclude Include="IShopScene.h" />
     <ClInclude Include="ShopPoint.h" />
     <ClInclude Include="SineWaveProjectile.h" />
+    <ClInclude Include="SpiralProjectile.h" />
     <ClInclude Include="TargetedProjectile.h" />
     <ClInclude Include="TextInputManager.h" />
     <ClInclude Include="RoundProjectile.h" />
@@ -300,6 +308,8 @@
     <ClInclude Include="TestBattleScene.h" />
     <ClInclude Include="TestEnemy.h" />
     <ClInclude Include="TutorialWorldScene.h" />
+    <ClInclude Include="VampireBatEnemy.h" />
+    <ClInclude Include="WarlockEnemy.h" />
     <ClInclude Include="World1Scene.h" />
   </ItemGroup>
   <ItemGroup>
