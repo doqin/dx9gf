@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "TutorialWorldScene.h"
 void Demo::TutorialWorldScene::Init()
 {
@@ -22,9 +22,37 @@ void Demo::TutorialWorldScene::Init()
     savePoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
 	savePoint->SetVisible(true);
 
-	shopPoint = std::make_shared<ShopPoint>(transformManager, 300.0f, 150.0f);
-   shopPoint->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
-	shopPoint->SetVisible(true);
+	shopPoint_Card = std::make_shared<ShopPoint>(transformManager, 300.0f, 150.0f);
+	shopPoint_Card->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
+		[](Game* g, Player* p, int w, int h) {
+			return new CardShop(g, p, w, h);
+		}
+	);
+	shopPoint_Card->SetVisible(true);
+
+	shopPoint_BSItem = std::make_shared<ShopPoint>(transformManager, 360.0f, 150.0f);
+	shopPoint_BSItem->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
+		[](Game* g, Player* p, int w, int h) {
+			return new ItemShop(g, p, w, h, ShopTier::BASIC);
+		}
+	);
+	shopPoint_BSItem->SetVisible(true);
+
+	shopPoint_HBItem = std::make_shared<ShopPoint>(transformManager, 430.0f, 150.0f);
+	shopPoint_HBItem->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
+		[](Game* g, Player* p, int w, int h) {
+			return new ItemShop(g, p, w, h, ShopTier::HYBRID);
+		}
+	);
+	shopPoint_HBItem->SetVisible(true);
+
+	shopPoint_PMItem = std::make_shared<ShopPoint>(transformManager, 500.0f, 150.0f);
+	shopPoint_PMItem->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
+		[](Game* g, Player* p, int w, int h) {
+			return new ItemShop(g, p, w, h, ShopTier::PREMIUM);
+		}
+	);
+	shopPoint_PMItem->SetVisible(true);
 
 	healingPoint = std::make_shared<HealingPoint>(transformManager, 250.0f, 220.0f);
   healingPoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
@@ -84,7 +112,10 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 		if (savePoint->IsMenuOpen()) isGamePaused = true;
 	}
 
-	if (shopPoint) shopPoint->Update(deltaTime);
+	if (shopPoint_Card) shopPoint_Card->Update(deltaTime);
+	if (shopPoint_BSItem) shopPoint_BSItem->Update(deltaTime);
+	if (shopPoint_HBItem) shopPoint_HBItem->Update(deltaTime);
+	if (shopPoint_PMItem) shopPoint_PMItem->Update(deltaTime);
 
 	if (healingPoint) healingPoint->Update(deltaTime);
 
@@ -125,7 +156,10 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 		if (savePoint) {
 			savePoint->Draw(camera, deltaTime);
 		}
-		if (shopPoint) shopPoint->Draw(camera, deltaTime);
+		if (shopPoint_Card) shopPoint_Card->Draw(camera, deltaTime);
+		if (shopPoint_BSItem) shopPoint_BSItem->Draw(camera, deltaTime);
+		if (shopPoint_HBItem) shopPoint_HBItem->Draw(camera, deltaTime);
+		if (shopPoint_PMItem) shopPoint_PMItem->Draw(camera, deltaTime);
 		if (healingPoint) healingPoint->Draw(camera, deltaTime);
 		player->Draw(deltaTime);
       if (drawBuffer) {

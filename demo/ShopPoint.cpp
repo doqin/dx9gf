@@ -4,11 +4,11 @@
 #include <cmath>
 
 namespace Demo {
-    ShopPoint::ShopPoint(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y)
-        : IGameObject(tm, x, y), transformManager(tm) {
-    }
+	ShopPoint::ShopPoint(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y)
+		: IGameObject(tm, x, y), transformManager(tm) {
+	}
 
-    void ShopPoint::Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer) {
+    void ShopPoint::Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer, std::function<DX9GF::IScene* (Game*, Player*, int, int)> factory) {
         this->game = game;
         player = p;
         fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
@@ -24,41 +24,46 @@ namespace Demo {
         sprite = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 80, 80, 8), 8);
         sprite->SetOrigin(40.f, 40.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
+
+        this->sceneFactory = factory;
     }
 
-    void ShopPoint::Update(unsigned long long deltaTime) {
-        if (!isVisible) return;
+	void ShopPoint::Update(unsigned long long deltaTime) {
+		if (!isVisible) return;
 
-        auto pLock = player.lock();
-        if (!pLock) return;
+		auto pLock = player.lock();
+		if (!pLock) return;
 
-        auto [px, py] = pLock->GetWorldPosition();
-        auto [sx, sy] = GetWorldPosition();
+		auto [px, py] = pLock->GetWorldPosition();
+		auto [sx, sy] = GetWorldPosition();
 
-        float distance = std::sqrt((px - sx) * (px - sx) + (py - sy) * (py - sy));
-        isPlayerNear = (distance <= INTERACTION_DISTANCE);
+		float distance = std::sqrt((px - sx) * (px - sx) + (py - sy) * (py - sy));
+		isPlayerNear = (distance <= INTERACTION_DISTANCE);
 
-        auto inpMan = DX9GF::InputManager::GetInstance();
+		auto inpMan = DX9GF::InputManager::GetInstance();
 
-        if (isPlayerNear && inpMan->KeyPress(DIK_E)) {
-            auto app = DX9GF::Application::GetInstance();
-            int sw = app->GetScreenWidth();
-            int sh = app->GetScreenHeight();
+		if (isPlayerNear && inpMan->KeyPress(DIK_E)) {
+			auto app = DX9GF::Application::GetInstance();
+			int sw = app->GetScreenWidth();
+			int sh = app->GetScreenHeight();
 
-            auto shopScene = new CardShop(game, pLock.get(), sw, sh);
-            game->GetSceneManager()->PushScene(shopScene);
-            game->GetSceneManager()->GoToNext();
-        }
-    }
+			if (sceneFactory) {
+				auto shopScene = sceneFactory(game, pLock.get(), sw, sh);
+				game->GetSceneManager()->PushScene(shopScene);
+				game->GetSceneManager()->GoToNext();
+			}
 
-    void ShopPoint::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime) {
-        if (!isVisible) return;
+		}
+	}
 
-        auto [x, y] = GetWorldPosition();
+	void ShopPoint::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime) {
+		if (!isVisible) return;
 
-        sprite->Begin();
-        sprite->Draw(camera, deltaTime);
-        sprite->End();
+		auto [x, y] = GetWorldPosition();
+
+		sprite->Begin();
+		sprite->Draw(camera, deltaTime);
+		sprite->End();
 
         if (fontSprite && isPlayerNear) {
             if (auto bufferLock = drawBuffer.lock()) {

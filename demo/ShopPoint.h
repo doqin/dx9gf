@@ -18,18 +18,20 @@ namespace Demo {
         std::shared_ptr<DX9GF::RectangleCollider> collider;
         std::weak_ptr<DX9GF::CommandBuffer> drawBuffer;
 
-        bool isPlayerNear = false;
-        const float INTERACTION_DISTANCE = 50.0f;
-        bool isVisible = false;
+		std::function<DX9GF::IScene* (Game*, Player*, int, int)> sceneFactory;
 
-    public:
-        ShopPoint(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0);
+		bool isPlayerNear = false;
+		const float INTERACTION_DISTANCE = 50.0f;
+		bool isVisible = false;
 
-        void Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer);
+	public:
+		ShopPoint(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0);
 
-        void Update(unsigned long long deltaTime);
-        void Draw(const DX9GF::Camera& camera, unsigned long long deltaTime);
-        void SetVisible(bool visible) { isVisible = visible; }
-        bool IsVisible() const { return isVisible; }
-    };
+        void Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer, std::function<DX9GF::IScene* (Game*, Player*, int, int)> factory);
+
+		void Update(unsigned long long deltaTime);
+		void Draw(const DX9GF::Camera& camera, unsigned long long deltaTime);
+		void SetVisible(bool visible) { isVisible = visible; }
+		bool IsVisible() const { return isVisible; }
+	};
 }
