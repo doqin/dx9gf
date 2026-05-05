@@ -207,6 +207,7 @@
     <ClCompile Include="BoomerangProjectile.cpp" />
     <ClCompile Include="CardShop.cpp" />
     <ClCompile Include="CupidEnemy.cpp" />
+    <ClCompile Include="CustomBattleScene.cpp" />
     <ClCompile Include="DamageTextManager.cpp" />
     <ClCompile Include="DauDauNPC.cpp" />
     <ClCompile Include="DebugScene.cpp" />
@@ -236,6 +237,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RandomEncounter.cpp" />
     <ClCompile Include="SavePoint.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="SettingsScene.cpp" />
@@ -265,6 +267,7 @@
     <ClInclude Include="BoomerangProjectile.h" />
     <ClInclude Include="CardShop.h" />
     <ClInclude Include="CupidEnemy.h" />
+    <ClInclude Include="CustomBattleScene.h" />
     <ClInclude Include="DamageTextManager.h" />
     <ClInclude Include="DauDauNPC.h" />
     <ClInclude Include="DebugScene.h" />
@@ -297,6 +300,7 @@
     <ClInclude Include="NPC1.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PopUpMessage.h" />
+    <ClInclude Include="RandomEncounter.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SavePoint.h" />
     <ClInclude Include="SettingsManager.h" />

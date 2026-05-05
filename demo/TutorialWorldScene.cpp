@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "TutorialWorldScene.h"
+#include "RandomEncounter.h"
+
 void Demo::TutorialWorldScene::Init()
 {
 	camera.SetZoom(2.0f);
@@ -10,10 +12,18 @@ void Demo::TutorialWorldScene::Init()
 	player->Init(game->GetGraphicsDevice(), colliderManager.get(), &camera);
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
 	map->Create(transformManager, colliderManager, "./tutorial.tmx");
+	map->SetAreaUpdateHandler("triggers", GetRandomEncounterFunc(game, player, {
+		{"TestEnemy", 50},
+		{"DemonEyeEnemy", 40},
+		{"VampireBatEnemy", 30},
+		{"MimicEnemy", 20},
+		{"WarlockEnemy", 10},
+		{"CupidEnemy", 5}
+		}));
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
 	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
 
-   npc1 = std::make_shared<DauDauNPC>(transformManager, 250.0f, 120.0f);
+	npc1 = std::make_shared<DauDauNPC>(transformManager, 167.0f, -18.0f);
 	npc1->Init(game->GetGraphicsDevice(), player, colliderManager, font, drawBuffer);
 	npc1->AddLine(L"Dau Dau", L"Hello! Welcome.");
 	npc1->AddLine(L"Dau Dau", L"How to escape this world? I don't know.");
@@ -55,7 +65,7 @@ void Demo::TutorialWorldScene::Init()
 	shopPoint_PMItem->SetVisible(true);
 
 	healingPoint = std::make_shared<HealingPoint>(transformManager, 250.0f, 220.0f);
-  healingPoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
+	healingPoint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	healingPoint->SetVisible(true);
 
 	draggableManager = std::make_shared<Demo::DraggableManager>();
@@ -90,6 +100,7 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 
 	bool isGamePaused = false;
 
+	map->UpdateAreas(player->GetWorldX(), player->GetWorldY());
 	if (npc1) {
 		npc1->Update(deltaTime);
 		if (!currentConversation && npc1->CanInteract() && inpMan->KeyPress(DIK_E)) {
@@ -152,7 +163,6 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 	if (SUCCEEDED(gd->BeginDraw())) {
 		map->Draw(camera);
 		if (npc1) npc1->Draw(camera, deltaTime);
-		if (currentConversation) currentConversation->Draw(gd, deltaTime);
 		if (savePoint) {
 			savePoint->Draw(camera, deltaTime);
 		}
@@ -162,15 +172,16 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 		if (shopPoint_PMItem) shopPoint_PMItem->Draw(camera, deltaTime);
 		if (healingPoint) healingPoint->Draw(camera, deltaTime);
 		player->Draw(deltaTime);
-      if (drawBuffer) {
+		if (drawBuffer) {
 			while (drawBuffer->IsBusy()) {
 				drawBuffer->Update(deltaTime);
 			}
 		}
-     if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
+		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
 		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
 			draggableManager->Draw(deltaTime);
 		}
+		if (currentConversation) currentConversation->Draw(gd, deltaTime);
 		DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		gd->EndDraw();
 	}

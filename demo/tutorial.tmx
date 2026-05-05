@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="8" nextobjectid="66">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="10" nextobjectid="68">
  <tileset firstgid="1" source="tutorial.tsx"/>
  <layer id="4" name="background0" width="30" height="20">
   <data encoding="csv">
@@ -496,5 +496,9 @@
   <object id="63" x="687.5" y="-104" width="16.25" height="71.5"/>
   <object id="64" x="112" y="-32.125" width="16" height="48"/>
   <object id="65" x="656" y="-111.875" width="5.625" height="10.75"/>
+ </objectgroup>
+ <objectgroup id="8" name="triggers">
+  <object id="66" x="612.667" y="-74.6667" width="54.6667" height="21.6667"/>
+  <object id="67" x="645" y="-91.6667" width="21.6667" height="16.3333"/>
  </objectgroup>
 </map>

@@ -860,6 +860,15 @@ void Demo::IBattleScene::Init()
 	itemMenuBackground->SetOrigin(95.5f, 63.5f);
 	itemMenuBackground->SetScale(3.0f, 3.0f);
 
+	// Fetch Deck
+	const auto& deckCards = player->GetDeck();
+	for (const auto& cardId : deckCards) {
+		auto newCard = ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), &camera);
+		if (newCard) {
+			drawPile.push_back(newCard);
+		}
+	}
+
 	// Init draggables
 	mainBlockCard = std::make_shared<MainBlockCard>(transformManager, -100.f, -140.f);
 	mainBlockCard->Init(draggableManager, game->GetGraphicsDevice(), &camera);
@@ -872,6 +881,7 @@ void Demo::IBattleScene::Init()
 
 	transformManager->RebuildHierarchy();
 	DamageTextManager::GetInstance()->Init(this->game);
+	ItemData::GetInstance()->LoadData();
 }
 
 void Demo::IBattleScene::Update(unsigned long long deltaTime)
