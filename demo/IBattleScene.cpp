@@ -4,6 +4,8 @@
 #include <random>
 #include "DamageTextManager.h"
 #include "GameItems.h"
+#include "TransitionCommand.h"
+
 namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
@@ -618,6 +620,7 @@ void Demo::IBattleScene::Init()
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
 	// Setup player
 	battlePlayer = std::make_shared<Player>(transformManager);
 	battlePlayer->Init(game->GetGraphicsDevice(), &colliderManager, &camera);
@@ -700,7 +703,12 @@ void Demo::IBattleScene::Init()
 	itemsButton->SetSpriteScale(2.f, 2.f);
 	fleeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	fleeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+		auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), 1.f, true);
+		drawBuffer->PushCommand(transitionInCommand);
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
+			if (!transitionInCommand->IsFinished()) {
+				return;
+			}
 			player->SetHealth(battlePlayer->GetHealth());
 			auto sceMan = game->GetSceneManager();
 			sceMan->PopScene();
@@ -882,6 +890,7 @@ void Demo::IBattleScene::Init()
 	transformManager->RebuildHierarchy();
 	DamageTextManager::GetInstance()->Init(this->game);
 	ItemData::GetInstance()->LoadData();
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), 1.f, false));
 }
 
 void Demo::IBattleScene::Update(unsigned long long deltaTime)
@@ -947,6 +956,7 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 		}
 		popUpMessage->Draw(deltaTime);
 		DamageTextManager::GetInstance()->Draw(this->camera, deltaTime);
+		drawBuffer->Update(deltaTime);
 		inpMan->DrawCursor(&camera, deltaTime);
 		gd->EndDraw();
 	}

@@ -41,6 +41,7 @@ namespace Demo {
 		std::shared_ptr<Player> battlePlayer;
 		// Managers
 		DX9GF::CommandBuffer commandBuffer;
+		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
 		std::shared_ptr<DraggableManager> draggableManager;
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
 		DX9GF::ColliderManager colliderManager;

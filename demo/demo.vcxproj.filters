@@ -54,6 +54,7 @@
     <ClCompile Include="TestEnemy.cpp" />
     <ClCompile Include="RandomEncounter.cpp" />
     <ClCompile Include="CustomBattleScene.cpp" />
+    <ClCompile Include="TransitionCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
@@ -113,6 +114,7 @@
     <ClInclude Include="TextButton.h" />
     <ClInclude Include="RandomEncounter.h" />
     <ClInclude Include="CustomBattleScene.h" />
+    <ClInclude Include="TransitionCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc" />

@@ -10,19 +10,19 @@ void Demo::TutorialWorldScene::Init()
 	player = std::make_shared<Player>(transformManager, 248, 184);
 	camera.SetPosition(248, 184);
 	player->Init(game->GetGraphicsDevice(), colliderManager.get(), &camera);
+	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
+	commandBuffer = std::make_shared<DX9GF::CommandBuffer>();
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
 	map->Create(transformManager, colliderManager, "./tutorial.tmx");
 	map->SetAreaUpdateHandler("triggers", GetRandomEncounterFunc(game, player, {
-		{"TestEnemy", 50},
 		{"DemonEyeEnemy", 40},
 		{"VampireBatEnemy", 30},
 		{"MimicEnemy", 20},
 		{"WarlockEnemy", 10},
 		{"CupidEnemy", 5}
-		}));
+		}, drawBuffer, commandBuffer, &isGamePaused));
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
-	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
-
+	
 	npc1 = std::make_shared<DauDauNPC>(transformManager, 167.0f, -18.0f);
 	npc1->Init(game->GetGraphicsDevice(), player, colliderManager, font, drawBuffer);
 	npc1->AddLine(L"Dau Dau", L"Hello! Welcome.");
@@ -98,9 +98,9 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 		escCooldown = 300.0f;
 	}
 
-	bool isGamePaused = false;
+	bool isGamePaused = this->isGamePaused;
 
-	map->UpdateAreas(player->GetWorldX(), player->GetWorldY());
+	if (!isGamePaused) map->UpdateAreas(player->GetWorldX(), player->GetWorldY());
 	if (npc1) {
 		npc1->Update(deltaTime);
 		if (!currentConversation && npc1->CanInteract() && inpMan->KeyPress(DIK_E)) {
@@ -147,13 +147,13 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 		draggableManager->Update(deltaTime);
 	}
 
-
 	if (inventoryMenu && inventoryMenu->IsPendingLeave()) {
 		auto sceMan = game->GetSceneManager();
 		sceMan->PopScene();
 		sceMan->GoToPrevious();
 		return;
 	}
+	commandBuffer->Update(deltaTime);
 }
 
 void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
@@ -173,9 +173,7 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 		if (healingPoint) healingPoint->Draw(camera, deltaTime);
 		player->Draw(deltaTime);
 		if (drawBuffer) {
-			while (drawBuffer->IsBusy()) {
-				drawBuffer->Update(deltaTime);
-			}
+			drawBuffer->Update(deltaTime);
 		}
 		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
 		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
