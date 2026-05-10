@@ -58,7 +58,7 @@ void Demo::VampireBatEnemy::PatternEcholocation(float projDamage) {
 					.SetWave(50.f, 8.f)
 					.SetDelay(0.f)
 					.SetDecayTime(4.f)
-					.SetVelocity(160.f)
+					.SetVelocity(80.f)
 					.SetDamage(projDamage)
 					.Build()
 				);
