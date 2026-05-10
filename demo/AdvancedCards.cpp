@@ -131,7 +131,10 @@ bool Demo::PoisonCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
 		if (auto enemy = targets[0].lock()) {
-			if (auto e = enemy->GetValue()) e->ApplyStatus(StatusType::POISON, 3, 2.f);
+          if (auto e = enemy->GetValue()) {
+				const int poisonTurns = 3;
+				e->ApplyStatus(StatusType::POISON, poisonTurns);
+			}
 		}
 	}
 	isDone = true;

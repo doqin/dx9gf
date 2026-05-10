@@ -49,6 +49,9 @@ void Demo::IBattleScene::StartBattle()
   initialEnemyCount = enemies.size();
   battleGoldReward = 0;
   isBattleEnding = false;
+  isDefeatSequence = false;
+	defeatElapsedMs = 0.f;
+	defeatFadeAlpha = 0.f;
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::shuffle(drawPile.begin(), drawPile.end(), gen);
@@ -501,12 +504,35 @@ void Demo::IBattleScene::PlayerOpenItemsUpdate(unsigned long long deltaTime)
 	}
 }
 
-void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
+bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 {
+    if (isDefeatSequence) {
+		defeatElapsedMs += static_cast<float>(deltaTime);
+		if (defeatElapsedMs >= 1000.f) {
+			const float fadeDurationMs = 1000.f;
+			defeatFadeAlpha = (std::min)(1.0f, (defeatElapsedMs - 1000.f) / fadeDurationMs);
+		}
+		if (defeatElapsedMs >= 2500.f) {
+			auto sceMan = game->GetSceneManager();
+			while (sceMan->GetSceneCount() > 1) {
+				sceMan->PopScene();
+			}
+			sceMan->GoToScene(0); // Go to main menu
+			return true;
+		}
+		return false;
+	}
 	battlePlayer->Update(deltaTime);
+	if (battlePlayer->IsDead()) {
+		isDefeatSequence = true;
+		defeatElapsedMs = 0.f;
+		defeatFadeAlpha = 0.f;
+		popUpMessage->QueueMessage(&commandBuffer, L"You were defeated", 1.5f);
+		return false;
+	}
     if (enemyAttackStartPending) {
 		if (commandBuffer.IsBusy()) {
-			return;
+			return false;
 		}
 		for (auto& enemy : enemies) {
 			enemy->SetState(true);
@@ -533,7 +559,7 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
         CollectDeadEnemies();
 		if (enemies.empty()) {
 			OnAllEnemiesDefeated();
-			return;
+			return false;
 		}
 		BeginNextTurn();
 		state = State::PlayerStandBy;
@@ -542,6 +568,7 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		enemyLayoutInitialized = true;
 		PlayerStandByUpdate(deltaTime);
 	}
+	return false;
 }
 
 void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
@@ -649,9 +676,19 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 
 void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 {
-	battlePlayer->Draw(deltaTime);
 	auto app = DX9GF::Application::GetInstance();
 	auto gd = game->GetGraphicsDevice();
+	const float battleHalfSize = battleBoxSize * 0.5f;
+	gd->SetAlphaBlending(true);
+	gd->DrawRectangle(camera, -battleHalfSize, -battleHalfSize, battleBoxSize, battleBoxSize, 0x40000000, true);
+	gd->DrawRectangle(camera, -battleHalfSize, -battleHalfSize, battleBoxSize, battleBoxSize, 0xFF000000, false);
+	const int outlineThickness = 4;
+	for (int i = 1; i < outlineThickness; ++i) {
+		gd->DrawRectangle(camera, -battleHalfSize - i, -battleHalfSize - i, battleBoxSize + 2 * i, battleBoxSize + 2 * i, 0xFFFFFFFF, false);
+	}
+	gd->DrawRectangle(camera, -battleHalfSize - outlineThickness, -battleHalfSize - outlineThickness, battleBoxSize + 2 * outlineThickness, battleBoxSize + 2 * outlineThickness, 0xFF000000, false);
+	gd->SetAlphaBlending(false);
+	battlePlayer->Draw(deltaTime);
 	const float spacing = 5.f;
 	const float w = battlePlayer->GetMaxHealth() * spacing;
 	const float defenseW = (std::max)(0.f, battlePlayer->GetTemporaryDefense()) * spacing;
@@ -975,6 +1012,28 @@ void Demo::IBattleScene::Init()
 	handContainer = std::make_shared<HandContainer>(transformManager, 180, 40, -250.f, -200.f);
 	handContainer->Init(draggableManager, game->GetGraphicsDevice(), &camera, &playedPile);
 
+  const float battleHalfSize = battleBoxSize * 0.5f;
+	const float battleBorder = 8.f;
+	const float battleLeft = -battleHalfSize - battleBorder;
+	const float battleTop = -battleHalfSize - battleBorder;
+	const float battleRight = battleHalfSize;
+	const float battleBottom = battleHalfSize;
+	const float battleWidth = battleBoxSize + battleBorder * 2.f;
+	const float battleHeight = battleBoxSize + battleBorder * 2.f;
+
+	std::array<std::shared_ptr<DX9GF::RectangleCollider>, 4> bounds = {
+		std::make_shared<DX9GF::RectangleCollider>(transformManager, battleWidth, battleBorder, battleLeft, battleTop),
+		std::make_shared<DX9GF::RectangleCollider>(transformManager, battleWidth, battleBorder, battleLeft, battleBottom),
+		std::make_shared<DX9GF::RectangleCollider>(transformManager, battleBorder, battleHeight, battleLeft, battleTop),
+		std::make_shared<DX9GF::RectangleCollider>(transformManager, battleBorder, battleHeight, battleRight, battleTop)
+	};
+
+	for (auto& bound : bounds) {
+		bound->SetOrigin(0.f, 0.f);
+		colliderManager.Add(bound);
+		battleBounds.push_back(bound);
+	}
+
 	// Init pop up message
 	popUpMessage = std::make_shared<PopUpMessage>(transformManager);
 	popUpMessage->Init(game->GetGraphicsDevice(), &camera);
@@ -990,6 +1049,15 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
+	if (isDefeatSequence) {
+		if (!EnemyAttackUpdate(deltaTime)) {
+			DamageTextManager::GetInstance()->Update(deltaTime);
+			transformManager->UpdateAll();
+			commandBuffer.Update(deltaTime);
+			return;
+		}
+		return;
+	}
 	if (!enemyLayoutInitialized || lastEnemyLayoutState != state) {
 		if (state == State::PlayerStandBy || state == State::PlayerAttack) {
 			QueueEnemyLayoutTransition(state);
@@ -1024,21 +1092,30 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	gd->Clear(0xFFFFFFFF);
 	if (SUCCEEDED(gd->BeginDraw())) {
-		for (auto& enemy : enemies) {
-			enemy->Draw(game->GetGraphicsDevice(), &camera, deltaTime);
-		}
 		switch (state) {
 		case State::PlayerStandBy:
+			for (auto& enemy : enemies) {
+				enemy->Draw(game->GetGraphicsDevice(), &camera, deltaTime);
+			}
 			PlayerStandByDraw(deltaTime);
 			break;
 		case State::PlayerAttack:
+			for (auto& enemy : enemies) {
+				enemy->Draw(game->GetGraphicsDevice(), &camera, deltaTime);
+			}
 			PlayerAttackDraw(deltaTime);
 			break;
 		case State::PlayerOpenItems:
+			for (auto& enemy : enemies) {
+				enemy->Draw(game->GetGraphicsDevice(), &camera, deltaTime);
+			}
 			PlayerOpenItemsDraw(deltaTime);
 			break;
 		case State::EnemyAttack:
 			EnemyAttackDraw(deltaTime);
+			for (auto& enemy : enemies) {
+				enemy->Draw(game->GetGraphicsDevice(), &camera, deltaTime);
+			}
 			break;
 		default:
 			throw std::runtime_error("Unexpected state");
@@ -1047,6 +1124,15 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 			dynamic_pointer_cast<IDraggable>(card)->Draw(deltaTime);
 		}
 		popUpMessage->Draw(deltaTime);
+        if (isDefeatSequence && defeatElapsedMs >= 1000.f) {
+			const auto app = DX9GF::Application::GetInstance();
+			const float screenWidth = static_cast<float>(app->GetScreenWidth());
+			const float screenHeight = static_cast<float>(app->GetScreenHeight());
+			const int alpha = static_cast<int>((std::min)(1.0f, defeatFadeAlpha) * 255.f);
+			gd->SetAlphaBlending(true);
+			gd->DrawRectangle(camera, -screenWidth / 2.f, -screenHeight / 2.f, screenWidth, screenHeight, D3DCOLOR_ARGB(alpha, 0, 0, 0), true);
+			gd->SetAlphaBlending(false);
+		}
 		DamageTextManager::GetInstance()->Draw(this->camera, deltaTime);
 		drawBuffer->Update(deltaTime);
 		inpMan->DrawCursor(&camera, deltaTime);

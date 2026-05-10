@@ -84,7 +84,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Apply Poison 3 (2 dmg/turn) to an enemy."; }
+        std::wstring GetDescription() const override { return L"Apply Poison 3 (damage equals remaining turns)."; }
 
 		bool Execute() override;
 
