@@ -35,6 +35,9 @@ namespace Demo {
 		int usedEnergy = 0;
 		bool isTransitioning = false;
         bool enemyAttackStartPending = false;
+        size_t initialEnemyCount = 0;
+        int battleGoldReward = 0;
+        bool isBattleEnding = false;
 		// Externals
 		Game* game;
 		std::shared_ptr<Player> player;
@@ -78,6 +81,7 @@ namespace Demo {
 		std::shared_ptr<DX9GF::StaticSprite> itemMenuBackground;
 		void CreateEnemyCard(std::shared_ptr<IEnemy> enemy);
 		void StartBattle();
+		void OnAllEnemiesDefeated();
 		
 	private:
 		void DrawCards(size_t count);
@@ -87,6 +91,7 @@ namespace Demo {
 		void MoveHandCardsToDiscardPile();
 		void BeginNextTurn();
 		void RefreshItemMenu();
+      void CollectDeadEnemies();
 		// Updates
 		void PlayerStandByUpdate(unsigned long long deltaTime);
 		void PlayerAttackUpdate(unsigned long long deltaTime);

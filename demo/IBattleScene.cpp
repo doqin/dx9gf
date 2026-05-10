@@ -46,11 +46,55 @@ void Demo::IBattleScene::StartBattle()
 	for (auto& card : drawPile) {
 		HidePileCard(card);
 	}
+  initialEnemyCount = enemies.size();
+  battleGoldReward = 0;
+  isBattleEnding = false;
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::shuffle(drawPile.begin(), drawPile.end(), gen);
 	currentTurn = 1;
 	DrawCards(5);
+}
+
+void Demo::IBattleScene::CollectDeadEnemies()
+{
+	for (size_t i = 0; i < enemies.size(); ++i) {
+		if (enemies[i]->IsDead()) {
+			battleGoldReward += enemies[i]->GetGoldReward();
+			enemies.erase(enemies.begin() + i);
+			--i;
+		}
+	}
+}
+
+void Demo::IBattleScene::OnAllEnemiesDefeated()
+{
+	if (isBattleEnding) {
+		return;
+	}
+	isBattleEnding = true;
+	int finalGold = battleGoldReward;
+	if (initialEnemyCount > 1) {
+		const float multiplier = 1.25f * static_cast<float>(initialEnemyCount - 1);
+       finalGold = static_cast<int>(std::round(finalGold * multiplier));
+	}
+
+	player->AddGold(finalGold);
+	popUpMessage->QueueMessage(&commandBuffer, L"You earned " + std::to_wstring(finalGold) + L" gold!", 1.5f);
+
+	auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), 1.f, true);
+	drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(2.5f));
+	drawBuffer->PushCommand(transitionInCommand);
+	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
+		if (!transitionInCommand->IsFinished()) {
+			return;
+		}
+		player->SetHealth(battlePlayer->GetHealth());
+		auto sceMan = game->GetSceneManager();
+		sceMan->PopScene();
+		sceMan->GoToPrevious();
+		markFinished();
+	}));
 }
 
 void Demo::IBattleScene::DrawCards(size_t count)
@@ -379,11 +423,11 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 						}
 					}
 					// Remove dead enemies
-					for (size_t i = 0; i < this->enemies.size(); ++i) {
-						if (this->enemies[i]->IsDead()) {
-							this->enemies.erase(this->enemies.begin() + i);
-							--i;
-						}
+					if (this->enemies.empty()) {
+						this->OnAllEnemiesDefeated();
+						this->isTransitioning = false;
+						markFinished();
+						return;
 					}
 					this->state = State::EnemyAttack;
 					this->QueueEnemyLayoutTransition(State::EnemyAttack);
@@ -413,11 +457,12 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 							--i;
 						}
 					}
-					for (size_t i = 0; i < this->enemies.size(); ++i) {
-						if (this->enemies[i]->IsDead()) {
-							this->enemies.erase(this->enemies.begin() + i);
-							--i;
-						}
+                    this->CollectDeadEnemies();
+					if (this->enemies.empty()) {
+						this->OnAllEnemiesDefeated();
+						this->isTransitioning = false;
+						markFinished();
+						return;
 					}
 					this->battlePlayer->SetLocalPosition(0, 0);
 					this->EnemyAttackUpdate(deltaTime);
@@ -485,6 +530,11 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		isDoneAttacking &= enemy->IsDoneAttacking();
 	}
 	if (isDoneAttacking) {
+        CollectDeadEnemies();
+		if (enemies.empty()) {
+			OnAllEnemiesDefeated();
+			return;
+		}
 		BeginNextTurn();
 		state = State::PlayerStandBy;
 		QueueEnemyLayoutTransition(State::PlayerStandBy);

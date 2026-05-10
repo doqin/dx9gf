@@ -26,5 +26,14 @@ void Demo::CardShop::LoadItems()
 			auto newCard = std::make_shared<HeavyStrikeCard>(this->transformManager);
 			this->player->AddCardToDeck(newCard->GetSaveID());
 		}
-		});
+	});
+
+	itemsForSale.push_back({
+		"Poison Card",
+		75,
+		[this]() {
+			auto newCard = std::make_shared<PoisonCard>(this->transformManager);
+			this->player->AddCardToDeck(newCard->GetSaveID());
+		}
+	});
 }
