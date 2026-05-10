@@ -10,7 +10,7 @@ void Demo::PopUpMessage::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Came
 	fontSprite->SetColor(0xFF000000);
 }
 
-void Demo::PopUpMessage::QueueMessage(DX9GF::CommandBuffer* commandBuffer, std::wstring message)
+void Demo::PopUpMessage::QueueMessage(DX9GF::CommandBuffer* commandBuffer, std::wstring message, float duration)
 {
 	fontSprite->SetText(std::move(message));
 	auto fontHeight = fontSprite->GetHeight();
@@ -21,7 +21,7 @@ void Demo::PopUpMessage::QueueMessage(DX9GF::CommandBuffer* commandBuffer, std::
 		markFinished();
 		}));
 	commandBuffer->PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), 0, -static_cast<float>(app->GetScreenHeight()) / 2.f + fontHeight + 20.f, 0.5f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-	commandBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(1.f));
+	commandBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(duration));
 	commandBuffer->PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), 0, -static_cast<float>(app->GetScreenHeight()), 0.5f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
 	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
 		isDrawing = false;

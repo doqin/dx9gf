@@ -168,6 +168,9 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	if (enemies.empty()) {
 		return;
 	}
+	if (targetState == lastEnemyLayoutState) {
+		return;
+	}
 
 	const auto app = DX9GF::Application::GetInstance();
 	const float centerLineY = -120.f;
@@ -484,7 +487,7 @@ void Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 	if (isDoneAttacking) {
 		BeginNextTurn();
 		state = State::PlayerStandBy;
-     QueueEnemyLayoutTransition(State::PlayerStandBy);
+		QueueEnemyLayoutTransition(State::PlayerStandBy);
 		lastEnemyLayoutState = State::PlayerStandBy;
 		enemyLayoutInitialized = true;
 		PlayerStandByUpdate(deltaTime);
@@ -512,7 +515,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 	fontSprite->Begin();
 	fontSprite->SetColor(0xFFFFFFFF);
 	fontSprite->SetPosition(enemyCardRemoveAreaX + 8.f, enemyCardRemoveAreaY + 8.f);
-	fontSprite->SetText(L"Drop EnemyCard Here");
+	fontSprite->SetText(L"Discard Enemy Card Here");
 	fontSprite->Draw(camera, deltaTime);
 	fontSprite->SetColor(0xFF000000);
 	fontSprite->SetPosition(backButton->GetWorldX() + 32.f, backButton->GetWorldY() - 30.f);
@@ -645,6 +648,9 @@ void Demo::IBattleScene::Init()
 			for (auto& enemy : enemies) {
 				enemy->SetState(false);
 			}
+			QueueEnemyLayoutTransition(State::PlayerAttack);
+			lastEnemyLayoutState = State::PlayerAttack;
+			popUpMessage->QueueMessage(&commandBuffer, L"Click on the enemy sprite to create an Enemy Card and drag it to your attacking card to target it!", 2.5f);
 			markFinished();
 			}));
 		isExecutingAttacks = false;
