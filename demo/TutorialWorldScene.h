@@ -36,6 +36,7 @@ namespace Demo {
 		std::shared_ptr<DX9GF::CommandBuffer> commandBuffer;
 
 		std::shared_ptr<DauDauNPC> npcIntroduction;
+		std::shared_ptr<DauDauNPC> npcExplainingEnemyEncounters;
 		std::shared_ptr<DauDauNPC> npcExplainingHealingPoint;
 		std::shared_ptr<IConversation> currentConversation;
 	public:

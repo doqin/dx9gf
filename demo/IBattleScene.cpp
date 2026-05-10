@@ -202,7 +202,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 
 		auto command = std::make_shared<DX9GF::GoToCommand>(enemies[i], targetX, targetY, 0.4f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{});
 		if (!hasQueued) {
-			commandBuffer.PushCommand(command);
+			commandBuffer.StackCommand(command);
 			hasQueued = true;
 		}
 		else {
@@ -604,16 +604,29 @@ void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 	auto gd = game->GetGraphicsDevice();
 	const float spacing = 5.f;
 	const float w = battlePlayer->GetMaxHealth() * spacing;
-   const float defenseW = (std::max)(0.f, battlePlayer->GetTemporaryDefense()) * spacing;
+	const float defenseW = (std::max)(0.f, battlePlayer->GetTemporaryDefense()) * spacing;
 	const float w_ = battlePlayer->GetHealth() * spacing;
 	const float x = -w / 2;
 	const float y = app->GetScreenHeight() / 2.f - 40;
-   const float defenseY = y - 24.f;
+	const float defenseY = y - 24.f;
+	// Defense bar
 	gd->DrawRectangle(camera, x, defenseY, w, 16, 0xFF808080, true);
 	gd->DrawRectangle(camera, x, defenseY, defenseW, 16, 0xFFD0D0D0, true);
+	// Black border
 	gd->DrawRectangle(camera, x, defenseY, w, 16, 0xFF000000, false);
-	gd->DrawRectangle(camera, x, y, w, 20, 0xFFFF0000, true);
-	gd->DrawRectangle(camera, x, y, w_, 20, 0xFF00FF00, true);
+
+	// Health bar
+	// Red background
+	gd->DrawRectangle(camera, x, y, w, 20, 0xFFb4202a, true);
+	// Red highlight
+	gd->DrawRectangle(camera, x, y, w, 10, 0xFFdf3e23, true);
+
+	// Green foreground
+	gd->DrawRectangle(camera, x, y, w_, 20, 0xFF59c135, true);
+	// Green highlight
+	gd->DrawRectangle(camera, x, y, w_, 10, 0xFF9cdb43, true);
+
+	// Black border
 	gd->DrawRectangle(camera, x, y, w, 20, 0xFF000000, false);
 }
 
@@ -709,16 +722,37 @@ void Demo::IBattleScene::Init()
 	itemsButton->SetSpriteScale(2.f, 2.f);
 	fleeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	fleeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-		auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), 1.f, true);
-		drawBuffer->PushCommand(transitionInCommand);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
-			if (!transitionInCommand->IsFinished()) {
-				return;
+		popUpMessage->QueueMessage(&commandBuffer, L"You tried to flee...");
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			std::uniform_int_distribution<> dis(0, 1);
+			if (dis(gen) == 0) {
+				popUpMessage->QueueMessage(&commandBuffer, L"You successfully fled!");
+				auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), 1.f, true);
+				drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(1.5f));
+				drawBuffer->PushCommand(transitionInCommand);
+				commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished2) {
+					if (!transitionInCommand->IsFinished()) {
+						return;
+					}
+					player->SetHealth(battlePlayer->GetHealth());
+					auto sceMan = game->GetSceneManager();
+					sceMan->PopScene();
+					sceMan->GoToPrevious();
+					markFinished2();
+					}));
 			}
-			player->SetHealth(battlePlayer->GetHealth());
-			auto sceMan = game->GetSceneManager();
-			sceMan->PopScene();
-			sceMan->GoToPrevious();
+			else {
+				popUpMessage->QueueMessage(&commandBuffer, L"You failed to flee!");
+				commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+					this->MoveHandCardsToDiscardPile();
+					this->QueueEnemyLayoutTransition(State::EnemyAttack);
+					this->enemyAttackStartPending = true;
+					this->state = State::EnemyAttack;
+					markFinished();
+				}));
+			}
 			markFinished();
 			}));
 		});
@@ -745,7 +779,9 @@ void Demo::IBattleScene::Init()
 	fleeButton->SetSpriteScale(2.f, 2.f);
 	backButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	backButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+		commandBuffer.Clear();
+		popUpMessage->Reset(); // Really bad hack, please never do this in a production game lol
+		commandBuffer.StackCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerStandBy;
 			for (auto& enemy : enemies) {
 				enemy->SetState(true);

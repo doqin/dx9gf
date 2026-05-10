@@ -32,6 +32,11 @@ void Demo::TutorialWorldScene::Init()
 	npcIntroduction->AddLine(L"Dau Dau", L"How to escape this world? I don't know.");
 	npcIntroduction->AddLine(L"Dau Dau", L"But I can teach you how to survive here! Explore around a bit and I'll explain further.");
 	npcIntroduction->AddLine(L"Dau Dau", L"By the way, use the floppy disk icon over there to save your progress.");
+	npcExplainingEnemyEncounters = std::make_shared<DauDauNPC>(transformManager, 544.0f, -56.0f);
+	npcExplainingEnemyEncounters->Init(game->GetGraphicsDevice(), player, colliderManager, font, drawBuffer);
+	npcExplainingEnemyEncounters->AddLine(L"Dau Dau", L"Look out ahead! Those green patches are combat zones.");
+	npcExplainingEnemyEncounters->AddLine(L"Dau Dau", L"If you step on them, there is a chance you'll be ambushed.\n If so, you'll have to fight enemies.");
+	npcExplainingEnemyEncounters->AddLine(L"Dau Dau", L"Don't worry, you can run away from battles if you want.\n But you won't get any rewards if you do that!");
 	npcExplainingHealingPoint = std::make_shared<DauDauNPC>(transformManager, 289.0f, -496.0f);
 	npcExplainingHealingPoint->Init(game->GetGraphicsDevice(), player, colliderManager, font, drawBuffer);
 	npcExplainingHealingPoint->AddLine(L"Dau Dau", L"Hey, you look hurt.");
@@ -119,6 +124,16 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 			}
 		}
 	}
+	if (npcExplainingEnemyEncounters) {
+		npcExplainingEnemyEncounters->Update(deltaTime);
+		if (!currentConversation && npcExplainingEnemyEncounters->CanInteract() && inpMan->KeyPress(DIK_E)) {
+			auto [sw, sh] = camera.GetScreenResolution();
+			currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+			for (auto& line : npcExplainingEnemyEncounters->GetDialogueLines()) {
+				currentConversation->AddLine(line);
+			}
+		}
+	}
 
 	if (currentConversation) {
 		isGamePaused = true;
@@ -170,6 +185,7 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 		map->Draw(camera);
 		if (npcIntroduction) npcIntroduction->Draw(camera, deltaTime);
 		if (npcExplainingHealingPoint) npcExplainingHealingPoint->Draw(camera, deltaTime);
+		if (npcExplainingEnemyEncounters) npcExplainingEnemyEncounters->Draw(camera, deltaTime);
 		for (auto& savePoint : savePoints) {
 			savePoint->Draw(camera, deltaTime);
 		}

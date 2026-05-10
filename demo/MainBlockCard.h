@@ -8,6 +8,7 @@ namespace Demo {
 		std::shared_ptr<DX9GF::FontSprite> nameFontSprite;
 		std::shared_ptr<DX9GF::Texture> blockTexture;
 		std::shared_ptr<DX9GF::StaticSprite> blockSprite;
+		std::shared_ptr<DX9GF::StaticSprite> pointerSprite;
 	public:
 	   MainBlockCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), IBlockCard(tm, 160, 32, x, y) {}
