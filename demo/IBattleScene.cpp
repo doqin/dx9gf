@@ -62,7 +62,7 @@ void Demo::IBattleScene::StartBattle()
 void Demo::IBattleScene::CollectDeadEnemies()
 {
 	for (size_t i = 0; i < enemies.size(); ++i) {
-		if (enemies[i]->IsDead()) {
+		if (enemies[i]->IsDead() && enemies[i]->IsDoneAttacking()) {
 			battleGoldReward += enemies[i]->GetGoldReward();
 			enemies.erase(enemies.begin() + i);
 			--i;
@@ -343,7 +343,7 @@ void Demo::IBattleScene::RefreshItemMenu()
 					this->RefreshItemMenu();
 					this->MoveHandCardsToDiscardPile();
 					this->QueueEnemyLayoutTransition(State::EnemyAttack);
-                 this->enemyAttackStartPending = true;
+					this->enemyAttackStartPending = true;
 					this->state = State::EnemyAttack;
 				}
 				markFinished();
@@ -409,9 +409,18 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 		if (isExecutingAttacks) {
 			isTransitioning = true;
 			isExecutingAttacks = false;
+			// Use shared_ptr to share state between multiple commands in the MultiCommand
+			auto attackingEnemies = std::make_shared<std::vector<std::shared_ptr<IEnemy>>>();
 			std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
 				std::make_shared<DX9GF::DelayCommand>(1.0f),
-				std::make_shared<DX9GF::CustomCommand>([this, deltaTime](std::function<void(void)> markFinished) {
+				std::make_shared<DX9GF::CustomCommand>([this, deltaTime, attackingEnemies](std::function<void(void)> markFinished) {
+					// Wait for dead enemies to finish animations before collecting them
+					for (auto& enemy : this->enemies) {
+						if (enemy->IsDead() && !enemy->IsDoneAttacking()) {
+							return; // wait
+						}
+					}
+
 					this->MoveExecutedHandCardsToPlayedPile();
 					this->MoveHandCardsToDiscardPile();
 					// Remove unused enemy cards or enemy cards of dead enemies
@@ -432,13 +441,8 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 						markFinished();
 						return;
 					}
-					this->state = State::EnemyAttack;
-					this->QueueEnemyLayoutTransition(State::EnemyAttack);
-					for (auto& enemy : this->enemies) {
-						enemy->SetState(true);
-					}
 
-					for (auto& enemy : this->enemies) {
+					for (auto enemy : this->enemies) {
 						bool isStunned = enemy->HasStatus(StatusType::STUN);
 						enemy->TickStatuses();
 						if (enemy->IsDead()) {
@@ -447,9 +451,10 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 						if (isStunned) {
 							continue;
 						}
-						enemy->StartAttack(this->battlePlayer);
+						attackingEnemies->push_back(enemy);
 					}
 
+					// Remove enemy cards of dead enemies again in case they died from statuses
 					for (size_t i = 0; i < this->enemyCards.size(); ++i) {
 						auto& enemyCard = this->enemyCards[i];
 						if (!enemyCard->GetParent().has_value() || enemyCard->GetValue()->IsDead()) {
@@ -460,7 +465,26 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 							--i;
 						}
 					}
-                    this->CollectDeadEnemies();
+					markFinished();
+				}),
+				std::make_shared<DX9GF::DelayCommand>(1.0f),
+				std::make_shared<DX9GF::CustomCommand>([this, deltaTime, attackingEnemies](std::function<void(void)> markFinished) {
+					// Wait for enemies that died from statuses to finish animations
+					for (auto& enemy : this->enemies) {
+						if (enemy->IsDead() && !enemy->IsDoneAttacking()) {
+							return; // wait
+						}
+					}
+
+					this->state = State::EnemyAttack;
+					this->QueueEnemyLayoutTransition(State::EnemyAttack);
+					for (auto& enemy : this->enemies) {
+						enemy->SetState(true);
+					}
+					for (auto& enemy : *attackingEnemies) {
+						enemy->StartAttack(this->battlePlayer);
+					}
+					this->CollectDeadEnemies();
 					if (this->enemies.empty()) {
 						this->OnAllEnemiesDefeated();
 						this->isTransitioning = false;

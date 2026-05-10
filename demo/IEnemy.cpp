@@ -190,7 +190,7 @@ void Demo::IEnemy::SetState(bool isOnStandby)
 
 bool Demo::IEnemy::IsDoneAttacking()
 {
-    return !commandBuffer.IsBusy() && projectiles.empty();
+    return !commandBuffer.IsBusy() && !animationBuffer.IsBusy() && projectiles.empty() && hitImpactSprites.empty();
 }
 
 void Demo::IEnemy::ApplyStatus(StatusType type, int duration, float value) {
