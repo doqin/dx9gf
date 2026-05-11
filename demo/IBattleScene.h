@@ -35,6 +35,7 @@ namespace Demo {
 		int usedEnergy = 0;
 		bool isTransitioning = false;
         bool enemyAttackStartPending = false;
+		bool isFleeing = false;
         size_t initialEnemyCount = 0;
         int battleGoldReward = 0;
         bool isBattleEnding = false;

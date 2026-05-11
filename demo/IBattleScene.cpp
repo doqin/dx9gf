@@ -370,7 +370,9 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 	itemsButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing, buttonY);
 	fleeButton->SetLocalPosition(leftX + attackButton->GetWidth() + spacing + itemsButton->GetWidth() + spacing, buttonY);
 
-	fleeButton->Update(deltaTime);
+	if (!isFleeing) {
+		fleeButton->Update(deltaTime);
+	}
 	itemsButton->Update(deltaTime);
 	attackButton->Update(deltaTime);
 	for (auto& enemy : enemies) {
@@ -834,6 +836,7 @@ void Demo::IBattleScene::Init()
 	fleeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	fleeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
 		popUpMessage->QueueMessage(&commandBuffer, L"You tried to flee...");
+		isFleeing = true;
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
 			std::random_device rd;
 			std::mt19937 gen(rd());
@@ -861,6 +864,7 @@ void Demo::IBattleScene::Init()
 					this->QueueEnemyLayoutTransition(State::EnemyAttack);
 					this->enemyAttackStartPending = true;
 					this->state = State::EnemyAttack;
+					isFleeing = false;
 					markFinished();
 				}));
 			}
