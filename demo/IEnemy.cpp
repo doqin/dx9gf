@@ -257,7 +257,7 @@ void Demo::IEnemy::TickStatuses() {
 
 float Demo::IEnemy::GetOutgoingDamage(float baseDamage) const
 {
-    float finalDamage = baseDamage;
+ float finalDamage = baseDamage * 2.f;
 
     if (HasStatus(StatusType::WEAK)) {
         finalDamage *= 0.75f;

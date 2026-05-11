@@ -15,7 +15,7 @@ namespace Demo {
 			Down
 		};
 		// Constants
-		const float MAX_HEALTH = 25;
+        const float MAX_HEALTH = 50;
 		float VELOCITY = 75;
 		const float SPRINT_MULTIPLIER = 1.5f;
 		const float CAMERA_VELOCITY = 25;
