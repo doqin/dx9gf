@@ -145,6 +145,7 @@
     <Image Include="text-select.png" />
     <Image Include="uiter-Sheet.png" />
     <Image Include="ui-pack.png" />
+    <Image Include="computerbug-Sheet.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="arcade-among-2-r46pv.ttf" />

@@ -46,10 +46,10 @@ void Demo::IBattleScene::StartBattle()
 	for (auto& card : drawPile) {
 		HidePileCard(card);
 	}
-  initialEnemyCount = enemies.size();
-  battleGoldReward = 0;
-  isBattleEnding = false;
-  isDefeatSequence = false;
+	initialEnemyCount = enemies.size();
+	battleGoldReward = 0;
+	isBattleEnding = false;
+	isDefeatSequence = false;
 	defeatElapsedMs = 0.f;
 	defeatFadeAlpha = 0.f;
 	std::random_device rd;
@@ -215,14 +215,14 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	if (enemies.empty()) {
 		return;
 	}
-	if (targetState == lastEnemyLayoutState) {
-		return;
-	}
+	//if (targetState == lastEnemyLayoutState) {
+	//	return;
+	//}
 
 	const auto app = DX9GF::Application::GetInstance();
 	const float centerLineY = -120.f;
 	const float horizontalSpacing = 120.f;
-	const float verticalSpacing = 100.f;
+	const float verticalSpacing = 160.f;
 	const float rightSideX = app->GetScreenWidth() / 2.f - 150.f;
 
 	bool hasQueued = false;
@@ -260,7 +260,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 
 void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy)
 {
-	auto card = std::make_shared<EnemyCard>(transformManager, enemy, enemy->GetWorldX(), enemy->GetWorldY());
+	auto card = std::make_shared<EnemyCard>(transformManager, enemy, enemy->GetWorldX() - enemy->GetCardSpawnTrigger().lock()->GetWidth() * 1.5f, enemy->GetWorldY() - 32);
 	card->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	enemyCards.push_back(card);
 }
@@ -1114,7 +1114,7 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
 	auto inpMan = DX9GF::InputManager::GetInstance();
-	gd->Clear(0xFFFFFFFF);
+	gd->Clear(0xFFEEEEEE);
 	if (SUCCEEDED(gd->BeginDraw())) {
 		switch (state) {
 		case State::PlayerStandBy:
