@@ -12,13 +12,14 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 	std::vector<std::pair<std::string, int>> possibleEnemies,
 	std::shared_ptr<DX9GF::CommandBuffer> drawBuffer,
 	std::shared_ptr<DX9GF::CommandBuffer> commandBuffer,
-	bool* isGamePaused
+	bool* isGamePaused,
+	std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> customBackgroundDraw
 )
 {
 	auto lastEncounterTime = std::chrono::steady_clock::now();
 	const int COOLDOWN_SECONDS = 5;
 
-	return [game, player, possibleEnemies, drawBuffer, commandBuffer, lastEncounterTime, COOLDOWN_SECONDS, isGamePaused](const DX9GF::Map::ObjectArea& area) mutable {
+	return [game, player, possibleEnemies, drawBuffer, commandBuffer, lastEncounterTime, COOLDOWN_SECONDS, isGamePaused, customBackgroundDraw](const DX9GF::Map::ObjectArea& area) mutable {
 		auto now = std::chrono::steady_clock::now();
 		if (std::chrono::duration_cast<std::chrono::seconds>(now - lastEncounterTime).count() < COOLDOWN_SECONDS) {
 			return;
@@ -40,6 +41,7 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 				auto demoGame = dynamic_cast<Demo::Game*>(game);
 				auto app = DX9GF::Application::GetInstance();
 				auto battleScene = new CustomBattleScene(demoGame, player, app->GetScreenWidth(), app->GetScreenHeight(), possibleEnemiesMap);
+				battleScene->SetCustomBackgroundDraw(customBackgroundDraw);
 				auto sceMan = game->GetSceneManager();
 				sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 

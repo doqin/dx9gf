@@ -46,6 +46,8 @@ namespace Demo {
 		Game* game;
 		std::shared_ptr<Player> player;
 		std::shared_ptr<Player> battlePlayer;
+
+		std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> customBackgroundDraw;
 		// Managers
 		DX9GF::CommandBuffer commandBuffer;
 		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
@@ -115,5 +117,6 @@ namespace Demo {
 		virtual void Init() override;
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
+		void SetCustomBackgroundDraw(std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> drawFunc) { customBackgroundDraw = drawFunc; }
 	};
 }

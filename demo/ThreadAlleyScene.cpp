@@ -28,7 +28,7 @@ void Demo::ThreadAlleyScene::Init()
 		{"MimicEnemy", 20},
 		{"WarlockEnemy", 10},
 		{"CupidEnemy", 5}
-		}, drawBuffer, commandBuffer, &isGamePaused));
+		}, drawBuffer, commandBuffer, &isGamePaused, [this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) { DrawCheckerBackground(gd, deltaTime); }));
 
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
 
@@ -250,7 +250,7 @@ void Demo::ThreadAlleyScene::Draw(unsigned long long deltaTime)
 	auto gd = game->GetGraphicsDevice();
 	gd->Clear(0xFF403353);
 	if (SUCCEEDED(gd->BeginDraw())) {
-		DrawCheckerBackground(deltaTime);
+		DrawCheckerBackground(gd, deltaTime);
 
 		map->Draw(camera);
 
@@ -310,9 +310,8 @@ void Demo::ThreadAlleyScene::GiveTestItems()
 
 }
 
-void Demo::ThreadAlleyScene::DrawCheckerBackground(unsigned long long deltaTime)
+void Demo::ThreadAlleyScene::DrawCheckerBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
-	auto gd = game->GetGraphicsDevice();
 	auto [screenWidth, screenHeight] = uiCamera.GetScreenResolution();
 	
 	const float SQUARE_SIZE = 96.0f;

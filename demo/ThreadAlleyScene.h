@@ -38,11 +38,11 @@ namespace Demo {
 		float bgEvenRowShift = 0;
 		
 		int bgAnimPhase = 0; // Tracks which square shift we are on
-		D3DCOLOR bgBlinkColor = 0xFF9cdb43;
+		D3DCOLOR bgBlinkColor = D3DCOLOR_XRGB(80, 80, 80);
 		D3DCOLOR bgBaseColor1 = D3DCOLOR_ARGB(0, 20, 20, 20);
 		D3DCOLOR bgBaseColor2 = 0xFF793a80;
 
-		void DrawCheckerBackground(unsigned long long deltaTime);
+		void DrawCheckerBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
 
 	public:
 		ThreadAlleyScene(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh) : IScene(sw, sh), game(game), saveManager(sm), uiCamera(sw, sh) {}

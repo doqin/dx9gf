@@ -1120,35 +1120,39 @@ void Demo::IBattleScene::Draw(unsigned long long deltaTime)
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	gd->Clear(0xFF403353);
 	if (SUCCEEDED(gd->BeginDraw())) {
-		/* Cool wave grid effect */
-		auto [screenWidth, screenHeight] = camera.GetScreenResolution();
-		const int spacingX = 32;
-		const int spacingY = 32;
-		const float segmentLength = 16.0f;
-		const float amplitude = 12.0f;
-		const float frequency = 0.05f;
-		const D3DCOLOR gridColor = 0xFF9cdb43;
-		static float waveTime = 0.0f;
-		waveTime += static_cast<float>(deltaTime) * 0.002f;
-		while (waveTime > 6.2831853f) {
-			waveTime -= 6.2831853f;
-		}
-
-		for (int y = 0; y <= screenHeight; y += spacingY) {
-			gd->DrawLine(0.0f, static_cast<float>(y), static_cast<float>(screenWidth), static_cast<float>(y), gridColor);
-		}
-
-		for (int x = 0; x <= screenWidth; x += spacingX) {
-			float prevY = 0.0f;
-			float prevX = static_cast<float>(x) + std::sinf(waveTime) * amplitude;
-			for (float y = segmentLength; y <= static_cast<float>(screenHeight); y += segmentLength) {
-				float offsetX = static_cast<float>(x) + std::sinf((y * frequency) + waveTime) * amplitude;
-				gd->DrawLine(prevX, prevY, offsetX, y, gridColor);
-				prevX = offsetX;
-				prevY = y;
+		if (customBackgroundDraw) {
+			customBackgroundDraw(gd, deltaTime);
+		} else {
+			/* Cool wave grid effect */
+			auto [screenWidth, screenHeight] = camera.GetScreenResolution();
+			const int spacingX = 32;
+			const int spacingY = 32;
+			const float segmentLength = 16.0f;
+			const float amplitude = 12.0f;
+			const float frequency = 0.05f;
+			const D3DCOLOR gridColor = 0xFF9cdb43;
+			static float waveTime = 0.0f;
+			waveTime += static_cast<float>(deltaTime) * 0.002f;
+			while (waveTime > 6.2831853f) {
+				waveTime -= 6.2831853f;
 			}
+
+			for (int y = 0; y <= screenHeight; y += spacingY) {
+				gd->DrawLine(0.0f, static_cast<float>(y), static_cast<float>(screenWidth), static_cast<float>(y), gridColor);
+			}
+
+			for (int x = 0; x <= screenWidth; x += spacingX) {
+				float prevY = 0.0f;
+				float prevX = static_cast<float>(x) + std::sinf(waveTime) * amplitude;
+				for (float y = segmentLength; y <= static_cast<float>(screenHeight); y += segmentLength) {
+					float offsetX = static_cast<float>(x) + std::sinf((y * frequency) + waveTime) * amplitude;
+					gd->DrawLine(prevX, prevY, offsetX, y, gridColor);
+					prevX = offsetX;
+					prevY = y;
+				}
+			}
+			/* End of cool wave grid effect */
 		}
-		/* End of cool wave grid effect */
 		switch (state) {
 		case State::PlayerStandBy:
 			for (auto& enemy : enemies) {

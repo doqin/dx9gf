@@ -20,7 +20,7 @@ void Demo::TutorialWorldScene::Init()
 		{"MimicEnemy", 20},
 		{"WarlockEnemy", 10},
 		{"CupidEnemy", 5}
-		}, drawBuffer, commandBuffer, &isGamePaused));
+		}, drawBuffer, commandBuffer, &isGamePaused, [this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) { DrawBackground(gd, deltaTime); }));
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
 	
 	npcIntroduction = std::make_shared<DauDauNPC>(transformManager, 167.0f, -18.0f);
@@ -182,7 +182,7 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 	gd->Clear(0xFF403353);
 	if (SUCCEEDED(gd->BeginDraw())) {
 		/* Cool wave grid effect */
-		DrawBackground(deltaTime, gd);
+		DrawBackground(gd, deltaTime);
 		/* End of cool wave grid effect */
 
 		map->Draw(camera);
@@ -210,7 +210,7 @@ void Demo::TutorialWorldScene::Draw(unsigned long long deltaTime)
 	gd->Present();
 }
 
-void Demo::TutorialWorldScene::DrawBackground(unsigned long long deltaTime, DX9GF::GraphicsDevice* gd)
+void Demo::TutorialWorldScene::DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
 	const int spacingX = 32;
