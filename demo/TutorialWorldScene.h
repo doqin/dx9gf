@@ -51,5 +51,6 @@ namespace Demo {
 		void RestoreSaveData(const nlohmann::json& inData) override;
 
 		void GiveTestItems();
+      std::shared_ptr<Player> GetPlayer() const { return player; }
 	};
 }

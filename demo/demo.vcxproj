@@ -239,6 +239,7 @@
     </ClCompile>
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RandomEncounter.cpp" />
+    <ClCompile Include="SaveGameState.cpp" />
     <ClCompile Include="SavePoint.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="SettingsScene.cpp" />
@@ -305,6 +306,7 @@
     <ClInclude Include="PopUpMessage.h" />
     <ClInclude Include="RandomEncounter.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SaveGameState.h" />
     <ClInclude Include="SavePoint.h" />
     <ClInclude Include="SettingsManager.h" />
     <ClInclude Include="SettingsScene.h" />

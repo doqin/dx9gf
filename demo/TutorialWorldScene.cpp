@@ -170,8 +170,7 @@ void Demo::TutorialWorldScene::Update(unsigned long long deltaTime)
 
 	if (inventoryMenu && inventoryMenu->IsPendingLeave()) {
 		auto sceMan = game->GetSceneManager();
-		sceMan->PopScene();
-		sceMan->GoToPrevious();
+		sceMan->GoToScene(0);
 		return;
 	}
 	commandBuffer->Update(deltaTime);
