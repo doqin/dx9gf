@@ -8,14 +8,9 @@
 #include "StrikeCard.h"
 #include "ShopPoint.h"
 #include "HealingPoint.h"
-#include "DauDauNPC.h"
-#include "IConversation.h"
 
-#include "NPC1.h"
-#include "CardShop.h"
-#include "ItemShop.h"
 namespace Demo {
-	class TutorialWorldScene : public DX9GF::IScene, public DX9GF::ISaveable {
+	class ThreadAlleyScene : public DX9GF::IScene, public DX9GF::ISaveable {
 		bool isGamePaused = false;
 		Game* game;
 		DX9GF::Camera uiCamera;
@@ -26,26 +21,21 @@ namespace Demo {
 		std::shared_ptr<DX9GF::SaveManager> saveManager;
 
 		std::vector<std::shared_ptr<SavePoint>> savePoints;
-		std::shared_ptr<ShopPoint> shopPoint_Card;
-		std::shared_ptr<ShopPoint> shopPoint_BSItem;
-		std::shared_ptr<HealingPoint> healingPoint;
+		std::vector<std::shared_ptr<ShopPoint>> shopPoints;
+		std::vector<std::shared_ptr<HealingPoint>> healingPoints;
+
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<Player> player;
 		std::shared_ptr<DX9GF::Map> map;
 		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
 		std::shared_ptr<DX9GF::CommandBuffer> commandBuffer;
 
-		std::shared_ptr<DauDauNPC> npcIntroduction;
-		std::shared_ptr<DauDauNPC> npcExplainingEnemyEncounters;
-		std::shared_ptr<DauDauNPC> npcExplainingHealingPoint;
-		std::shared_ptr<IConversation> currentConversation;
 	public:
-		TutorialWorldScene(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh) : IScene(sw, sh), game(game), saveManager(sm), uiCamera(sw, sh) {}
+		ThreadAlleyScene(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh) : IScene(sw, sh), game(game), saveManager(sm), uiCamera(sw, sh) {}
 		void Init() override;
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
 
-		// Inherited via ISaveable
 		std::string GetSaveID() const override;
 		void GenerateSaveData(nlohmann::json& outData) override;
 		void RestoreSaveData(const nlohmann::json& inData) override;

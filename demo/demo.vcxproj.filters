@@ -56,6 +56,8 @@
     <ClCompile Include="CustomBattleScene.cpp" />
     <ClCompile Include="TransitionCommand.cpp" />
     <ClCompile Include="AdvancedCards.cpp" />
+    <ClCompile Include="ThreadAlleyScene.cpp" />
+    <ClCompile Include="SaveGameState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
@@ -116,6 +118,8 @@
     <ClInclude Include="RandomEncounter.h" />
     <ClInclude Include="CustomBattleScene.h" />
     <ClInclude Include="TransitionCommand.h" />
+    <ClInclude Include="ThreadAlleyScene.h" />
+    <ClInclude Include="SaveGameState.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc" />
@@ -158,5 +162,6 @@
     <None Include="tutorial.tsx" />
     <None Include="uiter-Sheet.aseprite" />
     <None Include="uiter.aseprite" />
+    <None Include="ThreadAlley.tmx" />
   </ItemGroup>
 </Project>
