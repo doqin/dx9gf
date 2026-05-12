@@ -94,7 +94,7 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 		}
 		player->SetHealth(battlePlayer->GetHealth());
 		auto sceMan = game->GetSceneManager();
-		sceMan->PopScene();
+		sceMan->RemoveScene(sceMan->GetIndex());
 		sceMan->GoToPrevious();
 		markFinished();
 	}));
@@ -852,7 +852,7 @@ void Demo::IBattleScene::Init()
 					}
 					player->SetHealth(battlePlayer->GetHealth());
 					auto sceMan = game->GetSceneManager();
-					sceMan->PopScene();
+					sceMan->RemoveScene(sceMan->GetIndex());
 					sceMan->GoToPrevious();
 					markFinished2();
 					}));

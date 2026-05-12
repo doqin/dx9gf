@@ -41,7 +41,7 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 				auto app = DX9GF::Application::GetInstance();
 				auto battleScene = new CustomBattleScene(demoGame, player, app->GetScreenWidth(), app->GetScreenHeight(), possibleEnemiesMap);
 				auto sceMan = game->GetSceneManager();
-				sceMan->PushScene(battleScene);
+				sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 
 				commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([isGamePaused](std::function<void()> markFinished) {
 					*isGamePaused = true;

@@ -45,6 +45,8 @@ namespace Demo {
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
 
+		void DrawBackground(unsigned long long deltaTime, DX9GF::GraphicsDevice* gd);
+
 		// Inherited via ISaveable
 		std::string GetSaveID() const override;
 		void GenerateSaveData(nlohmann::json& outData) override;

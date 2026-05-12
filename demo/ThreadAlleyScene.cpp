@@ -3,6 +3,7 @@
 #include "RandomEncounter.h"
 #include "CardShop.h"
 #include "ItemShop.h"
+#include <cmath>
 
 void Demo::ThreadAlleyScene::Init()
 {
@@ -247,8 +248,10 @@ void Demo::ThreadAlleyScene::Update(unsigned long long deltaTime)
 void Demo::ThreadAlleyScene::Draw(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
-	gd->Clear(0xFFFFFFFF);
+	gd->Clear(0xFF403353);
 	if (SUCCEEDED(gd->BeginDraw())) {
+		DrawCheckerBackground(deltaTime);
+
 		map->Draw(camera);
 
 		for (auto& savePoint : savePoints) {
@@ -305,4 +308,88 @@ void Demo::ThreadAlleyScene::RestoreSaveData(const nlohmann::json& inData)
 void Demo::ThreadAlleyScene::GiveTestItems()
 {
 
+}
+
+void Demo::ThreadAlleyScene::DrawCheckerBackground(unsigned long long deltaTime)
+{
+	auto gd = game->GetGraphicsDevice();
+	auto [screenWidth, screenHeight] = uiCamera.GetScreenResolution();
+	
+	const float SQUARE_SIZE = 96.0f;
+	const float BASE_SCROLL_SPEED = 30.0f; 
+	const float BLINK_PERIOD = 2000.0f; 
+	const float ANIMATION_DURATION = 800.0f; 
+	const int PADDING = 12; // Adjust this value to increase or decrease the extra squares generated off-screen
+
+	// Update base scroll
+	bgBaseScrollX += (BASE_SCROLL_SPEED * deltaTime) / 1000.0f;
+	bgBaseScrollY += (BASE_SCROLL_SPEED * deltaTime) / 1000.0f;
+
+	if (bgBaseScrollX >= 2.0f * SQUARE_SIZE) bgBaseScrollX -= 2.0f * SQUARE_SIZE;
+	if (bgBaseScrollY >= 2.0f * SQUARE_SIZE) bgBaseScrollY -= 2.0f * SQUARE_SIZE;
+
+	// Update periodic blink and movement
+	bgPeriodTimer += deltaTime;
+	if (bgPeriodTimer >= BLINK_PERIOD) {
+		bgPeriodTimer = std::fmod(bgPeriodTimer, BLINK_PERIOD);
+		bgAnimPhase = (bgAnimPhase + 1) % 2; 
+		bgEaseProgress = bgPeriodTimer / ANIMATION_DURATION;
+	}
+
+	float blinkFactor = 0.0f;
+	if (bgPeriodTimer < 200.0f) {
+		blinkFactor = 1.0f - (bgPeriodTimer / 200.0f);
+	}
+
+	// Update easing for row shifting
+	if (bgEaseProgress < 1.0f) {
+		bgEaseProgress += deltaTime / ANIMATION_DURATION;
+		if (bgEaseProgress > 1.0f) bgEaseProgress = 1.0f;
+	}
+
+	auto easeInOut = [](float t) {
+		return t < 0.5f ? 2.0f * t * t : -1.0f + (4.0f - 2.0f * t) * t;
+	};
+
+	float easedValue = easeInOut(bgEaseProgress) * SQUARE_SIZE;
+	
+	if (bgAnimPhase == 1) {
+		bgOddRowShift = -easedValue; 
+		bgEvenRowShift = -easedValue; 
+	} else {
+		bgOddRowShift = -SQUARE_SIZE - easedValue; 
+		bgEvenRowShift = -SQUARE_SIZE - easedValue; 
+	}
+
+	int cols = (int)std::ceil(screenWidth / SQUARE_SIZE) + PADDING * 2;
+	int rows = (int)std::ceil(screenHeight / SQUARE_SIZE) + PADDING * 2;
+
+	gd->SetAlphaBlending(true);
+	for (int row = -PADDING; row < rows; ++row) {
+		for (int col = -PADDING; col < cols; ++col) {
+			float x = col * SQUARE_SIZE + bgBaseScrollX;
+			float y = row * SQUARE_SIZE + bgBaseScrollY;
+
+			if (row % 2 != 0) {
+				y += bgOddRowShift;
+			} else {
+				x += bgEvenRowShift;
+			}
+
+			bool isColor1 = (col + row) % 2 == 0;
+			D3DCOLOR baseColor = isColor1 ? bgBaseColor1 : bgBaseColor2;
+			
+			if (blinkFactor > 0.0f) {
+				int a = (baseColor >> 24) & 0xFF;
+				int r = ((baseColor >> 16) & 0xFF) + (int)((((bgBlinkColor >> 16) & 0xFF) - ((baseColor >> 16) & 0xFF)) * blinkFactor);
+				int g = ((baseColor >> 8) & 0xFF) + (int)((((bgBlinkColor >> 8) & 0xFF) - ((baseColor >> 8) & 0xFF)) * blinkFactor);
+				int b = (baseColor & 0xFF) + (int)((((bgBlinkColor & 0xFF) - (baseColor & 0xFF)) * blinkFactor));
+
+				baseColor = D3DCOLOR_ARGB(a, r, g, b);
+			}
+
+			gd->DrawRectangle(uiCamera, x, y, SQUARE_SIZE, SQUARE_SIZE, baseColor, true);
+		}
+	}
+	gd->SetAlphaBlending(false);
 }
