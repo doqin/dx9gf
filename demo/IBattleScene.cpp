@@ -223,7 +223,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	const float centerLineY = -120.f;
 	const float horizontalSpacing = 120.f;
 	const float verticalSpacing = 160.f;
-	const float rightSideX = app->GetScreenWidth() / 2.f - 150.f;
+	const float rightSideX = app->GetScreenWidth() / 2.f - 186.f;
 
 	bool hasQueued = false;
 	const size_t enemyCount = enemies.size();
@@ -706,11 +706,11 @@ void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 	auto gd = game->GetGraphicsDevice();
 	const float battleHalfSize = battleBoxSize * 0.5f;
 	gd->SetAlphaBlending(true);
-	gd->DrawRectangle(camera, -battleHalfSize, -battleHalfSize, battleBoxSize, battleBoxSize, 0x40FFFFFF, true);
+	gd->DrawRectangle(camera, -battleHalfSize, -battleHalfSize, battleBoxSize, battleBoxSize, 0xEE6d758d, true);
 	gd->DrawRectangle(camera, -battleHalfSize, -battleHalfSize, battleBoxSize, battleBoxSize, 0xFF000000, false);
 	const int outlineThickness = 4;
 	for (int i = 1; i < outlineThickness; ++i) {
-		gd->DrawRectangle(camera, -battleHalfSize - i, -battleHalfSize - i, battleBoxSize + 2 * i, battleBoxSize + 2 * i, 0xFFFFFFFF, false);
+		gd->DrawRectangle(camera, -battleHalfSize - i, -battleHalfSize - i, battleBoxSize + 2 * i, battleBoxSize + 2 * i, 0xFFdae0ea, false);
 	}
 	gd->DrawRectangle(camera, -battleHalfSize - outlineThickness, -battleHalfSize - outlineThickness, battleBoxSize + 2 * outlineThickness, battleBoxSize + 2 * outlineThickness, 0xFF000000, false);
 	gd->SetAlphaBlending(false);

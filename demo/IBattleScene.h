@@ -97,7 +97,7 @@ namespace Demo {
 		void MoveHandCardsToDiscardPile();
 		void BeginNextTurn();
 		void RefreshItemMenu();
-      void CollectDeadEnemies();
+		void CollectDeadEnemies();
 		// Updates
 		void PlayerStandByUpdate(unsigned long long deltaTime);
 		void PlayerAttackUpdate(unsigned long long deltaTime);

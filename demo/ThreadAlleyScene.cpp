@@ -33,25 +33,25 @@ void Demo::ThreadAlleyScene::Init()
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, -710, -450));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h); }
+       [](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::HYBRID); }
 	);
 	shopPoints.back()->SetVisible(true);
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, -697, -1112));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h); }
+       [](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::HYBRID); }
 	);
 	shopPoints.back()->SetVisible(true);
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, 35, -1413));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h); }
+       [](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::BASIC); }
 	);
 	shopPoints.back()->SetVisible(true);
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, 230, -456));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h); }
+       [](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::BASIC); }
 	);
 	shopPoints.back()->SetVisible(true);
 	  
@@ -85,9 +85,9 @@ void Demo::ThreadAlleyScene::Init()
 	savePoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
 	savePoints.back()->SetVisible(true);
 
-	savePoints.push_back(std::make_shared<SavePoint>(transformManager, 230, -392));
-	savePoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
-	savePoints.back()->SetVisible(true);
+	//savePoints.push_back(std::make_shared<SavePoint>(transformManager, 230, -392));
+	//savePoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
+	//savePoints.back()->SetVisible(true);
 
 	savePoints.push_back(std::make_shared<SavePoint>(transformManager, 968, -216));
 	savePoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
@@ -143,9 +143,9 @@ void Demo::ThreadAlleyScene::Init()
 	healingPoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	healingPoints.back()->SetVisible(true);
 
-	healingPoints.push_back(std::make_shared<HealingPoint>(transformManager, 233, -297));
-	healingPoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
-	healingPoints.back()->SetVisible(true);
+	//healingPoints.push_back(std::make_shared<HealingPoint>(transformManager, 233, -297));
+	//healingPoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
+	//healingPoints.back()->SetVisible(true);
 
 	healingPoints.push_back(std::make_shared<HealingPoint>(transformManager, 585, -539));
 	healingPoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);

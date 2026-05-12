@@ -54,7 +54,7 @@ void Demo::TutorialWorldScene::Init()
 	shopPoint_Card = std::make_shared<ShopPoint>(transformManager, 183.0f, -460.0f);
 	shopPoint_Card->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
 		[](Game* g, Player* p, int w, int h) {
-			return new CardShop(g, p, w, h);
+            return new CardShop(g, p, w, h, ShopTier::BASIC);
 		}
 	);
 	shopPoint_Card->SetVisible(true);
