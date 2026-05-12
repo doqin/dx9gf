@@ -251,6 +251,7 @@
     <ClCompile Include="PopUpMessage.cpp" />
     <ClCompile Include="RoundProjectile.cpp" />
     <ClCompile Include="TestBattleScene.cpp" />
+    <ClCompile Include="ThreadAlleyScene.cpp" />
     <ClCompile Include="TransitionCommand.cpp" />
     <ClCompile Include="TutorialWorldScene.cpp" />
     <ClCompile Include="VampireBatEnemy.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="StrikeCard.h" />
     <ClInclude Include="TestBattleScene.h" />
     <ClInclude Include="TestEnemy.h" />
+    <ClInclude Include="ThreadAlleyScene.h" />
     <ClInclude Include="TransitionCommand.h" />
     <ClInclude Include="TutorialWorldScene.h" />
     <ClInclude Include="VampireBatEnemy.h" />
@@ -325,6 +327,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="placeholder-round-projectile.aseprite" />
+    <None Include="ThreadAlley.tmx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="tutorial.aseprite">
       <DeploymentContent>true</DeploymentContent>
     </None>

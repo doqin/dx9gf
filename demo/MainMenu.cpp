@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "IconButton.h"
 #include "SettingsScene.h"
+#include "ThreadAlleyScene.h"
 #include "TutorialWorldScene.h"
 #include <fstream>
 #include <cstdio>
@@ -103,7 +104,8 @@ namespace Demo
 
 		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 			auto app = DX9GF::Application::GetInstance();
-			auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
+			//auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
+			auto world = new ThreadAlleyScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
 			saveManager->Clear();
 			saveManager->Register(world);
 			game->GetSceneManager()->PushScene(world);
@@ -117,7 +119,8 @@ namespace Demo
 		newGameButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { 
 			std::remove("savegame.json");
 			auto app = DX9GF::Application::GetInstance();
-			auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
+			//auto world = new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
+			auto world = new ThreadAlleyScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight());
 			saveManager->Clear();
 			saveManager->Register(world);
 			game->GetSceneManager()->PushScene(world);
