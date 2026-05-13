@@ -376,6 +376,9 @@
     <Image Include="items.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="notresponding-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="NPC1.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -389,6 +392,12 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="Shop-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="shrimp-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="spearprojectile.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="TempTex.png">

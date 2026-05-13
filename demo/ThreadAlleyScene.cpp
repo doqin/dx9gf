@@ -314,11 +314,11 @@ void Demo::ThreadAlleyScene::DrawCheckerBackground(DX9GF::GraphicsDevice* gd, un
 {
 	auto [screenWidth, screenHeight] = uiCamera.GetScreenResolution();
 	
-	const float SQUARE_SIZE = 96.0f;
+	const float SQUARE_SIZE = 128.0f;
 	const float BASE_SCROLL_SPEED = 30.0f; 
 	const float BLINK_PERIOD = 2000.0f; 
 	const float ANIMATION_DURATION = 800.0f; 
-	const int PADDING = 12; // Adjust this value to increase or decrease the extra squares generated off-screen
+	const int PADDING = 6; // Adjust this value to increase or decrease the extra squares generated off-screen
 
 	// Update base scroll
 	bgBaseScrollX += (BASE_SCROLL_SPEED * deltaTime) / 1000.0f;
