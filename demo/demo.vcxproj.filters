@@ -155,6 +155,7 @@
     <Image Include="spearprojectile.png" />
     <Image Include="bugprojectile-Sheet.png" />
     <Image Include="xprojectile.png" />
+    <Image Include="threadalley.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="arcade-among-2-r46pv.ttf" />
@@ -168,5 +169,6 @@
     <None Include="uiter-Sheet.aseprite" />
     <None Include="uiter.aseprite" />
     <None Include="ThreadAlley.tmx" />
+    <None Include="threadalley.tsx" />
   </ItemGroup>
 </Project>

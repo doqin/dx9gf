@@ -38,7 +38,7 @@ void Demo::ThreadAlleyScene::Init()
 	);
 	shopPoints.back()->SetVisible(true);
 
-	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, -697, -1112));
+	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, -697, -1148));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
        [](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::HYBRID); }
 	);
@@ -66,7 +66,7 @@ void Demo::ThreadAlleyScene::Init()
 	savePoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
 	savePoints.back()->SetVisible(true);
 
-	savePoints.push_back(std::make_shared<SavePoint>(transformManager, -727, -1192));
+	savePoints.push_back(std::make_shared<SavePoint>(transformManager, -727, -1201));
 	savePoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
 	savePoints.back()->SetVisible(true);
 
@@ -89,6 +89,7 @@ void Demo::ThreadAlleyScene::Init()
 	//savePoints.push_back(std::make_shared<SavePoint>(transformManager, 230, -392));
 	//savePoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);
 	//savePoints.back()->SetVisible(true);
+
 
 	savePoints.push_back(std::make_shared<SavePoint>(transformManager, 968, -216));
 	savePoints.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, saveManager, font, drawBuffer);

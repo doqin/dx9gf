@@ -36,7 +36,7 @@ namespace Demo {
 		float bgEaseProgress = 0;
 		float bgOddRowShift = 0;
 		float bgEvenRowShift = 0;
-		
+
 		int bgAnimPhase = 0; // Tracks which square shift we are on
 		D3DCOLOR bgBlinkColor = D3DCOLOR_XRGB(80, 80, 80);
 		D3DCOLOR bgBaseColor1 = D3DCOLOR_ARGB(0, 20, 20, 20);

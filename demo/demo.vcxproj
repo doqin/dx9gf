@@ -332,6 +332,9 @@
     <None Include="ThreadAlley.tmx">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="threadalley.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="tutorial.aseprite">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -419,6 +422,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="placeholder.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="threadalley.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="tutorial.png">
