@@ -15,7 +15,7 @@ void Demo::VampireBatEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::C
 	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"spearprojectile.png");
 	projSprite = std::make_shared<DX9GF::StaticSprite>(projTexture.get());
-	projSprite->SetOrigin(24, 8);
+	projSprite->SetOrigin(16, 8);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);

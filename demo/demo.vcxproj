@@ -352,6 +352,9 @@
     <Image Include="arrow.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="bugprojectile-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="click.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -428,6 +431,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="uiter-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="xprojectile.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
   </ItemGroup>

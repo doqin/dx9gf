@@ -13,7 +13,7 @@ void Demo::MimicEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera
 	sprite->SetScale(2.f, 2.f);
 
 	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-	projTexture->LoadTexture(IDB_PNG5);
+	projTexture->LoadTexture(L"xprojectile.png");
 	projSprite = std::make_shared<DX9GF::StaticSprite>(projTexture.get());
 	projSprite->SetOrigin(8, 8);
 

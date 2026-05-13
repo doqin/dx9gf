@@ -153,6 +153,8 @@
     <Image Include="shrimp-Sheet.png" />
     <Image Include="notresponding-Sheet.png" />
     <Image Include="spearprojectile.png" />
+    <Image Include="bugprojectile-Sheet.png" />
+    <Image Include="xprojectile.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="arcade-among-2-r46pv.ttf" />

@@ -13,8 +13,8 @@ void Demo::DemonEyeEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Cam
 	sprite->SetScale(2.f);
 
 	tearProjectileTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-	tearProjectileTexture->LoadTexture(IDB_PNG5); // TODO: blood drop img
-	tearProjectileSprite = std::make_shared<DX9GF::StaticSprite>(tearProjectileTexture.get());
+	tearProjectileTexture->LoadTexture(L"bugprojectile-Sheet.png"); // TODO: blood drop img
+	tearProjectileSprite = std::make_shared<DX9GF::AnimatedSprite>(tearProjectileTexture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4), 12);
 	tearProjectileSprite->SetOrigin(8, 8);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
