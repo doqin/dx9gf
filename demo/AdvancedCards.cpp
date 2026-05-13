@@ -197,7 +197,7 @@ bool Demo::VulnerableCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
 		if (auto enemy = targets[0].lock()) {
-			if (auto e = enemy->GetValue()) e->ApplyStatus(StatusType::VULNERABLE, 2);
+			if (auto e = enemy->GetValue()) e->ApplyStatus(StatusType::VULNERABLE, 1);
 		}
 	}
 	isDone = true;

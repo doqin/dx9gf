@@ -30,6 +30,20 @@ namespace Demo {
 		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
 		std::shared_ptr<DX9GF::CommandBuffer> commandBuffer;
 
+		float bgBaseScrollX = 0;
+		float bgBaseScrollY = 0;
+		float bgPeriodTimer = 0;
+		float bgEaseProgress = 0;
+		float bgOddRowShift = 0;
+		float bgEvenRowShift = 0;
+
+		int bgAnimPhase = 0; // Tracks which square shift we are on
+		D3DCOLOR bgBlinkColor = D3DCOLOR_XRGB(80, 80, 80);
+		D3DCOLOR bgBaseColor1 = D3DCOLOR_ARGB(0, 20, 20, 20);
+		D3DCOLOR bgBaseColor2 = 0xFF793a80;
+
+		void DrawCheckerBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
+
 	public:
 		ThreadAlleyScene(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh) : IScene(sw, sh), game(game), saveManager(sm), uiCamera(sw, sh) {}
 		void Init() override;

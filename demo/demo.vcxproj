@@ -332,6 +332,9 @@
     <None Include="ThreadAlley.tmx">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="threadalley.tsx">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="tutorial.aseprite">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -350,6 +353,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="arrow.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="bugprojectile-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="click.png">
@@ -376,6 +382,9 @@
     <Image Include="items.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="notresponding-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="NPC1.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -389,6 +398,12 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="Shop-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="shrimp-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="spearprojectile.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="TempTex.png">
@@ -409,6 +424,9 @@
     <Image Include="placeholder.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="threadalley.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="tutorial.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -419,6 +437,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="uiter-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="xprojectile.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
   </ItemGroup>
