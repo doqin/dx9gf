@@ -35,6 +35,7 @@ namespace Demo
 		keybinds["INTERACT"] = DIK_E;
 		keybinds["SPRINT"] = DIK_LSHIFT;
 		keybinds["TOGGLE_LOG"] = DIK_L;
+		keybinds["TOGGLE_GEAR"] = DIK_H;
 	}
 
 	bool SettingsManager::LoadSettings()

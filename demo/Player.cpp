@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Player.h"
 #include "resource.h"
 #include "DamageTextManager.h"
@@ -246,6 +246,36 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 			cameraDeltaTime = 0.f;
 		}
 	}
+
+	static float toggleCooldown = 0.0f;
+	if (toggleCooldown > 0) toggleCooldown -= deltaTime;
+	if (inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("TOGGLE_GEAR")) && toggleCooldown <= 0) {
+		PlayerGlobalData::GetInstance()->ToggleShowGearOnMap();
+		toggleCooldown = 300.0f;
+	}
+
+	auto setupGearAnim = [&](int currentID, int& lastID, std::shared_ptr<DX9GF::AnimatedSprite>& animPtr) {
+		if (currentID != lastID) {
+			lastID = currentID;
+			if (currentID != -1 && gearTex) {
+				auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentID);
+				if (bp && !bp->frames.empty()) {
+					animPtr = std::make_shared<DX9GF::AnimatedSprite>(gearTex.get(), bp->frames);
+					animPtr->SetFrameRate(12);
+					return;
+				}
+			}
+			animPtr = nullptr;
+		}
+		};
+
+	setupGearAnim(PlayerGlobalData::GetInstance()->GetEquippedActiveGearID(), lastActiveGearID, activeGearAnim);
+	setupGearAnim(PlayerGlobalData::GetInstance()->GetEquippedPassiveGearID(), lastPassiveGearID, passiveGearAnim);
+
+	if (activeGearAnim || passiveGearAnim) {
+		gearAnimTimer += deltaTime;
+	}
+
 	if (isInvincible) {
 		if (timeSinceTurnedInvincible > INVINCIBILITY_DURATION) {
 			isInvincible = false;
@@ -258,6 +288,32 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 
 void Demo::Player::Draw(unsigned long long deltaTime) {
 	footprintEmitter->Draw(*camera, deltaTime);
+
+	bool showVisuals = Demo::PlayerGlobalData::GetInstance()->GetShowGearOnMap();
+
+	auto drawDrone = [&](std::shared_ptr<DX9GF::AnimatedSprite> anim, float phaseOffset, bool drawBehind) {
+		if (!anim) return;
+		auto [px, py] = GetWorldPosition();
+		const float gearScale = 0.75f;
+		float angle = gearAnimTimer * 0.002f + phaseOffset;
+
+		bool isBehind = std::sin(angle) < 0;
+		if (isBehind == drawBehind) {
+			float cx = px + std::cos(angle) * 25.0f;
+			float cy = py + 4.0f + std::sin(angle) * 6.0f;
+			anim->SetScale(gearScale, gearScale);
+			anim->SetPosition(cx - (12.0f * gearScale / 2.0f), cy - (12.0f * gearScale / 2.0f));
+			anim->Begin();
+			anim->Draw(*camera, deltaTime);
+			anim->End();
+		}
+		};
+
+	if (showVisuals && !IsDead()) {
+		drawDrone(activeGearAnim, 0.0f, true);
+		drawDrone(passiveGearAnim, D3DX_PI, true);
+	}
+
 	if (!isInvincible || static_cast<int>(timeSinceTurnedInvincible / BLINKING_DURATION) % 2) {
 		switch (state) {
 		case State::Down: {
@@ -400,6 +456,12 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 			break;
 		}
 	}
+
+	if (showVisuals && !IsDead()) {
+		drawDrone(activeGearAnim, 0.0f, false);
+		drawDrone(passiveGearAnim, D3DX_PI, false);
+	}
+
 	collider->Draw(graphicsDevice, *camera);
 }
 
@@ -447,7 +509,6 @@ bool Demo::Player::TakeIndirectDamage(float damage, DamageType type) {
 	if (healthAfter < 0 && healthBefore > 0) DX9GF::AudioManager::GetInstance()->Play("player_dead", false, 0.3f);
 
 	if (damage > 0) {
-		//TODO: change audio resource here
 		if (type == DamageType::Poison) {
 			DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.4f);
 		}
@@ -492,4 +553,8 @@ void Demo::Player::SetFootprintsEnabled(bool enabled)
 {
 	this->footprintsEnabled = enabled;
 	footprintEmitter->SetEnabled(enabled);
+}
+
+void Demo::Player::InitGearAnim(std::shared_ptr<DX9GF::Texture> tex) {
+	this->gearTex = tex;
 }

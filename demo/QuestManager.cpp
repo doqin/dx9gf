@@ -23,7 +23,7 @@ void Demo::QuestManager::InitQuestDatabase() {
 		L"The Hidden Malware",
 		L"There's a hidden boss somewhere in this maze. Defeat it for a secret reward!",
 		L"Secret Boss: 0/1",
-		L"Rusty Key"
+		L"Rusty Key & Midas Chip"
 	};
 
 	questDatabase["Quest_BossWorld"] = {
@@ -47,7 +47,7 @@ void Demo::QuestManager::InitQuestDatabase() {
 		L"Kako's Lab",
 		L"Kako needs your help to clean up the lab.",
 		L"Investigate the lab",
-		L"100 Gold"
+		L"100 Gold & Aegis Plating"
 	};
 
 	questDatabase["Quest_ThreadAlley_Start"] = {
@@ -55,7 +55,15 @@ void Demo::QuestManager::InitQuestDatabase() {
 		L"Thread Alley Cleanup",
 		L"A stranger needs an Auth Token to escape. Help them clear the alley.",
 		L"Find the malware!",
-		L"50 Gold"
+		L"50 Gold & Energy Cell"
+	};
+
+	questDatabase["Quest_AdminLog"] = {
+		"Quest_AdminLog",
+		L"The Admin's Echo",
+		L"The veteran debugger keeps hearing a fragment of the old admin's log. Prove it's real.",
+		L"Hack a terminal, then report back",
+		L"Memory Locker"
 	};
 }
 
@@ -104,8 +112,8 @@ void Demo::QuestManager::Init(DX9GF::GraphicsDevice* gd, std::shared_ptr<DX9GF::
 	if (!btnToggle) {
 		btnToggle = std::make_shared<IconButton>(uiTransformManager, 0, 0,
 			static_cast<int>(ARROW_SIZE), static_cast<int>(ARROW_SIZE), uiTex, 3);
-		btnToggle->SetSpriteCoords(240, 96, 16, 16, 0); //TODO: Change this button
-		btnToggle->SetSpriteScale(ARROW_SIZE / 16.0f, ARROW_SIZE / 16.0f);
+		btnToggle->SetSpriteCoords(240, 336, 13, 16, 0);
+		btnToggle->SetSpriteScale(ARROW_SIZE / 13.0f, ARROW_SIZE / 13.0f);
 		btnToggle->SetOnReleaseLeft([this](DX9GF::ITrigger*) {
 			isExpanded = !isExpanded;
 			});
@@ -249,8 +257,9 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			}
 
 			player->GetInventoryItems().AddItem(10, 1);
+			player->AddGear(4); // midas chip
 			auto* bp = ItemData::GetInstance()->GetItemBlueprint(10);
-			std::wstring msg = L"You found: ";
+			std::wstring msg = L"You found: Midas Chip & ";
 			if (bp) msg += bp->GetName();
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			return { true, msg };
@@ -305,8 +314,9 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 				questDatabase["Quest_ThreadAlley_Start"].currentObjective = L"Alley is safe.";
 				SetQuest(L"Quest: " + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
 			}
+			player->AddGear(1); // energy cell
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
-			return { true, L"50 Gold - Quest Completed: Defeated the Trojan" };
+			return { true, L"50 Gold & Energy Cell - Quest Completed: Defeated the Trojan" };
 		}
 	}
 
@@ -334,7 +344,22 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			}
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			player->AddGold(100);
-			return { true, L"100 Gold - Quest Completed: Kako's Lab" };
+			player->AddGear(5);
+			return { true, L"100 Gold & Aegis Plating - Quest Completed: Kako's Lab" };
+		}
+	}
+
+	if (eventType == "ADMIN_LOG_VERIFIED") {
+		if (questStates["Quest_AdminLog"] == QuestState::Active) {
+			questStates["Quest_AdminLog"] = QuestState::Completed;
+
+			if (questDatabase.count("Quest_AdminLog")) {
+				questDatabase["Quest_AdminLog"].currentObjective = L"The log was real after all.";
+				SetQuest(L"Quest: " + questDatabase["Quest_AdminLog"].currentObjective);
+			}
+			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
+			player->AddGear(3); // Memory Locker
+			return { true, L"Memory Locker - Quest Completed: The Admin's Echo" };
 		}
 	}
 

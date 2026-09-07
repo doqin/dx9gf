@@ -18,7 +18,7 @@ namespace Demo
     constexpr float BUTTON_OFFSET_X = 25.0f;
     constexpr float ALIGN_OFFSET_Y = 10.0f;
 
-    // Keybind rows share startY/rowSpacing with the volume rows; with 8 keybind
+    // Keybind rows share startY/rowSpacing with the volume rows; with 9 keybind
     // rows a tighter step is needed to keep the last row on screen.
     constexpr float KEYBIND_ROW_START = 5.0f;
     constexpr float KEYBIND_ROW_STEP = 1.1f;
@@ -59,7 +59,7 @@ namespace Demo
 
         //keybind UI
         std::shared_ptr<Demo::TextIconButton> btnUp, btnDown, btnLeft, btnRight;
-        std::shared_ptr<Demo::TextIconButton> btnAccept, btnOpenInventory, btnInteract, btnSprint;
+        std::shared_ptr<Demo::TextIconButton> btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear;
 
         bool isListeningUp = false;
         bool isListeningDown = false;
@@ -69,6 +69,7 @@ namespace Demo
         bool isListeningOpenInventory = false;
         bool isListeningInteract = false;
         bool isListeningSprint = false;
+        bool isListeningToggleGear = false;
 
         KeyboardNavigator keyboardNavigator;
         std::vector<KeyboardNavigator::Candidate> CollectKeyboardCandidates();

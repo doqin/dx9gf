@@ -4,7 +4,7 @@
 #include "DX9GFAudioManager.h"
 #include <algorithm>
 #include <unordered_map>
-
+#include "SettingsManager.h"
 namespace {
 	constexpr float RAW_ITEM_W = 23.0f;
 	constexpr float RAW_ITEM_H = 35.0f;
@@ -49,7 +49,7 @@ namespace Demo {
 		float leftContainerX = -containerGap / 2.0f - containerW;
 		float rightContainerX = containerGap / 2.0f;
 		float buttonW = 48.0f * 2;
-		float totalTabW = 3 * buttonW + 2 * tabGap;
+		float totalTabW = 4 * buttonW + 3 * tabGap;
 		float startTabX = centerX - totalTabW / 2.0f;
 		float resumeX = -(buttonW + bottomGap + buttonW + bottomGap + buttonW) / 2.0f;
 		float optionsX = resumeX + buttonW + bottomGap;
@@ -73,7 +73,13 @@ namespace Demo {
 		btnTabDeck->SetSpriteScale(2.f, 2.f);
 		btnTabDeck->Init(uiCamera);
 
-		btnTabQuest = std::make_shared<IconButton>(transformManager, startTabX + 2 * (buttonW + tabGap), tabY, 48.0f * 2, 32.0f * 2, uiTex);
+		btnTabGear = std::make_shared<IconButton>(transformManager, startTabX + 2 * (buttonW + tabGap), tabY, 48.0f * 2, 32.0f * 2, uiTex);
+		btnTabGear->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 464, 48, 32, 3));
+		btnTabGear->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->SetTab(Tab::GEAR); });
+		btnTabGear->SetSpriteScale(2.f, 2.f);
+		btnTabGear->Init(uiCamera);
+
+		btnTabQuest = std::make_shared<IconButton>(transformManager, startTabX + 3 * (buttonW + tabGap), tabY, 48.0f * 2, 32.0f * 2, uiTex);
 		btnTabQuest->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 464, 48, 32, 3));
 		btnTabQuest->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->SetTab(Tab::QUEST); });
 		btnTabQuest->SetSpriteScale(2.f, 2.f);
@@ -114,6 +120,45 @@ namespace Demo {
 		inventoryContainer->Init(draggableManager, game->GetGraphicsDevice(), uiCamera);
 		inventoryContainer->SetMaxHeight(sh * 0.5f);
 		inventoryContainer->SetCulling(true);
+
+		uiPlayerTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		uiPlayerTex->LoadTexture(L"assets/uiter-Sheet.png");
+		uiPlayerSprite = std::make_shared<DX9GF::StaticSprite>(uiPlayerTex.get());
+		uiPlayerSprite->SetSrcRect({ 7, 7, 25, 32 });
+
+		flameTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		flameTex->LoadTexture(L"assets/flame-slot-Sheet.png");
+
+		gearTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
+
+		activeSlot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, true);
+		activeSlot->GetButton()->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			if (this->activeSlot->GetGearID() != -1) {
+				this->player->UnequipGear(this->activeSlot->GetGearID());
+				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
+			}
+			});
+
+		passiveSlot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, true);
+		passiveSlot->GetButton()->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			if (this->passiveSlot->GetGearID() != -1) {
+				this->player->UnequipGear(this->passiveSlot->GetGearID());
+				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
+			}
+			});
+
+		for (int i = 0; i < 8; i++) {
+			auto slot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, false);
+			slot->GetButton()->SetOnReleaseLeft([this, i](DX9GF::ITrigger* t) {
+				int id = this->orbitSlots[i]->GetGearID();
+				if (id != -1) {
+					this->player->EquipGear(id);
+					DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
+				}
+				});
+			orbitSlots.push_back(slot);
+		}
 	}
 
 	void InventoryMenu::Toggle()
@@ -301,6 +346,7 @@ namespace Demo {
 
 		addButton(btnTabItems);
 		addButton(btnTabDeck);
+		if (btnTabGear) addButton(btnTabGear);
 		if (btnTabQuest) addButton(btnTabQuest);
 		addButton(btnResume);
 		addButton(btnOptions);
@@ -359,6 +405,20 @@ namespace Demo {
 				}
 			}
 		}
+		else if (currentTab == Tab::GEAR) {
+			if (activeSlot && activeSlot->GetGearID() != -1) {
+				addButton(activeSlot->GetButton());
+			}
+			if (passiveSlot && passiveSlot->GetGearID() != -1) {
+				addButton(passiveSlot->GetButton());
+			}
+
+			for (auto& slot : orbitSlots) {
+				if (slot && slot->GetGearID() != -1) {
+					addButton(slot->GetButton());
+				}
+			}
+		}
 
 		return candidates;
 	}
@@ -383,7 +443,7 @@ namespace Demo {
 		float leftContainerX = -containerGap / 2.0f - containerW;
 		float rightContainerX = containerGap / 2.0f;
 		float buttonW = 48.0f * 2;
-		float totalTabW = 3 * buttonW + 2 * tabGap;
+		float totalTabW = 4 * buttonW + 3 * tabGap;
 		float startTabX = centerX - totalTabW / 2.0f;
 		float resumeX = -(buttonW + bottomGap + buttonW + bottomGap + buttonW) / 2.0f;
 		float optionsX = resumeX + buttonW + bottomGap;
@@ -391,7 +451,8 @@ namespace Demo {
 
 		btnTabItems->SetLocalPosition(startTabX, tabY);
 		btnTabDeck->SetLocalPosition(startTabX + buttonW + tabGap, tabY);
-		if (btnTabQuest) btnTabQuest->SetLocalPosition(startTabX + 2 * (buttonW + tabGap), tabY);
+		if (btnTabGear) btnTabGear->SetLocalPosition(startTabX + 2 * (buttonW + tabGap), tabY);
+		if (btnTabQuest) btnTabQuest->SetLocalPosition(startTabX + 3 * (buttonW + tabGap), tabY);
 
 		btnResume->SetLocalPosition(resumeX, bottomY - 80.0f);
 		btnOptions->SetLocalPosition(optionsX, bottomY - 80.0f);
@@ -403,6 +464,7 @@ namespace Demo {
 
 		btnTabItems->Update(deltaTime);
 		btnTabDeck->Update(deltaTime);
+		if (btnTabGear) btnTabGear->Update(deltaTime);
 		if (btnTabQuest) btnTabQuest->Update(deltaTime);
 
 		btnResume->Update(deltaTime);
@@ -433,6 +495,61 @@ namespace Demo {
 				btn->Update(deltaTime);
 			}
 		}
+		else if (currentTab == Tab::GEAR) {
+			if (btnTabGear) btnTabGear->SetState(Demo::IButton::ButtonState::CLICKED);
+			gearAnimTimer += deltaTime;
+
+			auto setupMenuAnim = [&](int currentID, std::shared_ptr<DX9GF::AnimatedSprite>& animPtr) {
+				if (currentID != -1 && gearTex) {
+					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentID);
+					if (bp && !bp->frames.empty()) {
+						animPtr = std::make_shared<DX9GF::AnimatedSprite>(gearTex.get(), bp->frames);
+						animPtr->SetFrameRate(12);
+						return;
+					}
+				}
+				animPtr = nullptr;
+				};
+			setupMenuAnim(player->GetEquippedActiveGearID(), activeGearAnim);
+			setupMenuAnim(player->GetEquippedPassiveGearID(), passiveGearAnim);
+
+			float gearContainerH = sh * 0.55f;
+			float centerX = rightContainerX + containerW / 2.0f;
+			float centerY = containerY + gearContainerH * 0.4f;
+			float radius = 90.0f;
+			float slotSize = 16.0f * 3.0f;
+
+			float innerAngle = -orbitAngle * 1.5f;
+			float innerRadius = 35.0f;
+
+			activeSlot->SetLocalPosition(std::round(centerX + innerRadius * std::cos(innerAngle) - slotSize / 2.0f),
+				std::round(centerY + innerRadius * std::sin(innerAngle) - slotSize / 2.0f));
+			activeSlot->Update(deltaTime);
+
+			passiveSlot->SetLocalPosition(std::round(centerX + innerRadius * std::cos(innerAngle + D3DX_PI) - slotSize / 2.0f),
+				std::round(centerY + innerRadius * std::sin(innerAngle + D3DX_PI) - slotSize / 2.0f));
+			passiveSlot->Update(deltaTime);
+
+			orbitAngle += 0.5f * (deltaTime / 1000.0f);
+
+			for (int i = 0; i < 8; i++) {
+				float angle = orbitAngle + i * (D3DX_PI / 4.0f);
+				float x = std::round(centerX + radius * std::cos(angle) - slotSize / 2.0f);
+				float y = std::round(centerY + radius * std::sin(angle) - slotSize / 2.0f);
+
+				orbitSlots[i]->SetLocalPosition(x, y);
+				orbitSlots[i]->Update(deltaTime);
+			}
+
+			activeSlot->SetGearID(player->GetEquippedActiveGearID());
+			passiveSlot->SetGearID(player->GetEquippedPassiveGearID());
+			auto& gears = player->GetInventoryGears();
+			for (int i = 0; i < 8; i++) {
+				if (i < gears.size()) orbitSlots[i]->SetGearID(gears[i]);
+				else orbitSlots[i]->SetGearID(-1);
+			}
+		}
+
 		else if (currentTab == Tab::QUEST) {
 			if (btnTabQuest) btnTabQuest->SetState(Demo::IButton::ButtonState::CLICKED);
 			if (isQuestsDirty) RefreshQuestUI();
@@ -476,6 +593,7 @@ namespace Demo {
 
 		btnTabItems->Draw(gd, deltaTime);
 		btnTabDeck->Draw(gd, deltaTime);
+		if (btnTabGear) btnTabGear->Draw(gd, deltaTime);
 		if (btnTabQuest) btnTabQuest->Draw(gd, deltaTime);
 		btnResume->Draw(gd, deltaTime);
 		btnOptions->Draw(gd, deltaTime);
@@ -484,6 +602,7 @@ namespace Demo {
 		fontSprite->Begin();
 		fontSprite->SetScale(1.5f, 1.5f);
 		fontSprite->SetColor(0xFFFFFF00);
+		// Header Texts
 		fontSprite->SetOutline(true, 0xFF000000, 3.f);
 		fontSprite->SetPosition(leftEdge + 30.0f, bottomEdge - 95.0f);
 
@@ -531,7 +650,6 @@ namespace Demo {
 			}
 			fontSprite->End();
 
-			//Draw description
 			if (!hoverDescription.empty()) {
 				fontSprite->Begin();
 				fontSprite->SetScale(1.2f, 1.2f);
@@ -569,6 +687,189 @@ namespace Demo {
 			deckContainer->Draw(deltaTime);
 			inventoryContainer->Draw(deltaTime);
 		}
+		else if (currentTab == Tab::GEAR) {
+			float containerGap = 40.0f;
+			float containerW = (sw - 120.0f - containerGap) / 2.0f;
+			float leftContainerX = -containerGap / 2.0f - containerW;
+			float rightContainerX = containerGap / 2.0f;
+			float containerY = topEdge + 190.0f;
+
+			float gearContainerH = sh * 0.55f;
+
+			float centerLeft = leftContainerX + containerW / 2.f;
+			float centerRight = rightContainerX + containerW / 2.f;
+
+			// Header Texts
+			fontSprite->Begin();
+			fontSprite->SetScale(1.0f, 1.0f);
+			fontSprite->SetOutline(true, 0xFF000000, 3.f);
+			fontSprite->SetColor(0xFFFFFFFF);
+			fontSprite->SetText(L"Core Process");
+			fontSprite->SetPosition(centerLeft - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
+			fontSprite->Draw(*uiCamera, deltaTime);
+			fontSprite->SetText(L"Equipment Orbit");
+			fontSprite->SetPosition(centerRight - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
+			fontSprite->Draw(*uiCamera, deltaTime);
+			fontSprite->End();
+
+			// Panels
+			const D3DCOLOR PANEL_BG = D3DCOLOR_ARGB(230, 15, 15, 20);
+			const D3DCOLOR PANEL_BORDER = D3DCOLOR_ARGB(255, 100, 100, 120);
+			gd->SetAlphaBlending(true);
+			gd->DrawRectangle(*uiCamera, leftContainerX, containerY, containerW, gearContainerH, PANEL_BG, true);
+			gd->DrawRectangle(*uiCamera, rightContainerX, containerY, containerW, gearContainerH, PANEL_BG, true);
+			gd->SetAlphaBlending(false);
+			gd->DrawRectangle(*uiCamera, leftContainerX, containerY, containerW, gearContainerH, PANEL_BORDER, false);
+			gd->DrawRectangle(*uiCamera, rightContainerX, containerY, containerW, gearContainerH, PANEL_BORDER, false);
+
+			float pScale = 7.0f;
+			float pWidth = 18.0f * pScale;
+			float pHeight = 25.0f * pScale;
+
+			float playerBaseY = containerY + gearContainerH * 0.6f;
+			float playerX = centerLeft - pWidth / 2.0f;
+			float playerY = playerBaseY - pHeight;
+
+			if (uiPlayerSprite) {
+				uiPlayerSprite->SetScale(pScale, pScale);
+				uiPlayerSprite->SetPosition(playerX, playerY);
+				uiPlayerSprite->Begin();
+				uiPlayerSprite->Draw(*uiCamera, deltaTime);
+				uiPlayerSprite->End();
+			}
+
+			bool showCursor = std::fmod(gearAnimTimer, 1000.0f) < 500.0f;
+			std::wstring consoleText = L"EXECUTE://";
+			std::wstring cursorText = showCursor ? L"_" : L" ";
+			std::wstring gearName = L"";
+			std::wstring gearDesc = L"";
+
+			int eqActID = player->GetEquippedActiveGearID();
+			int eqPasID = player->GetEquippedPassiveGearID();
+
+			if (eqActID != -1) {
+				auto blueprint = Demo::ItemData::GetInstance()->GetGearBlueprint(eqActID);
+				if (blueprint) { gearName = blueprint->name; gearDesc = blueprint->description; }
+			}
+			else if (eqPasID != -1) {
+				auto blueprint = Demo::ItemData::GetInstance()->GetGearBlueprint(eqPasID);
+				if (blueprint) { gearName = blueprint->name; gearDesc = blueprint->description; }
+			}
+
+			if (activeGearAnim || passiveGearAnim) {
+				float gearScale = pScale * 0.5f;
+				float bobbing = std::sin(gearAnimTimer / 200.0f) * 10.0f;
+
+				if (activeGearAnim) {
+					activeGearAnim->SetScale(gearScale, gearScale);
+					activeGearAnim->SetPosition(playerX + pWidth + 15.0f, playerY + (2.0f * pScale) + bobbing);
+					activeGearAnim->Begin(); activeGearAnim->Draw(*uiCamera, deltaTime); activeGearAnim->End();
+				}
+				if (passiveGearAnim) {
+					passiveGearAnim->SetScale(gearScale, gearScale);
+					passiveGearAnim->SetPosition(playerX - (12.0f * gearScale) - 15.0f, playerY + (2.0f * pScale) - bobbing);
+					passiveGearAnim->Begin(); passiveGearAnim->Draw(*uiCamera, deltaTime); passiveGearAnim->End();
+				}
+			}
+			fontSprite->Begin();
+			fontSprite->SetOutline(false);
+
+			fontSprite->SetScale(1.2f, 1.2f);
+			fontSprite->SetColor(0xFF00FF41);
+			std::wstring fullText = consoleText + gearName + cursorText;
+			fontSprite->SetText(fullText);
+			float textW = fontSprite->GetWidth() * 1.2f;
+
+			float executeY = playerBaseY + 30.0f;
+			fontSprite->SetPosition(centerLeft - textW / 2.0f, executeY);
+			fontSprite->Draw(*uiCamera, deltaTime);
+
+			if (!gearDesc.empty()) {
+				fontSprite->SetScale(0.9f, 0.9f);
+				fontSprite->SetColor(0xFFCCCCCC);
+				fontSprite->SetText(gearDesc);
+				float descW = fontSprite->GetWidth() * 0.9f;
+
+				fontSprite->SetPosition(centerLeft - descW / 2.0f, executeY + 22.0f);
+				fontSprite->Draw(*uiCamera, deltaTime);
+			}
+
+			fontSprite->End();
+
+			std::wstring toggleKey = Demo::SettingsManager::GetInstance()->GetKeybindDisplayName("TOGGLE_GEAR");
+			fontSprite->Begin();
+			fontSprite->SetScale(0.9f, 0.9f);
+			fontSprite->SetColor(0xFF888888);
+			fontSprite->SetText(L"Press <" + toggleKey + L"> outside to hide/show Gears");
+			fontSprite->SetPosition(centerLeft - fontSprite->GetWidth() / 2.0f, playerBaseY + 90.0f);
+			fontSprite->Draw(*uiCamera, deltaTime);
+			fontSprite->End();
+
+			activeSlot->Draw(gd, uiCamera, deltaTime);
+			passiveSlot->Draw(gd, uiCamera, deltaTime);
+
+			std::wstring hoverName = L"";
+			std::wstring hoverDesc = L"";
+
+			if (activeSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
+				int hovID = activeSlot->GetGearID();
+				if (hovID != -1) {
+					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
+					if (bp) { hoverName = bp->name; hoverDesc = bp->description; }
+				}
+			}
+			else if (passiveSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
+				int hovID = passiveSlot->GetGearID();
+				if (hovID != -1) {
+					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
+					if (bp) { hoverName = bp->name; hoverDesc = bp->description; }
+				}
+			}
+
+			for (int i = 0; i < 8; i++) {
+				orbitSlots[i]->Draw(gd, uiCamera, deltaTime);
+
+				if (orbitSlots[i]->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
+					int hovID = orbitSlots[i]->GetGearID();
+					if (hovID != -1) {
+						auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
+						if (bp) { hoverName = bp->name; hoverDesc = bp->description; }
+					}
+				}
+			}
+
+			float separatorY = containerY + gearContainerH * 0.75f;
+			gd->DrawLine(*uiCamera, rightContainerX, separatorY, rightContainerX + containerW, separatorY, 0xFF555566);
+
+			if (!hoverName.empty()) {
+				fontSprite->Begin();
+				fontSprite->SetOutline(true, 0xFF000000, 3.f);
+
+				fontSprite->SetScale(1.3f, 1.3f);
+				fontSprite->SetColor(0xFFFFD700);
+				fontSprite->SetPosition(rightContainerX + 20.0f, separatorY + 15.0f);
+				fontSprite->SetText(hoverName);
+				fontSprite->Draw(*uiCamera, deltaTime);
+
+				fontSprite->SetScale(1.0f, 1.0f);
+				fontSprite->SetColor(0xFFCCCCCC);
+				fontSprite->SetPosition(rightContainerX + 20.0f, separatorY + 45.0f);
+				fontSprite->SetText(hoverDesc);
+				fontSprite->Draw(*uiCamera, deltaTime);
+
+				fontSprite->End();
+				fontSprite->SetOutline(false);
+			}
+			else {
+				fontSprite->Begin();
+				fontSprite->SetScale(1.0f, 1.0f);
+				fontSprite->SetColor(0xFF888888);
+				fontSprite->SetPosition(rightContainerX + 20.0f, separatorY + 25.0f);
+				fontSprite->SetText(L"Hover over a gear to view details.");
+				fontSprite->Draw(*uiCamera, deltaTime);
+				fontSprite->End();
+			}
+		}
 		else if (currentTab == Tab::QUEST) {
 			float containerGap = 40.0f;
 			float containerW = (sw - 120.0f - containerGap) / 2.0f;
@@ -603,7 +904,6 @@ namespace Demo {
 
 			gd->DrawRectangle(*uiCamera, leftContainerX, containerY, containerW, containerH, PANEL_BORDER, false);
 			gd->DrawRectangle(*uiCamera, rightContainerX, containerY, containerW, containerH, PANEL_BORDER, false);
-
 
 			//Quest list
 			D3DXMATRIX matCamera = uiCamera->GetTransformMatrix();
