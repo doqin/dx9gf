@@ -32,19 +32,48 @@ void Demo::BossWorldScene::OnInit()
 	NPCConfig daudauConfig = { L"assets/daudau-Sheet.png", 32, 32, 5, 12, 24.f, 8.f, 12.f };
 
 	auto npcHint = std::make_shared<NPC>(transformManager, -950.0f, -220.0f, daudauConfig);
+	npcHint->AttachQuestMarker("Quest_AdminLog", Demo::QuestMarkerRole::Giver);
 	npcHint->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	npcHint->RegisterVoice(L"Veteran Debugger", "bleep12");
-	npcHint->SetInteractLogic([](NPC* self) -> std::function<void()> {
-		self->AddLine(L"Veteran Debugger", L"Halt, traveler. You shouldn't be here.");
-		self->AddLine(L"Veteran Debugger", L"This sector is deeply corrupted-a graveyard of unresolved bugs and dead code.");
-		self->AddLine(L"Player", L"What exactly happened here?");
-		self->AddLine(L"Veteran Debugger", L"What happened? Ambition met reality.");
-		self->AddLine(L"Veteran Debugger", L"Teams of debuggers rushed in, thinking they could fix the core.");
-		self->AddLine(L"Veteran Debugger", L"They couldn't agree on a protocol. The system panicked, spawned massive anomalies, \nand wiped them out.");
-		self->AddLine(L"Veteran Debugger", L"I keep hearing the old admin's logs echoing in my head...");
-		self->AddLine(L"Veteran Debugger", L"...'The red sun sets over the blue ocean, giving life to the green earth, until it fades into\norange autumn'...");
-		self->AddLine(L"Veteran Debugger", L"Bah, probably just corrupted junk data. Don't mind my rambling.");
-		return nullptr;
+	npcHint->SetInteractLogic([this](NPC* self) -> std::function<void()> {
+		auto qState = QuestManager::GetInstance()->GetQuestState("Quest_AdminLog");
+
+		if (qState == Demo::QuestState::Locked) {
+			self->AddLine(L"Veteran Debugger", L"Halt, traveler. You shouldn't be here.");
+			self->AddLine(L"Veteran Debugger", L"This sector is deeply corrupted-a graveyard of unresolved bugs and dead code.");
+			self->AddLine(L"Player", L"What exactly happened here?");
+			self->AddLine(L"Veteran Debugger", L"What happened? Ambition met reality.");
+			self->AddLine(L"Veteran Debugger", L"Teams of debuggers rushed in, thinking they could fix the core.");
+			self->AddLine(L"Veteran Debugger", L"They couldn't agree on a protocol. The system panicked, spawned massive anomalies, \nand wiped them out.");
+			self->AddLine(L"Veteran Debugger", L"I keep hearing the old admin's logs echoing in my head...");
+			self->AddLine(L"Veteran Debugger", L"...'The red sun sets over the blue ocean, giving life to the green earth, until it fades into\norange autumn'...");
+			self->AddLine(L"Player", L"That doesn't sound like junk data. Want me to check the core logs when I hack a terminal?");
+			self->AddLine(L"Veteran Debugger", L"...If you spot that phrase anywhere in the real logs, come tell me. I need to know I'm not\nglitching out.");
+			return []() {
+				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
+					{ L"Yes(Y)", []() { QuestManager::GetInstance()->AcceptQuest("Quest_AdminLog"); } },
+					{ L"No(N)", []() {} }
+				};
+				PopupManager::GetInstance()->Show("stepped_blue", L"New Quest", L"Help the debugger chase the ghost in the logs?", buttons);
+			};
+		}
+		else if (qState == Demo::QuestState::Active && this->currentHackStep >= 1) {
+			self->AddLine(L"Player", L"I cracked a terminal. The admin's log is in there, word for word - 'red sun... blue ocean...'.");
+			self->AddLine(L"Veteran Debugger", L"So it IS real. I'm not corrupted. It was a message all along.");
+			self->AddLine(L"Veteran Debugger", L"Here - take this. Found it clipped to the admin's old workstation. A shame to let it rot here.");
+			return [this]() {
+				auto r = QuestManager::GetInstance()->NotifyEvent("ADMIN_LOG_VERIFIED", "", player.get());
+				if (r.hasReward && popUpMessage) popUpMessage->ShowMessage(L"(+) " + r.rewardMessage, 5.0f);
+			};
+		}
+		else if (qState == Demo::QuestState::Active) {
+			self->AddLine(L"Veteran Debugger", L"Hack one of the security terminals and check the logs. If that phrase is really in there,\ncome straight back.");
+			return nullptr;
+		}
+		else {
+			self->AddLine(L"Veteran Debugger", L"The admin left a message, not a bug. All these years I thought I was the broken one.\nThank you, traveler.");
+			return nullptr;
+		}
 	});
 	mapNPCs.push_back(npcHint);
 
@@ -387,11 +416,12 @@ void Demo::BossWorldScene::OnUpdate(unsigned long long deltaTime)
 
 			if (player->GetInventoryItems().HasItem(10)) {
 				dialogBuilder->AddLine(L"Rusty Chest", L"Wait, is that the key? NOOO! YOU ROB ME!!!");
-				dialogBuilder->AddLine(L"Rusty Chest", L"You found: " + ItemData::GetInstance()->GetItemBlueprint(6)->GetName() + L", " + ItemData::GetInstance()->GetItemBlueprint(7)->GetName() + L", and " + ItemData::GetInstance()->GetItemBlueprint(8)->GetName());
+				dialogBuilder->AddLine(L"Rusty Chest", L"You found: " + ItemData::GetInstance()->GetItemBlueprint(6)->GetName() + L", " + ItemData::GetInstance()->GetItemBlueprint(7)->GetName() + L", " + ItemData::GetInstance()->GetItemBlueprint(8)->GetName() + L", and a Data Extractor gear!");
 				player->GetInventoryItems().ConsumeItem(10);
 				player->GetInventoryItems().AddItem(6, 1);
 				player->GetInventoryItems().AddItem(7, 1);
 				player->GetInventoryItems().AddItem(8, 1);
+				player->AddGear(2); // Data Extractor
 				rustyChest->SetOpened(true);
 			}
 			else {

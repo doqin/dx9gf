@@ -89,14 +89,14 @@ namespace Demo
 		//	{239,7,251,19} },
 		//	GearType::Passive, GearEffect::AddMaxHP, 20, 0};
 
-		gearRegistry[0] = { 0, L"Titan Core", L"Grants 20 Max HP.", //red core
-			{ {7,91,19,103} }, GearType::Passive, GearEffect::AddMaxHP, 20, 0 };
+		gearRegistry[0] = { 0, L"Titan Core", L"Grants 10 Max HP.", //red core
+			{ {7,91,19,103} }, GearType::Passive, GearEffect::AddMaxHP, 10, 0 };
 
 		gearRegistry[1] = { 1, L"Energy Cell", L"Active: Restore 1 Energy.\nCooldown: 3 turns.", //energy cell
 			{ {7, 77, 19, 89} }, GearType::Active, GearEffect::AddEnergy, 1, 3 };
 
-		gearRegistry[2] = { 2, L"Data Extractor", L"Active: Draw 1 card.\nCooldown: 2 turns.", //.rar
-			{ {7, 21, 19, 33} }, GearType::Active, GearEffect::DrawCard, 1, 2 };
+		gearRegistry[2] = { 2, L"Data Extractor", L"Active: Draw 2 card.\nCooldown: 2 turns.", //.rar
+			{ {7, 21, 19, 33} }, GearType::Active, GearEffect::DrawCard, 2, 2 };
 
 		gearRegistry[3] = { 3, L"Memory Locker", L"Active: Retain 1 hand card.\nCooldown: 2 turns.", //lock
 			{ {7, 35, 19, 47} }, GearType::Active, GearEffect::RetainCard, 1, 2 };

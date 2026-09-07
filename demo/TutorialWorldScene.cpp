@@ -284,7 +284,8 @@ void Demo::TutorialWorldScene::StartSpamBattle()
 		this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
 			this->spamBossDefeated = true;
 			if (this->spamNPC) this->spamNPC->SetPhase(SpamNPC::Phase::Defeated);
-			if (this->popUpMessage) this->popUpMessage->ShowMessage(L"The portal hums to life.", 4.0f);
+			this->player->AddGear(0); // Titan Core
+			if (this->popUpMessage) this->popUpMessage->ShowMessage(L"The portal hums to life. (+) Titan Core - a gear!", 5.0f);
 			markFinished();
 		}));
 	});
