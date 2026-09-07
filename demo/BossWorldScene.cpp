@@ -48,7 +48,7 @@ void Demo::BossWorldScene::OnInit()
 	});
 	mapNPCs.push_back(npcHint);
 
-	NPCConfig hngocConfig = { L"assets/daudau-Sheet.png", 32, 32, 5, 12, 24.f, 8.f, 12.f };
+	NPCConfig hngocConfig = { L"assets/ahai-Sheet.png", 32, 32, 2, 3, 24.f, 8.f, 12.f };
 	auto hNgoc = std::make_shared<NPC>(transformManager, 300.f, 230.f, hngocConfig);
 	hNgoc->AttachQuestMarker("Quest_BossWorld", Demo::QuestMarkerRole::Giver);
 	hNgoc->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);

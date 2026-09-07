@@ -545,6 +545,9 @@
     <Image Include="assets\12x12-gold-token.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="assets\ahai-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="assets\All-borders.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -576,6 +579,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\buytab.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\hkhang-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\lab.png">

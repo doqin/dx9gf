@@ -223,7 +223,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 
 	OnUpdate(deltaTime);
 
-	if (!isGamePaused) {
+	if (!isGamePaused && !isTransitioning) {
 		for (auto& enemy : mapEnemies) {
 			enemy->Update(deltaTime);
 		}

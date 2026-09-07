@@ -260,7 +260,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void DrawCardFace(unsigned long long deltaTime) override;
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Deal 4 DMG. If the previous card killed its target, deal 8 DMG to the lowest HP enemy instead."; }
+		std::wstring GetDescription() const override { return L"Deal 5 DMG. If the previous card killed its target, deal 8 DMG to the lowest HP enemy instead."; }
 		RECT GetFaceRect() const override { return RECT{ 176, 416, 272, 432 }; }
 	};
 
@@ -268,13 +268,13 @@ namespace Demo {
 	public:
 		LethalHarvestCard(std::weak_ptr<DX9GF::TransformManager> tm)
 			: IGameObject(tm, 0, 0), MultiTargetCard(tm, 1, L"Lethal Harvest", 0, 0, 192, 32) {
-			SetPersistent(false);
+			SetPersistent(true);
 		}
 		bool Execute() override;
-		void CollectProjectedSteps(VirtualBattleState& state) override { CollectHitsOnTargets(state, 12.f, 1); }
+		void CollectProjectedSteps(VirtualBattleState& state) override { CollectHitsOnTargets(state, 5.f, 1); }
 		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Deal 12 DMG. If fatal, heal 8 HP."; }
+		std::wstring GetDescription() const override { return L"Deal 5 DMG. If fatal, heal 8 HP."; }
 		RECT GetFaceRect() const override { return RECT{ 80, 448, 176, 464 }; }
 	};
 

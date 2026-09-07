@@ -57,7 +57,7 @@ void Demo::ThreadAlleyScene::OnInit()
 	);
 	shopPoints.back()->SetVisible(true);
 
-	NPCConfig hkhangConfig = { L"assets/daudau-Sheet.png", 32, 32, 5, 12, 24.f, 8.f, 12.f };
+	NPCConfig hkhangConfig = { L"assets/hkhang-Sheet.png", 32, 32, 2, 3, 24.f, 8.f, 12.f };
 
 	auto hKhang = std::make_shared<NPC>(transformManager, -580.f, 100.f, hkhangConfig);
 	hKhang->AttachQuestMarker("Quest_ThreadAlley_Start", Demo::QuestMarkerRole::Giver);

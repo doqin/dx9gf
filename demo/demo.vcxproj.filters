@@ -434,6 +434,8 @@
     <Image Include="assets\labinside.png" />
     <Image Include="assets\flame-slot-Sheet.png" />
     <Image Include="assets\12x12-gold-token.png" />
+    <Image Include="assets\ahai-Sheet.png" />
+    <Image Include="assets\hkhang-Sheet.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\arcade-among-2-r46pv.ttf" />
@@ -461,5 +463,7 @@
     <None Include="assets\lab.tsx" />
     <None Include="assets\labinside.tsx" />
     <None Include="assets\labinside.tmx" />
+    <None Include="assets\spam.aseprite" />
+    <None Include="assets\spamprojectile.aseprite" />
   </ItemGroup>
 </Project>

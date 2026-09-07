@@ -34,7 +34,7 @@ void Demo::TutorialWorldScene::OnInit()
 	});
 
 	NPCConfig daudauConfig = { L"assets/daudau-Sheet.png", 32, 32, 5, 12, 24.f, 8.f, 12.f };
-	NPCConfig kakoConfig = { L"assets/kako-Sheet.png", 32, 32, 2, 6, 24.f, 8.f, 12.f };
+	NPCConfig kakoConfig = { L"assets/kako-Sheet.png", 32, 32, 2, 3, 24.f, 8.f, 12.f };
 
 	auto npcIntroduction = std::make_shared<NPC>(transformManager, 167.0f, -18.0f, kakoConfig);
 	npcIntroduction->AttachQuestMarker("Quest_Tutorial", Demo::QuestMarkerRole::Giver);
