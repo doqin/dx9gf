@@ -3,38 +3,51 @@
 
 float Demo::PlayerGlobalData::GetMaxHealth() const {
 	float total = baseMaxHealth;
-	if (equippedGearID != -1) {
-		auto* gear = ItemData::GetInstance()->GetGearBlueprint(equippedGearID);
-		if (gear && gear->effect == GearEffect::AddMaxHP) {
-			total += gear->effectValue;
+	auto checkGear = [&](int id) {
+		if (id != -1) {
+			auto* gear = ItemData::GetInstance()->GetGearBlueprint(id);
+			if (gear && gear->effect == GearEffect::AddMaxHP) total += gear->effectValue;
 		}
-	}
+		};
+	checkGear(equippedActiveGearID);
+	checkGear(equippedPassiveGearID);
 	return total;
 }
+
 void Demo::PlayerGlobalData::EquipGear(int gearID) {
 	auto it = std::find(inventoryGears.begin(), inventoryGears.end(), gearID);
 	if (it == inventoryGears.end()) return;
 
-	int oldGear = equippedGearID;
+	auto bp = ItemData::GetInstance()->GetGearBlueprint(gearID);
+	if (!bp) return;
 
 	inventoryGears.erase(it);
-	equippedGearID = gearID;
 
-	if (oldGear != -1) {
-		inventoryGears.push_back(oldGear);
+	//automatically sort gear's type
+	if (bp->type == GearType::Active) {
+		if (equippedActiveGearID != -1) inventoryGears.push_back(equippedActiveGearID);
+		equippedActiveGearID = gearID;
 	}
-
+	else {
+		if (equippedPassiveGearID != -1) inventoryGears.push_back(equippedPassiveGearID);
+		equippedPassiveGearID = gearID;
+	}
 	SetHealth(health);
 }
 
-void Demo::PlayerGlobalData::UnequipGear() {
-	if (equippedGearID == -1) return;
-
-	inventoryGears.push_back(equippedGearID);
-	equippedGearID = -1;
-
+void Demo::PlayerGlobalData::UnequipGear(int gearID) {
+	if (gearID == -1) return;
+	if (equippedActiveGearID == gearID) {
+		inventoryGears.push_back(equippedActiveGearID);
+		equippedActiveGearID = -1;
+	}
+	else if (equippedPassiveGearID == gearID) {
+		inventoryGears.push_back(equippedPassiveGearID);
+		equippedPassiveGearID = -1;
+	}
 	SetHealth(health);
 }
+
 void Demo::PlayerGlobalData::Reset() {
 	baseMaxHealth = 50.f;
 	health = baseMaxHealth;
@@ -44,7 +57,9 @@ void Demo::PlayerGlobalData::Reset() {
 	inventoryItems = ItemInventory();
 	inventoryItems.InitFixedInventory(13);
 	inventoryGears.clear();
-	equippedGearID = -1;
+	equippedActiveGearID = -1;
+	equippedPassiveGearID = -1;
+	showGearOnMap = true;
 }
 
 float Demo::PlayerGlobalData::Heal(float value) {
@@ -67,7 +82,9 @@ std::string Demo::PlayerGlobalData::GetSaveID() const {
 void Demo::PlayerGlobalData::GenerateSaveData(nlohmann::json& outData) {
 	outData["gold"] = gold;
 	outData["health"] = health;
-	outData["equippedGearID"] = equippedGearID;
+	outData["equippedActiveGearID"] = equippedActiveGearID;
+	outData["equippedPassiveGearID"] = equippedPassiveGearID;
+	outData["showGearOnMap"] = showGearOnMap;
 
 	outData["inventoryGears"] = nlohmann::json::array();
 	for (int gear : inventoryGears) {
@@ -91,7 +108,20 @@ void Demo::PlayerGlobalData::GenerateSaveData(nlohmann::json& outData) {
 
 void Demo::PlayerGlobalData::RestoreSaveData(const nlohmann::json& inData) {
 	if (inData.contains("gold")) gold = inData["gold"];
-	if (inData.contains("equippedGearID")) equippedGearID = inData["equippedGearID"];
+	if (inData.contains("showGearOnMap")) showGearOnMap = inData["showGearOnMap"];
+
+	if (inData.contains("equippedGearID")) {
+		int oldGearID = inData["equippedGearID"];
+		if (oldGearID != -1) {
+			auto bp = ItemData::GetInstance()->GetGearBlueprint(oldGearID);
+			if (bp && bp->type == GearType::Active) equippedActiveGearID = oldGearID;
+			else equippedPassiveGearID = oldGearID;
+		}
+	}
+	else {
+		if (inData.contains("equippedActiveGearID")) equippedActiveGearID = inData["equippedActiveGearID"];
+		if (inData.contains("equippedPassiveGearID")) equippedPassiveGearID = inData["equippedPassiveGearID"];
+	}
 	if (inData.contains("inventoryGears")) {
 		inventoryGears.clear();
 		for (auto& item : inData["inventoryGears"]) {

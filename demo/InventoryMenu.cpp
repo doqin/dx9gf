@@ -4,7 +4,7 @@
 #include "DX9GFAudioManager.h"
 #include <algorithm>
 #include <unordered_map>
-
+#include "SettingsManager.h"
 namespace {
 	constexpr float RAW_ITEM_W = 23.0f;
 	constexpr float RAW_ITEM_H = 35.0f;
@@ -132,10 +132,19 @@ namespace Demo {
 		gearTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
 
-		coreSlot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, true);		coreSlot->GetButton()->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
-			if (this->coreSlot->GetGearID() != -1) {
-				this->player->UnequipGear();
-				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f); //TODO: Change sfx
+		activeSlot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, true);
+		activeSlot->GetButton()->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			if (this->activeSlot->GetGearID() != -1) {
+				this->player->UnequipGear(this->activeSlot->GetGearID());
+				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
+			}
+			});
+
+		passiveSlot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, true);
+		passiveSlot->GetButton()->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			if (this->passiveSlot->GetGearID() != -1) {
+				this->player->UnequipGear(this->passiveSlot->GetGearID());
+				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
 			}
 			});
 
@@ -397,9 +406,13 @@ namespace Demo {
 			}
 		}
 		else if (currentTab == Tab::GEAR) {
-			if (coreSlot) {
-				addButton(coreSlot->GetButton());
+			if (activeSlot && activeSlot->GetGearID() != -1) {
+				addButton(activeSlot->GetButton());
 			}
+			if (passiveSlot && passiveSlot->GetGearID() != -1) {
+				addButton(passiveSlot->GetButton());
+			}
+
 			for (auto& slot : orbitSlots) {
 				if (slot && slot->GetGearID() != -1) {
 					addButton(slot->GetButton());
@@ -486,22 +499,19 @@ namespace Demo {
 			if (btnTabGear) btnTabGear->SetState(Demo::IButton::ButtonState::CLICKED);
 			gearAnimTimer += deltaTime;
 
-			static int lastMenuEquippedGearID = -2;
-			int currentGear = player->GetEquippedGearID();
-
-			if (currentGear != lastMenuEquippedGearID) {
-				lastMenuEquippedGearID = currentGear;
-				if (currentGear != -1 && gearTex) {
-					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentGear);
+			auto setupMenuAnim = [&](int currentID, std::shared_ptr<DX9GF::AnimatedSprite>& animPtr) {
+				if (currentID != -1 && gearTex) {
+					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentID);
 					if (bp && !bp->frames.empty()) {
-						gearDroneAnim = std::make_shared<DX9GF::AnimatedSprite>(gearTex.get(), bp->frames);
-						gearDroneAnim->SetFrameRate(12);
+						animPtr = std::make_shared<DX9GF::AnimatedSprite>(gearTex.get(), bp->frames);
+						animPtr->SetFrameRate(12);
+						return;
 					}
 				}
-				else {
-					gearDroneAnim = nullptr;
-				}
-			}
+				animPtr = nullptr;
+				};
+			setupMenuAnim(player->GetEquippedActiveGearID(), activeGearAnim);
+			setupMenuAnim(player->GetEquippedPassiveGearID(), passiveGearAnim);
 
 			float gearContainerH = sh * 0.55f;
 			float centerX = rightContainerX + containerW / 2.0f;
@@ -509,8 +519,16 @@ namespace Demo {
 			float radius = 90.0f;
 			float slotSize = 16.0f * 3.0f;
 
-			coreSlot->SetLocalPosition(std::round(centerX - slotSize / 2.0f), std::round(centerY - slotSize / 2.0f));
-			coreSlot->Update(deltaTime);
+			float innerAngle = -orbitAngle * 1.5f;
+			float innerRadius = 35.0f;
+
+			activeSlot->SetLocalPosition(std::round(centerX + innerRadius * std::cos(innerAngle) - slotSize / 2.0f),
+				std::round(centerY + innerRadius * std::sin(innerAngle) - slotSize / 2.0f));
+			activeSlot->Update(deltaTime);
+
+			passiveSlot->SetLocalPosition(std::round(centerX + innerRadius * std::cos(innerAngle + D3DX_PI) - slotSize / 2.0f),
+				std::round(centerY + innerRadius * std::sin(innerAngle + D3DX_PI) - slotSize / 2.0f));
+			passiveSlot->Update(deltaTime);
 
 			orbitAngle += 0.5f * (deltaTime / 1000.0f);
 
@@ -523,7 +541,8 @@ namespace Demo {
 				orbitSlots[i]->Update(deltaTime);
 			}
 
-			coreSlot->SetGearID(player->GetEquippedGearID());
+			activeSlot->SetGearID(player->GetEquippedActiveGearID());
+			passiveSlot->SetGearID(player->GetEquippedPassiveGearID());
 			auto& gears = player->GetInventoryGears();
 			for (int i = 0; i < 8; i++) {
 				if (i < gears.size()) orbitSlots[i]->SetGearID(gears[i]);
@@ -583,6 +602,7 @@ namespace Demo {
 		fontSprite->Begin();
 		fontSprite->SetScale(1.5f, 1.5f);
 		fontSprite->SetColor(0xFFFFFF00);
+		// Header Texts
 		fontSprite->SetOutline(true, 0xFF000000, 3.f);
 		fontSprite->SetPosition(leftEdge + 30.0f, bottomEdge - 95.0f);
 
@@ -630,7 +650,6 @@ namespace Demo {
 			}
 			fontSprite->End();
 
-			//Draw description
 			if (!hoverDescription.empty()) {
 				fontSprite->Begin();
 				fontSprite->SetScale(1.2f, 1.2f);
@@ -725,29 +744,33 @@ namespace Demo {
 			std::wstring gearName = L"";
 			std::wstring gearDesc = L"";
 
-			int eqID = player->GetEquippedGearID();
-			if (eqID != -1) {
-				auto blueprint = Demo::ItemData::GetInstance()->GetGearBlueprint(eqID);
-				if (blueprint) {
-					gearName = blueprint->name;
-					gearDesc = blueprint->description;
-				}
+			int eqActID = player->GetEquippedActiveGearID();
+			int eqPasID = player->GetEquippedPassiveGearID();
+
+			if (eqActID != -1) {
+				auto blueprint = Demo::ItemData::GetInstance()->GetGearBlueprint(eqActID);
+				if (blueprint) { gearName = blueprint->name; gearDesc = blueprint->description; }
+			}
+			else if (eqPasID != -1) {
+				auto blueprint = Demo::ItemData::GetInstance()->GetGearBlueprint(eqPasID);
+				if (blueprint) { gearName = blueprint->name; gearDesc = blueprint->description; }
 			}
 
-			if (gearDroneAnim) {
+			if (activeGearAnim || passiveGearAnim) {
 				float gearScale = pScale * 0.5f;
 				float bobbing = std::sin(gearAnimTimer / 200.0f) * 10.0f;
 
-				float droneX = playerX + pWidth + 20.0f;
-				float droneY = playerY + (2.0f * pScale) + bobbing;
-
-				gearDroneAnim->SetScale(gearScale, gearScale);
-				gearDroneAnim->SetPosition(droneX, droneY);
-				gearDroneAnim->Begin();
-				gearDroneAnim->Draw(*uiCamera, deltaTime);
-				gearDroneAnim->End();
+				if (activeGearAnim) {
+					activeGearAnim->SetScale(gearScale, gearScale);
+					activeGearAnim->SetPosition(playerX + pWidth + 15.0f, playerY + (2.0f * pScale) + bobbing);
+					activeGearAnim->Begin(); activeGearAnim->Draw(*uiCamera, deltaTime); activeGearAnim->End();
+				}
+				if (passiveGearAnim) {
+					passiveGearAnim->SetScale(gearScale, gearScale);
+					passiveGearAnim->SetPosition(playerX - (12.0f * gearScale) - 15.0f, playerY + (2.0f * pScale) - bobbing);
+					passiveGearAnim->Begin(); passiveGearAnim->Draw(*uiCamera, deltaTime); passiveGearAnim->End();
+				}
 			}
-
 			fontSprite->Begin();
 			fontSprite->SetOutline(false);
 
@@ -773,18 +796,33 @@ namespace Demo {
 
 			fontSprite->End();
 
-			coreSlot->Draw(gd, uiCamera, deltaTime);
+			std::wstring toggleKey = Demo::SettingsManager::GetInstance()->GetKeybindDisplayName("TOGGLE_GEAR");
+			fontSprite->Begin();
+			fontSprite->SetScale(0.9f, 0.9f);
+			fontSprite->SetColor(0xFF888888);
+			fontSprite->SetText(L"Press <" + toggleKey + L"> outside to hide/show Gears");
+			fontSprite->SetPosition(centerLeft - fontSprite->GetWidth() / 2.0f, playerBaseY + 90.0f);
+			fontSprite->Draw(*uiCamera, deltaTime);
+			fontSprite->End();
+
+			activeSlot->Draw(gd, uiCamera, deltaTime);
+			passiveSlot->Draw(gd, uiCamera, deltaTime);
+
 			std::wstring hoverName = L"";
 			std::wstring hoverDesc = L"";
 
-			if (coreSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
-				int hovID = coreSlot->GetGearID();
+			if (activeSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
+				int hovID = activeSlot->GetGearID();
 				if (hovID != -1) {
 					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
-					if (bp) {
-						hoverName = bp->name;
-						hoverDesc = bp->description;
-					}
+					if (bp) { hoverName = bp->name; hoverDesc = bp->description; }
+				}
+			}
+			else if (passiveSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
+				int hovID = passiveSlot->GetGearID();
+				if (hovID != -1) {
+					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
+					if (bp) { hoverName = bp->name; hoverDesc = bp->description; }
 				}
 			}
 
@@ -795,10 +833,7 @@ namespace Demo {
 					int hovID = orbitSlots[i]->GetGearID();
 					if (hovID != -1) {
 						auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
-						if (bp) {
-							hoverName = bp->name;
-							hoverDesc = bp->description;
-						}
+						if (bp) { hoverName = bp->name; hoverDesc = bp->description; }
 					}
 				}
 			}
@@ -869,7 +904,6 @@ namespace Demo {
 
 			gd->DrawRectangle(*uiCamera, leftContainerX, containerY, containerW, containerH, PANEL_BORDER, false);
 			gd->DrawRectangle(*uiCamera, rightContainerX, containerY, containerW, containerH, PANEL_BORDER, false);
-
 
 			//Quest list
 			D3DXMATRIX matCamera = uiCamera->GetTransformMatrix();

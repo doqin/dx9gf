@@ -150,7 +150,7 @@ namespace Demo {
 		std::shared_ptr<BattleMenu> battleMenu;
 		std::shared_ptr<DX9GF::Texture> gearTex;
 		std::shared_ptr<IconButton> gearButton;
-		bool isGearUsedThisBattle = false;
+		int currentGearCooldown = 0;
 		void OnGearButtonClicked();
 		void PlayerUseGearTargetingUpdate(unsigned long long deltaTime);
 		std::vector<std::shared_ptr<IconButton>> buffItems;

@@ -29,6 +29,7 @@ namespace Demo
 		GearType type;
 		GearEffect effect;
 		int effectValue;
+		int maxCooldownTurns;
 	};
 
 	enum class ModifierType {

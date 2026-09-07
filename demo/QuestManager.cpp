@@ -334,7 +334,8 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			}
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			player->AddGold(100);
-			return { true, L"100 Gold - Quest Completed: Kako's Lab" };
+			player->AddGear(5);
+			return { true, L"100 Gold & Aegis Plating - Quest Completed: Kako's Lab" };
 		}
 	}
 

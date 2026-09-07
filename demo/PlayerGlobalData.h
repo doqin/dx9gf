@@ -20,7 +20,9 @@ namespace Demo {
 		std::vector<std::string> inventoryCards;
 		ItemInventory inventoryItems;
 		std::vector<int> inventoryGears;
-		int equippedGearID = -1;
+		int equippedActiveGearID = -1;
+		int equippedPassiveGearID = -1;
+		bool showGearOnMap = true;
 		PlayerGlobalData() { Reset(); }
 	public:
 		static PlayerGlobalData* GetInstance() {
@@ -37,9 +39,14 @@ namespace Demo {
 		float Heal(float value);
 
 		const std::vector<int>& GetInventoryGears() const { return inventoryGears; }
-		int GetEquippedGearID() const { return equippedGearID; }
+		int GetEquippedActiveGearID() const { return equippedActiveGearID; }
+		int GetEquippedPassiveGearID() const { return equippedPassiveGearID; }
+		bool GetShowGearOnMap() const { return showGearOnMap; }
+		void ToggleShowGearOnMap() { showGearOnMap = !showGearOnMap; }
+		bool HasGearEquipped(int gearID) const { return equippedActiveGearID == gearID || equippedPassiveGearID == gearID; }
+
 		void EquipGear(int gearID);
-		void UnequipGear();
+		void UnequipGear(int gearID);
 		void AddGear(int gearID) { inventoryGears.push_back(gearID); }
 
 		int GetGold() const { return gold; }

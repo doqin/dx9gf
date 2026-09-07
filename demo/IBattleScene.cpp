@@ -71,9 +71,8 @@ namespace {
 void Demo::IBattleScene::StartBattle()
 {
 	// Reset Gear
-	isGearUsedThisBattle = false;
-	int gearID = player->GetEquippedGearID();
-	if (gearID == 5) {
+	currentGearCooldown = 0;
+	if (player->HasGearEquipped(5)) {
 		battlePlayer->AddModifier(Demo::ModifierType::BuffDefense, 3, 15.f, true, 0);
 	}
 
@@ -219,7 +218,7 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 	}
 
 	// Hook Gear 4 (Midas Chip)
-	if (player->GetEquippedGearID() == 4) {
+	if (player->HasGearEquipped(4)) {
 		finalGold = static_cast<int>(std::round(finalGold * 1.2f));
 	}
 
@@ -646,6 +645,7 @@ float Demo::IBattleScene::LayOutPileButtons(float screenWidth, float buttonY)
 
 void Demo::IBattleScene::BeginNextTurn()
 {
+	if (currentGearCooldown > 0) currentGearCooldown--;
 	++currentTurn;
 	MovePlayedPileToDiscardPileIfNeeded();
 	DrawCards(CARDS_DRAWN_PER_TURN + pendingBonusDraw);
@@ -1157,12 +1157,15 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 			// from a mid-turn draw are still in flight, stranding them outside every pile.
 			if (usedEnergy == 0 && queuedToDraw.empty()) backButton->Update(deltaTime);
 
-			int eqID = player->GetEquippedGearID();
+			int eqID = player->GetEquippedActiveGearID();
 			auto bp = eqID != -1 ? Demo::ItemData::GetInstance()->GetGearBlueprint(eqID) : nullptr;
-			if (!bp || bp->type == Demo::GearType::Passive || isGearUsedThisBattle) {
+			if (!bp || currentGearCooldown > 0) {
 				gearButton->SetState(Demo::IButton::ButtonState::DISABLED);
 			}
 			else {
+				if (gearButton->GetState() == Demo::IButton::ButtonState::DISABLED) {
+					gearButton->SetState(Demo::IButton::ButtonState::IDLE);
+				}
 				gearButton->Update(deltaTime);
 			}
 
@@ -1506,7 +1509,8 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 							(float)statementCard->GetWidth(), (float)statementCard->GetHeight(),
 							[this, statementCard]() {
 								statementCard->SetRetained(true);
-								this->isGearUsedThisBattle = true;
+								auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(player->GetEquippedActiveGearID());
+								if (bp) this->currentGearCooldown = bp->maxCooldownTurns;
 								this->pickedUpCard.reset();
 								this->state = State::PlayerAttack;
 								this->popUpMessage->QueueMessage(&this->commandBuffer, L"Card retained!", 1.5f);
@@ -2229,20 +2233,39 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		DrawPileButtons(deltaTime);
 		//gear's button tooltip
 		if (gearButton->GetTrigger()->IsHovering(deltaTime)) {
-			int eqID = player->GetEquippedGearID();
-			if (eqID != -1) {
-				auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(eqID);
-				if (bp) {
-					std::wstring tooltipText = L"Use Gear: " + bp->name + L"\n" + bp->description;
+			int eqID = player->GetEquippedActiveGearID();
+			auto bp = eqID != -1 ? Demo::ItemData::GetInstance()->GetGearBlueprint(eqID) : nullptr;
 
-					if (isGearUsedThisBattle) tooltipText += L"\n(Already Used)";
-					else if (bp->type == Demo::GearType::Passive) tooltipText += L"\n(Passive)";
+			std::wstring tooltipText;
 
-					auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
-					std::wstring ttStr = tooltipText;
-					DrawTooltip(ttStr, screenX, screenY, game->GetGraphicsDevice());
+			if (bp) {
+				tooltipText = L"Use Gear: " + bp->name + L"\n" + bp->description;
+				if (currentGearCooldown > 0) {
+					tooltipText += L"\n(Cooldown: " + std::to_wstring(currentGearCooldown) + L" turns)";
 				}
 			}
+			else {
+				tooltipText = L"No Active Gear Equipped";
+			}
+
+			auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
+			DrawTooltip(tooltipText, screenX, screenY, game->GetGraphicsDevice());
+		}
+
+		if (currentGearCooldown > 0) {
+			fontSprite->Begin();
+			fontSprite->SetColor(0xFFff4444);
+			fontSprite->SetOutline(true, 0xFF000000, 2.f);
+			fontSprite->SetText(L"CD: " + std::to_wstring(currentGearCooldown) + L"T");
+
+			fontSprite->SetPosition(
+				gearButton->GetWorldX() + (gearButton->GetWidth() - fontSprite->GetWidth()) / 2.f,
+				gearButton->GetWorldY() - 30.f
+			);
+
+			fontSprite->Draw(this->uiCamera, deltaTime);
+			fontSprite->End();
+			fontSprite->SetOutline(false);
 		}
 	}
 
@@ -3960,14 +3983,14 @@ void Demo::IBattleScene::AddEnergyPieceToken() {
 }
 
 void Demo::IBattleScene::OnGearButtonClicked() {
-	if (isGearUsedThisBattle) return;
-	int gearID = player->GetEquippedGearID();
+	if (currentGearCooldown > 0) return;
+	int gearID = player->GetEquippedActiveGearID();
 	auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(gearID);
 	if (!bp || bp->type == Demo::GearType::Passive) return;
 
 	if (gearID == 1) { // Energy Cell
 		GainEnergyNow(1);
-		isGearUsedThisBattle = true;
+		currentGearCooldown = bp->maxCooldownTurns;
 		DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
 		popUpMessage->QueueMessage(&commandBuffer, L"Gained 1 Energy!", 1.5f);
 
@@ -3979,7 +4002,7 @@ void Demo::IBattleScene::OnGearButtonClicked() {
 			return;
 		}
 		DrawCardsNow(1);
-		isGearUsedThisBattle = true;
+		currentGearCooldown = bp->maxCooldownTurns;
 		popUpMessage->QueueMessage(&commandBuffer, L"Drew 1 card!", 1.5f);
 
 	}
@@ -4041,7 +4064,8 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 					mouseWY >= ty && mouseWY <= ty + trigger->GetHeight()) {
 
 					statementCard->SetRetained(true);
-					this->isGearUsedThisBattle = true;
+					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(player->GetEquippedActiveGearID());
+					if (bp) this->currentGearCooldown = bp->maxCooldownTurns;
 					pickedUpCard.reset();
 					this->state = State::PlayerAttack;
 					this->popUpMessage->QueueMessage(&this->commandBuffer, L"Card retained for next turn!", 1.5f);
@@ -4051,8 +4075,6 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 			}
 		}
 	}
-
-	//keyboardNavigator.Update(deltaTime, CollectKeyboardCandidates());
 
 	for (size_t i = 0; i < enemies.size(); ++i) {
 		enemies[i]->Update(deltaTime);

@@ -246,24 +246,36 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 			cameraDeltaTime = 0.f;
 		}
 	}
-	int currentGear = GetEquippedGearID();
-	if (currentGear != lastEquippedGearID) {
-		lastEquippedGearID = currentGear;
-		if (currentGear != -1 && gearTex) {
-			auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentGear);
-			if (bp && !bp->frames.empty()) {
-				gearDroneAnim = std::make_shared<DX9GF::AnimatedSprite>(gearTex.get(), bp->frames);
-				gearDroneAnim->SetFrameRate(12);
-			}
-		}
-		else {
-			gearDroneAnim = nullptr;
-		}
+
+	static float toggleCooldown = 0.0f;
+	if (toggleCooldown > 0) toggleCooldown -= deltaTime;
+	if (inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("TOGGLE_GEAR")) && toggleCooldown <= 0) {
+		PlayerGlobalData::GetInstance()->ToggleShowGearOnMap();
+		toggleCooldown = 300.0f;
 	}
 
-	if (gearDroneAnim) {
+	auto setupGearAnim = [&](int currentID, int& lastID, std::shared_ptr<DX9GF::AnimatedSprite>& animPtr) {
+		if (currentID != lastID) {
+			lastID = currentID;
+			if (currentID != -1 && gearTex) {
+				auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentID);
+				if (bp && !bp->frames.empty()) {
+					animPtr = std::make_shared<DX9GF::AnimatedSprite>(gearTex.get(), bp->frames);
+					animPtr->SetFrameRate(12);
+					return;
+				}
+			}
+			animPtr = nullptr;
+		}
+		};
+
+	setupGearAnim(PlayerGlobalData::GetInstance()->GetEquippedActiveGearID(), lastActiveGearID, activeGearAnim);
+	setupGearAnim(PlayerGlobalData::GetInstance()->GetEquippedPassiveGearID(), lastPassiveGearID, passiveGearAnim);
+
+	if (activeGearAnim || passiveGearAnim) {
 		gearAnimTimer += deltaTime;
 	}
+
 	if (isInvincible) {
 		if (timeSinceTurnedInvincible > INVINCIBILITY_DURATION) {
 			isInvincible = false;
@@ -277,35 +289,29 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 void Demo::Player::Draw(unsigned long long deltaTime) {
 	footprintEmitter->Draw(*camera, deltaTime);
 
-	bool isBehindPlayer = false;
-	float gearRenderX = 0.0f, gearRenderY = 0.0f;
-	const float gearScale = 0.75f;
+	bool showVisuals = Demo::PlayerGlobalData::GetInstance()->GetShowGearOnMap();
 
-	if (gearDroneAnim && !IsDead()) {
+	auto drawDrone = [&](std::shared_ptr<DX9GF::AnimatedSprite> anim, float phaseOffset, bool drawBehind) {
+		if (!anim) return;
 		auto [px, py] = GetWorldPosition();
-		float gearWidth = 12.0f * gearScale;
-		float gearHeight = 12.0f * gearScale;
+		const float gearScale = 0.75f;
+		float angle = gearAnimTimer * 0.002f + phaseOffset;
 
-		const float radiusX = 25.0f;
-		const float radiusY = 6.0f;
-		const float orbitSpeed = 0.002f;
-		float angle = gearAnimTimer * orbitSpeed;
+		bool isBehind = std::sin(angle) < 0;
+		if (isBehind == drawBehind) {
+			float cx = px + std::cos(angle) * 25.0f;
+			float cy = py + 4.0f + std::sin(angle) * 6.0f;
+			anim->SetScale(gearScale, gearScale);
+			anim->SetPosition(cx - (12.0f * gearScale / 2.0f), cy - (12.0f * gearScale / 2.0f));
+			anim->Begin();
+			anim->Draw(*camera, deltaTime);
+			anim->End();
+		}
+		};
 
-		float targetCenterX = px + std::cos(angle) * radiusX;
-		float targetCenterY = py + 4.0f + std::sin(angle) * radiusY;
-
-		gearRenderX = targetCenterX - (gearWidth / 2.0f);
-		gearRenderY = targetCenterY - (gearHeight / 2.0f);
-
-		isBehindPlayer = std::sin(angle) < 0;
-	}
-
-	if (gearDroneAnim && !IsDead() && isBehindPlayer) {
-		gearDroneAnim->SetScale(gearScale, gearScale);
-		gearDroneAnim->SetPosition(gearRenderX, gearRenderY);
-		gearDroneAnim->Begin();
-		gearDroneAnim->Draw(*camera, deltaTime);
-		gearDroneAnim->End();
+	if (showVisuals && !IsDead()) {
+		drawDrone(activeGearAnim, 0.0f, true);
+		drawDrone(passiveGearAnim, D3DX_PI, true);
 	}
 
 	if (!isInvincible || static_cast<int>(timeSinceTurnedInvincible / BLINKING_DURATION) % 2) {
@@ -451,12 +457,9 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 		}
 	}
 
-	if (gearDroneAnim && !IsDead() && !isBehindPlayer) {
-		gearDroneAnim->SetScale(gearScale, gearScale);
-		gearDroneAnim->SetPosition(gearRenderX, gearRenderY);
-		gearDroneAnim->Begin();
-		gearDroneAnim->Draw(*camera, deltaTime);
-		gearDroneAnim->End();
+	if (showVisuals && !IsDead()) {
+		drawDrone(activeGearAnim, 0.0f, false);
+		drawDrone(passiveGearAnim, D3DX_PI, false);
 	}
 
 	collider->Draw(graphicsDevice, *camera);

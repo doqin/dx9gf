@@ -68,10 +68,11 @@ namespace Demo {
 		std::shared_ptr<DX9GF::Texture> flameTex;
 		std::shared_ptr<DX9GF::Texture> gearTex;
 
-		std::shared_ptr<GearSlotUI> coreSlot;
+		std::shared_ptr<GearSlotUI> activeSlot;
+		std::shared_ptr<GearSlotUI> passiveSlot;
+		std::shared_ptr<DX9GF::AnimatedSprite> activeGearAnim;
+		std::shared_ptr<DX9GF::AnimatedSprite> passiveGearAnim;
 		std::vector<std::shared_ptr<GearSlotUI>> orbitSlots;
-
-		std::shared_ptr<DX9GF::AnimatedSprite> gearDroneAnim;
 		float orbitAngle = 0.0f;
 
 		// Tab Quests

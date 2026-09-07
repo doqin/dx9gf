@@ -77,7 +77,7 @@ namespace Demo
 
 
 		//TODO: Update gear rects here. Default size is 12x12. Assets can be 9x9 max, but please import 12x12 rects
-		
+
 		//gearRegistry[0] = { 0, L"Titan Core", L"Grants 20 Max HP.",
 		//	{ {7,7,19,19},
 		//	{40,7,52,19},
@@ -87,25 +87,25 @@ namespace Demo
 		//	{172,7,184,19},
 		//	{206,7,218,19},
 		//	{239,7,251,19} },
-		//	GearType::Passive, GearEffect::AddMaxHP, 20 };
+		//	GearType::Passive, GearEffect::AddMaxHP, 20, 0};
 
 		gearRegistry[0] = { 0, L"Titan Core", L"Grants 20 Max HP.", //red core
-			{ {7,91,19,103} }, GearType::Passive, GearEffect::AddMaxHP, 20 };
+			{ {7,91,19,103} }, GearType::Passive, GearEffect::AddMaxHP, 20, 0 };
 
-		gearRegistry[1] = { 1, L"Energy Cell", L"Active: Restore 1 Energy.", //energy cell
-			{ {7, 77, 19, 89} }, GearType::Active, GearEffect::AddEnergy, 1 };
+		gearRegistry[1] = { 1, L"Energy Cell", L"Active: Restore 1 Energy.\nCooldown: 3 turns.", //energy cell
+			{ {7, 77, 19, 89} }, GearType::Active, GearEffect::AddEnergy, 1, 3 };
 
-		gearRegistry[2] = { 2, L"Data Extractor", L"Active: Draw 1 card.", //.rar
-			{ {7, 21, 19, 33} }, GearType::Active, GearEffect::DrawCard, 1 };
+		gearRegistry[2] = { 2, L"Data Extractor", L"Active: Draw 1 card.\nCooldown: 2 turns.", //.rar
+			{ {7, 21, 19, 33} }, GearType::Active, GearEffect::DrawCard, 1, 2 };
 
-		gearRegistry[3] = { 3, L"Memory Locker", L"Active: Retain 1 hand card.", //lock
-			{ {7, 35, 19, 47} }, GearType::Active, GearEffect::RetainCard, 1 };
+		gearRegistry[3] = { 3, L"Memory Locker", L"Active: Retain 1 hand card.\nCooldown: 2 turns.", //lock
+			{ {7, 35, 19, 47} }, GearType::Active, GearEffect::RetainCard, 1, 2 };
 
 		gearRegistry[4] = { 4, L"Midas Chip", L"Gain extra Gold on win.", //cpu chip
-			{ {7, 49, 19, 61} }, GearType::Passive, GearEffect::GoldBoost, 20 };
+			{ {7, 49, 19, 61} }, GearType::Passive, GearEffect::GoldBoost, 20, 0 };
 
 		gearRegistry[5] = { 5, L"Aegis Plating", L"Start combat with 15 Armor in 3 turns.", //actully a white plate
-			{ {7, 63, 19, 75} }, GearType::Passive, GearEffect::StartArmor, 15 };
+			{ {7, 63, 19, 75} }, GearType::Passive, GearEffect::StartArmor, 15, 0 };
 	}
 
 	const ConsumableItem* ItemData::GetItemBlueprint(int id)
