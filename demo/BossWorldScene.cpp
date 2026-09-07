@@ -387,6 +387,7 @@ void Demo::BossWorldScene::OnUpdate(unsigned long long deltaTime)
 
 			if (player->GetInventoryItems().HasItem(10)) {
 				dialogBuilder->AddLine(L"Rusty Chest", L"Wait, is that the key? NOOO! YOU ROB ME!!!");
+				dialogBuilder->AddLine(L"Rusty Chest", L"You found: " + ItemData::GetInstance()->GetItemBlueprint(6)->GetName() + L", " + ItemData::GetInstance()->GetItemBlueprint(7)->GetName() + L", and " + ItemData::GetInstance()->GetItemBlueprint(8)->GetName());
 				player->GetInventoryItems().ConsumeItem(10);
 				player->GetInventoryItems().AddItem(6, 1);
 				player->GetInventoryItems().AddItem(7, 1);
