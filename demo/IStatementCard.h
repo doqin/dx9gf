@@ -68,6 +68,14 @@ namespace Demo {
 		virtual void ReleaseEnemyCards() {}
 		// World-space position the next attached enemy card would occupy.
 		virtual std::tuple<float, float> GetEnemyCardSlotWorldPosition() const { return { GetWorldX(), GetWorldY() }; }
+
+		// A statement card is not a generic drop target. The base IDraggable::OnDrop accepts any
+		// draggable dropped onto it by position, which - reached via DraggableManager::AttachDroppable
+		// on a mouse release - would nest one card inside another. The nested card stays in the hand
+		// list, is billed for its energy every frame, and renders stacked on its host: the card looks
+		// duplicated and its cost is counted twice. Targeting cards (StrikeCard, MultiTargetCard)
+		// override this again with their own EnemyCard-only logic.
+		bool OnDrop(std::shared_ptr<IDraggable> other) override { return false; }
 	protected:
 		std::shared_ptr<DX9GF::Font> descFont;
 		std::shared_ptr<DX9GF::FontSprite> descFontSprite;

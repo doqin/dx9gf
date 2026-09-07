@@ -2,6 +2,7 @@
 #include "IBlockCard.h"
 #include "IBattleScene.h"
 #include "DrawUtils.h"
+#include <algorithm>
 
 bool Demo::IBlockCard::OnDrop(std::shared_ptr<IDraggable> other)
 {
@@ -23,6 +24,12 @@ bool Demo::IBlockCard::OnDrop(std::shared_ptr<IDraggable> other)
 	}
 
 	if (IContainer::OnDrop(other)) {
+		// IContainer::OnDrop de-dupes `children`; keep `statementCards` in step so a re-drop or
+		// reorder of an already-queued card does not leave two entries (double execution, double
+		// energy commit, double discard). Mirrors InsertStatementCardAt's reorder handling.
+		statementCards.erase(std::remove_if(statementCards.begin(), statementCards.end(),
+			[&](const std::weak_ptr<IStatementCard>& weak) { return weak.lock() == statementCard; }),
+			statementCards.end());
 		statementCards.push_back(statementCard);
 		return true;
 	}
