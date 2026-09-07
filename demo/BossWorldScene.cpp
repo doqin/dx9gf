@@ -592,8 +592,8 @@ void Demo::BossWorldScene::DrawBackground(DX9GF::GraphicsDevice* gd, unsigned lo
 		break;
 	}
 	case 3: {
-		const D3DCOLOR gridColor = 0x11FF8C00;
-		const D3DCOLOR streakColor = 0xAAFF8C00;
+		const D3DCOLOR gridColor = 0xFFFF8C00;
+		const D3DCOLOR streakColor = 0xFFFF8C00;
 		const D3DCOLOR brightColor = 0xFFFFD700;
 		for (int i = 0; i < screenHeight; i += 40) gd->DrawLine(0, static_cast<float>(i), static_cast<float>(screenWidth), static_cast<float>(i), gridColor);
 		for (int i = 0; i < screenWidth; i += 40) gd->DrawLine(static_cast<float>(i), 0, static_cast<float>(i), static_cast<float>(screenHeight), gridColor);
@@ -622,8 +622,8 @@ void Demo::BossWorldScene::DrawBackground(DX9GF::GraphicsDevice* gd, unsigned lo
 		break;
 	}
 	case 4: {
-		const D3DCOLOR polyColor = 0x22DC143C;
-		const D3DCOLOR crackColor = 0x66DC143C;
+		const D3DCOLOR polyColor = 0xFFDC143C;
+		const D3DCOLOR crackColor = 0xFFDC143C;
 		for (int i = 0; i < 15; ++i) {
 			float size = 100.0f + (i % 3) * 50.0f;
 			float bx = std::fmod((i * 123.0f) + timeAcc * 10.0f, static_cast<float>(screenWidth + size)) - size / 2.0f;
