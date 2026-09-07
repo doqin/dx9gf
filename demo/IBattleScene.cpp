@@ -268,6 +268,7 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 	float screenHeight = static_cast<float>(app->GetScreenHeight());
 	auto x = -static_cast<float>(screenWidth) / 2.f + 20.f;
 	auto y = -static_cast<float>(screenHeight) / 2.f + 20.f;
+	size_t drawn = 0;
 	for (size_t i = 0; i < count; ++i) {
 		if (drawPile.empty()) {
 			ShuffleDiscardIntoDrawPile();
@@ -275,6 +276,7 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 		if (drawPile.empty()) {
 			break;
 		}
+		++drawn;
 		auto card = drawPile.back();
 		drawPile.pop_back();
 		this->queuedToDraw.push_back(card);
@@ -306,6 +308,16 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 			})
 		};
 		commandBuffer.StackCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+	}
+
+	// The draw pile plus the discard pile could not supply a full draw - cards are parked in the
+	// program (playedPile) or nullified. Drawing short is allowed, but say so rather than failing
+	// silently.
+	if (drawn < count) {
+		if (popUpMessage) {
+			popUpMessage->ShowMessage(L"Deck empty - drew " + std::to_wstring(drawn) + L" of " + std::to_wstring(count));
+		}
+		OutputDebugStringA(("DrawCards: requested " + std::to_string(count) + ", drew " + std::to_string(drawn) + " (draw + discard pool exhausted)\n").c_str());
 	}
 }
 
@@ -3325,6 +3337,11 @@ void Demo::IBattleScene::Init()
 		auto newCard = ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), &camera);
 		if (newCard) {
 			drawPile.push_back(newCard);
+		}
+		else {
+			// ICard::CreateCard returns null for an id it does not recognise (renamed/removed card,
+			// typo, stale save). Dropping it silently makes the deck - and every draw - short.
+			OutputDebugStringA(("IBattleScene::Init: unknown deck card id '" + cardId + "' skipped\n").c_str());
 		}
 	}
 

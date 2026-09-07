@@ -5,45 +5,45 @@ namespace Demo
 	//register an item here
 	void ItemData::LoadData()
 	{
-		itemRegistry[0] = ConsumableItem(0, L"Heal 20HP",
-			L"Instant Heal 20HP",
-			{ CombatModifier{ ModifierType::HealHP, 0, 20.0f, true, 0 } },
+		itemRegistry[0] = ConsumableItem(0, L"Lesser Heal",
+			L"Instant Heal 25HP",
+			{ CombatModifier{ ModifierType::HealHP, 0, 25.0f, true, 0 } },
 			{ 0, 0, 23, 35 });
 
-		itemRegistry[1] = ConsumableItem(1, L"Buff 10 Defense",
-			L"Buff 10 Defense for 2 turns",
-			{ CombatModifier{ ModifierType::BuffDefense, 2, 10.0f, true, 1 } },
+		itemRegistry[1] = ConsumableItem(1, L"Lesser Defense",
+			L"Buff 15 Defense for 3 turns",
+			{ CombatModifier{ ModifierType::BuffDefense, 3, 15.0f, true, 1 } },
 			{ 24, 0, 47, 35 });
 
-		itemRegistry[2] = ConsumableItem(2, L"Buff 5 Damage",
-			L"Buff 5 Damage for 1 turns",
-			{ CombatModifier{ ModifierType::BuffDamage, 1, 5.0f, true, 1 } },
+		itemRegistry[2] = ConsumableItem(2, L"Lesser Damage",
+			L"Buff 2 Damage for 3 turns",
+			{ CombatModifier{ ModifierType::BuffDamage, 3, 2.0f, true, 1 } },
 			{ 48, 0, 71, 35 });
 
-		itemRegistry[3] = ConsumableItem(3, L"Buff 8 Damage & Heal 15HP",
-			L"Instant Heal 15HP & Buff 8 Damage for 3 turns",
+		itemRegistry[3] = ConsumableItem(3, L"Adrenaline Rush",
+			L"Buff 2 Damage for 6 turns & Instant Heal 15HP",
 			{
-				CombatModifier{ ModifierType::BuffDamage, 3, 8.0f, true, 1 },
+				CombatModifier{ ModifierType::BuffDamage, 6, 2.0f, true, 1 },
 				CombatModifier{ ModifierType::HealHP, 0, 15.0f, true, 0 }
 			},
 			{ 72, 0, 95, 35 });
 
-		itemRegistry[4] = ConsumableItem(4, L"Buff 10 Defense & Heal 12HP",
-			L"Instant Heal 12HP & Buff 10 Defense for 4 turns",
+		itemRegistry[4] = ConsumableItem(4, L"Enguard",
+			L"Instant Heal 20HP & Buff 10 Defense for 4 turns",
 			{
 				CombatModifier{ ModifierType::BuffDefense, 4, 10.0f, true, 1 },
-				CombatModifier{ ModifierType::HealHP, 0, 12.0f, true, 0 }
+				CombatModifier{ ModifierType::HealHP, 0, 20.0f, true, 0 }
 			},
 			{ 96, 0, 119, 35 });
 
 		itemRegistry[5] = ConsumableItem(5, L"Mega Heal Elixir",
-			L"Instant Heal 45HP",
-			{ CombatModifier{ ModifierType::HealHP, 0, 45.0f, true, 0 } },
+			L"Instant Heal 50HP",
+			{ CombatModifier{ ModifierType::HealHP, 0, 50.0f, true, 0 } },
 			{ 0, 36, 23, 71 });
 
 		itemRegistry[6] = ConsumableItem(6, L"Iron Wall Shield",
-			L"Buff 30.0 Defense for 2 turns",
-			{ CombatModifier{ ModifierType::BuffDefense, 2, 30.0f, true, 1 } },
+			L"Buff 30.0 Defense for 3 turns",
+			{ CombatModifier{ ModifierType::BuffDefense, 3, 30.0f, true, 1 } },
 			{ 24, 36, 47, 71 });
 
 		itemRegistry[7] = ConsumableItem(7, L"Berserker's Wrath",
@@ -52,19 +52,19 @@ namespace Demo
 			{ 48, 36, 71, 71 });
 
 		itemRegistry[8] = ConsumableItem(8, L"Paladin's Blessing",
-			L"Instant Heal 10HP & Buff 12 Defense and Damage for 2 turns",
+			L"Instant Heal 35HP & Buff 20 Defense and 3 Damage for 3 turns",
 			{
-				CombatModifier{ ModifierType::HealHP, 0, 10.0f, true, 0 },
-				CombatModifier{ ModifierType::BuffDefense, 2, 12.0f, true, 1 },
-				CombatModifier{ ModifierType::BuffDamage, 2, 12.0f, true, 1 }
+				CombatModifier{ ModifierType::HealHP, 0, 35.0f, true, 0 },
+				CombatModifier{ ModifierType::BuffDefense, 3, 20.0f, true, 1 },
+				CombatModifier{ ModifierType::BuffDamage, 3, 3.0f, true, 1 }
 			},
 			{ 72, 36, 95, 71 });
 
 		itemRegistry[9] = ConsumableItem(9, L"Titan's Resolve",
-			L"Buff 20 Defense and 5 Damage for 3 turns",
+			L"Buff 50 Defense and 3 Damage for 3 turns",
 			{
-				CombatModifier{ ModifierType::BuffDefense, 3, 20.0f, true, 1 },
-				CombatModifier{ ModifierType::BuffDamage, 3, 5.0f, true, 1 }
+				CombatModifier{ ModifierType::BuffDefense, 3, 50.0f, true, 1 },
+				CombatModifier{ ModifierType::BuffDamage, 3, 3.0f, true, 1 }
 			},
 			{ 96, 36, 119, 71 });
 
