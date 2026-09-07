@@ -56,7 +56,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 0; }
-		std::wstring GetDescription() const override { return L"Gain 5 block until the end of the round."; }
+		std::wstring GetDescription() const override { return L"Gain 5 block for 2 turns."; }
 		RECT GetFaceRect() const override { return RECT{ 0, 352, 80, 368 }; }
 
 		bool Execute() override;

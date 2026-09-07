@@ -369,7 +369,7 @@ bool Demo::ChainReactionCard::Execute() {
 	auto originalTarget = targets[0].lock();
 	if (!originalTarget || !originalTarget->GetValue()) { isDone = true; return true; }
 
-	float finalDamage = 4.f;
+	float finalDamage = 5.f;
 	IEnemy* finalTargetEnemy = originalTarget->GetValue().get();
 
 	auto parentBlock = std::dynamic_pointer_cast<IBlockCard>(GetParent().has_value() ? GetParent().value().lock() : nullptr);
@@ -433,7 +433,7 @@ void Demo::ChainReactionCard::CollectProjectedSteps(VirtualBattleState& state) {
 	auto originalTarget = targets[0].lock();
 	if (!originalTarget || !originalTarget->GetValue()) return;
 
-	float finalDamage = 4.f;
+	float finalDamage = 5.f;
 	IEnemy* finalTargetEnemy = originalTarget->GetValue().get();
 
 	auto parentBlock = std::dynamic_pointer_cast<IBlockCard>(GetParent().has_value() ? GetParent().value().lock() : nullptr);
@@ -487,7 +487,7 @@ bool Demo::LethalHarvestCard::Execute() {
 
 	auto enemy = target->GetValue().get();
 	if (owner) {
-		owner->DealDamage(enemy, 12.f);
+		owner->DealDamage(enemy, 5.f);
 		if (enemy->IsDead()) {
 			owner->Heal(8.f);
 		}

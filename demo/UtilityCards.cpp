@@ -43,7 +43,7 @@ bool Demo::BraceCard::Execute() {
 	if (owner) {
 		// Stacking, so two Brace cards in one program give 10 block rather than 5 - AddModifier
 		// would take max(value) and leave it at 5.
-		owner->AddStackingModifier(ModifierType::BuffDefense, 1, 5.f, true);
+		owner->AddStackingModifier(ModifierType::BuffDefense, 2, 5.f, true);
 		if (battleScene) battleScene->QueuePopUpMessage(L"+5 block");
 	}
 	isDone = true;

@@ -169,7 +169,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 	fontSprite->Begin();
 	fontSprite->SetOutline(true, 0xFF000000, 2.f);
 	fontSprite->SetColor(0xFFFFFFFF);
-	fontSprite->SetPosition(GetWorldX(), GetWorldY() - 120.f);
+	fontSprite->SetPosition(GetWorldX(), GetWorldY() - 105.f);
 	fontSprite->SetText(std::move(healthText));
 	fontSprite->Draw(*camera, deltaTime);
 
@@ -203,142 +203,140 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 	float statusOffsetX = 64.f;
 	float statusOffsetY = -20.f;
 
-	if (!isOnStandby) {
-		auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(camera);
-		auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(*camera, screenX, screenY);
+	auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(camera);
+	auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(*camera, screenX, screenY);
 
-		for (const auto& mod : modifiers) {
-			if (mod.type == ModifierType::BuffDefense && mod.value <= 0.f) continue;
-			if (mod.duration <= 0) continue;
+	for (const auto& mod : modifiers) {
+		if (mod.type == ModifierType::BuffDefense && mod.value <= 0.f) continue;
+		if (mod.duration <= 0) continue;
 
-			std::wstring statusName = L"Unknown";
-			std::wstring statusDescription = L"";
-			RECT sourceRect = { 0, 0, 0, 0 };
+		std::wstring statusName = L"Unknown";
+		std::wstring statusDescription = L"";
+		RECT sourceRect = { 0, 0, 0, 0 };
 
-			if (mod.type == ModifierType::Poison) {
-				statusName = L"Poison";
-				statusDescription = L"Takes damage equal to remaining turns at end of turn.";
-				sourceRect = { 128, 240, 144, 256 };
-			}
-			else if (mod.type == ModifierType::Burn) {
-				statusName = L"Burn";
-				statusDescription = L"Takes damage equal to its value at end of turn, ignoring block.";
-				sourceRect = { 240, 288, 256, 304 };
-			}
-			else if (mod.type == ModifierType::Regen) {
-				statusName = L"Regen";
-				statusDescription = L"Heals its value at end of turn.";
-				sourceRect = { 272, 288, 288, 304 };
-			}
-			else if (mod.type == ModifierType::Marked) {
-				statusName = L"Marked";
-				statusDescription = L"Takes extra damage from every hit.";
-				sourceRect = { 128, 256, 144, 272 };
-			}
-			else if (mod.type == ModifierType::Vulnerable) {
-				statusName = L"Vulnerable";
-				statusDescription = L"Takes 50% more damage from attacks.";
-				sourceRect = { 96, 256, 112, 272 };
-			}
-			else if (mod.type == ModifierType::Weak) {
-				statusName = L"Weak";
-				statusDescription = L"Deals 25% less damage with attacks.";
-				sourceRect = { 112, 256, 128, 272 };
-			}
-			else if (mod.type == ModifierType::Stun) {
-				statusName = L"Stun";
-				statusDescription = L"Cannot take action this turn.";
-				sourceRect = { 224, 288, 240, 304 };
-			}
-			else if (mod.type == ModifierType::BuffDamage) {
-				statusName = L"Atk Up";
-				statusDescription = L"Increases attack damage.";
-				sourceRect = { 112, 240, 128, 256 };
-			}
-			else if (mod.type == ModifierType::BuffDefense) {
-				statusName = L"Def Up";
-				statusDescription = L"Blocks incoming damage.";
-				sourceRect = { 96, 240, 112, 256 };
-			}
-			else if (mod.type == ModifierType::Spark) {
-				statusName = L"Spark";
-				statusDescription = L"Accumulates stacks. Deals no damage until detonated.";
-				sourceRect = { 272, 320, 288, 336 };
-			}
-
-			float iconX = GetWorldX() + statusOffsetX;
-			float iconY = GetWorldY() + statusOffsetY;
-
-			std::wstring displayValueText = L"";
-			if (mod.type == ModifierType::BuffDefense || mod.type == ModifierType::BuffDamage || mod.type == ModifierType::Poison
-				|| mod.type == ModifierType::Burn || mod.type == ModifierType::Marked || mod.type == ModifierType::Regen || mod.type == ModifierType::Spark) {
-				int displayValue = (mod.type == ModifierType::Poison) ?
-					static_cast<int>(std::round((mod.value > 0.f) ? mod.value : static_cast<float>(mod.duration))) :
-					static_cast<int>(std::round(mod.value));
-
-				if (mod.type == ModifierType::BuffDamage)
-					displayValueText = L" +" + std::to_wstring(displayValue);
-				else if (mod.type == ModifierType::Spark)
-					displayValueText = L" (x" + std::to_wstring(displayValue) + L")";
-				else displayValueText = L" " + std::to_wstring(displayValue);
-			}
-
-			if (sourceRect.right > 0) {
-				uiSprite->SetSrcRect(sourceRect);
-				uiSprite->SetPosition(iconX, iconY);
-				uiSprite->Begin();
-				uiSprite->Draw(*camera, deltaTime);
-				uiSprite->End();
-
-				std::wstring durationText = std::to_wstring(mod.duration);
-				fontSprite->SetColor(0xFFfffc40);
-				fontSprite->SetOutline(true, 0xFF000000, 1.f);
-				fontSprite->SetPosition(iconX + 36.f, iconY);
-				fontSprite->SetText(durationText + displayValueText);
-				fontSprite->Draw(*camera, deltaTime);
-
-				bool isHovered = mouseX >= iconX && mouseX <= iconX + 32 && mouseY >= iconY && mouseY <= iconY + 32;
-				if (isHovered) {
-					std::wstring tooltipText = statusName + L" (" + durationText + L" turns remaining)\n" + statusDescription;
-					fontSprite->SetText(std::move(tooltipText));
-					float tooltipWidth = fontSprite->GetWidth() + 8.f;
-					float tooltipHeight = fontSprite->GetHeight() + 8.f;
-
-					auto [screenW, screenH] = camera->GetScreenResolution();
-					float targetScreenX = screenX;
-					float targetScreenY = screenY - tooltipHeight;
-
-					if (targetScreenX + tooltipWidth > screenW) {
-						targetScreenX = screenW - tooltipWidth;
-					}
-					if (targetScreenY < 0) {
-						targetScreenY = screenY + 32.f;
-					}
-
-					auto [worldDrawX, worldDrawY] = DX9GF::Utils::WindowToWorldCoords(*camera, targetScreenX, targetScreenY);
-
-					fontSprite->End();
-					graphicsDevice->SetAlphaBlending(true);
-					graphicsDevice->DrawRectangle(*camera, worldDrawX, worldDrawY, tooltipWidth, tooltipHeight, 0, 1, 1, 0, 0, D3DCOLOR_ARGB(220, 0, 0, 0), true);
-					fontSprite->Begin();
-
-					fontSprite->SetColor(0xFFFFFFFF);
-					fontSprite->SetOutline(true, 0xFF000000, 1.f);
-					fontSprite->SetPosition(worldDrawX + 4.f, worldDrawY + 4.f);
-					fontSprite->Draw(*camera, deltaTime);
-				}
-			}
-			else {
-				std::wstring statusText = statusName + displayValueText + L" (" + std::to_wstring(mod.duration) + L")";
-				fontSprite->SetColor(0xFFfffc40);
-				fontSprite->SetOutline(true, 0xFF000000, 2.f);
-				fontSprite->SetPosition(iconX, iconY);
-				fontSprite->SetText(std::move(statusText));
-				fontSprite->Draw(*camera, deltaTime);
-			}
-
-			statusOffsetY += 36.f;
+		if (mod.type == ModifierType::Poison) {
+			statusName = L"Poison";
+			statusDescription = L"Takes damage equal to remaining turns at end of turn.";
+			sourceRect = { 128, 240, 144, 256 };
 		}
+		else if (mod.type == ModifierType::Burn) {
+			statusName = L"Burn";
+			statusDescription = L"Takes damage equal to its value at end of turn, ignoring block.";
+			sourceRect = { 240, 288, 256, 304 };
+		}
+		else if (mod.type == ModifierType::Regen) {
+			statusName = L"Regen";
+			statusDescription = L"Heals its value at end of turn.";
+			sourceRect = { 272, 288, 288, 304 };
+		}
+		else if (mod.type == ModifierType::Marked) {
+			statusName = L"Marked";
+			statusDescription = L"Takes extra damage from every hit.";
+			sourceRect = { 128, 256, 144, 272 };
+		}
+		else if (mod.type == ModifierType::Vulnerable) {
+			statusName = L"Vulnerable";
+			statusDescription = L"Takes 50% more damage from attacks.";
+			sourceRect = { 96, 256, 112, 272 };
+		}
+		else if (mod.type == ModifierType::Weak) {
+			statusName = L"Weak";
+			statusDescription = L"Deals 25% less damage with attacks.";
+			sourceRect = { 112, 256, 128, 272 };
+		}
+		else if (mod.type == ModifierType::Stun) {
+			statusName = L"Stun";
+			statusDescription = L"Cannot take action this turn.";
+			sourceRect = { 224, 288, 240, 304 };
+		}
+		else if (mod.type == ModifierType::BuffDamage) {
+			statusName = L"Atk Up";
+			statusDescription = L"Increases attack damage.";
+			sourceRect = { 112, 240, 128, 256 };
+		}
+		else if (mod.type == ModifierType::BuffDefense) {
+			statusName = L"Def Up";
+			statusDescription = L"Blocks incoming damage.";
+			sourceRect = { 96, 240, 112, 256 };
+		}
+		else if (mod.type == ModifierType::Spark) {
+			statusName = L"Spark";
+			statusDescription = L"Accumulates stacks. Deals no damage until detonated.";
+			sourceRect = { 272, 320, 288, 336 };
+		}
+
+		float iconX = GetWorldX() + statusOffsetX;
+		float iconY = GetWorldY() + statusOffsetY;
+
+		std::wstring displayValueText = L"";
+		if (mod.type == ModifierType::BuffDefense || mod.type == ModifierType::BuffDamage || mod.type == ModifierType::Poison
+			|| mod.type == ModifierType::Burn || mod.type == ModifierType::Marked || mod.type == ModifierType::Regen || mod.type == ModifierType::Spark) {
+			int displayValue = (mod.type == ModifierType::Poison) ?
+				static_cast<int>(std::round((mod.value > 0.f) ? mod.value : static_cast<float>(mod.duration))) :
+				static_cast<int>(std::round(mod.value));
+
+			if (mod.type == ModifierType::BuffDamage)
+				displayValueText = L" +" + std::to_wstring(displayValue);
+			else if (mod.type == ModifierType::Spark)
+				displayValueText = L" (x" + std::to_wstring(displayValue) + L")";
+			else displayValueText = L" " + std::to_wstring(displayValue);
+		}
+
+		if (sourceRect.right > 0) {
+			uiSprite->SetSrcRect(sourceRect);
+			uiSprite->SetPosition(iconX, iconY);
+			uiSprite->Begin();
+			uiSprite->Draw(*camera, deltaTime);
+			uiSprite->End();
+
+			std::wstring durationText = std::to_wstring(mod.duration);
+			fontSprite->SetColor(0xFFfffc40);
+			fontSprite->SetOutline(true, 0xFF000000, 1.f);
+			fontSprite->SetPosition(iconX + 36.f, iconY);
+			fontSprite->SetText(durationText + displayValueText);
+			fontSprite->Draw(*camera, deltaTime);
+
+			bool isHovered = mouseX >= iconX && mouseX <= iconX + 32 && mouseY >= iconY && mouseY <= iconY + 32;
+			if (isHovered) {
+				std::wstring tooltipText = statusName + L" (" + durationText + L" turns remaining)\n" + statusDescription;
+				fontSprite->SetText(std::move(tooltipText));
+				float tooltipWidth = fontSprite->GetWidth() + 8.f;
+				float tooltipHeight = fontSprite->GetHeight() + 8.f;
+
+				auto [screenW, screenH] = camera->GetScreenResolution();
+				float targetScreenX = screenX;
+				float targetScreenY = screenY - tooltipHeight;
+
+				if (targetScreenX + tooltipWidth > screenW) {
+					targetScreenX = screenW - tooltipWidth;
+				}
+				if (targetScreenY < 0) {
+					targetScreenY = screenY + 32.f;
+				}
+
+				auto [worldDrawX, worldDrawY] = DX9GF::Utils::WindowToWorldCoords(*camera, targetScreenX, targetScreenY);
+
+				fontSprite->End();
+				graphicsDevice->SetAlphaBlending(true);
+				graphicsDevice->DrawRectangle(*camera, worldDrawX, worldDrawY, tooltipWidth, tooltipHeight, 0, 1, 1, 0, 0, D3DCOLOR_ARGB(220, 0, 0, 0), true);
+				fontSprite->Begin();
+
+				fontSprite->SetColor(0xFFFFFFFF);
+				fontSprite->SetOutline(true, 0xFF000000, 1.f);
+				fontSprite->SetPosition(worldDrawX + 4.f, worldDrawY + 4.f);
+				fontSprite->Draw(*camera, deltaTime);
+			}
+		}
+		else {
+			std::wstring statusText = statusName + displayValueText + L" (" + std::to_wstring(mod.duration) + L")";
+			fontSprite->SetColor(0xFFfffc40);
+			fontSprite->SetOutline(true, 0xFF000000, 2.f);
+			fontSprite->SetPosition(iconX, iconY);
+			fontSprite->SetText(std::move(statusText));
+			fontSprite->Draw(*camera, deltaTime);
+		}
+
+		statusOffsetY += 36.f;
 	}
 
 	fontSprite->End();

@@ -11,8 +11,8 @@ namespace Demo
 			{ 0, 0, 23, 35 });
 
 		itemRegistry[1] = ConsumableItem(1, L"Lesser Defense",
-			L"Buff 15 Defense for 3 turns",
-			{ CombatModifier{ ModifierType::BuffDefense, 3, 15.0f, true, 1 } },
+			L"Buff 30 Defense for 3 turns",
+			{ CombatModifier{ ModifierType::BuffDefense, 3, 30.0f, true, 1 } },
 			{ 24, 0, 47, 35 });
 
 		itemRegistry[2] = ConsumableItem(2, L"Lesser Damage",
@@ -29,9 +29,9 @@ namespace Demo
 			{ 72, 0, 95, 35 });
 
 		itemRegistry[4] = ConsumableItem(4, L"Enguard",
-			L"Instant Heal 20HP & Buff 10 Defense for 4 turns",
+			L"Instant Heal 20HP & Buff 25 Defense for 4 turns",
 			{
-				CombatModifier{ ModifierType::BuffDefense, 4, 10.0f, true, 1 },
+				CombatModifier{ ModifierType::BuffDefense, 4, 25.0f, true, 1 },
 				CombatModifier{ ModifierType::HealHP, 0, 20.0f, true, 0 }
 			},
 			{ 96, 0, 119, 35 });
@@ -42,8 +42,8 @@ namespace Demo
 			{ 0, 36, 23, 71 });
 
 		itemRegistry[6] = ConsumableItem(6, L"Iron Wall Shield",
-			L"Buff 30.0 Defense for 3 turns",
-			{ CombatModifier{ ModifierType::BuffDefense, 3, 30.0f, true, 1 } },
+			L"Buff 50.0 Defense for 3 turns",
+			{ CombatModifier{ ModifierType::BuffDefense, 3, 50.0f, true, 1 } },
 			{ 24, 36, 47, 71 });
 
 		itemRegistry[7] = ConsumableItem(7, L"Berserker's Wrath",

@@ -794,7 +794,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	const auto app = DX9GF::Application::GetInstance();
 	const float screenWidth = static_cast<float>(app->GetScreenWidth());
 	const float centerLineY = -120.f;
-	const float horizontalSpacing = 120.f;
+	const float horizontalSpacing = 180.f;
 	const float verticalSpacing = 240.f;
 
 	const size_t enemyCount = enemies.size();
