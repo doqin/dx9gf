@@ -4052,7 +4052,7 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 		}
 	}
 
-	keyboardNavigator.Update(deltaTime, CollectKeyboardCandidates());
+	//keyboardNavigator.Update(deltaTime, CollectKeyboardCandidates());
 
 	for (size_t i = 0; i < enemies.size(); ++i) {
 		enemies[i]->Update(deltaTime);
