@@ -471,6 +471,13 @@ void Demo::IBattleScene::FinishInitBlockExecution()
 			}
 		}
 		HidePileCard(card);
+		// The block still lists this card in statementCards/children, and its Update - which
+		// would prune the entry - does not run again before end-of-turn cleanup (Execute returns
+		// straight into the enemy turn). Drop it here so MoveInitBlockCardsToDiscardPile does not
+		// bank it a second time: duplicated card, cost counted twice.
+		if (auto statement = std::dynamic_pointer_cast<IStatementCard>(card)) {
+			initBlockCard->ForgetStatementCard(statement);
+		}
 		// Executing here spends a use just as it does in the main block, so a card that ran out
 		// has to be nullified rather than discarded - otherwise it would be drawn again with no
 		// uses left and keep resolving for free.

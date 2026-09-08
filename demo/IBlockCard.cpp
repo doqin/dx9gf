@@ -144,6 +144,28 @@ void Demo::IBlockCard::StartExecution()
 	isExecuting = !statementCards.empty();
 }
 
+void Demo::IBlockCard::ForgetStatementCard(const std::shared_ptr<IStatementCard>& card)
+{
+	if (!card) {
+		return;
+	}
+	for (size_t i = 0; i < statementCards.size(); ++i) {
+		if (statementCards[i].lock() == card) {
+			statementCards.erase(statementCards.begin() + i);
+			if (executeIndex > i && executeIndex != 0) {
+				--executeIndex;
+			}
+			--i;
+		}
+	}
+	children.erase(std::remove_if(children.begin(), children.end(),
+		[&](const std::weak_ptr<IDraggable>& weak) { return weak.lock() == card; }),
+		children.end());
+	if (auto parent = card->GetParent(); parent.has_value() && parent.value().lock().get() == this) {
+		card->DetachParent();
+	}
+}
+
 void Demo::IBlockCard::ExecuteIteratively(unsigned long long deltaTime)
 {
 	if (executeIndex >= statementCards.size()) {

@@ -57,6 +57,11 @@ namespace Demo {
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
 		void StartExecution();
+		// Drops a card from the queue without moving it anywhere. The init block commits its
+		// resolved cards straight to a pile; it must forget them the same frame, before Update
+		// gets a chance to self-heal the vectors, or end-of-turn cleanup banks them a second time
+		// (card shows up duplicated, its cost counted twice).
+		void ForgetStatementCard(const std::shared_ptr<IStatementCard>& card);
 		void ExecuteIteratively(unsigned long long deltaTime);
 		bool IsExecuting() const;
 		std::shared_ptr<IStatementCard> GetCurrentExecutingCard() const;
