@@ -11,6 +11,9 @@ namespace Demo {
 
     void MapBattleScene::Init() {
         this->battleEventType = encounter.eventType;
+        // Roaming-enemy battles are where the player first meets the card system; IBattleScene
+        // shows the walkthrough here only if it hasn't been seen yet.
+        this->tutorialEnabled = true;
         IBattleScene::Init();
         std::string finalBGM = encounter.bgmName;
 

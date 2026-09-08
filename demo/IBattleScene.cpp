@@ -16,6 +16,9 @@
 #include "VirtualBattleState.h"
 #include "RNG.h"
 #include "BattleMenu.h"
+#include "PlayerGlobalData.h"
+#include "IStatementCard.h"
+#include "IBlockCard.h"
 namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
@@ -3451,6 +3454,13 @@ void Demo::IBattleScene::Init()
 	DamageTextManager::GetInstance()->Init(this->game);
 	ItemData::GetInstance()->LoadData();
 
+	// First-battle walkthrough: only the very first monster battle (MapBattleScene sets
+	// tutorialEnabled) and only once per save. Marked seen right away so it never replays.
+	if (tutorialEnabled && !PlayerGlobalData::GetInstance()->HasSeenBattleTutorial()) {
+		battleTutorial = std::make_shared<BattleTutorial>(game->GetGraphicsDevice());
+		PlayerGlobalData::GetInstance()->SetSeenBattleTutorial(true);
+	}
+
 	// Note: enemies are populated by subclasses after IBattleScene::Init() returns,
 	// so their onRequestLockCard is wired centrally in StartBattle() instead.
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
@@ -3491,6 +3501,43 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 		battleMenu->Update(deltaTime);
 		transformManager->UpdateAll();
 		return;
+	}
+
+	if (battleTutorial) {
+		BattleTutorialContext tctx;
+		tctx.inProgrammingPhase = (state == State::PlayerAttack);
+		tctx.currentTurn = static_cast<int>(currentTurn);
+
+		auto blockHasCard = [](const std::shared_ptr<IBlockCard>& block) {
+			if (!block) return false;
+			for (const auto& weak : block->GetStatementCards()) {
+				if (!weak.expired()) return true;
+			}
+			return false;
+			};
+		tctx.cardInBlock = blockHasCard(mainBlockCard) || blockHasCard(initBlockCard);
+		tctx.enemyCardExists = !enemyCards.empty();
+		for (const auto& enemyCard : enemyCards) {
+			if (!enemyCard) continue;
+			if (auto parent = enemyCard->GetParent(); parent.has_value()) {
+				if (std::dynamic_pointer_cast<IStatementCard>(parent.value().lock())) {
+					tctx.enemyCardTargeted = true;
+					break;
+				}
+			}
+		}
+		for (const auto& card : cardHand) {
+			if (!card) continue;
+			if (!card->IsPersistent()) tctx.nonPersistentCardInHand = true;
+			if (card->HasLimitedUses()) tctx.limitedUseCardInHand = true;
+		}
+
+		battleTutorial->Observe(tctx);
+		if (battleTutorial->IsPanelVisible()) {
+			battleTutorial->Update(deltaTime);
+			transformManager->UpdateAll();
+			return;
+		}
 	}
 
 	static float logCooldown = 0.0f;
@@ -3932,6 +3979,12 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 
 
 		DrawKeyboardReticleUI(deltaTime);
+
+		if (battleTutorial && battleTutorial->IsPanelVisible()) {
+			battleTutorial->Draw(gd, this->uiCamera, fontSprite.get(),
+				static_cast<float>(game->GetVirtualWidth()),
+				static_cast<float>(game->GetVirtualHeight()), deltaTime);
+		}
 
 		if (battleMenu) {
 			battleMenu->Draw(gd, deltaTime);

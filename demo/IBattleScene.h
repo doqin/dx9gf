@@ -19,6 +19,7 @@
 #include "BattleEncounter.h"
 #include "EnergyToken.h"
 #include "GoldToken.h"
+#include "BattleTutorial.h"
 namespace Demo {
 	class IBattleScene : public DX9GF::IScene {
 	protected:
@@ -207,6 +208,11 @@ namespace Demo {
 		// Leftmost pixel an enemy body may reach. The void main() / void Init() blocks sit at
 		// x = +70 by default, so columns stop just clear of them rather than at the midpoint.
 		static constexpr float ENEMY_GRID_LEFT_EDGE_X = 76.f;
+
+		// First-battle walkthrough. Created in Init() only when tutorialEnabled is set (by
+		// MapBattleScene) and the player has not seen it yet; null otherwise.
+		bool tutorialEnabled = false;
+		std::shared_ptr<BattleTutorial> battleTutorial;
 
 		std::shared_ptr<PopUpMessage> popUpMessage;
 		std::shared_ptr<DX9GF::StaticSprite> energyIcon;

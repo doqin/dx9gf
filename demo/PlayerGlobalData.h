@@ -23,6 +23,9 @@ namespace Demo {
 		int equippedActiveGearID = -1;
 		int equippedPassiveGearID = -1;
 		bool showGearOnMap = true;
+		// Set once the player has been walked through the first battle, so the walkthrough
+		// never replays. Persisted with the save.
+		bool seenBattleTutorial = false;
 		PlayerGlobalData() { Reset(); }
 	public:
 		static PlayerGlobalData* GetInstance() {
@@ -43,6 +46,9 @@ namespace Demo {
 		int GetEquippedPassiveGearID() const { return equippedPassiveGearID; }
 		bool GetShowGearOnMap() const { return showGearOnMap; }
 		void ToggleShowGearOnMap() { showGearOnMap = !showGearOnMap; }
+
+		bool HasSeenBattleTutorial() const { return seenBattleTutorial; }
+		void SetSeenBattleTutorial(bool seen) { seenBattleTutorial = seen; }
 		bool HasGearEquipped(int gearID) const { return equippedActiveGearID == gearID || equippedPassiveGearID == gearID; }
 
 		void EquipGear(int gearID);

@@ -53,6 +53,7 @@
     <ClCompile Include="IDraggable.cpp" />
     <ClCompile Include="INPC.cpp" />
     <ClCompile Include="BattleMenu.cpp" />
+    <ClCompile Include="BattleTutorial.cpp" />
     <ClCompile Include="InventoryMenu.cpp" />
     <ClCompile Include="IStatementCard.cpp" />
     <ClCompile Include="MapBattleScene.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="IDraggable.h" />
     <ClInclude Include="INPC.h" />
     <ClInclude Include="BattleMenu.h" />
+    <ClInclude Include="BattleTutorial.h" />
     <ClInclude Include="InventoryMenu.h" />
     <ClInclude Include="ItemShop.h" />
     <ClInclude Include="MapBattleScene.h" />
