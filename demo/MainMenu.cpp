@@ -167,7 +167,7 @@ namespace Demo
 		auto uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		uiTex->LoadTexture(L"assets/ui.png");
 
-		PopupManager::GetInstance()->Init(game->GetGraphicsDevice(), borderTex, uiTex, font);
+		PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 
 		std::ifstream f("savegame.json");
 		if (f.good()) {
@@ -181,7 +181,7 @@ namespace Demo
 		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 			if (isTransitioning) return;
 			isTransitioning = true;
-			auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+			auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 			drawBuffer->PushCommand(transitionInCommand);
 			commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
 				if (!transitionInCommand->IsFinished()) {
@@ -191,7 +191,7 @@ namespace Demo
 				isTransitioning = false;
 				markFinished();
 				}));
-			drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));			});
+			drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));			});
 
 		//New Game Button
 		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
@@ -206,7 +206,7 @@ namespace Demo
 
 			auto startNewGameLogic = [this]() {
 				this->isTransitioning = true;
-				auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+				auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 
 				this->drawBuffer->PushCommand(transitionInCommand);
 				this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
@@ -226,7 +226,7 @@ namespace Demo
 						}));
 					markFinished();
 					}));
-				this->drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+				this->drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 				};
 
 			if (hasSave) {

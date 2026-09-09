@@ -128,13 +128,15 @@ namespace Demo
 		}
 
 		auto sm = SettingsManager::GetInstance();
-		const int resIdx = sm->GetCurrentResolutionIndex();
-		const int maxIdx = static_cast<int>(sm->GetSupportedResolutions().size()) - 1;
-		if (resIdx > 0) {
-			addButton(btnResPrev);
-		}
-		if (resIdx < maxIdx) {
-			addButton(btnResNext);
+		if (!sm->GetFullscreen()) {
+			const int resIdx = sm->GetCurrentResolutionIndex();
+			const int maxIdx = static_cast<int>(sm->GetSupportedResolutions().size()) - 1;
+			if (resIdx > 0) {
+				addButton(btnResPrev);
+			}
+			if (resIdx < maxIdx) {
+				addButton(btnResNext);
+			}
 		}
 
 		return candidates;
@@ -200,16 +202,21 @@ namespace Demo
 
 		backButton->SetLocalPosition(-screenW / 2.0f + 32.f, -screenH / 2.0f + 32.f);
 
-		float resRowY = startY + rowSpacing * 3.5f;
-		float fineTuneY = -6.0f;
+		float displayModeY = startY + rowSpacing * 3.0f;
+		float resRowY = startY + rowSpacing * 4.0f;
 
-		btnResPrev->SetLocalPosition(SLIDER_COLUMN_X, resRowY + fineTuneY);
-		btnResNext->SetLocalPosition(SLIDER_COLUMN_X + 180.f, resRowY + fineTuneY);
+		float btnOffsetY = -8.0f;
+
+		btnWindowedCheck->SetLocalPosition(SLIDER_COLUMN_X, displayModeY + btnOffsetY);
+		btnFullscreenCheck->SetLocalPosition(SLIDER_COLUMN_X + 130.f, displayModeY + btnOffsetY);
+
+		btnResPrev->SetLocalPosition(SLIDER_COLUMN_X, resRowY + btnOffsetY);
+		btnResNext->SetLocalPosition(SLIDER_COLUMN_X + 180.f, resRowY + btnOffsetY);
 
 		std::shared_ptr<Demo::TextIconButton> keybindButtons[] = { btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear };
 		for (size_t i = 0; i < std::size(keybindButtons); ++i) {
 			if (keybindButtons[i]) {
-				keybindButtons[i]->SetLocalPosition(SLIDER_COLUMN_X, startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * i) + fineTuneY);
+				keybindButtons[i]->SetLocalPosition(SLIDER_COLUMN_X, startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * i));
 			}
 		}
 	}
@@ -270,6 +277,31 @@ namespace Demo
 		backButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(96, 48, 48, 16, 3));
 		backButton->SetOnReleaseLeft([this](DX9GF::ITrigger*) { this->isGoingBack = true; });
 		backButton->SetSpriteScale(2.f, 2.f);
+
+		// Init 2 Checkboxes
+		btnWindowedCheck = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
+		btnWindowedCheck->SetSpriteCoords(sm->GetFullscreen() ? 256 : 272, 352, 16, 16, 0, true);
+		btnWindowedCheck->SetSpriteScale(2.f, 2.f);
+		btnWindowedCheck->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+			auto sm = SettingsManager::GetInstance();
+			if (sm->GetFullscreen()) {
+				sm->SetFullscreen(false);
+				sm->SaveSettings();
+				sm->ApplyResolution();
+			}
+			});
+
+		btnFullscreenCheck = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
+		btnFullscreenCheck->SetSpriteCoords(sm->GetFullscreen() ? 272 : 256, 352, 16, 16, 0, true);
+		btnFullscreenCheck->SetSpriteScale(2.f, 2.f);
+		btnFullscreenCheck->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+			auto sm = SettingsManager::GetInstance();
+			if (!sm->GetFullscreen()) {
+				sm->SetFullscreen(true);
+				sm->SaveSettings();
+				sm->ApplyResolution();
+			}
+			});
 
 		btnResPrev = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
 		btnResPrev->SetSpriteCoords(240, 96, 16, 16, 0);
@@ -344,7 +376,7 @@ namespace Demo
 		SetupKeybindBtn(btnToggleGear, "TOGGLE_GEAR", isListeningToggleGear);
 
 		// Active Buttons
-		std::shared_ptr<Demo::IButton> buttons[] = { backButton, btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc };
+		std::shared_ptr<Demo::IButton> buttons[] = { backButton, btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck };
 		for (auto& btn : buttons)
 		{
 			if (btn)
@@ -364,11 +396,26 @@ namespace Demo
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
 
+		auto sm = SettingsManager::GetInstance();
+
+		//sprite coords checkbox base on state
+		if (sm->GetFullscreen()) {
+			btnWindowedCheck->SetSpriteCoords(256, 352, 16, 16, 0, true);
+			btnFullscreenCheck->SetSpriteCoords(272, 352, 16, 16, 0, true);
+		}
+		else {
+			btnWindowedCheck->SetSpriteCoords(272, 352, 16, 16, 0, true);
+			btnFullscreenCheck->SetSpriteCoords(256, 352, 16, 16, 0, true);
+		}
+
 		for (auto& button : uiButtons) button->Update(deltaTime);
-		int resIdx = SettingsManager::GetInstance()->GetCurrentResolutionIndex();
-		int maxIdx = SettingsManager::GetInstance()->GetSupportedResolutions().size() - 1;
-		if (resIdx > 0) btnResPrev->Update(deltaTime);
-		if (resIdx < maxIdx) btnResNext->Update(deltaTime);
+
+		if (!sm->GetFullscreen()) {
+			int resIdx = sm->GetCurrentResolutionIndex();
+			int maxIdx = sm->GetSupportedResolutions().size() - 1;
+			if (resIdx > 0) btnResPrev->Update(deltaTime);
+			if (resIdx < maxIdx) btnResNext->Update(deltaTime);
+		}
 		transformManager->UpdateAll();
 		camera.Update();
 
@@ -446,14 +493,46 @@ namespace Demo
 			DrawString(L"Master Volume", LABEL_COLUMN_X, startY, 0xFFFFFFFF);
 			DrawString(L"Music Volume", LABEL_COLUMN_X, startY + rowSpacing, 0xFFFFFFFF);
 			DrawString(L"Sfx Volume", LABEL_COLUMN_X, startY + rowSpacing * 2, 0xFFFFFFFF);
-			DrawString(L"Resolution", LABEL_COLUMN_X, startY + rowSpacing * 3.5f, 0xFFFFFFFF);
+
+			float displayModeY = startY + rowSpacing * 3.0f;
+			float resRowY = startY + rowSpacing * 4.0f;
+
+			DrawString(L"Display Mode", LABEL_COLUMN_X, displayModeY, 0xFFFFFFFF);
+
+			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, displayModeY);
+			fontSprite->SetColor(0xFFFFFFFF);
+			fontSprite->SetText(L"Windowed");
+			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+
+			fontSprite->SetPosition(SLIDER_COLUMN_X + 165.f, displayModeY);
+			fontSprite->SetText(L"Fullscreen");
+			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+
+			auto sm = SettingsManager::GetInstance();
+
+			D3DCOLOR resColor = sm->GetFullscreen() ? 0xFF888888 : 0xFFFFFFFF;
+			DrawString(L"Resolution", LABEL_COLUMN_X, resRowY, resColor);
+
+			int resIdx = sm->GetCurrentResolutionIndex();
+			auto resList = sm->GetSupportedResolutions();
+
+			std::string resStr = resList[resIdx].label;
+			fontSprite->SetPosition(SLIDER_COLUMN_X + 45.f, resRowY);
+			fontSprite->SetColor(resColor);
+			fontSprite->SetText(ToWString(resStr));
+			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+
+			if (!sm->GetFullscreen()) {
+				if (resIdx > 0) btnResPrev->Draw(gd, deltaTime);
+				if (resIdx < resList.size() - 1) btnResNext->Draw(gd, deltaTime);
+			}
+
 			const wchar_t* keybindLabels[] = { L"Move up", L"Move down", L"Move left", L"Move right", L"Accept", L"Open inventory", L"Interact", L"Sprint", L"Toggle Gear" };
 			for (size_t i = 0; i < std::size(keybindLabels); ++i) {
 				DrawString(keybindLabels[i], LABEL_COLUMN_X, startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * i), 0xFFFFFFFF);
 			}
 
 			//draw tracks
-			auto sm = SettingsManager::GetInstance();
 			DrawVolumeTrack(trackMaster, trackMasterFill, sm->GetMasterVolume(), { 65, 483, 112, 490 }, deltaTime);
 			DrawVolumeTrack(trackMusic, trackMusicFill, sm->GetMusicVolume(), { 65, 499, 112, 506 }, deltaTime);
 			DrawVolumeTrack(trackSFX, trackSFXFill, sm->GetSfxVolume(), { 65, 515, 112, 522 }, deltaTime);
@@ -461,20 +540,6 @@ namespace Demo
 			//draw buttons
 			for (auto& btn : uiButtons) btn->Draw(gd, deltaTime);
 
-			int resIdx = sm->GetCurrentResolutionIndex();
-			auto resList = sm->GetSupportedResolutions();
-			float fineTuneY = -6.0f;
-			float resRowY = startY + rowSpacing * 3.5f + fineTuneY;
-			if (resIdx > 0)
-				btnResPrev->Draw(gd, deltaTime);
-			//draw resolution text
-			std::string resStr = resList[resIdx].label;
-			fontSprite->SetPosition(SLIDER_COLUMN_X + 45.f, resRowY + 8.f);
-			fontSprite->SetColor(0xFFFFFFFF);
-			fontSprite->SetText(ToWString(resStr));
-			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
-			if (resIdx < resList.size() - 1)
-				btnResNext->Draw(gd, deltaTime);
 			keyboardNavigator.Draw(gd, uiCamera, CollectKeyboardCandidates());
 			if (!keyboardNavigator.IsInKeyboardMode()) {
 				DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);

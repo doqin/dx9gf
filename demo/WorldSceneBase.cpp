@@ -49,7 +49,7 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	borderTex->LoadTexture(L"assets/popup-borders.png");
 	auto uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	uiTex->LoadTexture(L"assets/ui.png");
-	PopupManager::GetInstance()->Init(game->GetGraphicsDevice(), borderTex, uiTex, font);
+	PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 	QuestManager::GetInstance()->SetVirtualResolution(game->GetVirtualWidth(), game->GetVirtualHeight());
 	QuestManager::GetInstance()->Init(game->GetGraphicsDevice(), transformManager, &this->uiCamera, font);
 
@@ -382,7 +382,7 @@ void Demo::WorldSceneBase::CreatePortalTransition(int sceneOffset, float targetX
 	if (isTransitioning) return;
 	isTransitioning = true;
 
-	auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->PushCommand(transitionInCommand);
 	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand, sceneOffset, targetX, targetY, bgm, bgmVol](std::function<void(void)> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
@@ -399,7 +399,7 @@ void Demo::WorldSceneBase::CreatePortalTransition(int sceneOffset, float targetX
 		isTransitioning = false;
 		markFinished();
 	}));
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 	std::vector<std::string> types, bool isRand, bool isGlobal,
@@ -426,7 +426,7 @@ void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 		if (this->isTransitioning) return;
 		this->isTransitioning = true;
 
-		auto transitionIn = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+		auto transitionIn = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 		this->drawBuffer->PushCommand(transitionIn);
 
 		this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionIn, e, questEvent, questId](std::function<void(void)> markFinished) {
@@ -460,7 +460,7 @@ void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 			markFinished();
 		}));
 
-		this->drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+		this->drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 	});
 
 	mapEnemies.push_back(enemy);

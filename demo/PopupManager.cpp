@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include "TextIconButton.h"
-
+#include "Game.h"]
 namespace Demo {
     // Horizontal breathing room between a popup button's label and its edge. Must match the
     // padding handed to TextIconButton::SetAutoResize so Show()'s width estimate agrees with the
@@ -22,8 +22,8 @@ namespace Demo {
         return instance;
     }
 
-    void PopupManager::Init(DX9GF::GraphicsDevice* gd, std::shared_ptr<DX9GF::Texture> borderTex, std::shared_ptr<DX9GF::Texture> uiTex, std::shared_ptr<DX9GF::Font> popupFont) {
-        this->gd = gd;
+    void PopupManager::Init(Game* game, std::shared_ptr<DX9GF::Texture> borderTex, std::shared_ptr<DX9GF::Texture> uiTex, std::shared_ptr<DX9GF::Font> popupFont) {
+        this->game = game;
         this->font = popupFont;
         this->fontSprite = std::make_shared<DX9GF::FontSprite>(this->font.get());
         this->internalTm = std::make_shared<DX9GF::TransformManager>();
@@ -159,7 +159,6 @@ namespace Demo {
 
     void PopupManager::LayoutButtons() {
         if (!this->uiCamera) return;
-        auto [sw, sh] = this->uiCamera->GetScreenResolution();
 
         popupX = -popupWidth / 2.0f;
         popupY = -popupHeight / 2.0f;
@@ -222,9 +221,12 @@ namespace Demo {
     }
 
     void PopupManager::DrawUI(unsigned long long deltaTime, DX9GF::Camera* uiCamera) {
-        if (!isActive) return;
+        if (!isActive || !game) return;
 
-        auto [sw, sh] = uiCamera->GetScreenResolution();
+        float sw = static_cast<float>(game->GetVirtualWidth());
+        float sh = static_cast<float>(game->GetVirtualHeight());
+        auto gd = game->GetGraphicsDevice();
+
         gd->SetAlphaBlending(true);
         gd->DrawRectangle(*uiCamera, -sw / 2.0f, -sh / 2.0f, (float)sw, (float)sh, 0x88000000, true);
         gd->SetAlphaBlending(false);

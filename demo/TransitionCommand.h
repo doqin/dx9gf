@@ -7,9 +7,10 @@
 #include "DX9GFCamera.h"
 
 namespace Demo {
+    class Game;
     class TransitionCommand : public DX9GF::ICommand {
     private:
-        DX9GF::GraphicsDevice* graphicsDevice;
+        Game* game;
         DX9GF::Camera* uiCamera;
         float duration;
         float elapsedTime;
@@ -19,7 +20,7 @@ namespace Demo {
         int screenHeight;
         int frame = 0;
     public:
-        TransitionCommand(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamera, float duration, bool isTransitioningIn, int numPillars = 10);
+        TransitionCommand(Game* game, DX9GF::Camera* uiCamera, float duration, bool isTransitioningIn, int numPillars = 10);
         void Execute(unsigned long long deltaTime) override;
 
         static float EaseInOutQuad(float t) {
