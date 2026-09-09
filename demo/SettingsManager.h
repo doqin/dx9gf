@@ -8,7 +8,6 @@ namespace Demo
 		int width;
 		int height;
 		std::string label;
-		bool isFullScreenMode;
 	};
 
 	class SettingsManager
