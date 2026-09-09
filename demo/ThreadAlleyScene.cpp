@@ -205,7 +205,7 @@ void Demo::ThreadAlleyScene::OnInit()
 			if (this->isTransitioning) return;
 			this->isTransitioning = true;
 
-			auto transitionIn = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+			auto transitionIn = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 			this->drawBuffer->PushCommand(transitionIn);
 
 			this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionIn, e](std::function<void(void)> markFinished) {
@@ -226,7 +226,7 @@ void Demo::ThreadAlleyScene::OnInit()
 				markFinished();
 			}));
 
-			this->drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+			this->drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 		});
 
 		mapEnemies.push_back(enemy);
@@ -264,7 +264,7 @@ void Demo::ThreadAlleyScene::OnInit()
 
 	transformManager->RebuildHierarchy();
 	this->GiveTestItems();
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
 void Demo::ThreadAlleyScene::OnUpdate(unsigned long long deltaTime)
@@ -403,7 +403,7 @@ void Demo::ThreadAlleyScene::StartTrojanBattle()
 	if (isTransitioning) return;
 	isTransitioning = true;
 
-	auto transitionIn = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+	auto transitionIn = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->PushCommand(transitionIn);
 
 	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionIn](std::function<void(void)> markFinished) {
@@ -435,7 +435,7 @@ void Demo::ThreadAlleyScene::StartTrojanBattle()
 		markFinished();
 	}));
 
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
 void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()

@@ -231,7 +231,7 @@ void Demo::TutorialWorldScene::OnInit()
 
 	transformManager->RebuildHierarchy();
 	this->GiveTestItems();
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
 void Demo::TutorialWorldScene::OnUpdate(unsigned long long deltaTime)
@@ -300,7 +300,7 @@ void Demo::TutorialWorldScene::StartSpamBattle()
 		markFinished();
 	}));
 
-	auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->StackCommand(transitionInCommand);
 
 	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
@@ -311,7 +311,7 @@ void Demo::TutorialWorldScene::StartSpamBattle()
 		markFinished();
 	}));
 
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
 	drawBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = false;

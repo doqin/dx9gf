@@ -202,13 +202,9 @@ namespace Demo
 
 		backButton->SetLocalPosition(-screenW / 2.0f + 32.f, -screenH / 2.0f + 32.f);
 
-		backButton->SetLocalPosition(-screenW / 2.0f + 32.f, -screenH / 2.0f + 32.f);
-
-		// [ĐÃ FIX 1] Xóa fineTuneY để giãn dòng đều đặn
 		float displayModeY = startY + rowSpacing * 3.0f;
 		float resRowY = startY + rowSpacing * 4.0f;
 
-		// [ĐÃ FIX 2] Trừ đi 8px để tâm nút (cao 32) thẳng hàng với tâm chữ Title (cao 16)
 		float btnOffsetY = -8.0f;
 
 		btnWindowedCheck->SetLocalPosition(SLIDER_COLUMN_X, displayModeY + btnOffsetY);
@@ -220,7 +216,6 @@ namespace Demo
 		std::shared_ptr<Demo::TextIconButton> keybindButtons[] = { btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear };
 		for (size_t i = 0; i < std::size(keybindButtons); ++i) {
 			if (keybindButtons[i]) {
-				// Xóa đuôi + fineTuneY ở hàng Keybind
 				keybindButtons[i]->SetLocalPosition(SLIDER_COLUMN_X, startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * i));
 			}
 		}
@@ -403,7 +398,7 @@ namespace Demo
 
 		auto sm = SettingsManager::GetInstance();
 
-		// Auto cập nhật Sprite Coords Checkbox dựa trên State
+		//sprite coords checkbox base on state
 		if (sm->GetFullscreen()) {
 			btnWindowedCheck->SetSpriteCoords(256, 352, 16, 16, 0, true);
 			btnFullscreenCheck->SetSpriteCoords(272, 352, 16, 16, 0, true);
@@ -415,7 +410,6 @@ namespace Demo
 
 		for (auto& button : uiButtons) button->Update(deltaTime);
 
-		// Nếu Windowed thì mới cho Update các mũi tên Resolution
 		if (!sm->GetFullscreen()) {
 			int resIdx = sm->GetCurrentResolutionIndex();
 			int maxIdx = sm->GetSupportedResolutions().size() - 1;
@@ -500,13 +494,11 @@ namespace Demo
 			DrawString(L"Music Volume", LABEL_COLUMN_X, startY + rowSpacing, 0xFFFFFFFF);
 			DrawString(L"Sfx Volume", LABEL_COLUMN_X, startY + rowSpacing * 2, 0xFFFFFFFF);
 
-			// [ĐÃ FIX 1] Xóa fineTuneY
 			float displayModeY = startY + rowSpacing * 3.0f;
 			float resRowY = startY + rowSpacing * 4.0f;
 
 			DrawString(L"Display Mode", LABEL_COLUMN_X, displayModeY, 0xFFFFFFFF);
 
-			// [ĐÃ FIX 2] Xóa phần cộng lệch +8.f, đặt ngang gốc với Title bên trái
 			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, displayModeY);
 			fontSprite->SetColor(0xFFFFFFFF);
 			fontSprite->SetText(L"Windowed");
@@ -524,7 +516,6 @@ namespace Demo
 			int resIdx = sm->GetCurrentResolutionIndex();
 			auto resList = sm->GetSupportedResolutions();
 
-			// Text Resolution cũng ngang hàng với Title bên trái
 			std::string resStr = resList[resIdx].label;
 			fontSprite->SetPosition(SLIDER_COLUMN_X + 45.f, resRowY);
 			fontSprite->SetColor(resColor);

@@ -151,13 +151,11 @@ namespace Demo
 		auto app = DX9GF::Application::GetInstance();
 		if (!app || !app->GetHWnd()) return;
 
-		// Nếu Check Fullscreen thì Engine sẽ tự lấy độ phân giải max
 		if (isFullscreen) {
 			app->SetFullscreen(true);
 			this->SetFullscreen(true);
 		}
 		else {
-			// Windowed: Bắt đầu dò lại Res index hiện hành và set
 			auto res = supportedResolutions[currentResIndex];
 			app->SetFullscreen(false);
 			this->SetFullscreen(false);

@@ -234,7 +234,7 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 		onVictoryCallback();
 	}
 
-	auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(2.5f));
 	drawBuffer->PushCommand(transitionInCommand);
 	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
@@ -3007,7 +3007,7 @@ void Demo::IBattleScene::Init()
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
 			if (RNG::Range(0, 1) == 0) {
 				popUpMessage->QueueMessage(&commandBuffer, L"You successfully fled!");
-				auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+				auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 				drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(1.5f));
 				drawBuffer->PushCommand(transitionInCommand);
 				commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished2) {
@@ -3470,7 +3470,7 @@ void Demo::IBattleScene::Init()
 
 	// Note: enemies are populated by subclasses after IBattleScene::Init() returns,
 	// so their onRequestLockCard is wired centrally in StartBattle() instead.
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
 void Demo::IBattleScene::Update(unsigned long long deltaTime)

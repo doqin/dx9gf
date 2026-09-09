@@ -1,13 +1,13 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "TransitionCommand.h"
+#include "Game.h"
 
 namespace Demo {
-    TransitionCommand::TransitionCommand(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamera, float duration, bool isTransitioningIn, int numPillars)
-        : graphicsDevice(gd), uiCamera(uiCamera), duration(duration), elapsedTime(0.0f), isTransitioningIn(isTransitioningIn), numPillars(numPillars)
+    TransitionCommand::TransitionCommand(Game* game, DX9GF::Camera* uiCamera, float duration, bool isTransitioningIn, int numPillars)
+        : game(game), uiCamera(uiCamera), duration(duration), elapsedTime(0.0f), isTransitioningIn(isTransitioningIn), numPillars(numPillars)
     {
-        auto [camW, camH] = uiCamera->GetScreenResolution();
-        screenWidth = camW;
-        screenHeight = camH;
+        screenWidth = game->GetVirtualWidth();
+        screenHeight = game->GetVirtualHeight();
     }
 
     void TransitionCommand::Execute(unsigned long long deltaTime) {
@@ -51,7 +51,7 @@ namespace Demo {
             }
 
             if (currentHeight > 0) {
-                graphicsDevice->DrawRectangle(
+                game->GetGraphicsDevice()->DrawRectangle(
                     *uiCamera,
                     startX + (i * pillarWidth), y,
                     pillarWidth + 1.0f, currentHeight,
