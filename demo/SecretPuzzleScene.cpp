@@ -110,7 +110,7 @@ void Demo::SecretPuzzleScene::OnInit()
 			if (this->isTransitioning) return;
 			this->isTransitioning = true;
 
-			auto transitionIn = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+			auto transitionIn = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 			this->drawBuffer->PushCommand(transitionIn);
 
 			this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionIn, e](std::function<void(void)> markFinished) {
@@ -131,7 +131,7 @@ void Demo::SecretPuzzleScene::OnInit()
 				markFinished();
 			}));
 
-			this->drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+			this->drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 		});
 
 		mapEnemies.push_back(enemy);
@@ -157,7 +157,7 @@ void Demo::SecretPuzzleScene::OnInit()
 
 	transformManager->RebuildHierarchy();
 	this->GiveTestItems();
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
 	NPCConfig daudauConfig = { L"assets/daudau-Sheet.png", 32, 32, 5, 12, 24.f, 8.f, 12.f };
 
@@ -282,7 +282,7 @@ void Demo::SecretPuzzleScene::StartCupidBattle()
 		markFinished();
 	}));
 
-	auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->StackCommand(transitionInCommand);
 
 	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
@@ -293,7 +293,7 @@ void Demo::SecretPuzzleScene::StartCupidBattle()
 		markFinished();
 	}));
 
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
 	drawBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = false;

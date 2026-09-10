@@ -9,12 +9,11 @@ namespace Demo
 	SettingsManager* SettingsManager::instance = nullptr;
 	SettingsManager::SettingsManager() {
 		supportedResolutions = {
-			{ 800, 600, "800x600", false },
-			{ 960, 720, "960x720 (Native)", false },
-			{ 1024, 768, "1024x768", false },
-			{ 1280, 960, "1280x960", false },
-			{ 1440, 1080, "1440x1080", false },
-			{ 0, 0, "Fullscreen", true }
+			{ 800, 600, "800x600" },
+			{ 960, 720, "960x720 (Native)" },
+			{ 1024, 768, "1024x768" },
+			{ 1280, 960, "1280x960" },
+			{ 1440, 1080, "1440x1080" }
 		};
 		currentResIndex = 1;
 	}
@@ -62,39 +61,24 @@ namespace Demo
 
 			//find '=' to split string
 			size_t delimiterPos = line.find('=');
-			if (delimiterPos == std::string::npos) continue; //skip line without '='
+			if (delimiterPos == std::string::npos) continue;
 
 			std::string key = line.substr(0, delimiterPos);
 			std::string value = line.substr(delimiterPos + 1);
 
 			//classify data
-			if (key == "MASTER_VOL") 
-			{
-				this->SetMasterVolume(std::stof(value));
-			}
-			else if (key == "MUSIC_VOL") 
-			{
-				this->SetMusicVolume(std::stof(value));
-			}
-			else if (key == "SFX_VOL") 
-			{
-				this->SetSfxVolume(std::stof(value));
-			}
-			else if (key == "FULLSCREEN") {
-				this->SetFullscreen(std::stoi(value));
-			}
-			else if (key == "RESOLUTION_INDEX") {
-				this->SetResolutionIndex(std::stoi(value));
-			}
-			else 
-			{
-				this->keybinds[key] = std::stoi(value);
-			}
+			if (key == "MASTER_VOL") this->SetMasterVolume(std::stof(value));
+			else if (key == "MUSIC_VOL") this->SetMusicVolume(std::stof(value));
+			else if (key == "SFX_VOL") this->SetSfxVolume(std::stof(value));
+			else if (key == "FULLSCREEN") this->SetFullscreen(std::stoi(value));
+			else if (key == "RESOLUTION_INDEX") this->SetResolutionIndex(std::stoi(value));
+			else this->keybinds[key] = std::stoi(value);
 		}
 
 		fileInput.close();
 		return true;
 	}
+
 	bool SettingsManager::SaveSettings()
 	{
 		std::ofstream file("config.ini");
@@ -136,17 +120,18 @@ namespace Demo
 	{
 		this->keybinds[actionName] = keyCode;
 	}
+
 	int SettingsManager::GetKeybind(std::string actionName)
 	{
 		// find actionName in keybinds map
 		auto it = keybinds.find(actionName);
-
-		if (it != keybinds.end()) 
+		if (it != keybinds.end())
 		{
 			return it->second;
 		}
 		return 0;
 	}
+
 	void SettingsManager::SetFullscreen(bool fs)
 	{
 		this->isFullscreen = fs;
@@ -166,14 +151,12 @@ namespace Demo
 		auto app = DX9GF::Application::GetInstance();
 		if (!app || !app->GetHWnd()) return;
 
-		auto res = supportedResolutions[currentResIndex];
-
-		if (res.isFullScreenMode) {
+		if (isFullscreen) {
 			app->SetFullscreen(true);
 			this->SetFullscreen(true);
 		}
 		else {
-			// Disable fullscreen to allow Windows to restore the title bar
+			auto res = supportedResolutions[currentResIndex];
 			app->SetFullscreen(false);
 			this->SetFullscreen(false);
 

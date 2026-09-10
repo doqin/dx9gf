@@ -18,8 +18,7 @@ namespace Demo
     constexpr float BUTTON_OFFSET_X = 25.0f;
     constexpr float ALIGN_OFFSET_Y = 10.0f;
 
-    // Keybind rows share startY/rowSpacing with the volume rows; with 9 keybind
-    // rows a tighter step is needed to keep the last row on screen.
+    // Shift Keybind rows start value so Display Mode and Resolution rows fit cleanly
     constexpr float KEYBIND_ROW_START = 5.0f;
     constexpr float KEYBIND_ROW_STEP = 1.1f;
 
@@ -43,6 +42,10 @@ namespace Demo
         std::shared_ptr<IconButton> backButton;
         std::shared_ptr<Demo::IconButton> btnResPrev;
         std::shared_ptr<Demo::IconButton> btnResNext;
+
+        // Display Mode Checkboxes
+        std::shared_ptr<Demo::IconButton> btnWindowedCheck;
+        std::shared_ptr<Demo::IconButton> btnFullscreenCheck;
 
         bool isGoingBack = false;
 

@@ -41,7 +41,7 @@ void Demo::LabInsideScene::OnInit()
 	player->SetBaseSurface("default");
 
 	transformManager->RebuildHierarchy();
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
 std::string Demo::LabInsideScene::GetSaveID() const

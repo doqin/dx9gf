@@ -53,7 +53,7 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 					markFinished();
 					}));
 
-				auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), uiCamera, 1.f, true);
+				auto transitionInCommand = std::make_shared<TransitionCommand>(demoGame, uiCamera, 1.f, true);
 				drawBuffer->PushCommand(transitionInCommand);
 
 				commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand](std::function<void()> markFinished) {
@@ -64,7 +64,7 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 					markFinished();
 					}));
 
-				drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), uiCamera, 1.f, false));
+				drawBuffer->PushCommand(std::make_shared<TransitionCommand>(demoGame, uiCamera, 1.f, false));
 
 				commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([isGamePaused, &lastEncounterTime](std::function<void()> markFinished) {
 					*isGamePaused = false;

@@ -12,6 +12,7 @@
 #include <map>
 
 namespace Demo {
+    class Game;
     class PopupDynamicButton {
     public:
         std::shared_ptr<IconButton> backgroundBtn;
@@ -36,7 +37,7 @@ namespace Demo {
     private:
         static PopupManager* instance;
 
-        DX9GF::GraphicsDevice* gd = nullptr;
+        Game* game = nullptr;
         DX9GF::Camera* uiCamera = nullptr;
 
         std::shared_ptr<DX9GF::Texture> uiSheetTex;
@@ -73,7 +74,7 @@ namespace Demo {
 
         static PopupManager* GetInstance();
 
-        void Init(DX9GF::GraphicsDevice* gd, std::shared_ptr<DX9GF::Texture> borderTex, std::shared_ptr<DX9GF::Texture> uiTex, std::shared_ptr<DX9GF::Font> popupFont);
+        void Init(Game* game, std::shared_ptr<DX9GF::Texture> borderTex, std::shared_ptr<DX9GF::Texture> uiTex, std::shared_ptr<DX9GF::Font> popupFont);
 
         void SetUICamera(DX9GF::Camera* camera) { this->uiCamera = camera; }
 

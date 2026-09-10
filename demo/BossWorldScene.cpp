@@ -254,7 +254,7 @@ void Demo::BossWorldScene::OnInit()
 				this->isGamePaused = true; markFinished();
 			}));
 
-			auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+			auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 			drawBuffer->StackCommand(transitionInCommand);
 
 			commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
@@ -262,7 +262,7 @@ void Demo::BossWorldScene::OnInit()
 				sceMan->GoToNext(); markFinished();
 			}));
 
-			drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+			drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
 			drawBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
 				this->isGamePaused = false;
@@ -281,7 +281,7 @@ void Demo::BossWorldScene::OnInit()
 			new OutroScene(this->game, app->GetScreenWidth(), app->GetScreenHeight())
 		);
 		isTransitioning = true;
-		auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+		auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 		drawBuffer->PushCommand(transitionInCommand);
 		commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand, sceMan](std::function<void(void)> markFinished) {
 			if (!transitionInCommand->IsFinished()) {
@@ -293,7 +293,7 @@ void Demo::BossWorldScene::OnInit()
 			sceMan->GoToNext();
 			markFinished();
 		}));
-		drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+		drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 	});
 
 	map->SetAreaUpdateHandler("trigger_spec_item", [this](const DX9GF::Map::ObjectArea& area) {
@@ -316,7 +316,7 @@ void Demo::BossWorldScene::OnInit()
 
 	transformManager->RebuildHierarchy();
 	this->GiveTestItems();
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
 void Demo::BossWorldScene::OnTerminalHacked(int terminalID) {
@@ -506,7 +506,7 @@ void Demo::BossWorldScene::StartKeyeproBattle()
 		this->isGamePaused = true; markFinished();
 	}));
 
-	auto transitionInCommand = std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, true);
+	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->StackCommand(transitionInCommand);
 
 	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
@@ -514,7 +514,7 @@ void Demo::BossWorldScene::StartKeyeproBattle()
 		sceMan->GoToNext(); markFinished();
 	}));
 
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game->GetGraphicsDevice(), &this->uiCamera, 1.f, false));
+	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
 	drawBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = false;
