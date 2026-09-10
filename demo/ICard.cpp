@@ -41,6 +41,7 @@ std::shared_ptr<Demo::ICard> Demo::ICard::CreateCard(const std::string& id, std:
 	else if (id == "CruelStrikeCard") card = std::make_shared<CruelStrikeCard>(transformManager);
 	else if (id == "ArmorPiercerCard") card = std::make_shared<ArmorPiercerCard>(transformManager);
 	else if (id == "ExecuteCard") card = std::make_shared<ExecuteCard>(transformManager);
+	else if (id == "ImmunityCard") card = std::make_shared<ImmunityCard>(transformManager);
 	if (card && draggableManager && graphicsDevice && camera) {
 		if (auto dragCard = std::dynamic_pointer_cast<IDraggable>(card)) {
 			dragCard->Init(draggableManager, graphicsDevice, camera);

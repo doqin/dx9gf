@@ -601,3 +601,17 @@ void Demo::ShieldBashCard::CollectProjectedSteps(VirtualBattleState& state) {
 
 	CollectHitsOnTargets(state, expectedDmg, 1);
 }
+
+bool Demo::ImmunityCard::Execute()  {
+	if (isDone) return true;
+	if (owner) {
+		owner->AddStackingModifier(ModifierType::Immunity, 3, 3.0f, true);
+	}
+	isDone = true;
+	return true;
+}
+
+void Demo::ImmunityCard::ResetExecution()  {
+	IStatementCard::ResetExecution();
+	isDone = false;
+}

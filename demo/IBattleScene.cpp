@@ -2749,6 +2749,14 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::
 			statusName = L"Freeze";
 			statusDescription = L"Player's movement speed is reduced.";
 		}
+		else if (mod.type == ModifierType::Immunity) {
+			int charges = static_cast<int>(std::round(mod.value));
+			valueText = std::to_wstring(charges);
+			textColor = 0xFF00FFFF;
+			iconRect = { 272, 304, 288, 320 }; //TODO: Change effect's icon rect here
+			statusName = L"Immunity";
+			statusDescription = L"Blocks debuffs and tick damage.\nLoses 1 charge per block.";
+		}
 		else {
 			continue;
 		}
