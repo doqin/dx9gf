@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "IShopScene.h"
 #include "IconButton.h"
 #include "DX9GFUtils.h"
@@ -13,14 +13,14 @@ namespace {
 	constexpr float PANEL_PAD = 24.0f;
 	// Tall enough that the 64px LEAVE button clears the divider drawn just above the list.
 	constexpr float HEADER_H = 80.0f;
-	constexpr float FOOTER_H = 104.0f;
+	constexpr float FOOTER_H = 160.0f;
 	constexpr float ROW_H = 64.0f;
 	constexpr float ROW_GAP = 10.0f;
 	constexpr float ROW_INNER_PAD = 14.0f;
 	// The footer stacks the description box on top of the page bar; these must sum to
 	// no more than FOOTER_H or the arrows would sit on top of the description.
-	constexpr float DESC_BOX_H = 56.0f;
-	constexpr float PAGE_BAR_OFFSET = 64.0f;
+	constexpr float DESC_BOX_H = 110.0f;
+	constexpr float PAGE_BAR_OFFSET = 120.0f;
 	constexpr float PAGE_BTN_SIZE = 32.0f;
 	// Scales only the nine-slice border margins, keeping the pixel-art frame crisp
 	// while the centre stretches to the target size.
@@ -531,6 +531,9 @@ void Demo::IShopScene::Update(unsigned long long deltaTime)
 	auto inpMan = DX9GF::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
+	if (inpMan->KeyDown(DIK_ESCAPE)) {
+		shouldLeave = true;
+	}
 	uiCamera.Update();
 
 	if (messageTimer > 0) {
@@ -809,7 +812,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 			}
 			else if (hoveredIndex >= 0) {
 				const auto lines = WrapText(myFontSprite.get(), items[hoveredIndex].description,
-					l.rowW - ROW_INNER_PAD * 2.0f, 2);
+					l.rowW - ROW_INNER_PAD * 2.0f, 4);
 				myFontSprite->SetColor(COLOR_TEXT);
 				float lineY = l.footerTop + 6.0f;
 				for (const auto& line : lines) {
