@@ -2753,7 +2753,7 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::
 			int charges = static_cast<int>(std::round(mod.value));
 			valueText = std::to_wstring(charges);
 			textColor = 0xFF00FFFF;
-			iconRect = { 272, 304, 288, 320 }; //TODO: Change effect's icon rect here
+			iconRect = { 256, 448, 272, 464};
 			statusName = L"Immunity";
 			statusDescription = L"Blocks debuffs and tick damage.\nLoses 1 charge per block.";
 		}
@@ -3205,7 +3205,7 @@ void Demo::IBattleScene::Init()
 	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
 
 	gearButton = std::make_shared<IconButton>(transformManager, 0, 0, 16.f * 2.f, 16.f * 2.f, uiSheetTex);
-	gearButton->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(176, 448, 16, 16, 4));
+	gearButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(272, 400, 16, 16, 4));
 	gearButton->SetSpriteScale(2.f, 2.f);
 	gearButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
 		this->OnGearButtonClicked();

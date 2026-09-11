@@ -43,6 +43,7 @@ namespace Demo::CardCatalog {
 				{ "OverdriveCard",      180 },
 				{ "ExecuteCard",        160 },
 				{ "OverloadCard",       170 },
+				{ "ImmunityCard",		50},
 			};
 			return prices;
 		}
@@ -100,7 +101,7 @@ namespace Demo::CardCatalog {
 			for (const auto& [id, price] : PriceMap()) v.push_back(id);
 			std::sort(v.begin(), v.end());
 			return v;
-		}();
+			}();
 		return all;
 	}
 
@@ -112,7 +113,7 @@ namespace Demo::CardCatalog {
 					b[static_cast<int>(GetRarity(id))].push_back(id);
 				}
 				return b;
-			}();
+				}();
 			return buckets[static_cast<int>(rarity)];
 		}
 

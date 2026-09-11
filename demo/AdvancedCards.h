@@ -350,7 +350,7 @@ namespace Demo {
 		std::wstring GetDescription() const override {
 			return L"Apply Immunity 3. Blocks 1 incoming Debuff or Tick Damage per charge.";
 		}
-		RECT GetFaceRect() const override { return RECT{ 192, 432, 272, 448 }; } //TODO: Change immunity card asset
+		RECT GetFaceRect() const override { return RECT{ 176, 448, 256, 464}; }
 		void DrawCardFace(unsigned long long deltaTime) override {
 			DrawSheetFace(deltaTime, GetFaceRect());
 		}
