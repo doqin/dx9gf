@@ -346,7 +346,7 @@ namespace Demo {
 		bool Execute() override;
 		void ResetExecution() override;
 
-		size_t GetCost() const override { return 2; }
+		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override {
 			return L"Apply Immunity 3. Blocks 1 incoming Debuff or Tick Damage per charge.";
 		}
