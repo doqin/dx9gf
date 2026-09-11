@@ -58,6 +58,7 @@ namespace Demo {
 	}
 
 	void ICombatant::AddModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns) {
+		if (!isBuff && TryBlockWithImmunity()) return;
 		for (auto& mod : modifiers) {
 			if (mod.type == type) {
 				mod.duration += duration;
@@ -75,6 +76,7 @@ namespace Demo {
 	}
 
 	void ICombatant::AddStackingModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns) {
+		if (!isBuff && TryBlockWithImmunity()) return;
 		for (auto& mod : modifiers) {
 			if (mod.type == type) {
 				mod.value += value;
@@ -108,6 +110,19 @@ namespace Demo {
 		return val;
 	}
 
+	bool ICombatant::TryBlockWithImmunity() {
+		for (auto& mod : modifiers) {
+			if (mod.type == ModifierType::Immunity && mod.duration > 0) {
+				mod.value -= 1.0f;
+				if (mod.value <= 0.f) {
+					mod.duration = 0; 
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
 	bool ICombatant::TakeIndirectDamage(float damage, DamageType type) {
 		health -= damage;
 		if (health < 0) health = 0;
@@ -118,6 +133,7 @@ namespace Demo {
 		for (auto& it : modifiers) {
 			if (it.duration > 0) {
 				if (it.type == ModifierType::Poison && phase == TickPhase::EndOfTurn) {
+					if (TryBlockWithImmunity()) continue;
 					const float poisonDamage = (it.value > 0.f) ? it.value : static_cast<float>(it.duration);
 
 					float tempDef = temporaryDefense;
@@ -143,6 +159,7 @@ namespace Demo {
 				// Burn and Regen need none of the dance above: TakeIndirectDamage already
 				// bypasses block and modifiers, and Heal is unaffected by both.
 				else if (it.type == ModifierType::Burn && phase == TickPhase::EndOfTurn) {
+					if (TryBlockWithImmunity()) continue;
 					this->TakeIndirectDamage(it.value, DamageType::Burn);
 				}
 				else if (it.type == ModifierType::Regen && phase == TickPhase::EndOfTurn) {

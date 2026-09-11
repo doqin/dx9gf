@@ -50,7 +50,8 @@ namespace Demo
 		Regen,
 		//For ignite and destonate combo
 		Spark,
-		Freeze
+		Freeze,
+		Immunity
 		//...Add more if you have ideas
 	};
 

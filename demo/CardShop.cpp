@@ -55,6 +55,7 @@ void Demo::CardShop::LoadItems()
 		AddShopCard<RagingStrikeCard>("Raging Strike Card");
 		AddShopCard<ArmorPiercerCard>("Armor Piercer Card");
 		AddShopCard<LethalHarvestCard>("Lethal Harvest Card");
+		AddShopCard<ImmunityCard>("Immunity Card");
 		break;
 
 	case ShopTier::HYBRID:

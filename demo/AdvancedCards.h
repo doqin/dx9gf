@@ -154,7 +154,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override {
 			CollectEffectOnTargets(state, ModifierType::Weak, 0.f, 2, 2);
 		}
-	};	
+	};
 
 	class StunCard : public MultiTargetCard {
 		std::shared_ptr<DX9GF::Texture> strikeTexture;
@@ -332,5 +332,27 @@ namespace Demo {
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return L"Consume all your Armor. Deal damage equal to 1.5x the consumed amount."; }
 		RECT GetFaceRect() const override { return RECT{ 192, 432, 272, 448 }; }
+	};
+
+	class ImmunityCard : public IStatementCard {
+	private:
+		bool isDone = false;
+	public:
+		ImmunityCard(std::weak_ptr<DX9GF::TransformManager> tm)
+			: IGameObject(tm, 0, 0), IStatementCard(tm, 160, 32, 0, 0) {
+			SetPersistent(false);
+		}
+
+		bool Execute() override;
+		void ResetExecution() override;
+
+		size_t GetCost() const override { return 1; }
+		std::wstring GetDescription() const override {
+			return L"Apply Immunity 3. Blocks 1 incoming Debuff or Tick Damage per charge.";
+		}
+		RECT GetFaceRect() const override { return RECT{ 176, 448, 256, 464}; }
+		void DrawCardFace(unsigned long long deltaTime) override {
+			DrawSheetFace(deltaTime, GetFaceRect());
+		}
 	};
 }
