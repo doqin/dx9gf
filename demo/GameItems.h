@@ -52,7 +52,8 @@ namespace Demo
 		Spark,
 		Freeze,
 		Immunity,
-		EnergyDrain
+		EnergyDrain,
+		InvertedControls
 		//...Add more if you have ideas
 	};
 

@@ -14,6 +14,9 @@ void Demo::HomeworkEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Cam
 	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
 
+	groupProjTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	groupProjTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
+
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
@@ -29,11 +32,30 @@ void Demo::HomeworkEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Cam
 	IEnemy::Draw(graphicsDevice, camera, deltaTime);
 }
 
+void Demo::HomeworkEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn) {
+	this->player = player;
+
+	if (abilityCooldown > 0) {
+		--abilityCooldown;
+		return;
+	}
+
+	if (auto lock = this->player.lock()) {
+		lock->AddModifier(ModifierType::InvertedControls, CONTROL_INVERT_DURATION, 0.f, false);
+	}
+
+	if (popUpMessage) {
+		popUpMessage->ShowMessage(L"Homework scrambles your controls!");
+	}
+
+	abilityCooldown = 2;
+}
+
 void Demo::HomeworkEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
 	(void)enemies; (void)popUpMessage; (void)graphicsDevice; (void)camera; (void)currentTurn;
 	this->player = player;
 
-	const float baseDamage = 1.f;
+	const float baseDamage = 2.f;
 	const float finalDamage = CalculateOutgoingDamage(baseDamage);
 
 	int patternId = GetSmartRandomPattern(1, 2);
@@ -105,62 +127,62 @@ void Demo::HomeworkEnemy::PatternPileUp(float projDamage) {
 }
 
 void Demo::HomeworkEnemy::PatternGroupProject(float projDamage) {
-	const int WAVE_COUNT = 6;
-	const int BULLET_PER_WAVE = 8;
-	const float WAVE_DELAY = 1.0f;
-	const float BULLET_SPEED = 160.f;
-	const float DROP_HEIGHT = 300.f;
-	const float BULLET_SPACING = 80.f;
-	const float WALL_START_X = -(BULLET_PER_WAVE / 2.f) * BULLET_SPACING;
+	const float ARENA_HALF_WIDTH = 400.f;
+	const float ARENA_HALF_HEIGHT = 300.f;
+	const float CLUSTER_VELOCITY = 150.f;
+	const float HOLD_TIME = 2.f;
+	const int BURST_COUNT = 24;
+	const float BURST_VELOCITY = 90.f;
+	const float PULSE_COUNT = 10;
+	const float PULSE_GAP = 0.5f;
+	const float PULSE_DECAY = 0.05f;
+	const float RING_DECAY_TIME = 6.f;
+	const float RING_BULLET_SIZE = 12.f;
 
-	for (int wave = 0; wave < WAVE_COUNT; wave++) {
-		int emptyHole = RNG::Range(0, BULLET_PER_WAVE - 1);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, emptyHole, BULLET_PER_WAVE, BULLET_SPEED, DROP_HEIGHT, WALL_START_X, BULLET_SPACING](std::function<void(void)> markFinished) {
+	int edge = RNG::Range(0, 3);
+	float spawnX = 0.f, spawnY = 0.f;
+	switch (edge) {
+	case 0: spawnX = 0.f;               spawnY = -ARENA_HALF_HEIGHT; break;
+	case 1: spawnX = 0.f;               spawnY = ARENA_HALF_HEIGHT;  break;
+	case 2: spawnX = -ARENA_HALF_WIDTH; spawnY = 0.f;                break;
+	default: spawnX = ARENA_HALF_WIDTH; spawnY = 0.f;                break;
+	}
+
+	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, spawnX, spawnY, CLUSTER_VELOCITY, HOLD_TIME, BURST_COUNT, BURST_VELOCITY, RING_DECAY_TIME, RING_BULLET_SIZE](std::function<void(void)> markFinished) {
+		if (auto lock = this->player.lock()) {
+			auto desc = ProjectileDesc(groupProjTexture.get(), 8, 8, 16, 16, spawnX, spawnY)
+				.SetVelocity(CLUSTER_VELOCITY)
+				.SetSplitOnArrival(0.f, 0.f, BURST_COUNT, BURST_VELOCITY)
+				.SetSplitRandomAngle(true)
+				.SetSplitHoldTime(HOLD_TIME)
+				.SetSplitDecayTime(RING_DECAY_TIME)
+				.SetShardTexture(groupProjTexture.get(), 8, 8, RING_BULLET_SIZE, RING_BULLET_SIZE)
+				.SetDamage(projDamage);
+			projectiles.Spawn(lock, desc);
+		}
+		markFinished();
+		}));
+
+	const float maxTravelDistance = (std::max)(ARENA_HALF_WIDTH, ARENA_HALF_HEIGHT);
+	const float travelTime = maxTravelDistance / CLUSTER_VELOCITY;
+	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(travelTime + HOLD_TIME));
+
+	for (int pulse = 1; pulse < PULSE_COUNT; pulse++) {
+		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(PULSE_GAP));
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, BURST_COUNT, BURST_VELOCITY, RING_DECAY_TIME, PULSE_DECAY, RING_BULLET_SIZE](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
-				for (int i = 0; i < BULLET_PER_WAVE; i++) {
-					if (i == emptyHole) continue;
-					float x = WALL_START_X + i * BULLET_SPACING;
-					projectiles.Spawn(
-						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 12, 12, x, -DROP_HEIGHT)
-						.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
-						.SetVelocity(BULLET_SPEED)
-						.SetDecayTime(6.f)
-						.SetDamage(projDamage)
-					);
-				}
+				auto desc = ProjectileDesc(groupProjTexture.get(), 8, 8, 0, 0, 0.f, 0.f)
+					.SetSplitOnDecay(BURST_COUNT, BURST_VELOCITY)
+					.SetSplitRandomAngle(true)
+					.SetSplitDecayTime(RING_DECAY_TIME)
+					.SetDecayTime(PULSE_DECAY)
+					.SetShardTexture(groupProjTexture.get(), 8, 8, RING_BULLET_SIZE, RING_BULLET_SIZE)
+					.SetDamage(projDamage);
+				projectiles.Spawn(lock, desc);
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
 	}
 
-	const int ZIGZAG_WAVES = 5;
-	const int ZIGZAG_BULLETS = 8;
-	const int STEP_Y = 100;
-	const float START_Y = -(ZIGZAG_BULLETS - 1) * STEP_Y * 0.5f;
-
-	for (int wave = 0; wave < ZIGZAG_WAVES; wave++) {
-		bool fromLeft = (wave % 2 == 0);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, fromLeft, START_Y, STEP_Y, ZIGZAG_BULLETS](std::function<void(void)> markFinished) {
-			if (auto lock = this->player.lock()) {
-				float spawnX = fromLeft ? -300.f : 300.f;
-				D3DXVECTOR2 dir(fromLeft ? 1.f : -1.f, 0.f);
-				for (int i = 0; i < ZIGZAG_BULLETS; i++) {
-					float spawnY = START_Y + STEP_Y * static_cast<float>(i);
-					projectiles.Spawn(
-						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, spawnY)
-						.SetTrajectory(dir)
-						.SetVelocity(100.f)
-						.SetWave(80.f, 0.3f, true)
-						.SetDecayTime(7.f)
-						.SetDamage(projDamage)
-					);
-				}
-			}
-			markFinished();
-			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
-	}
+	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(1.0f));
 }

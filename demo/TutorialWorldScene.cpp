@@ -210,7 +210,7 @@ void Demo::TutorialWorldScene::OnInit()
 		DrawBackground(gd, deltaTime);
 	};
 
-	SpawnMapEnemy(615.f, -170.f, "tutorial_keye_01", { "KeyeEnemy" }, false, false, bgDraw);
+	SpawnMapEnemy(615.f, -170.f, "tutorial_keye_01", { "DeadlineEnemy" }, false, false, bgDraw);
 	SpawnMapEnemy(510.f, -380.f, "tutorial_demoneye_01", { "DemonEyeEnemy" }, false, false, bgDraw);
 	SpawnMapEnemy(500.f, -590.f, "tutorial_random_01", { "KeyeEnemy", "DemonEyeEnemy" }, true, false, bgDraw, 30);
 	SpawnMapEnemy(-45.f, -409.f, "tutorial_random_02", { "KeyeEnemy", "DemonEyeEnemy", "MimicEnemy" }, true, false, bgDraw, 30);

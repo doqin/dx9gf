@@ -57,119 +57,124 @@ void Demo::DeadlineEnemy::StartAttack(std::shared_ptr<Player> player, std::vecto
 	const float finalDamage = CalculateOutgoingDamage(baseDamage);
 
 	int patternId = GetSmartRandomPattern(1, 2);
-	if (patternId == 1) PatternCramSession(finalDamage);
-	else PatternSubmissionRush(finalDamage);
+	if (patternId == 1) PatternClockTickCountdown(finalDamage);
+	else PatternServerMaintenance2359(finalDamage);
 }
 
-void Demo::DeadlineEnemy::PatternCramSession(float projDamage) {
-	constexpr int COLUMNS = 8;
-	constexpr float SPAN = 220.f;
-	constexpr float STEP = SPAN / (COLUMNS - 1);
-	constexpr int WAVES = 10;
-	constexpr float SPAWN_Y = -260.f;
-	constexpr float BULLET_SPEED = 230.f;
-	constexpr float WAVE_DELAY = 0.55f;
-	constexpr float HOMING_VELOCITY = 200.f;
-	constexpr float HOMING_TURN_SPEED = 1.6f;
+void Demo::DeadlineEnemy::PatternClockTickCountdown(float projDamage) {
+	constexpr int TICKS = 8;
+	constexpr int HAND_BULLETS = 7;         
+	constexpr float TICK_INTERVAL = 0.55f;
+	constexpr float SWEEP_RADIAL_SPEED = 150.f; 
+	constexpr float SWEEP_ANGULAR_SPEED = 2.5f;
+	constexpr float ANGLE_STEP = 3.14159f * 0.35f;
+	constexpr float HAND_DECAY_TIME = 4.5f; 
 
-	int gap = RNG::Range(0, COLUMNS - 2);
-	for (int w = 0; w < WAVES; w++) {
-		for (int c = 0; c < COLUMNS; c++) {
-			if (c == gap || c == gap + 1) continue;
-			float x = -SPAN * 0.5f + c * STEP;
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, x, BULLET_SPEED, SPAWN_Y](std::function<void(void)> markFinished) {
-				if (auto lock = this->player.lock()) {
+	constexpr float ARENA_HALF = 128.f;
+	constexpr float PIVOT_MARGIN = 50.f; 
+	constexpr float PIVOT_A_X = -(ARENA_HALF + PIVOT_MARGIN), PIVOT_A_Y = (ARENA_HALF + PIVOT_MARGIN); 
+	constexpr float PIVOT_B_X = (ARENA_HALF + PIVOT_MARGIN), PIVOT_B_Y = -(ARENA_HALF + PIVOT_MARGIN);  
+
+	auto angleA = std::make_shared<float>(0.f);
+	auto angleB = std::make_shared<float>(3.14159f * 0.5f); 
+
+	for (int t = 0; t < TICKS; t++) {
+		bool useA = (t % 2 == 0);
+		float pivotX = useA ? PIVOT_A_X : PIVOT_B_X;
+		float pivotY = useA ? PIVOT_A_Y : PIVOT_B_Y;
+		float spinDir = useA ? SWEEP_ANGULAR_SPEED : -SWEEP_ANGULAR_SPEED;
+		auto angleRef = useA ? angleA : angleB;
+
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, angleRef, pivotX, pivotY, spinDir, HAND_BULLETS, SWEEP_RADIAL_SPEED, ANGLE_STEP, HAND_DECAY_TIME](std::function<void(void)> markFinished) {
+			if (auto lock = this->player.lock()) {
+				float startAng = *angleRef;
+				for (int i = 1; i <= HAND_BULLETS; ++i) {
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 12, 12, x, SPAWN_Y)
-						.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
-						.SetVelocity(BULLET_SPEED)
-						.SetDecayTime(4.f)
+						ProjectileDesc(projTexture.get(), 8, 8, 12, 12, pivotX, pivotY)
+						.SetSpiralParams(startAng, SWEEP_RADIAL_SPEED * (i / (float)HAND_BULLETS), spinDir)
+						.SetVelocity(100.f)
+						.SetDecayTime(HAND_DECAY_TIME)
 						.SetDamage(projDamage)
 					);
 				}
-				markFinished();
-				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.01f));
-		}
+				*angleRef += ANGLE_STEP;
+			}
+			markFinished();
+			}));
 
-		if (w % 3 == 2) {
-			bool fromRight = RNG::Range(0, 1) == 0;
-			float cornerX = fromRight ? 300.f : -300.f;
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, cornerX](std::function<void(void)> markFinished) {
+		if (t % 2 == 1) {
+			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
-					D3DXVECTOR2 dir(cornerX > 0.f ? -1.f : 1.f, 1.f);
-					auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, cornerX, -200.f)
-						.SetTrajectory(dir)
-						.SetHoming(HOMING_TURN_SPEED)
-						.SetVelocity(HOMING_VELOCITY)
-						.SetDecayTime(5.f)
+					auto [px, py] = lock->GetWorldPosition();
+					auto desc = ProjectileDesc(projTexture.get(), 8, 8, 14, 14, px, -260.f)
+						.SetTargetPosition(px, py)
+						.SetVelocity(380.f)
+						.SetDecayTime(3.0f)
 						.SetDamage(projDamage);
-					desc.SetStatusEffect(
-						ModifierType::Freeze, FREEZE_VALUE, FREEZE_DURATION
-					);
+					desc.SetStatusEffect(ModifierType::Freeze, FREEZE_VALUE, FREEZE_DURATION);
 					projectiles.Spawn(lock, desc);
 				}
 				markFinished();
 				}));
 		}
 
-		gap = std::clamp(gap + RNG::Range(-1, 1), 0, COLUMNS - 2);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
+		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(TICK_INTERVAL));
 	}
 }
 
-void Demo::DeadlineEnemy::PatternSubmissionRush(float projDamage) {
-	const int DROP_COUNT = 45;
-	const float DROP_SPAWN_DELAY = 0.05f;
-	const float DROP_SPEED = 200.f;
-	const float DROP_HEIGHT = 300.f;
-	const float OFFSET_MIN = -300.f;
-	const float OFFSET_MAX = 100.f;
+void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
+	constexpr float BEAM_LENGTH = 300.f;
+	constexpr float WARN_TIME = 0.8f;
+	constexpr float FIRE_TIME = 4.0f;
+	constexpr D3DCOLOR WARN_COLOR = D3DCOLOR_ARGB(160, 255, 60, 60);
+	constexpr D3DCOLOR GLOW_COLOR = D3DCOLOR_ARGB(120, 200, 20, 20);
+	constexpr D3DCOLOR CORE_COLOR = 0xFFFFFFFF;
 
-	for (int i = 0; i < DROP_COUNT; i++) {
-		float offsetX = RNG::Range(OFFSET_MIN, OFFSET_MAX);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, offsetX, DROP_SPEED, DROP_HEIGHT](std::function<void(void)> markFinished) {
+	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, BEAM_LENGTH, WARN_TIME, FIRE_TIME, WARN_COLOR, GLOW_COLOR, CORE_COLOR](std::function<void(void)> markFinished) {
+		if (auto lock = this->player.lock()) {
+			float wallOffset = 55.f; 
+			LaserDesc leftBeam = LaserDesc::Vertical(-wallOffset, 0.f, BEAM_LENGTH)
+				.SetWarnTime(WARN_TIME)
+				.SetFireTime(FIRE_TIME)
+				.SetDamage(projDamage * 1.5f)
+				.SetColors(WARN_COLOR, GLOW_COLOR, CORE_COLOR);
+			leftBeam.SetStatusEffect(ModifierType::Burn, BURN_VALUE, BURN_DURATION);
+
+			LaserDesc rightBeam = LaserDesc::Vertical(wallOffset, 0.f, BEAM_LENGTH)
+				.SetWarnTime(WARN_TIME)
+				.SetFireTime(FIRE_TIME)
+				.SetDamage(projDamage * 1.5f)
+				.SetColors(WARN_COLOR, GLOW_COLOR, CORE_COLOR);
+			rightBeam.SetStatusEffect(ModifierType::Burn, BURN_VALUE, BURN_DURATION);
+
+			projectiles.Spawn(lock, leftBeam);
+			projectiles.Spawn(lock, rightBeam);
+		}
+		markFinished();
+		}));
+
+	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WARN_TIME));
+
+	const int WAVE_SHOTS = 22;
+	const float SHOT_DELAY = 0.16f;
+
+	for (int i = 0; i < WAVE_SHOTS; i++) {
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, i](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
-				auto [px, py] = lock->GetWorldPosition();
-				projectiles.Spawn(
-					lock,
-					ProjectileDesc(projTexture.get(), 8, 8, 12, 12, px + offsetX, py - DROP_HEIGHT)
-					.SetTrajectory(D3DXVECTOR2(0.4f, 1.f))
-					.SetVelocity(DROP_SPEED)
-					.SetDecayTime(4.f)
-					.SetDamage(projDamage)
-				);
-			}
-			markFinished();
-			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(DROP_SPAWN_DELAY));
-	}
-
-	const int SWOOP_COUNT = 4;
-	const float SWOOP_SPEED = 380.f;
-	const float SWOOP_ACCEL = 200.f;
-
-	for (int i = 0; i < SWOOP_COUNT; i++) {
-		bool fromRight = (i % 2 == 0);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, fromRight, SWOOP_SPEED, SWOOP_ACCEL](std::function<void(void)> markFinished) {
-			if (auto lock = this->player.lock()) {
-				auto [px, py] = lock->GetWorldPosition();
-				float spawnX = fromRight ? 320.f : -320.f;
-				float spawnY = RNG::Range(-100.f, 100.f);
-				auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, spawnY)
-					.SetTargetPosition(px, py)
-					.SetInitialVelocity(SWOOP_SPEED)
-					.SetReturnAcceleration(SWOOP_ACCEL)
-					.SetDecayTime(5.f)
+				float spawnX = RNG::Range(-45.f, 45.f); 
+				auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, -220.f)
+					.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
+					.SetWave(45.f, 5.0f)
+					.SetVelocity(280.f)
+					.SetDecayTime(3.5f)
 					.SetDamage(projDamage);
-				desc.SetStatusEffect(
-					ModifierType::Freeze, FREEZE_VALUE, FREEZE_DURATION
-				);
 				projectiles.Spawn(lock, desc);
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.6f));
+		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(SHOT_DELAY));
 	}
+
+	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
 }

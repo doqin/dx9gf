@@ -11,11 +11,13 @@ namespace Demo {
 
 		int abilityCooldown = 0;
 
-		void PatternCramSession(float projDamage);
-		void PatternSubmissionRush(float projDamage);
+		void PatternClockTickCountdown(float projDamage);
+		void PatternServerMaintenance2359(float projDamage);
 
 		static constexpr float FREEZE_VALUE = 0.3f;
 		static constexpr int FREEZE_DURATION = 1;
+		static constexpr float BURN_VALUE = 0.5f;
+		static constexpr int BURN_DURATION = 2;
 
 	public:
 		using EnemyBase<DeadlineEnemy>::EnemyBase;

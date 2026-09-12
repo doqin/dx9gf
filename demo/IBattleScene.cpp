@@ -2766,6 +2766,12 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::
 			statusName = L"Energy Drain";
 			statusDescription = L"Reduces Energy gained at the start of your turn by " + std::to_wstring(drain) + L".";
 		}
+		else if (mod.type == ModifierType::InvertedControls) {
+			nameText = L"Reversed";
+			textColor = 0xFFff66cc;
+			statusName = L"Reversed Controls";
+			statusDescription = L"Movement is flipped: up<->down, left<->right.";
+		}
 		else {
 			continue;
 		}
