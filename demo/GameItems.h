@@ -51,7 +51,9 @@ namespace Demo
 		//For ignite and destonate combo
 		Spark,
 		Freeze,
-		Immunity
+		Immunity,
+		EnergyDrain,
+		InvertedControls
 		//...Add more if you have ideas
 	};
 

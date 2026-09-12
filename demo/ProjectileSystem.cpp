@@ -477,6 +477,12 @@ Demo::LaserDesc& Demo::LaserDesc::SetRandomStatusEffect(
 	return *this;
 }
 
+Demo::ProjectileDesc& Demo::ProjectileDesc::SetSplitHoldTime(float holdTime)
+{
+	this->splitArrivalHoldTime = holdTime;
+	return *this;
+}
+
 unsigned int Demo::ProjectileSystem::GetOrCreateBatch(const RenderDesc& desc)
 {
 	for (unsigned int i = 0; i < batches.size(); i++) {
@@ -574,6 +580,7 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 	split.generations = desc.splitGenerations;
 	split.colliderWidth = desc.shardColliderWidth;
 	split.colliderHeight = desc.shardColliderHeight;
+	split.holdTime = desc.splitArrivalHoldTime;
 	splits.push_back(split);
 
 	std::unique_ptr<DX9GF::ParticleSystem> emitter;
@@ -830,35 +837,45 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 
 		auto& tr = transforms[i];
 		auto& motion = motions[i];
-		if (life.elapsed >= life.delay) {
-			switch (motion.behavior) {
-			case ProjectileBehavior::Straight: {
-				tr.x += motion.trajectory.x * motion.velocity * dtSec;
-				tr.y += motion.trajectory.y * motion.velocity * dtSec;
-				tr.rotation = std::atan2(motion.trajectory.y, motion.trajectory.x);
-				break;
+		auto& split = splits[i];
+		if (life.arrivalHeld) {
+			life.holdRemaining -= dtSec;
+			if (life.holdRemaining <= 0.f) {
+				QueueBurst(i);
+				dead[i] = 1;
+				continue;
 			}
-			case ProjectileBehavior::Homing: {
-				if (player) {
-					auto [playerX, playerY] = player->GetWorldPosition();
-					D3DXVECTOR2 idealTrajectory{ playerX - tr.x, playerY - tr.y };
-					D3DXVec2Normalize(&idealTrajectory, &idealTrajectory);
-					// gradually steer (lerp) toward the player
-					motion.trajectory.x += (idealTrajectory.x - motion.trajectory.x) * motion.turnSpeed * dtSec;
-					motion.trajectory.y += (idealTrajectory.y - motion.trajectory.y) * motion.turnSpeed * dtSec;
-					D3DXVec2Normalize(&motion.trajectory, &motion.trajectory);
+		}
+		else {
+			if (life.elapsed >= life.delay) {
+				switch (motion.behavior) {
+				case ProjectileBehavior::Straight: {
+					tr.x += motion.trajectory.x * motion.velocity * dtSec;
+					tr.y += motion.trajectory.y * motion.velocity * dtSec;
+					tr.rotation = std::atan2(motion.trajectory.y, motion.trajectory.x);
+					break;
 				}
-				tr.x += motion.trajectory.x * motion.velocity * dtSec;
-				tr.y += motion.trajectory.y * motion.velocity * dtSec;
-				tr.rotation = std::atan2(motion.trajectory.y, motion.trajectory.x);
-				break;
-			}
-			case ProjectileBehavior::SineWave: {
-				motion.baseX += motion.trajectory.x * motion.velocity * dtSec;
-				motion.baseY += motion.trajectory.y * motion.velocity * dtSec;
-				D3DXVECTOR2 perpendicular(-motion.trajectory.y, motion.trajectory.x);
-				float moveTime = life.elapsed - life.delay;
-				float waveOffset = 0.f;
+				case ProjectileBehavior::Homing: {
+					if (player) {
+						auto [playerX, playerY] = player->GetWorldPosition();
+						D3DXVECTOR2 idealTrajectory{ playerX - tr.x, playerY - tr.y };
+						D3DXVec2Normalize(&idealTrajectory, &idealTrajectory);
+						// gradually steer (lerp) toward the player
+						motion.trajectory.x += (idealTrajectory.x - motion.trajectory.x) * motion.turnSpeed * dtSec;
+						motion.trajectory.y += (idealTrajectory.y - motion.trajectory.y) * motion.turnSpeed * dtSec;
+						D3DXVec2Normalize(&motion.trajectory, &motion.trajectory);
+					}
+					tr.x += motion.trajectory.x * motion.velocity * dtSec;
+					tr.y += motion.trajectory.y * motion.velocity * dtSec;
+					tr.rotation = std::atan2(motion.trajectory.y, motion.trajectory.x);
+					break;
+				}
+				case ProjectileBehavior::SineWave: {
+					motion.baseX += motion.trajectory.x * motion.velocity * dtSec;
+					motion.baseY += motion.trajectory.y * motion.velocity * dtSec;
+					D3DXVECTOR2 perpendicular(-motion.trajectory.y, motion.trajectory.x);
+					float moveTime = life.elapsed - life.delay;
+					float waveOffset = 0.f;
 					if (motion.zigzag) {
 						if (motion.frequency > floatEpsilon && motion.amplitude > floatEpsilon) {
 							float phase = std::fmod(moveTime * motion.frequency, 1.f);
@@ -872,10 +889,10 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 					else {
 						waveOffset = std::sin(moveTime * motion.frequency) * motion.amplitude;
 					}
-				tr.x = motion.baseX + perpendicular.x * waveOffset;
-				tr.y = motion.baseY + perpendicular.y * waveOffset;
+					tr.x = motion.baseX + perpendicular.x * waveOffset;
+					tr.y = motion.baseY + perpendicular.y * waveOffset;
 
-				float waveDerivative = 0.f;
+					float waveDerivative = 0.f;
 					if (motion.zigzag) {
 						if (motion.frequency > floatEpsilon && motion.amplitude > floatEpsilon) {
 							waveDerivative = (std::fmod(moveTime * motion.frequency, 1.f) < 0.5f ? 1.f : -1.f)
@@ -885,43 +902,51 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 					else {
 						waveDerivative = std::cos(moveTime * motion.frequency) * motion.frequency * motion.amplitude;
 					}
-				D3DXVECTOR2 instantaneousVelocity = motion.trajectory * motion.velocity + perpendicular * waveDerivative;
-				if (D3DXVec2LengthSq(&instantaneousVelocity) > 0.0001f) {
-					tr.rotation = std::atan2(instantaneousVelocity.y, instantaneousVelocity.x);
+					D3DXVECTOR2 instantaneousVelocity = motion.trajectory * motion.velocity + perpendicular * waveDerivative;
+					if (D3DXVec2LengthSq(&instantaneousVelocity) > 0.0001f) {
+						tr.rotation = std::atan2(instantaneousVelocity.y, instantaneousVelocity.x);
+					}
+					break;
 				}
-				break;
-			}
-			case ProjectileBehavior::Spiral: {
-				motion.radius += motion.radialSpeed * dtSec;
-				motion.angle += motion.angularVelocity * dtSec;
-				tr.x = motion.baseX + motion.radius * std::cos(motion.angle);
-				tr.y = motion.baseY + motion.radius * std::sin(motion.angle);
-				tr.rotation = motion.angle;
-				break;
-			}
-			case ProjectileBehavior::Boomerang: {
-				motion.velocity -= motion.returnAcceleration * dtSec;
-				D3DXVECTOR2 moveVector = motion.trajectory * motion.velocity;
-				if (D3DXVec2LengthSq(&moveVector) > 0.0001f) {
-					tr.rotation = std::atan2(moveVector.y, moveVector.x);
+				case ProjectileBehavior::Spiral: {
+					motion.radius += motion.radialSpeed * dtSec;
+					motion.angle += motion.angularVelocity * dtSec;
+					tr.x = motion.baseX + motion.radius * std::cos(motion.angle);
+					tr.y = motion.baseY + motion.radius * std::sin(motion.angle);
+					tr.rotation = motion.angle;
+					break;
 				}
-				tr.x += motion.trajectory.x * motion.velocity * dtSec;
-				tr.y += motion.trajectory.y * motion.velocity * dtSec;
-				break;
+				case ProjectileBehavior::Boomerang: {
+					motion.velocity -= motion.returnAcceleration * dtSec;
+					D3DXVECTOR2 moveVector = motion.trajectory * motion.velocity;
+					if (D3DXVec2LengthSq(&moveVector) > 0.0001f) {
+						tr.rotation = std::atan2(moveVector.y, moveVector.x);
+					}
+					tr.x += motion.trajectory.x * motion.velocity * dtSec;
+					tr.y += motion.trajectory.y * motion.velocity * dtSec;
+					break;
+				}
+				}
 			}
-			}
-		}
 
-		// An airburst projectile bursts the frame it crosses the plane through its
-		// target point, so a shot that overshoots still splits exactly on target.
-		auto& split = splits[i];
-		if (split.trigger == ProjectileSplitTrigger::OnArrival && life.elapsed >= life.delay) {
-			const Vec2 heading{ motion.trajectory.x, motion.trajectory.y };
-			const Vec2 toTarget{ split.targetX - tr.x, split.targetY - tr.y };
-			if (LengthSq(heading) > floatEpsilon && Dot(toTarget, heading) <= 0.f) {
-				QueueBurst(i);
-				dead[i] = 1;
-				continue;
+			// An airburst projectile bursts the frame it crosses the plane through its
+			// target point, so a shot that overshoots still splits exactly on target.
+			if (split.trigger == ProjectileSplitTrigger::OnArrival && life.elapsed >= life.delay) {
+				const Vec2 heading{ motion.trajectory.x, motion.trajectory.y };
+				const Vec2 toTarget{ split.targetX - tr.x, split.targetY - tr.y };
+				if (LengthSq(heading) > floatEpsilon && Dot(toTarget, heading) <= 0.f) {
+					tr.x = split.targetX;
+					tr.y = split.targetY;
+					if (split.holdTime > 0.f) {
+						life.arrivalHeld = true;
+						life.holdRemaining = split.holdTime;
+					}
+					else {
+						QueueBurst(i);
+						dead[i] = 1;
+						continue;
+					}
+				}
 			}
 		}
 

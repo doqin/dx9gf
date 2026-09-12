@@ -80,6 +80,7 @@ namespace Demo {
 		float splitDecayTime = UNSPECIFIED;
 		float splitDamage = UNSPECIFIED; // UNSPECIFIED = inherit the parent's damage
 		int splitGenerations = 1;      // >1 lets the children burst again on decay
+		float splitArrivalHoldTime = 0.f;
 		// Ghost trail (afterimages reusing the projectile's own texture)
 		DX9GF::Texture* ghostTexture = nullptr;
 		RECT ghostSrcRect{};
@@ -151,6 +152,7 @@ namespace Demo {
 		ProjectileDesc& SetSplitDecayTime(float decayTime);
 		ProjectileDesc& SetSplitDamage(float damage);
 		ProjectileDesc& SetSplitGenerations(int generations);
+		ProjectileDesc& SetSplitHoldTime(float holdTime);
 		ProjectileDesc& SetShardTexture(DX9GF::Texture* texture, std::vector<RECT> frames, unsigned int frameRate, float originX, float originY, float colliderWidth, float colliderHeight);
 		ProjectileDesc& SetShardTexture(DX9GF::Texture* texture, float originX, float originY, float colliderWidth, float colliderHeight);
 		ProjectileDesc& SetGhostSprite(DX9GF::Texture* texture, RECT srcRect, float originX, float originY);
@@ -244,6 +246,8 @@ namespace Demo {
 		};
 		struct LifetimeComponent {
 			float delay, elapsed, decayTime;
+			bool arrivalHeld = false;
+			float holdRemaining = 0.f;
 		};
 		struct CombatComponent {
 			float damage;
@@ -271,6 +275,7 @@ namespace Demo {
 			float damage;
 			int generations;
 			float colliderWidth, colliderHeight;
+			float holdTime = 0.f;
 		};
 		struct RenderComponent {
 			unsigned int batchIndex;
