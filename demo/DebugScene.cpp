@@ -32,9 +32,9 @@ void Demo::DebugScene::Init()
 	player->AddCardToDeck("PoisonCard");
 	player->AddCardToDeck("PoisonCard");
 	player->AddCardToDeck("PoisonCard");
-	player->AddCardToDeck("PoisonCard");
-	player->AddCardToDeck("PoisonCard");
-	player->AddCardToDeck("PoisonCard");
+	player->AddCardToDeck("ImmunityCard");
+	player->AddCardToDeck("ImmunityCard");
+	player->AddCardToDeck("ImmunityCard");
 	player->AddCardToDeck("BraceCard");
 	player->AddCardToDeck("BraceCard");
 	player->AddCardToDeck("BraceCard");

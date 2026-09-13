@@ -9,6 +9,8 @@
 #include "KeyeproEnemy.h"
 #include "TrojanEnemy.h"
 #include "KernelEnemy.h"
+#include "DeadlineEnemy.h"
+#include "HomeworkEnemy.h"
 void Demo::TestBattleScene::Init()
 {
 	IBattleScene::Init();
@@ -62,10 +64,10 @@ void Demo::TestBattleScene::Init()
 	//warlock->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
 	//enemies.push_back(warlock);
 
-	auto keyeproEnemy = std::make_shared<KeyeproEnemy>(transformManager, 600.f);
-	keyeproEnemy->Init(game->GetGraphicsDevice(), &camera);
-	keyeproEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
-	enemies.push_back(keyeproEnemy);
+	//auto keyeproEnemy = std::make_shared<KeyeproEnemy>(transformManager, 600.f);
+	//keyeproEnemy->Init(game->GetGraphicsDevice(), &camera);
+	//keyeproEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
+	//enemies.push_back(keyeproEnemy);
 
 	//auto keyeEnemy = std::make_shared<KeyeEnemy>(transformManager, 25.f);
 	//keyeEnemy->Init(game->GetGraphicsDevice(), &camera);
@@ -81,6 +83,16 @@ void Demo::TestBattleScene::Init()
 	//kernelEnemy->Init(game->GetGraphicsDevice(), &camera);
 	//kernelEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
 	//enemies.push_back(kernelEnemy);
+
+	//auto deadlineEnemy = std::make_shared<DeadlineEnemy>(transformManager, 100.f);
+	//deadlineEnemy->Init(game->GetGraphicsDevice(), &camera);
+	//deadlineEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
+	//enemies.push_back(deadlineEnemy);
+
+	auto homeworkEnemy = std::make_shared<HomeworkEnemy>(transformManager, 100.f);
+	homeworkEnemy->Init(game->GetGraphicsDevice(), &camera);
+	homeworkEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
+	enemies.push_back(homeworkEnemy);
 
 	//// Heavy Strike
 	//auto heavy = std::make_shared<HeavyStrikeCard>(transformManager, -260.f, -80.f);
