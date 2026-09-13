@@ -114,6 +114,8 @@
     <ClCompile Include="TestEnemy.cpp" />
     <ClCompile Include="TuitionFeeEnemy.cpp" />
     <ClCompile Include="GearSlotUI.cpp" />
+    <ClCompile Include="DeadlineEnemy.cpp" />
+    <ClCompile Include="HomeworkEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
@@ -237,6 +239,8 @@
     <ClInclude Include="TextButton.h" />
     <ClInclude Include="TuitionFeeEnemy.h" />
     <ClInclude Include="GearSlotUI.h" />
+    <ClInclude Include="DeadlineEnemy.h" />
+    <ClInclude Include="HomeworkEnemy.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc" />

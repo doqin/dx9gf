@@ -120,6 +120,7 @@ void Demo::IBattleScene::StartBattle()
 		enemy->OnTurnBegin(this->battlePlayer, this->popUpMessage, this->currentTurn, &this->enemies, game->GetGraphicsDevice(), &this->camera);
 	}
 	FlushPendingEnemies();
+	energy = (std::max)(0, energy - static_cast<int>(battlePlayer->GetModifierValue(ModifierType::EnergyDrain)));
 	if (!customBGMName.empty()) {
 		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(customBGMName, 0.3f, 1.5f);
 	}
@@ -680,6 +681,7 @@ void Demo::IBattleScene::BeginNextTurn()
 		enemy->OnTurnBegin(this->battlePlayer, this->popUpMessage, this->currentTurn, &this->enemies, game->GetGraphicsDevice(), &this->camera);
 	}
 	FlushPendingEnemies();
+	energy = (std::max)(0, energy - static_cast<int>(battlePlayer->GetModifierValue(ModifierType::EnergyDrain)));
 }
 
 void Demo::IBattleScene::GetEnemyGridBand(float& top, float& bottom) const
@@ -2756,6 +2758,19 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::
 			iconRect = { 256, 448, 272, 464};
 			statusName = L"Immunity";
 			statusDescription = L"Blocks debuffs and tick damage.\nLoses 1 charge per block.";
+		}
+		else if (mod.type == ModifierType::EnergyDrain) {
+			int drain = static_cast<int>(std::round(mod.value));
+			valueText = std::to_wstring(drain);
+			textColor = 0xFF40c4ff;
+			statusName = L"Energy Drain";
+			statusDescription = L"Reduces Energy gained at the start of your turn by " + std::to_wstring(drain) + L".";
+		}
+		else if (mod.type == ModifierType::InvertedControls) {
+			nameText = L"Reversed";
+			textColor = 0xFFff66cc;
+			statusName = L"Reversed Controls";
+			statusDescription = L"Movement is flipped: up<->down, left<->right.";
 		}
 		else {
 			continue;

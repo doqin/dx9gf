@@ -119,6 +119,10 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 	if (inpMan->KeyPress(keyLeft))  dir.x -= 1;
 	if (inpMan->KeyPress(keyDown))  dir.y += 1;
 	if (inpMan->KeyPress(keyUp))    dir.y -= 1;
+	if (HasModifier(ModifierType::InvertedControls)) {
+		dir.x = -dir.x;
+		dir.y = -dir.y;
+	}
 	if (dir.x == 1) state = State::Right;
 	if (dir.x == -1) state = State::Left;
 	if (dir.y == 1) state = State::Down;

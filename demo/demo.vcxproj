@@ -223,12 +223,14 @@
     <ClCompile Include="CustomBattleScene.cpp" />
     <ClCompile Include="DamageTextManager.cpp" />
     <ClCompile Include="DauDauNPC.cpp" />
+    <ClCompile Include="DeadlineEnemy.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="DemonEyeEnemy.cpp" />
     <ClCompile Include="DrawUtils.cpp" />
     <ClCompile Include="EnemyFactory.cpp" />
     <ClCompile Include="GearSlotUI.cpp" />
+    <ClCompile Include="HomeworkEnemy.cpp" />
     <ClCompile Include="ICard.cpp" />
     <ClCompile Include="EnergyToken.cpp" />
     <ClCompile Include="GoldToken.cpp" />
@@ -371,6 +373,7 @@
     <ClInclude Include="DauDauNPC.h">
       <DeploymentContent>false</DeploymentContent>
     </ClInclude>
+    <ClInclude Include="DeadlineEnemy.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="DemonEyeEnemy.h" />
@@ -382,6 +385,7 @@
     <ClInclude Include="GoldToken.h">
       <DeploymentContent>false</DeploymentContent>
     </ClInclude>
+    <ClInclude Include="HomeworkEnemy.h" />
     <ClInclude Include="ICombatant.h" />
     <ClInclude Include="imconfig.h" />
     <ClInclude Include="imgui.h" />
