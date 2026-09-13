@@ -53,7 +53,7 @@ void Demo::DeadlineEnemy::StartAttack(std::shared_ptr<Player> player, std::vecto
 	(void)enemies; (void)popUpMessage; (void)graphicsDevice; (void)camera; (void)currentTurn;
 	this->player = player;
 
-	const float baseDamage = 6.f;
+	const float baseDamage = 5.f;
 	const float finalDamage = CalculateOutgoingDamage(baseDamage);
 
 	int patternId = GetSmartRandomPattern(1, 2);
@@ -126,14 +126,19 @@ void Demo::DeadlineEnemy::PatternClockTickCountdown(float projDamage) {
 void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 	constexpr float BEAM_LENGTH = 300.f;
 	constexpr float WARN_TIME = 0.8f;
-	constexpr float FIRE_TIME = 4.0f;
 	constexpr D3DCOLOR WARN_COLOR = D3DCOLOR_ARGB(160, 255, 60, 60);
 	constexpr D3DCOLOR GLOW_COLOR = D3DCOLOR_ARGB(120, 200, 20, 20);
 	constexpr D3DCOLOR CORE_COLOR = 0xFFFFFFFF;
 
+	const int WAVE_SHOTS = 22;
+	const float SHOT_DELAY = 0.16f;
+
+	const float WAVE_DURATION = WAVE_SHOTS * SHOT_DELAY;
+	const float FIRE_TIME = WAVE_DURATION + 1.8f;
+
 	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, BEAM_LENGTH, WARN_TIME, FIRE_TIME, WARN_COLOR, GLOW_COLOR, CORE_COLOR](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
-			float wallOffset = 55.f; 
+			float wallOffset = 55.f;
 			LaserDesc leftBeam = LaserDesc::Vertical(-wallOffset, 0.f, BEAM_LENGTH)
 				.SetWarnTime(WARN_TIME)
 				.SetFireTime(FIRE_TIME)
@@ -156,20 +161,34 @@ void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 
 	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WARN_TIME));
 
-	const int WAVE_SHOTS = 22;
-	const float SHOT_DELAY = 0.16f;
+	struct SpawnRange {
+		float minX, maxX;
+		int tickInterval = 1;
+	};
+
+	constexpr std::array<SpawnRange, 5> spawnRanges = { {
+		{ -45.f,   45.f,  1 },
+		{ -128.f, -65.f,  1 },
+		{  65.f,  128.f,  1 },
+		{ -181.f, -128.f, 2 },
+		{  128.f,  181.f, 2 }
+	} };
 
 	for (int i = 0; i < WAVE_SHOTS; i++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, i](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, i, spawnRanges](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
-				float spawnX = RNG::Range(-45.f, 45.f); 
-				auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, -220.f)
-					.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
-					.SetWave(45.f, 5.0f)
-					.SetVelocity(280.f)
-					.SetDecayTime(3.5f)
-					.SetDamage(projDamage);
-				projectiles.Spawn(lock, desc);
+				for (const auto& range : spawnRanges) {
+					if (i % range.tickInterval != 0) continue;
+
+					float spawnX = RNG::Range(range.minX, range.maxX);
+					auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, -220.f)
+						.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
+						.SetWave(45.f, 5.0f)
+						.SetVelocity(280.f)
+						.SetDecayTime(3.5f)
+						.SetDamage(projDamage);
+					projectiles.Spawn(lock, desc);
+				}
 			}
 			markFinished();
 			}));
