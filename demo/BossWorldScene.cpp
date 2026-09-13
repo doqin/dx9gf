@@ -77,6 +77,17 @@ void Demo::BossWorldScene::OnInit()
 	});
 	mapNPCs.push_back(npcHint);
 
+	NPCConfig LiVRHmih = { L"assets/I_Dont_Know.png", 32, 32, 1, 3, 24.f, 8.f, 12.f };
+	auto QemcTT = std::make_shared<NPC>(transformManager, -560.0f, -15.0f, LiVRHmih);
+	QemcTT->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
+	QemcTT->SetInteractLogic(
+		[](NPC* self) -> std::function<void()> {
+			self->AddLine(L"LiVRHmih", L"...");
+			return nullptr;
+		}
+	);
+	mapNPCs.push_back(QemcTT);
+
 	NPCConfig hngocConfig = { L"assets/ahai-Sheet.png", 32, 32, 2, 3, 24.f, 8.f, 12.f };
 	auto hNgoc = std::make_shared<NPC>(transformManager, 300.f, 230.f, hngocConfig);
 	hNgoc->AttachQuestMarker("Quest_BossWorld", Demo::QuestMarkerRole::Giver);

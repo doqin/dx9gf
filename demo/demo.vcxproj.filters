@@ -438,6 +438,7 @@
     <Image Include="assets\12x12-gold-token.png" />
     <Image Include="assets\ahai-Sheet.png" />
     <Image Include="assets\hkhang-Sheet.png" />
+    <Image Include="assets\I_dont_know.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\arcade-among-2-r46pv.ttf" />

@@ -586,6 +586,9 @@
     <Image Include="assets\hkhang-Sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="assets\I_dont_know.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="assets\lab.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
