@@ -3514,17 +3514,23 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	static float escCooldown = 0.0f;
 	if (escCooldown > 0) escCooldown -= deltaTime;
 
-	if (inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("OPEN_INVENTORY")) && escCooldown <= 0) {
-		if (battleMenu) battleMenu->Toggle();
-		escCooldown = 300.0f;
-	}
+	// Once a return-to-previous-scene sequence has been queued (victory or a successful flee),
+	// the pause menu must not be reachable: opening it here stalls the queued commandBuffer
+	// transition, and "Leave Game" would GoToScene(0) without ever removing this scene, orphaning
+	// it in the scene stack instead of returning to the actual previous scene.
+	if (!isBattleEnding && !isFleeing) {
+		if (inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("OPEN_INVENTORY")) && escCooldown <= 0) {
+			if (battleMenu) battleMenu->Toggle();
+			escCooldown = 300.0f;
+		}
 
-	if (battleMenu && battleMenu->IsPendingLeave()) {
-		auto sceMan = game->GetSceneManager();
-		sceMan->GoToScene(0);
-		auto audio = DX9GF::AudioManager::GetInstance();
-		audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
-		return;
+		if (battleMenu && battleMenu->IsPendingLeave()) {
+			auto sceMan = game->GetSceneManager();
+			sceMan->GoToScene(0);
+			auto audio = DX9GF::AudioManager::GetInstance();
+			audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
+			return;
+		}
 	}
 
 	if (battleMenu && battleMenu->IsOpen()) {
