@@ -1883,8 +1883,12 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 
 			this->CollectDeadEnemies();
 			if (this->enemies.empty()) {
+				// Leave isTransitioning latched true: the battle scene is going away for good
+				// once OnAllEnemiesDefeated's queued fade/RemoveScene finishes, and clearing it
+				// here would re-open the PlayerAttack button gates (see the `!isTransitioning`
+				// checks above) mid-fade, letting Execute be pressed again and clear commandBuffer
+				// out from under the queued return-to-previous-scene command.
 				this->OnAllEnemiesDefeated();
-				this->isTransitioning = false;
 				markFinished();
 				return;
 			}
@@ -3141,6 +3145,11 @@ void Demo::IBattleScene::Init()
 		}
 		});
 	executeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+		// commandBuffer.Clear() below would also wipe a queued victory/flee return-to-previous-
+		// scene command if the battle is already ending - refuse instead of stranding the player.
+		if (isBattleEnding || isFleeing) {
+			return;
+		}
 		// Executing clears the command buffer, which is also what carries the deal animation of
 		// a mid-turn draw. Clearing it mid-flight would strand those cards in queuedToDraw -
 		// never reaching the hand, never discarded - so refuse until they have landed.
@@ -3514,17 +3523,23 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	static float escCooldown = 0.0f;
 	if (escCooldown > 0) escCooldown -= deltaTime;
 
-	if (inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("OPEN_INVENTORY")) && escCooldown <= 0) {
-		if (battleMenu) battleMenu->Toggle();
-		escCooldown = 300.0f;
-	}
+	// Once a return-to-previous-scene sequence has been queued (victory or a successful flee),
+	// the pause menu must not be reachable: opening it here stalls the queued commandBuffer
+	// transition, and "Leave Game" would GoToScene(0) without ever removing this scene, orphaning
+	// it in the scene stack instead of returning to the actual previous scene.
+	if (!isBattleEnding && !isFleeing) {
+		if (inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("OPEN_INVENTORY")) && escCooldown <= 0) {
+			if (battleMenu) battleMenu->Toggle();
+			escCooldown = 300.0f;
+		}
 
-	if (battleMenu && battleMenu->IsPendingLeave()) {
-		auto sceMan = game->GetSceneManager();
-		sceMan->GoToScene(0);
-		auto audio = DX9GF::AudioManager::GetInstance();
-		audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
-		return;
+		if (battleMenu && battleMenu->IsPendingLeave()) {
+			auto sceMan = game->GetSceneManager();
+			sceMan->GoToScene(0);
+			auto audio = DX9GF::AudioManager::GetInstance();
+			audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
+			return;
+		}
 	}
 
 	if (battleMenu && battleMenu->IsOpen()) {
