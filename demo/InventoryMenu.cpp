@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include "SettingsManager.h"
+#include "PopupManager.h"
 namespace {
 	constexpr float RAW_ITEM_W = 23.0f;
 	constexpr float RAW_ITEM_H = 35.0f;
@@ -104,7 +105,21 @@ namespace Demo {
 		btnLeaveGame = std::make_shared<IconButton>(transformManager, leaveX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
 		btnLeaveGame->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 208, 48, 32, 3));
 		btnLeaveGame->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
-			this->pendingLeave = true;
+
+			std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
+				{ L"Yes(Y)", [this]() {
+					this->pendingLeave = true;
+				} },
+				{ L"No(N)", []() {} }
+			};
+
+			PopupManager::GetInstance()->Show(
+				"stepped_gold",
+				L"Leave Game",
+				L"Are you sure you want to return to Main Menu?",
+				buttons
+			);
+
 			});
 		btnLeaveGame->SetSpriteScale(2.f, 2.f);
 		btnLeaveGame->Init(uiCamera);
