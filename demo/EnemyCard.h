@@ -19,5 +19,7 @@ namespace Demo {
 		std::shared_ptr<IEnemy> GetValue() override;
 		void Draw(unsigned long long deltaTime) override;
 		bool OnDrop(std::shared_ptr<IDraggable> draggable) override;
+		void OnDropMissed(std::weak_ptr<DX9GF::IGameObject> oldParent, float oldWorldX, float oldWorldY) override;
+		bool CanBeStoredInContainer() const override { return false; }
 	};
 }

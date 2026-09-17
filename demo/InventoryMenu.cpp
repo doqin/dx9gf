@@ -287,7 +287,23 @@ namespace Demo {
 			pool.pop_back();
 			return card;
 		}
-		return ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), uiCamera);
+
+		auto card = ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), uiCamera);
+		auto draggable = std::dynamic_pointer_cast<IDraggable>(card);
+		if (draggable) {
+			draggable->SetOnDropMissedHandler([this](std::shared_ptr<IDraggable> droppedCard) {
+				// Trả về đúng container cũ dựa trên preDragParent
+				if (auto p = droppedCard->GetPreDragParent().lock()) {
+					if (p.get() == this->deckContainer.get()) {
+						this->deckContainer->StoreCard(std::dynamic_pointer_cast<ICard>(droppedCard));
+					}
+					else if (p.get() == this->inventoryContainer.get()) {
+						this->inventoryContainer->StoreCard(std::dynamic_pointer_cast<ICard>(droppedCard));
+					}
+				}
+				});
+		}
+		return card;
 	}
 
 	void InventoryMenu::CommitCards()

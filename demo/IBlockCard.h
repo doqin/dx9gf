@@ -76,5 +76,7 @@ namespace Demo {
 		std::tuple<float, float> GetStatementSlotWorldPosition(size_t index, std::shared_ptr<IStatementCard> excluding = nullptr);
 		// Ordered list (execution order) of statement cards currently queued in this block.
 		const std::vector<std::weak_ptr<IStatementCard>>& GetStatementCards() const { return statementCards; }
+		bool TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent) override;
+		bool CanBeStoredInContainer() const override { return false; }
 	};
 }

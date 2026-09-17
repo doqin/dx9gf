@@ -28,7 +28,7 @@ namespace Demo {
 		void ResetExecution() override;
 		std::wstring GetInputsDescription() const override;
 		bool HasRequiredTargets() const override { return !targets.empty(); }
-		bool CanAcceptEnemyCard() const override { return targets.size() < maxTargets; }
+		bool CanAcceptEnemyCard() const override { return targets.size() < maxTargets && IsQueuedInBlock(); }
 		bool AttachEnemyCard(std::shared_ptr<EnemyCard> card) override;
 		void ReleaseEnemyCards() override;
 		std::tuple<float, float> GetEnemyCardSlotWorldPosition() const override;

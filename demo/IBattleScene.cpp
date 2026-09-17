@@ -287,6 +287,13 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 		card->SetBattleScene(this);
 		auto draggable = dynamic_pointer_cast<IDraggable>(card);
 		if (draggable) {
+			draggable->SetOnDropMissedHandler([this](std::shared_ptr<IDraggable> droppedCard) {
+				auto statement = std::dynamic_pointer_cast<IStatementCard>(droppedCard);
+				if (statement) {
+					// BattleScene có hàm ReturnCardToHand sinh ra để làm đúng việc này!
+					this->ReturnCardToHand(statement);
+				}
+				});
 			draggable->DetachParent();
 			draggable->SetHidden(false);
 		}

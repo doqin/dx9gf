@@ -25,7 +25,7 @@ namespace Demo {
 		RECT GetFaceRect() const override { return RECT{ 0, 288, 80, 304 }; }
 		std::wstring GetInputsDescription() const override;
 		size_t GetCost() const override;
-		bool CanAcceptEnemyCard() const override { return !enemyCard.lock(); }
+		bool CanAcceptEnemyCard() const override { return !enemyCard.lock() && IsQueuedInBlock(); }
 		bool AttachEnemyCard(std::shared_ptr<EnemyCard> card) override;
 		void ReleaseEnemyCards() override;
 		std::tuple<float, float> GetEnemyCardSlotWorldPosition() const override;

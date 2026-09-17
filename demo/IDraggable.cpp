@@ -11,15 +11,16 @@ std::shared_ptr<DX9GF::FontSprite> Demo::IDraggable::debugFontSprite = nullptr;
 
 void Demo::DraggableManager::RebuildHierarchy()
 {
+	// Clean up dead objects first using a safe iterator-based erase
+	for (auto it = objectMap.begin(); it != objectMap.end(); ) {
+		if (!it->second) it = objectMap.erase(it);
+		else ++it;
+	}
+
 	std::vector<std::weak_ptr<IDraggable>> newHierarchy;
 	std::vector<LevelBatch> newLevels;
 	size_t currentStart = 0;
 	for (auto& [key, val] : objectMap) {
-		// Remove dead objects
-		if (!val) {
-			objectMap.erase(key);
-			continue;
-		}
 		if (auto parent = val->GetParent(); !parent.has_value()) {
 			newHierarchy.push_back(val);
 		}
@@ -244,8 +245,14 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 		}
 
 		auto parent = dynamic_pointer_cast<IDraggable>(thisObj->GetParent().value().lock());
-		if (parent->GetParent().has_value()) {
-			parent->DetachParent();
+		if (!isDragging) {
+			parent->preDragParent = parent->GetParent().has_value() ? parent->GetParent().value() : std::weak_ptr<DX9GF::IGameObject>();
+			parent->preDragWorldX = parent->GetWorldX();
+			parent->preDragWorldY = parent->GetWorldY();
+			if (parent->GetParent().has_value()) {
+				parent->DetachParent();
+			}
+			DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.4f);
 		}
 		auto inpMan = DX9GF::InputManager::GetInstance();
 
@@ -290,13 +297,13 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 			DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 		}
 		else {
-			DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.2f);
+			parent->OnDropMissed(parent->preDragParent, parent->preDragWorldX, parent->preDragWorldY);
 		}
 		parent->GetTransformManager().lock()->RebuildHierarchy();
 		isDragging = false;
 		});
 	manager->Add(dynamic_pointer_cast<IDraggable>(shared_from_this()));
-	color = D3DXCOLOR(RNG::Range(0.0f, 1.0f) , RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), 1);
+	color = D3DXCOLOR(RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), 1);
 	if (debugFont.get() == nullptr) {
 		IDraggable::debugFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
 	}
@@ -313,7 +320,7 @@ void Demo::IDraggable::SetParent(std::weak_ptr<IGameObject> parent)
 	auto [objX, objY] = this->GetWorldPosition();
 	this->SetLocalPosition(objX - parentX, objY - parentY);
 	const bool defer = draggableManager && draggableManager->IsDeferRebuild();
-	if (!defer) draggableManager->RebuildHierarchy();
+	if (draggableManager && !defer) draggableManager->RebuildHierarchy();
 	if (auto lock = GetTransformManager().lock()) {
 		lock->SetParent(transformHandle, parent.lock()->GetTransformHandle().slotIndex);
 		if (!defer) lock->RebuildHierarchy();
@@ -324,7 +331,7 @@ void Demo::IDraggable::DetachParent()
 {
 	this->parent.reset();
 	const bool defer = draggableManager && draggableManager->IsDeferRebuild();
-	if (!defer) draggableManager->RebuildHierarchy();
+	if (draggableManager && !defer) draggableManager->RebuildHierarchy();
 	if (auto lock = GetTransformManager().lock()) {
 		lock->SetParent(transformHandle, -1);
 		if (!defer) lock->RebuildHierarchy();
@@ -380,7 +387,7 @@ void Demo::IDraggable::Draw(unsigned long long deltaTime)
 	if (isCropped) {
 		graphicsDevice->SetScissorTest(false);
 	}
-	
+
 	if (trigger->IsHovering(deltaTime) && dynamic_cast<Demo::ICard*>(this) != nullptr) {
 		auto width = trigger->GetWidth();
 		auto height = trigger->GetHeight();
@@ -394,7 +401,7 @@ void Demo::IDraggable::Draw(unsigned long long deltaTime)
 			gd->DrawRectangle(*cam, thisX, thisY, width, height, color, true);
 			gd->SetAlphaBlending(false);
 			markFinished();
-		}));
+			}));
 	}
 }
 
@@ -478,4 +485,23 @@ bool Demo::IDraggable::IsHidden() const
 void Demo::IDraggable::SetHidden(bool hidden)
 {
 	isHidden = hidden;
+}
+
+void Demo::IDraggable::OnDropMissed(std::weak_ptr<DX9GF::IGameObject> oldParent, float oldWorldX, float oldWorldY)
+{
+	if (TryReclaim(oldParent)) {
+		if (onDropMissedHandler) {
+			onDropMissedHandler(std::dynamic_pointer_cast<IDraggable>(shared_from_this()));
+		}
+		return;
+	}
+
+	this->SetLocalPosition(oldWorldX, oldWorldY);
+
+	if (onDropMissedHandler) {
+		onDropMissedHandler(std::dynamic_pointer_cast<IDraggable>(shared_from_this()));
+	}
+	else {
+		if (auto p = oldParent.lock()) this->SetParent(p);
+	}
 }
