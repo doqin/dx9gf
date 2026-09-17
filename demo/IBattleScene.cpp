@@ -2248,7 +2248,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		runInitButton->Draw(game->GetGraphicsDevice(), deltaTime);
 		DrawPileButtons(deltaTime);
 		//gear's button tooltip
-		if (gearButton->GetTrigger()->IsHovering(deltaTime)) {
+		if (gearButton->GetTrigger()->IsHovering(deltaTime) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == gearButton)) {
 			int eqID = player->GetEquippedActiveGearID();
 			auto bp = eqID != -1 ? Demo::ItemData::GetInstance()->GetGearBlueprint(eqID) : nullptr;
 
@@ -2264,7 +2264,11 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 				tooltipText = L"No Active Gear Equipped";
 			}
 
-			auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
+			float btnWorldX = gearButton->GetWorldX() + (gearButton->GetWidth() / 2.0f) - 20.f;
+			float btnWorldY = gearButton->GetWorldY() - 20.f;
+
+			auto [screenX, screenY] = DX9GF::Utils::WorldToWindowCoords(this->uiCamera, btnWorldX, btnWorldY);
+
 			DrawTooltip(tooltipText, screenX, screenY, game->GetGraphicsDevice());
 		}
 
@@ -2364,7 +2368,7 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 			fontSprite->SetColor(0xFFFFFFFF);
 		}
 
-		if (btn->GetTrigger()->IsHovering(deltaTime)) {
+		if (btn->GetTrigger()->IsHovering(deltaTime) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == btn)) {
 			auto blueprint = Demo::ItemData::GetInstance()->GetItemBlueprint(slot.itemID);
 			if (blueprint) {
 				hoverDescription = blueprint->GetDescription();

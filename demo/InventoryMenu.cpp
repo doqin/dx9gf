@@ -434,6 +434,11 @@ namespace Demo {
 				}
 			}
 		}
+		else if (currentTab == Tab::ITEMS) {
+			for (auto& btn : buffItems) {
+				addButton(btn);
+			}
+		}
 
 		return candidates;
 	}
@@ -632,6 +637,7 @@ namespace Demo {
 
 		if (currentTab == Tab::ITEMS)
 		{
+
 			auto& inventory = player->GetInventoryItems().GetSlots();
 			hoverDescription = L"";
 			int displayIndex = 0;
@@ -658,7 +664,7 @@ namespace Demo {
 				fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
 				fontSprite->Draw(*uiCamera, deltaTime);
 
-				if (btn->GetTrigger()->IsHovering(deltaTime)) {
+				if (btn->GetTrigger()->IsHovering(deltaTime) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == btn)) {
 					hoverDescription = blueprint->GetDescription();
 				}
 				displayIndex++;
@@ -826,14 +832,14 @@ namespace Demo {
 			std::wstring hoverName = L"";
 			std::wstring hoverDesc = L"";
 
-			if (activeSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
+			if (activeSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == activeSlot->GetButton())) {
 				int hovID = activeSlot->GetGearID();
 				if (hovID != -1) {
 					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
 					if (bp) { hoverName = bp->name; hoverDesc = bp->description; }
 				}
 			}
-			else if (passiveSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
+			else if (passiveSlot->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER ||(keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == passiveSlot->GetButton())) {
 				int hovID = passiveSlot->GetGearID();
 				if (hovID != -1) {
 					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
@@ -844,7 +850,7 @@ namespace Demo {
 			for (int i = 0; i < 8; i++) {
 				orbitSlots[i]->Draw(gd, uiCamera, deltaTime);
 
-				if (orbitSlots[i]->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) {
+				if ((orbitSlots[i]->GetButton()->GetState() == Demo::IButton::ButtonState::HOVER) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == orbitSlots[i]->GetButton())) {
 					int hovID = orbitSlots[i]->GetGearID();
 					if (hovID != -1) {
 						auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(hovID);
