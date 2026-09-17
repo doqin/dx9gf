@@ -254,7 +254,27 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 		auto currentX = parent->GetWorldX();
 		auto currentY = parent->GetWorldY();
 
-		parent->SetLocalPosition(currentX + dX / this->camera->GetZoom(), currentY + dY / this->camera->GetZoom());
+		//clamp to advoid offscreen bug
+		float zoom = this->camera->GetZoom();
+		float targetX = currentX + dX / zoom;
+		float targetY = currentY + dY / zoom;
+
+		auto app = DX9GF::Application::GetInstance();
+		float virtualW = static_cast<float>(app->GetScreenWidth());
+		float virtualH = static_cast<float>(app->GetScreenHeight());
+
+		auto camPos = this->camera->GetPosition();
+
+		float minX = camPos.x - (virtualW / 2.0f);
+		float minY = camPos.y - (virtualH / 2.0f);
+
+		float maxX = std::max(minX, camPos.x + (virtualW / 2.0f) - parent->GetWidth());
+		float maxY = std::max(minY, camPos.y + (virtualH / 2.0f) - parent->GetHeight());
+
+		targetX = std::clamp(targetX, minX, maxX);
+		targetY = std::clamp(targetY, minY, maxY);
+
+		parent->SetLocalPosition(targetX, targetY);
 		parent->GetTransformManager().lock()->RebuildHierarchy();
 
 		if (!isDragging) {
@@ -262,6 +282,7 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 		}
 		isDragging = true;
 		});
+
 	trigger->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
 		auto parent = dynamic_pointer_cast<IDraggable>(thisObj->GetParent().value().lock());
 		parent->GetDraggableManager().lock()->AttachDroppable(parent);
