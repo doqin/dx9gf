@@ -80,23 +80,10 @@ namespace Demo {
 				//avoid spamming gold token on 1 enemy
 				SetEventState(EventType::None);
 
-				if (colliderManager) {
-					float hitBoxW = encounterData.hitBoxWidth;
-					float originalHitBoxH = encounterData.hitBoxHeight;
-					float hitBoxH = originalHitBoxH * 0.25f;
-
-					float offsetX = -hitBoxW / 2.0f;
-					float offsetY = (originalHitBoxH / 2.0f) - hitBoxH;
-
-					collider = std::make_shared<DX9GF::RectangleCollider>(
-						transformManager,
-						shared_from_this(),
-						hitBoxW, hitBoxH,
-						offsetX, offsetY
-					);
-
-					collider->SetOrigin(0.f, 0.f);
+				if (colliderManager && collider) {
+					colliderManager->Add(collider);
 				}
+
 				if (encounterData.useGlobalPool) {
 					encounterData.enemyTypes = EncounterGenerator::GenerateNormalEncounter();
 				}
