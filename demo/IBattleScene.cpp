@@ -287,6 +287,12 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 		card->SetBattleScene(this);
 		auto draggable = dynamic_pointer_cast<IDraggable>(card);
 		if (draggable) {
+			draggable->SetOnDropMissedHandler([this](std::shared_ptr<IDraggable> droppedCard) {
+				auto statement = std::dynamic_pointer_cast<IStatementCard>(droppedCard);
+				if (statement) {
+					this->ReturnCardToHand(statement);
+				}
+				});
 			draggable->DetachParent();
 			draggable->SetHidden(false);
 		}
@@ -1127,22 +1133,33 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	const float buttonY = screenHeight / 2.f - 20 - attackButton->GetHeight();
 	const float sidePadding = 20.f;
 
+	const float pileButtonsX = LayOutPileButtons(screenWidth, buttonY);
+
+	enemyCardRemoveAreaWidth = 250.f; //fixed area's width
+	enemyCardRemoveAreaHeight = backButton->GetHeight();
+	enemyCardRemoveAreaY = buttonY;
+
 	const float leftX = -screenWidth / 2.f + sidePadding;
-	const float gearX = leftX + backButton->GetWidth() + sidePadding;
-	const float executeX = gearX + gearButton->GetWidth() + sidePadding;
-	const float runInitX = executeX + executeButton->GetWidth() + sidePadding;
+	const float totalItemsWidth = backButton->GetWidth() + gearButton->GetWidth()
+		+ executeButton->GetWidth() + runInitButton->GetWidth() + enemyCardRemoveAreaWidth;
+	const float availableWidth = (pileButtonsX - sidePadding) - leftX;
+	const float spacing = (std::max)(sidePadding, (availableWidth - totalItemsWidth) / 4.f);
+
+	const float gearX = leftX + backButton->GetWidth() + spacing;
+	const float executeX = gearX + gearButton->GetWidth() + spacing;
+	const float runInitX = executeX + executeButton->GetWidth() + spacing;
+	enemyCardRemoveAreaX = runInitX + runInitButton->GetWidth() + spacing;
 
 	backButton->SetLocalPosition(leftX, buttonY);
 	gearButton->SetLocalPosition(gearX, buttonY);
 	executeButton->SetLocalPosition(executeX, buttonY);
 	runInitButton->SetLocalPosition(runInitX, buttonY);
 
-	const float pileButtonsX = LayOutPileButtons(screenWidth, buttonY);
-	enemyCardRemoveAreaX = runInitX + runInitButton->GetWidth() + sidePadding;
-	enemyCardRemoveAreaY = buttonY;
-	// Stops short of the pile buttons parked at the right end of the same bar.
-	enemyCardRemoveAreaWidth = pileButtonsX - sidePadding - enemyCardRemoveAreaX;
-	enemyCardRemoveAreaHeight = backButton->GetHeight();
+	backButton->SetLocalPosition(leftX, buttonY);
+	gearButton->SetLocalPosition(gearX, buttonY);
+	executeButton->SetLocalPosition(executeX, buttonY);
+	runInitButton->SetLocalPosition(runInitX, buttonY);
+
 	const bool initExecuting = initBlockCard && initBlockCard->IsExecuting();
 	// Unlike the main block finishing, this does not end the turn - the cards are committed and
 	// discarded and the player carries on programming.
@@ -1192,8 +1209,6 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 		draggableManager->Update(deltaTime);
 		RemoveEnemyCardsInRemoveArea();
 	}
-	// Indexed, and holding a strong reference for the duration of the call: Update drains the
-	// enemy's command buffer, which can spawn or remove enemies and resize this vector.
 	for (size_t i = 0; i < enemies.size(); ++i) {
 		auto enemy = enemies[i];
 		enemy->Update(deltaTime);
@@ -1475,6 +1490,23 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 				}
 				});
 		}
+
+		for (auto& enemyCard : enemyCards) {
+			if (!enemyCard) continue;
+			auto parent = enemyCard->GetParent();
+			if (!parent.has_value()) continue;
+			if (enemyCard->IsDragging()) continue;
+
+			candidates.push_back({
+				enemyCard,
+				enemyCard->GetWorldX(),
+				enemyCard->GetWorldY(),
+				(float)enemyCard->GetWidth(),
+				(float)enemyCard->GetHeight(),
+				[this, enemyCard]() { pickedUpCard = enemyCard; placementSlotIndex = 0; }
+				});
+		}
+
 		break;
 	}
 	case State::PlayerOpenItems: {
@@ -2213,6 +2245,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		D3DXCOLOR(0.7f, 0.1f, 0.1f, 0.5f),
 		true
 	);
+
 	fontSprite->Begin();
 	fontSprite->SetColor(0xFFFFFFFF);
 	fontSprite->SetPosition(enemyCardRemoveAreaX + 8.f, enemyCardRemoveAreaY + 8.f);
@@ -2248,7 +2281,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		runInitButton->Draw(game->GetGraphicsDevice(), deltaTime);
 		DrawPileButtons(deltaTime);
 		//gear's button tooltip
-		if (gearButton->GetTrigger()->IsHovering(deltaTime)) {
+		if (gearButton->GetTrigger()->IsHovering(deltaTime) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == gearButton)) {
 			int eqID = player->GetEquippedActiveGearID();
 			auto bp = eqID != -1 ? Demo::ItemData::GetInstance()->GetGearBlueprint(eqID) : nullptr;
 
@@ -2264,7 +2297,11 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 				tooltipText = L"No Active Gear Equipped";
 			}
 
-			auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
+			float btnWorldX = gearButton->GetWorldX() + (gearButton->GetWidth() / 2.0f) - 20.f;
+			float btnWorldY = gearButton->GetWorldY() - 20.f;
+
+			auto [screenX, screenY] = DX9GF::Utils::WorldToWindowCoords(this->uiCamera, btnWorldX, btnWorldY);
+
 			DrawTooltip(tooltipText, screenX, screenY, game->GetGraphicsDevice());
 		}
 
@@ -2364,7 +2401,7 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 			fontSprite->SetColor(0xFFFFFFFF);
 		}
 
-		if (btn->GetTrigger()->IsHovering(deltaTime)) {
+		if (btn->GetTrigger()->IsHovering(deltaTime) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == btn)) {
 			auto blueprint = Demo::ItemData::GetInstance()->GetItemBlueprint(slot.itemID);
 			if (blueprint) {
 				hoverDescription = blueprint->GetDescription();
@@ -3878,8 +3915,9 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 	if (SUCCEEDED(gd->BeginDraw())) {
 		auto screenW = (float)game->GetVirtualWidth();
 		auto screenH = (float)game->GetVirtualHeight();
-		const float modifierIconOffsetX = -screenW / 2.f + 96.f;
+		const float modifierIconOffsetX = gearButton->GetWorldX() - gearButton->GetWidth();
 		const float modifierIconOffsetY = screenH / 2.f - 64.f;
+
 		switch (state) {
 		case State::PlayerStandBy:
 			PlayerStandByDraw(deltaTime);

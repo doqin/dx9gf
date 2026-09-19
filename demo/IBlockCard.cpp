@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "IBlockCard.h"
 #include "IBattleScene.h"
 #include "DrawUtils.h"
@@ -285,5 +285,12 @@ bool Demo::IBlockCard::HasAllRequiredTargets() const
 			}
 		}
 	}
+	return true;
+}
+
+bool Demo::IBlockCard::TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent)
+{
+	// Block cards don't belong to any container and have no original position. 
+	// An invalid drop will just keep the card at its current dropped position instead of reverting.
 	return true;
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ICard.h"
 #include "IDraggable.h"
 #include "GameItems.h"
@@ -7,12 +7,13 @@ namespace Demo {
 	class VirtualBattleState;
 	class EnemyCard;
 	class IEnemy;
+	class IBlockCard;
 	class IStatementCard : public ICard, public IDraggable {
 	public:
 		// One step of the queued program, in the order it would resolve. Only what changes how
 		// much damage lands on an enemy is modelled - a hit, or a modifier the program applies
 		// partway through that makes the hits after it land differently.
-		
+
 		inline IStatementCard(std::weak_ptr<DX9GF::TransformManager> transformManager)
 			: IGameObject(transformManager), ICard(transformManager), IDraggable(transformManager) {
 		}
@@ -76,7 +77,15 @@ namespace Demo {
 		// duplicated and its cost is counted twice. Targeting cards (StrikeCard, MultiTargetCard)
 		// override this again with their own EnemyCard-only logic.
 		bool OnDrop(std::shared_ptr<IDraggable> other) override { return false; }
+
+		bool TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent) override;
 	protected:
+		// Currently placed within any IBlockCard, rather than in the hand container or floating freely. 
+		// Used to determine if this statement card can accept an EnemyCard (CanAcceptEnemyCard/AttachEnemyCard).
+		// This is 1 of 3 places enforcing the "EnemyCards only live in blocks" rule. If this rule 
+		// changes, also review: IDraggable::CanBeStoredInContainer (EnemyCard override) and 
+		// EnemyCard::OnDropMissed (handling for being rejected everywhere).
+		bool IsQueuedInBlock() const;
 		std::shared_ptr<DX9GF::Font> descFont;
 		std::shared_ptr<DX9GF::FontSprite> descFontSprite;
 

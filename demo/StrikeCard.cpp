@@ -23,7 +23,7 @@ bool Demo::StrikeCard::OnDrop(std::shared_ptr<IDraggable> other)
 
 bool Demo::StrikeCard::AttachEnemyCard(std::shared_ptr<EnemyCard> card)
 {
-	if (!card || enemyCard.lock()) {
+	if (!card || enemyCard.lock() || !IsQueuedInBlock()) {
 		return false;
 	}
 	card->SetParent(shared_from_this());
@@ -122,7 +122,7 @@ void Demo::StrikeCard::Draw(unsigned long long deltaTime)
 	IStatementCard::Draw(deltaTime);
 	for (auto& draggable : draggableManager->GetDraggingDraggables()) {
 		if (auto draggedEnemyCard = std::dynamic_pointer_cast<EnemyCard>(draggable); draggableManager->GetDraggingDraggables().size() == 1 && draggedEnemyCard) {
-			if (!enemyCard.lock()) {
+			if (CanAcceptEnemyCard()) {
 				auto [draggedX, draggedY] = draggedEnemyCard->GetWorldPosition();
 				auto draggedWidth = draggedEnemyCard->GetWidth();
 				auto draggedHeight = draggedEnemyCard->GetHeight();

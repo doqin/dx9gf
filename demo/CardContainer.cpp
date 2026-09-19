@@ -1,7 +1,5 @@
 #include "pch.h"
 #include "CardContainer.h"
-#include "IBlockCard.h"
-#include "MainBlockCard.h"
 #include <algorithm>
 
 void Demo::CardContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
@@ -23,14 +21,14 @@ void Demo::CardContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF:
 
 bool Demo::CardContainer::OnDrop(std::shared_ptr<IDraggable> other)
 {
-	if (!std::dynamic_pointer_cast<ICard>(other) || std::dynamic_pointer_cast<MainBlockCard>(other)) {
+	if (!std::dynamic_pointer_cast<ICard>(other) || !other->CanBeStoredInContainer()) {
 		return false;
 	}
 
 	if (playedPile && std::find_if(playedPile->begin(), playedPile->end(), [&](const std::weak_ptr<ICard>& playedCard) {
 		auto lock = playedCard.lock();
 		return lock && lock.get() == dynamic_pointer_cast<ICard>(other).get();
-	}) != playedPile->end()) {
+		}) != playedPile->end()) {
 		return false;
 	}
 	if (!IContainer::OnDrop(other)) {

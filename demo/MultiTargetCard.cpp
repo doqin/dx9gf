@@ -27,7 +27,7 @@ namespace Demo {
 	}
 
 	bool MultiTargetCard::AttachEnemyCard(std::shared_ptr<EnemyCard> card) {
-		if (!card || targets.size() >= maxTargets) return false;
+		if (!card || targets.size() >= maxTargets || !IsQueuedInBlock()) return false;
 
 		float localX = (float)GetWidth();
 		for (auto& wp : targets) {
@@ -129,7 +129,7 @@ namespace Demo {
 				auto height = GetHeight();
 				auto thisX = GetWorldX();
 				auto thisY = GetWorldY();
-				if (targets.size() >= maxTargets) {
+				if (!CanAcceptEnemyCard()) {
 					goto skipHighlight;
 				}
 				for (auto& wp : targets) {
