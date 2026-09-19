@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "UtilityCards.h"
 #include "IBattleScene.h"
 #include "VirtualBattleState.h"
@@ -130,5 +130,41 @@ void Demo::ForesightCard::ResetExecution() {
 }
 
 void Demo::ForesightCard::DrawCardFace(unsigned long long deltaTime) {
+	DrawSheetFace(deltaTime, GetFaceRect());
+}
+
+bool Demo::SystemRestartCard::Execute() {
+	if (isDone) return true;
+
+	if (owner) {
+		bool hasDebuff = false;
+		for (const auto& mod : owner->GetModifiers()) {
+			if (!mod.isBuff && mod.duration > 0) {
+				hasDebuff = true;
+				break;
+			}
+		}
+
+		if (hasDebuff) {
+			owner->ClearDebuffs();
+			if (battleScene) {
+				battleScene->QueuePopUpMessage(L"Debuffs Cleared!");
+				DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.6f);
+			}
+		}
+		else if (battleScene) {
+			battleScene->QueuePopUpMessage(L"No debuffs to clear");
+		}
+	}
+
+	isDone = true;
+	return true;
+}
+
+void Demo::SystemRestartCard::ResetExecution() {
+	isDone = false;
+}
+
+void Demo::SystemRestartCard::DrawCardFace(unsigned long long deltaTime) {
 	DrawSheetFace(deltaTime, GetFaceRect());
 }

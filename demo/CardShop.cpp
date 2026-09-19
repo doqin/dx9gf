@@ -83,6 +83,7 @@ void Demo::CardShop::LoadItems()
 		AddShopCard<TerminateCard>("Terminate Card");
 		AddShopCard<OverdriveCard>("Overdrive Card");
 		AddShopCard<SystemPurgeCard>("System Purge Card");
+		AddShopCard<SystemRestartCard>("System Restart Card");
 		// These three only pay off against a built-out block - Overload scales with the
 		// persistent cards installed in it, Chain Reaction with what resolved just before it,
 		// and Execute wants the energy to spend in the first place.

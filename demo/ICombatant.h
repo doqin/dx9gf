@@ -69,5 +69,6 @@ namespace Demo {
 		float ConsumeModifier(ModifierType type);
 		float ConsumeAllArmor();
 		void ClearBuffs();
+		void ClearDebuffs();
 	};
 }

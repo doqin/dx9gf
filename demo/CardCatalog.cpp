@@ -44,6 +44,7 @@ namespace Demo::CardCatalog {
 				{ "ExecuteCard",        160 },
 				{ "OverloadCard",       170 },
 				{ "ImmunityCard",		50},
+				{ "SystemRestartCard",	175},
 			};
 			return prices;
 		}
