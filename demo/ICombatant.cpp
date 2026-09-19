@@ -220,4 +220,12 @@ namespace Demo {
 				[](const CombatModifier& mod) { return mod.isBuff; }),
 			modifiers.end());
 	}
+
+	void Demo::ICombatant::ClearDebuffs() {
+		modifiers.erase(std::remove_if(modifiers.begin(), modifiers.end(),
+			[](const CombatModifier& mod) {
+				return !mod.isBuff;
+			}),
+			modifiers.end());
+	}
 }

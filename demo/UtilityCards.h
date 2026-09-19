@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "IStatementCard.h"
 #include "MultiTargetCard.h"
 
@@ -137,6 +137,27 @@ namespace Demo {
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return L"Draw 1 extra card next turn."; }
 		RECT GetFaceRect() const override { return RECT{ 80, 368, 160, 384 }; }
+
+		bool Execute() override;
+		void ResetExecution() override;
+		void DrawCardFace(unsigned long long deltaTime) override;
+	};
+
+	// A legendary utility card that clears all debuffs from the player.
+	// Costs 1 energy, max 1 use per battle, non-persistent.
+	class SystemRestartCard : public IStatementCard {
+	private:
+		bool isDone = false;
+	public:
+		SystemRestartCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
+			: IGameObject(tm, x, y), IStatementCard(tm, 192, 32, x, y) {
+			SetPersistent(false);
+			SetMaxUses(1);
+		}
+
+		size_t GetCost() const override { return 1; }
+		std::wstring GetDescription() const override { return L"Clear all debuffs and tick damage from yourself."; }
+		RECT GetFaceRect() const override { return RECT{ 0, 496, 96, 512}; }
 
 		bool Execute() override;
 		void ResetExecution() override;
