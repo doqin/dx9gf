@@ -290,7 +290,6 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 			draggable->SetOnDropMissedHandler([this](std::shared_ptr<IDraggable> droppedCard) {
 				auto statement = std::dynamic_pointer_cast<IStatementCard>(droppedCard);
 				if (statement) {
-					// BattleScene có hàm ReturnCardToHand sinh ra để làm đúng việc này!
 					this->ReturnCardToHand(statement);
 				}
 				});
@@ -1482,6 +1481,23 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 				}
 				});
 		}
+
+		for (auto& enemyCard : enemyCards) {
+			if (!enemyCard) continue;
+			auto parent = enemyCard->GetParent();
+			if (!parent.has_value()) continue;
+			if (enemyCard->IsDragging()) continue;
+
+			candidates.push_back({
+				enemyCard,
+				enemyCard->GetWorldX(),
+				enemyCard->GetWorldY(),
+				(float)enemyCard->GetWidth(),
+				(float)enemyCard->GetHeight(),
+				[this, enemyCard]() { pickedUpCard = enemyCard; placementSlotIndex = 0; }
+				});
+		}
+
 		break;
 	}
 	case State::PlayerOpenItems: {

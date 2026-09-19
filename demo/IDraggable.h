@@ -6,7 +6,6 @@ namespace Demo {
 	class DraggableManager;
   class IDraggable : virtual public DX9GF::IGameObject {
 	protected:
-		// [THÊM VÀO ĐÂY] Lưu vết trạng thái trước khi nhấc lên
 		std::weak_ptr<DX9GF::IGameObject> preDragParent;
 		float preDragWorldX = 0;
 		float preDragWorldY = 0;
@@ -66,9 +65,7 @@ namespace Demo {
 		virtual void Draw(unsigned long long deltaTime);
 		virtual bool OnDrop(std::shared_ptr<IDraggable> other);
 		virtual bool OnHover(std::shared_ptr<IDraggable> other);
-		// [THÊM VÀO ĐÂY] Khai báo hàm ảo xử lý khi thả trượt
 		virtual void OnDropMissed(std::weak_ptr<DX9GF::IGameObject> oldParent, float oldWorldX, float oldWorldY);
-		//Thêm một callback vào IDraggable để nó "hét" lên khi bị thả trượt:
 		using DropMissedCallback = std::function<void(std::shared_ptr<IDraggable>)>;
 		DropMissedCallback onDropMissedHandler;
 		void SetOnDropMissedHandler(DropMissedCallback handler) { onDropMissedHandler = handler; }
