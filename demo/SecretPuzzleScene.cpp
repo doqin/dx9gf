@@ -160,6 +160,7 @@ void Demo::SecretPuzzleScene::OnInit()
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
 	NPCConfig daudauConfig = { L"assets/daudau-Sheet.png", 32, 32, 5, 12, 24.f, 8.f, 12.f };
+	NPCConfig qemConfig = { L"assets/qem-sheet.png", 32, 32, 13, 10, 24.f, 8.f, 12.f };
 
 	auto dauDau = std::make_shared<NPC>(transformManager, 1 * 16, -31.0f * 16, daudauConfig);
 	dauDau->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
@@ -170,15 +171,15 @@ void Demo::SecretPuzzleScene::OnInit()
 	});
 	mapNPCs.push_back(dauDau);
 
-	auto dauDauSpawn = std::make_shared<NPC>(transformManager, -80 * 16, -37 * 16, daudauConfig);
-	dauDauSpawn->AttachQuestMarker("SecretBoss_Pacman", Demo::QuestMarkerRole::Giver);
-	dauDauSpawn->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
-	dauDauSpawn->RegisterVoice(L"Dau Dau", "bleep12");
-	dauDauSpawn->SetInteractLogic([](NPC* self) -> std::function<void()> {
+	auto qem = std::make_shared<NPC>(transformManager, -80 * 16, -37 * 16, qemConfig);
+	qem->AttachQuestMarker("SecretBoss_Pacman", Demo::QuestMarkerRole::Giver);
+	qem->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
+	qem->RegisterVoice(L"Qem", "bleep12");
+	qem->SetInteractLogic([](NPC* self) -> std::function<void()> {
 		auto qState = QuestManager::GetInstance()->GetQuestState("SecretBoss_Pacman");
 		if (qState == Demo::QuestState::Locked) {
-			self->AddLine(L"Dau Dau", L"There's a hidden boss somewhere in this maze.");
-			self->AddLine(L"Dau Dau", L"Defeat it for a secret reward!");
+			self->AddLine(L"Qem", L"There's a hidden boss somewhere in this maze.");
+			self->AddLine(L"Qem", L"Defeat it for a secret reward!");
 			return []() {
 				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
 					{ L"Yes(Y)", []() { QuestManager::GetInstance()->AcceptQuest("SecretBoss_Pacman"); } },
@@ -188,14 +189,14 @@ void Demo::SecretPuzzleScene::OnInit()
 			};
 		}
 		else if (qState == Demo::QuestState::Active) {
-			self->AddLine(L"Dau Dau", L"The boss is still lurking somewhere... Find it!");
+			self->AddLine(L"Qem", L"The boss is still lurking somewhere... Find it!");
 		}
 		else {
-			self->AddLine(L"Dau Dau", L"Incredible! You actually defeated the secret boss!");
+			self->AddLine(L"Qem", L"Incredible! You actually defeated the secret boss!");
 		}
 		return nullptr;
 	});
-	mapNPCs.push_back(dauDauSpawn);
+	mapNPCs.push_back(qem);
 
 	cupidNPC = std::make_shared<CupidNPC>(transformManager, 1671.f, 792.f);
 	cupidNPC->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);

@@ -510,6 +510,7 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="assets\placeholder-round-projectile.aseprite" />
+    <None Include="assets\qem-sheet.aseprite" />
     <None Include="assets\spam.aseprite" />
     <None Include="assets\spamprojectile.aseprite" />
     <None Include="assets\SecretPuzzle.tmx">
@@ -597,6 +598,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\flame-slot-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\qem-sheet.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\selltab.png">

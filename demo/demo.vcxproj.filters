@@ -442,6 +442,7 @@
     <Image Include="assets\12x12-gold-token.png" />
     <Image Include="assets\ahai-Sheet.png" />
     <Image Include="assets\hkhang-Sheet.png" />
+    <Image Include="assets\qem-sheet.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\arcade-among-2-r46pv.ttf" />
@@ -471,5 +472,6 @@
     <None Include="assets\labinside.tmx" />
     <None Include="assets\spam.aseprite" />
     <None Include="assets\spamprojectile.aseprite" />
+    <None Include="assets\qem-sheet.aseprite" />
   </ItemGroup>
 </Project>
