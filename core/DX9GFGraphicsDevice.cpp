@@ -13,6 +13,13 @@ struct Vertex {
 	DWORD color;
 };
 
+struct TexVertex {
+	float x, y, z, rhw; // rhw is reciprocal of homogenous w
+	DWORD color;
+	float u, v;
+};
+#define D3DFVF_TEXVERTEX (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+
 static D3DXVECTOR2 TransformPoint(const D3DXMATRIX& matrix, float x, float y)
 {
 	D3DXVECTOR4 v(x, y, 0.0f, 1.0f);
@@ -386,6 +393,37 @@ void DX9GF::GraphicsDevice::DrawTriangle(const DX9GF::Camera& camera, float cent
 	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
 	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 1 : 3, vertices.data(), sizeof(Vertex));
 }
+void DX9GF::GraphicsDevice::DrawTexturedPolygon(const std::vector<D3DXVECTOR2>& points, const std::vector<D3DXVECTOR2>& uvs, DX9GF::Texture* texture, D3DCOLOR color)
+{
+	if (points.size() < 3 || points.size() != uvs.size() || texture == nullptr) return;
+
+	std::vector<TexVertex> vertices;
+	vertices.reserve(points.size());
+	for (size_t i = 0; i < points.size(); ++i) {
+		vertices.push_back({
+			.x = points[i].x * virtualScale + virtualOffsetX,
+			.y = points[i].y * virtualScale + virtualOffsetY,
+			.z = 0.0f,
+			.rhw = 1.0f,
+			.color = color,
+			.u = uvs[i].x,
+			.v = uvs[i].y
+			});
+	}
+
+	// Clamp rather than wrap/tile: callers may pass UVs outside [0,1] on purpose (e.g. a
+	// screen-space-projected crop window), and clamping just holds the edge pixel there
+	// instead of repeating the texture.
+	d3ddev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+	d3ddev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+	d3ddev->SetTexture(0, texture->GetRawTexture());
+	d3ddev->SetFVF(D3DFVF_TEXVERTEX);
+	d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, static_cast<UINT>(points.size() - 2), vertices.data(), sizeof(TexVertex));
+	d3ddev->SetTexture(0, nullptr);
+	d3ddev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+	d3ddev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+}
+
 HRESULT DX9GF::GraphicsDevice::SetRenderTarget(Texture* renderTarget)
 {
 	if (renderTarget == nullptr) return E_POINTER;

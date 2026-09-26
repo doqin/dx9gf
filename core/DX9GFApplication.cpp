@@ -189,13 +189,21 @@ void DX9GF::Application::Run()
 		}
 		else {
 			if (frameRate == -1 || GetTickCount64() - start >= 1000 / frameRate) {
-				unsigned long long deltaTime = GetTickCount64() - start;
+				unsigned long long rawDeltaTime = GetTickCount64() - start;
 				start = GetTickCount64();
+
+				// Clamp the delta fed to Update/Draw so a stall (e.g. a heavy scene load)
+				// doesn't get replayed as one giant time jump - that skips timer-driven
+				// animations (fades, transitions) straight to their end instead of playing
+				// them smoothly. The raw, unclamped value still feeds the FPS readout below.
+				const unsigned long long MAX_DELTA_TIME_MS = 100;
+				unsigned long long deltaTime = (rawDeltaTime > MAX_DELTA_TIME_MS) ? MAX_DELTA_TIME_MS : rawDeltaTime;
+
 				p_game->Update(deltaTime);
 				audioManager->Update(deltaTime);
 				p_game->Draw(deltaTime);
 
-				fpsElapsed += deltaTime;
+				fpsElapsed += rawDeltaTime;
 				fpsFrames++;
 				if (fpsElapsed >= 1000) {
 					char title[128];
