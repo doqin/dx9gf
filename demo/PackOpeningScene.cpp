@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "PackOpeningScene.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include "ICard.h"
 #include "RNG.h"
 #include "SettingsManager.h"
@@ -46,7 +48,7 @@ namespace Demo {
 		uiTex->LoadTexture(L"assets/ui.png");
 		cardFaceSprite = std::make_shared<DX9GF::StaticSprite>(uiTex.get());
 
-		font = std::make_shared<DX9GF::Font>(gd, L"StatusPlz", 24);
+		font = std::make_shared<DX9GF::Font>(gd, Demo::kMainFontName, Demo::kLargeFontSize);
 		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 
 		particleTex = std::make_shared<DX9GF::Texture>(gd);
@@ -206,7 +208,7 @@ namespace Demo {
 			fontSprite->SetScale(1.2f, 1.2f);
 			fontSprite->SetOutline(true, 0xFF000000, 2.f);
 			fontSprite->SetColor(D3DCOLOR_ARGB(a, ChR(rc), ChG(rc), ChB(rc)));
-			fontSprite->SetText(std::wstring(CardCatalog::RarityName(rarities[idx])));
+			fontSprite->SetText(CardCatalog::RarityName(rarities[idx]));
 			const float labelW = fontSprite->GetWidth() * 1.2f;
 			fontSprite->SetPosition(-labelW / 2.f, fh * CARD_SCALE / 2.f + 8.f);
 			fontSprite->Draw(uiCamera, deltaTime);
@@ -215,9 +217,9 @@ namespace Demo {
 			fontSprite->SetOutline(true, 0xFF000000, 2.f);
 			fontSprite->SetColor(0xFFFFFFFF);
 			const std::wstring hint = state == State::Done
-				? std::wstring(L"Click or press a key to close")
-				: L"Card " + std::to_wstring(revealIndex + 1) + L" / " + std::to_wstring(cardIds.size())
-				+ L"   -   click or press a key for next";
+				? Tr(L"Click or press a key to close")
+				: Tr(L"Card ") + std::to_wstring(revealIndex + 1) + L" / " + std::to_wstring(cardIds.size())
+				+ Tr(L"   -   click or press a key for next");
 			fontSprite->SetText(hint);
 			const float hintW = fontSprite->GetWidth() * 0.9f;
 			fontSprite->SetPosition(-hintW / 2.f, vh / 2.f - 60.f);

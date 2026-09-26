@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "SettingsManager.h"
 #include "SecretPuzzleScene.h"
+#include "LocalizationManager.h"
 #include "CustomBattleScene.h"
 #include "RandomEncounter.h"
 #include "MainMenu.h"
@@ -23,7 +24,7 @@ void Demo::SecretPuzzleScene::OnInit()
 {
 	InitCore(-84 * 16, -39 * 16, L"./assets/SecretPuzzle.tmx");
 
-	SetChapterTitle(L"ANOMALY DETECTED: THE ROOT", L"< Encrypted Database >");
+	SetChapterTitle(Tr(L"ANOMALY DETECTED: THE ROOT"), Tr(L"< Encrypted Database >"));
 	map->SetAreaUpdateHandler("trigger_p_back", [this](const DX9GF::Map::ObjectArea& area) {
 		CreatePortalTransition(-2, -263.f, -295.f, "bgm_tutorial", 0.5f);
 	});
@@ -160,7 +161,7 @@ void Demo::SecretPuzzleScene::OnInit()
 	dauDau->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	dauDau->RegisterVoice(L"Dau Dau", "bleep12");
 	dauDau->SetInteractLogic([](NPC* self) -> std::function<void()> {
-		self->AddLine(L"Dau Dau", L"Watch out! This portal is a one-way trip to the invisible maze! Enter if you dare!");
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"Watch out! This portal is a one-way trip to the invisible maze! Enter if you dare!"));
 		return nullptr;
 	});
 	mapNPCs.push_back(dauDau);
@@ -172,21 +173,21 @@ void Demo::SecretPuzzleScene::OnInit()
 	qem->SetInteractLogic([](NPC* self) -> std::function<void()> {
 		auto qState = QuestManager::GetInstance()->GetQuestState("SecretBoss_Pacman");
 		if (qState == Demo::QuestState::Locked) {
-			self->AddLine(L"Qem", L"There's a hidden boss somewhere in this maze.");
-			self->AddLine(L"Qem", L"Defeat it for a secret reward!");
+			self->AddLine(Tr(L"Qem"), Tr(L"There's a hidden boss somewhere in this maze."));
+			self->AddLine(Tr(L"Qem"), Tr(L"Defeat it for a secret reward!"));
 			return []() {
 				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-					{ L"Yes(Y)", []() { QuestManager::GetInstance()->AcceptQuest("SecretBoss_Pacman"); } },
-					{ L"No(N)", []() {} }
+					{ Tr(L"Yes(Y)"), []() { QuestManager::GetInstance()->AcceptQuest("SecretBoss_Pacman"); } },
+					{ Tr(L"No(N)"), []() {} }
 				};
-				PopupManager::GetInstance()->Show("stepped_blue", L"Secret Boss", L"Accept this challenge?", buttons);
+				PopupManager::GetInstance()->Show("stepped_blue", Tr(L"Secret Boss"), Tr(L"Accept this challenge?"), buttons);
 			};
 		}
 		else if (qState == Demo::QuestState::Active) {
-			self->AddLine(L"Qem", L"The boss is still lurking somewhere... Find it!");
+			self->AddLine(Tr(L"Qem"), Tr(L"The boss is still lurking somewhere... Find it!"));
 		}
 		else {
-			self->AddLine(L"Qem", L"Incredible! You actually defeated the secret boss!");
+			self->AddLine(Tr(L"Qem"), Tr(L"Incredible! You actually defeated the secret boss!"));
 		}
 		return nullptr;
 	});
@@ -194,13 +195,13 @@ void Demo::SecretPuzzleScene::OnInit()
 
 	cupidNPC = std::make_shared<CupidNPC>(transformManager, 1671.f, 792.f);
 	cupidNPC->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
-	cupidNPC->AddLine(L"???", L"Oh? A visitor, all the way out here?");
-	cupidNPC->AddLine(L"???", L"Nobody finds this dead end unless they're looking for something they shouldn't.");
-	cupidNPC->AddLine(L"Pacman", L"Fine, fine. Pacman. Not that the name means much anymore -\nthis process got repurposed long before you wandered in.");
-	cupidNPC->AddLine(L"Pacman", L"I'm what's left guarding a rusty key to a precious treasure.\nYou must know what I'm talking about, right?");
-	cupidNPC->AddLine(L"Pacman", L"So here's the deal: beat me, take the key.\nLose, and you get to enjoy the scenic route back to the start.");
-	cupidNPC->AddLine(L"Player", L"...I've come this far. Might as well.");
-	cupidNPC->AddLine(L"Pacman", L"That's the spirit. Don't say I didn't warn you.");
+	cupidNPC->AddLine(Tr(L"???"), Tr(L"Oh? A visitor, all the way out here?"));
+	cupidNPC->AddLine(Tr(L"???"), Tr(L"Nobody finds this dead end unless they're looking for something they shouldn't."));
+	cupidNPC->AddLine(Tr(L"Pacman"), Tr(L"Fine, fine. Pacman. Not that the name means much anymore -\nthis process got repurposed long before you wandered in."));
+	cupidNPC->AddLine(Tr(L"Pacman"), Tr(L"I'm what's left guarding a rusty key to a precious treasure.\nYou must know what I'm talking about, right?"));
+	cupidNPC->AddLine(Tr(L"Pacman"), Tr(L"So here's the deal: beat me, take the key.\nLose, and you get to enjoy the scenic route back to the start."));
+	cupidNPC->AddLine(Tr(L"Player"), Tr(L"...I've come this far. Might as well."));
+	cupidNPC->AddLine(Tr(L"Pacman"), Tr(L"That's the spirit. Don't say I didn't warn you."));
 }
 
 void Demo::SecretPuzzleScene::OnUpdate(unsigned long long deltaTime)

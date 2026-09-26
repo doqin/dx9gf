@@ -1,21 +1,23 @@
 ﻿#include "pch.h"
 #include "IntroScene.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 
 void Demo::IntroScene::Init() {
-    font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+    font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
     fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 
     auto [sw, sh] = camera.GetScreenResolution();
     conversation = std::make_shared<IConversation>(fontSprite, sw, sh);
 
-    conversation->AddLine({ .name = L"???", .content = L"Ugh... where... where am I?", .voiceClip = std::optional<std::string>("bleep8") });
-    conversation->AddLine({ .name = L"Player", .content = L"The last thing I remember... I clicked on that suspicious link in the chat.", .voiceClip = std::optional<std::string>("bleep8") });
-    conversation->AddLine({ .name = L"Player", .content = L"\"Free Robux!\" it said. Of course it was too good to be true.", .voiceClip = std::optional<std::string>("bleep8") });
-    conversation->AddLine({ .name = L"Player", .content = L"But before I could close the page, my screen started glitching...", .voiceClip = std::optional<std::string>("bleep8") });
-    conversation->AddLine({ .name = L"Player", .content = L"Lines of code flashed before my eyes, and then everything went black.", .voiceClip = std::optional<std::string>("bleep8") });
-    conversation->AddLine({ .name = L"Player", .content = L"And now... I'm inside some kind of digital world?", .voiceClip = std::optional<std::string>("bleep8") });
-    conversation->AddLine({ .name = L"Player", .content = L"Everything around me looks like a corrupted program. I need to find a way out.", .voiceClip = std::optional<std::string>("bleep8") });
-    conversation->AddLine({ .name = L"Player", .content = L"Wait... I can see something in the distance. Maybe I should head that way.", .voiceClip = std::optional<std::string>("bleep8") });
+    conversation->AddLine({ .name = Tr(L"???"), .content = Tr(L"Ugh... where... where am I?"), .voiceClip = std::optional<std::string>("bleep8") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"The last thing I remember... I clicked on that suspicious link in the chat."), .voiceClip = std::optional<std::string>("bleep8") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"\"Free Robux!\" it said. Of course it was too good to be true."), .voiceClip = std::optional<std::string>("bleep8") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"But before I could close the page, my screen started glitching..."), .voiceClip = std::optional<std::string>("bleep8") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"Lines of code flashed before my eyes, and then everything went black."), .voiceClip = std::optional<std::string>("bleep8") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"And now... I'm inside some kind of digital world?"), .voiceClip = std::optional<std::string>("bleep8") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"Everything around me looks like a corrupted program. I need to find a way out."), .voiceClip = std::optional<std::string>("bleep8") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"Wait... I can see something in the distance. Maybe I should head that way."), .voiceClip = std::optional<std::string>("bleep8") });
 }
 
 void Demo::IntroScene::Update(unsigned long long deltaTime) {

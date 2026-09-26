@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "IStatementCard.h"
 #include "MultiTargetCard.h"
+#include "LocalizationManager.h"
 
 namespace Demo {
 
@@ -17,7 +18,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 0; }
-		std::wstring GetDescription() const override { return L"Deal 3 damage to an enemy."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 3 damage to an enemy."); }
 		RECT GetFaceRect() const override { return RECT{ 80, 336, 160, 352 }; }
 
 		bool Execute() override;
@@ -35,7 +36,8 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 0; }
-		std::wstring GetDescription() const override { return L"Apply Marked 2 for 2 turns (target takes 2 extra damage per hit)."; }
+		std::wstring GetDescription() const override { return Tr(L"Apply Marked 2 for 2 turns (target takes 2 extra damage per hit)."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Marked, true } }; }
 		RECT GetFaceRect() const override { return RECT{ 160, 336, 240, 352 }; }
 
 		bool Execute() override;
@@ -56,7 +58,8 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 0; }
-		std::wstring GetDescription() const override { return L"Gain 5 block for 2 turns."; }
+		std::wstring GetDescription() const override { return Tr(L"Gain 5 block for 2 turns."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::BuffDefense, true } }; }
 		RECT GetFaceRect() const override { return RECT{ 0, 352, 80, 368 }; }
 
 		bool Execute() override;
@@ -77,7 +80,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 0; }
-		std::wstring GetDescription() const override { return L"Draw 2 cards now."; }
+		std::wstring GetDescription() const override { return Tr(L"Draw 2 cards now."); }
 		RECT GetFaceRect() const override { return RECT{ 80, 352, 160, 368 }; }
 
 		bool Execute() override;
@@ -96,7 +99,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 0; }
-		std::wstring GetDescription() const override { return L"Gain 1 energy now. Take 4 damage."; }
+		std::wstring GetDescription() const override { return Tr(L"Gain 1 energy now. Take 4 damage."); }
 		RECT GetFaceRect() const override { return RECT{ 160, 352, 256, 368 }; }
 
 		bool Execute() override;
@@ -118,7 +121,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Gain 2 energy now."; }
+		std::wstring GetDescription() const override { return Tr(L"Gain 2 energy now."); }
 		RECT GetFaceRect() const override { return RECT{ 0, 368, 80, 384 }; }
 
 		bool Execute() override;
@@ -135,7 +138,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Draw 1 extra card next turn."; }
+		std::wstring GetDescription() const override { return Tr(L"Draw 1 extra card next turn."); }
 		RECT GetFaceRect() const override { return RECT{ 80, 368, 160, 384 }; }
 
 		bool Execute() override;
@@ -156,7 +159,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Clear all debuffs and tick damage from yourself."; }
+		std::wstring GetDescription() const override { return Tr(L"Clear all debuffs and tick damage from yourself."); }
 		RECT GetFaceRect() const override { return RECT{ 0, 496, 96, 512}; }
 
 		bool Execute() override;

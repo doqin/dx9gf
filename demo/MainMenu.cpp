@@ -13,6 +13,8 @@
 #include "TransitionCommand.h"
 #include "CreditsScene.h"
 #include "PopupManager.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 
 namespace Demo
 {
@@ -269,16 +271,26 @@ namespace Demo
 
 
 		// Sprites
-		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
 		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 		fontSprite->SetColor(0xFF000000);
 
+		//LOCAL FUNCTION to init a menu text-icon button: blank slice-able frame + auto-sizing translated label
+		auto InitMenuButton = [&](std::shared_ptr<Demo::TextIconButton>& btn, const std::wstring& english) {
+			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, font.get(), L"", 3);
+			btn->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(0, 0, 16, 16, 3));
+			btn->SetSliceMargins(4, 4);
+			btn->SetSpriteScale(2.f, 2.f);
+			btn->SetAutoResize(true, 16.f);
+			btn->SetTextScale(1.f, 1.f);
+			btn->SetTextColor(D3DCOLOR_XRGB(0, 0, 0));
+			btn->SetTextOutline(false);
+			btn->SetDynamicTextGetter([english]() { return Tr(english); });
+			};
+
 		//BUTTONS INIT
 		//Continue Button
-		continueButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 4);
-		continueButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(144, 96, 48, 16, 4));
-		//continueButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { /* Logic */ });
-		continueButton->SetSpriteScale(2.f, 2.f);
+		InitMenuButton(continueButton, L"Continue");
 		/*continueButton->SetState(IButton::ButtonState::DISABLED);*/
 
 		auto borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
@@ -314,8 +326,7 @@ namespace Demo
 			drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));			});
 
 		//New Game Button
-		newGameButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
-		newGameButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(144, 48, 48, 16, 3));
+		InitMenuButton(newGameButton, L"New Game");
 		newGameButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 			if (isTransitioning) return;
 
@@ -351,20 +362,18 @@ namespace Demo
 
 			if (hasSave) {
 				std::vector<std::pair<std::wstring, std::function<void()>>> popupBtns = {
-					{ L"Yes", startNewGameLogic },
-					{ L"No", []() {} }
+					{ Tr(L"Yes"), startNewGameLogic },
+					{ Tr(L"No"), []() {} }
 				};
-				PopupManager::GetInstance()->Show("stepped_red", L"WARNING", L"Overwrite existing save?", popupBtns);
+				PopupManager::GetInstance()->Show("stepped_red", Tr(L"WARNING"), Tr(L"Overwrite existing save?"), popupBtns);
 			}
 			else {
 				startNewGameLogic();
 			}
 			});
-		newGameButton->SetSpriteScale(2.f, 2.f);
 
 		//Options Button
-		optionsButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
-		optionsButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(192, 48, 48, 16, 3));
+		InitMenuButton(optionsButton, L"Options");
 		optionsButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 			auto app = DX9GF::Application::GetInstance();
 			//push Settings Scene
@@ -374,11 +383,9 @@ namespace Demo
 			);
 			this->game->GetSceneManager()->GoToNext();
 			});
-		optionsButton->SetSpriteScale(2.f, 2.f);
 
 		//Credits Button
-		creditsButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
-		creditsButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(192, 96, 48, 16, 3));
+		InitMenuButton(creditsButton, L"Credits");
 		creditsButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 			auto app = DX9GF::Application::GetInstance();
 			auto sceMan = this->game->GetSceneManager();
@@ -387,13 +394,10 @@ namespace Demo
 			);
 			this->game->GetSceneManager()->GoToNext();
 			});
-		creditsButton->SetSpriteScale(2.f, 2.f);
 
 		//Quit Button
-		quitButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, 3);
-		quitButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(240, 48, 48, 16, 3));
+		InitMenuButton(quitButton, L"Quit");
 		quitButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { PostQuitMessage(0); });
-		quitButton->SetSpriteScale(2.f, 2.f);
 
 		//active buttons
 		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, optionsButton, creditsButton, quitButton };
@@ -493,15 +497,15 @@ namespace Demo
 			fontSprite->SetColor(0xFFFFFFFF);
 			fontSprite->SetOutline(true, 0xFF000000, 2.0f);
 
-			fontSprite->SetText(L"Toi, sinh vien nam 6 UIT,");
+			fontSprite->SetText(Tr(L"I, a 6th-year UIT student,"));
 			fontSprite->Draw(uiCamera, deltaTime);
 
 			fontSprite->SetPosition(prevPos.x, prevPos.y + height);
-			fontSprite->SetText(L"bi hut vao cyberspace");
+			fontSprite->SetText(Tr(L"got sucked into cyberspace"));
 			fontSprite->Draw(uiCamera, deltaTime);
 
 			fontSprite->SetPosition(prevPos.x, prevPos.y + height * 2);
-			fontSprite->SetText(L"vi click vao link doc");
+			fontSprite->SetText(Tr(L"because I clicked a shady link"));
 			fontSprite->Draw(uiCamera, deltaTime);
 
 			fontSprite->SetPosition(prevPos.x, prevPos.y);

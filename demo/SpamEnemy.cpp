@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "SpamEnemy.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 #include "RNG.h"
 #include "PopUpMessage.h"
@@ -50,12 +51,12 @@ void Demo::SpamEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 	int turnInCycle = (currentTurn - 1) % 3 + 1;
 	if (turnInCycle == skillTurnThisCycle) {
 		if (RNG::Range(1, 2) == 1) {
-			CastAbility([this]() { this->Heal(12.f); }, popUpMessage, L"Spam multiplies! (+12 HP)");
+			CastAbility([this]() { this->Heal(12.f); }, popUpMessage, Tr(L"Spam multiplies! (+12 HP)"));
 		}
 		else {
 			CastAbility([this]() {
 				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false);
-				}, popUpMessage, L"Your best shots get buried in junk!");
+				}, popUpMessage, Tr(L"Your best shots get buried in junk!"));
 		}
 	}
 }

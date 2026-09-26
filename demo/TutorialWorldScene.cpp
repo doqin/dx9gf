@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "SettingsManager.h"
 #include "TutorialWorldScene.h"
+#include "LocalizationManager.h"
 #include "RandomEncounter.h"
 #include "MainMenu.h"
 #include "SaveGameState.h"
@@ -21,7 +22,7 @@ void Demo::TutorialWorldScene::OnInit()
 {
 	InitCore(248, 184, L"./assets/tutorial.tmx");
 
-	SetChapterTitle(L"CHAPTER I: CLOUD CANOPY", L"< System Initialized >");
+	SetChapterTitle(Tr(L"CHAPTER I: CLOUD CANOPY"), Tr(L"< System Initialized >"));
 	map->SetAreaUpdateHandler("trigger_p", [this](const DX9GF::Map::ObjectArea& area) {
 		if (!spamBossDefeated) return;   // locked until the Spam boss guarding it is beaten
 		CreatePortalTransition(3, -417.f, 144.f, "bgm_arcade", 0.2f);
@@ -44,30 +45,30 @@ void Demo::TutorialWorldScene::OnInit()
 	npcIntroduction->SetInteractLogic([](NPC* self) -> std::function<void()> {
 		auto qState = QuestManager::GetInstance()->GetQuestState("Quest_Tutorial");
 		if (qState == Demo::QuestState::Locked) {
-			self->AddLine(L"???", L"Hello! Welcome.");
-			self->AddLine(L"Player", L"Who are you?");
-			self->AddLine(L"Kako", L"My name is Kako. I am a digital entity that exists in this world. Created by the developers as a guide.");
-			self->AddLine(L"Player", L"Where am I?");
-			self->AddLine(L"Kako", L"This is a cyber world! An abandoned project made by a bunch of UIT students.");
-			self->AddLine(L"Kako", L"Unfortunately, this world is not safe for humans. You are trapped here now.");
-			self->AddLine(L"Player", L"How do I get out?");
-			self->AddLine(L"Kako", L"How to escape this world? I don't know.");
-			self->AddLine(L"Kako", L"But I can teach you how to survive here! Explore around a bit and I'll explain further.");
-			self->AddLine(L"Kako", L"By the way, use the floppy disk icon over there to save your progress.");
+			self->AddLine(Tr(L"???"), Tr(L"Hello! Welcome."));
+			self->AddLine(Tr(L"Player"), Tr(L"Who are you?"));
+			self->AddLine(Tr(L"Kako"), Tr(L"My name is Kako. I am a digital entity that exists in this world. Created by the developers as a guide."));
+			self->AddLine(Tr(L"Player"), Tr(L"Where am I?"));
+			self->AddLine(Tr(L"Kako"), Tr(L"This is a cyber world! An abandoned project made by a bunch of UIT students."));
+			self->AddLine(Tr(L"Kako"), Tr(L"Unfortunately, this world is not safe for humans. You are trapped here now."));
+			self->AddLine(Tr(L"Player"), Tr(L"How do I get out?"));
+			self->AddLine(Tr(L"Kako"), Tr(L"How to escape this world? I don't know."));
+			self->AddLine(Tr(L"Kako"), Tr(L"But I can teach you how to survive here! Explore around a bit and I'll explain further."));
+			self->AddLine(Tr(L"Kako"), Tr(L"By the way, use the floppy disk icon over there to save your progress."));
 
 			return []() {
 				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-					{ L"Yes(Y)", []() { QuestManager::GetInstance()->AcceptQuest("Quest_Tutorial"); } },
-					{ L"No(N)", []() {} }
+					{ Tr(L"Yes(Y)"), []() { QuestManager::GetInstance()->AcceptQuest("Quest_Tutorial"); } },
+					{ Tr(L"No(N)"), []() {} }
 				};
-				PopupManager::GetInstance()->Show("stepped_blue", L"New Quest", L"Accept Beginner's Quest?", buttons);
+				PopupManager::GetInstance()->Show("stepped_blue", Tr(L"New Quest"), Tr(L"Accept Beginner's Quest?"), buttons);
 			};
 		}
 		else if (qState == Demo::QuestState::Active) {
-			self->AddLine(L"Kako", L"Explore around a bit!");
+			self->AddLine(Tr(L"Kako"), Tr(L"Explore around a bit!"));
 		}
 		else {
-			self->AddLine(L"Kako", L"Great job! You know the basics of survival now.");
+			self->AddLine(Tr(L"Kako"), Tr(L"Great job! You know the basics of survival now."));
 		}
 		return nullptr;
 	});
@@ -82,30 +83,30 @@ void Demo::TutorialWorldScene::OnInit()
 		auto questState = QuestManager::GetInstance()->GetQuestState("Quest_KakosLab");
 		if (questState == Demo::QuestState::Locked) {
 			if (prevQuestState == Demo::QuestState::Active || prevQuestState == Demo::QuestState::Completed) {
-				self->AddLine(L"Kako", L"Oh hi again!");
-				self->AddLine(L"Player", L"Hi Kako! What are you doing here?");
+				self->AddLine(Tr(L"Kako"), Tr(L"Oh hi again!"));
+				self->AddLine(Tr(L"Player"), Tr(L"Hi Kako! What are you doing here?"));
 			}
 			else {
-				self->AddLine(L"Player", L"Hello! Who are you?");
-				self->AddLine(L"Kako", L"Hi! I am Kako, a digital entity that exists in this world.");
-				self->AddLine(L"Player", L"Hi Kako! What are you doing here?");
+				self->AddLine(Tr(L"Player"), Tr(L"Hello! Who are you?"));
+				self->AddLine(Tr(L"Kako"), Tr(L"Hi! I am Kako, a digital entity that exists in this world."));
+				self->AddLine(Tr(L"Player"), Tr(L"Hi Kako! What are you doing here?"));
 			}
-			self->AddLine(L"Kako", L"Hm.. I was doing some research inside the lab right there until a monster appeared!");
-			self->AddLine(L"Kako", L"Luckily, I managed to escape. But I think the lab is not safe anymore.");
-			self->AddLine(L"Kako", L"If you can clear the area for me, I'll pay a handsome reward :).");
+			self->AddLine(Tr(L"Kako"), Tr(L"Hm.. I was doing some research inside the lab right there until a monster appeared!"));
+			self->AddLine(Tr(L"Kako"), Tr(L"Luckily, I managed to escape. But I think the lab is not safe anymore."));
+			self->AddLine(Tr(L"Kako"), Tr(L"If you can clear the area for me, I'll pay a handsome reward :)."));
 			return []() {
 				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-					{ L"Yes(Y)", []() { QuestManager::GetInstance()->AcceptQuest("Quest_KakosLab"); } },
-					{ L"No(N)", []() {} }
+					{ Tr(L"Yes(Y)"), []() { QuestManager::GetInstance()->AcceptQuest("Quest_KakosLab"); } },
+					{ Tr(L"No(N)"), []() {} }
 				};
-				PopupManager::GetInstance()->Show("stepped_blue", L"New Quest", L"Accept Kako's Request?", buttons);
+				PopupManager::GetInstance()->Show("stepped_blue", Tr(L"New Quest"), Tr(L"Accept Kako's Request?"), buttons);
 			};
 		}
 		else if (questState == Demo::QuestState::Active) {
-			self->AddLine(L"Kako", L"I'll be waiting for you to clear the lab!");
+			self->AddLine(Tr(L"Kako"), Tr(L"I'll be waiting for you to clear the lab!"));
 		}
 		else {
-			self->AddLine(L"Kako", L"Thanks for helping me clear the lab!");
+			self->AddLine(Tr(L"Kako"), Tr(L"Thanks for helping me clear the lab!"));
 		}
 		return nullptr;
 	});
@@ -115,10 +116,10 @@ void Demo::TutorialWorldScene::OnInit()
 	npcExplainingEnemyEncounters->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	npcExplainingEnemyEncounters->RegisterVoice(L"Dau Dau", "bleep12");
 	npcExplainingEnemyEncounters->SetInteractLogic([](NPC* self) -> std::function<void()> {
-		self->AddLine(L"Dau Dau", L"Look out ahead! See those digital creeps roaming around?");
-		self->AddLine(L"Dau Dau", L"If they spot you, they will chase you down! Touching them will drag you into a battle.");
-		self->AddLine(L"Dau Dau", L"You can try to outrun them or hide behind walls to break their line of sight.");
-		self->AddLine(L"Dau Dau", L"Don't worry, you can run away from battles if you want.\n But you won't get any rewards if you do that!");
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"Look out ahead! See those digital creeps roaming around?"));
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"If they spot you, they will chase you down! Touching them will drag you into a battle."));
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"You can try to outrun them or hide behind walls to break their line of sight."));
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"Don't worry, you can run away from battles if you want.\n But you won't get any rewards if you do that!"));
 		return nullptr;
 	});
 	mapNPCs.push_back(npcExplainingEnemyEncounters);
@@ -128,15 +129,15 @@ void Demo::TutorialWorldScene::OnInit()
 	npcExplainingHealingPoint->RegisterVoice(L"Dau Dau", "bleep12");
 	npcExplainingHealingPoint->SetInteractLogic([this](NPC* self) -> std::function<void()> {
 		if (player->GetHealth() == player->GetMaxHealth()) {
-			self->AddLine(L"Dau Dau", L"Hey, you look healthy!");
-			self->AddLine(L"Dau Dau", L"Remember, you can use healing points to restore your health.");
-			self->AddLine(L"Dau Dau", L"If you want to heal in combat, you can use healing items! Check out my shop up ahead for some.");
+			self->AddLine(Tr(L"Dau Dau"), Tr(L"Hey, you look healthy!"));
+			self->AddLine(Tr(L"Dau Dau"), Tr(L"Remember, you can use healing points to restore your health."));
+			self->AddLine(Tr(L"Dau Dau"), Tr(L"If you want to heal in combat, you can use healing items! Check out my shop up ahead for some."));
 			return nullptr;
 		}
-		self->AddLine(L"Dau Dau", L"Hey, you look hurt.");
-		self->AddLine(L"Player", L"Yeah, I feel dizzy...");
-		self->AddLine(L"Dau Dau", L"This is a healing point. You can use it to restore your health. Just interact with it like you do with me.");
-		self->AddLine(L"Dau Dau", L"If you want to heal in combat, you can use healing items! Check out my shop up ahead for some.");
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"Hey, you look hurt."));
+		self->AddLine(Tr(L"Player"), Tr(L"Yeah, I feel dizzy..."));
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"This is a healing point. You can use it to restore your health. Just interact with it like you do with me."));
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"If you want to heal in combat, you can use healing items! Check out my shop up ahead for some."));
 		return nullptr;
 	});
 	mapNPCs.push_back(npcExplainingHealingPoint);
@@ -145,8 +146,8 @@ void Demo::TutorialWorldScene::OnInit()
 	npcExplainingPortal->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	npcExplainingPortal->RegisterVoice(L"Dau Dau", "bleep12");
 	npcExplainingPortal->SetInteractLogic([](NPC* self) -> std::function<void()> {
-		self->AddLine(L"Dau Dau", L"Up this hill, there will be a foe waiting for you. It's guarding a portal that'll take you to the next area.");
-		self->AddLine(L"Dau Dau", L"Good luck!");
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"Up this hill, there will be a foe waiting for you. It's guarding a portal that'll take you to the next area."));
+		self->AddLine(Tr(L"Dau Dau"), Tr(L"Good luck!"));
 		return nullptr;
 	});
 	mapNPCs.push_back(npcExplainingPortal);
@@ -221,13 +222,13 @@ void Demo::TutorialWorldScene::OnInit()
 
 	spamNPC = std::make_shared<SpamNPC>(transformManager, 776.f, -1144.f);
 	spamNPC->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
-	spamNPC->AddLine(L"???", L"Hold it right there, valued customer!");
-	spamNPC->AddLine(L"SPAM", L"CONGRATULATIONS! You've been pre-selected to NOT use this portal today.");
-	spamNPC->AddLine(L"Player", L"...who are you?");
-	spamNPC->AddLine(L"SPAM", L"Me? I'm the offer you can't refuse. Unread mail that piled up until it woke up.");
-	spamNPC->AddLine(L"SPAM", L"This exit is a limited-time deal, and the price is beating me. Terms and conditions apply.");
-	spamNPC->AddLine(L"Player", L"Can't I just unsubscribe?");
-	spamNPC->AddLine(L"SPAM", L"Everybody clicks that link. Nobody escapes the list. Let's talk numbers, kid.");
+	spamNPC->AddLine(Tr(L"???"), Tr(L"Hold it right there, valued customer!"));
+	spamNPC->AddLine(Tr(L"SPAM"), Tr(L"CONGRATULATIONS! You've been pre-selected to NOT use this portal today."));
+	spamNPC->AddLine(Tr(L"Player"), Tr(L"...who are you?"));
+	spamNPC->AddLine(Tr(L"SPAM"), Tr(L"Me? I'm the offer you can't refuse. Unread mail that piled up until it woke up."));
+	spamNPC->AddLine(Tr(L"SPAM"), Tr(L"This exit is a limited-time deal, and the price is beating me. Terms and conditions apply."));
+	spamNPC->AddLine(Tr(L"Player"), Tr(L"Can't I just unsubscribe?"));
+	spamNPC->AddLine(Tr(L"SPAM"), Tr(L"Everybody clicks that link. Nobody escapes the list. Let's talk numbers, kid."));
 
 	transformManager->RebuildHierarchy();
 	this->GiveTestItems();
@@ -285,7 +286,7 @@ void Demo::TutorialWorldScene::StartSpamBattle()
 			this->spamBossDefeated = true;
 			if (this->spamNPC) this->spamNPC->SetPhase(SpamNPC::Phase::Defeated);
 			this->player->AddGear(0); // Titan Core
-			if (this->popUpMessage) this->popUpMessage->ShowMessage(L"The portal hums to life. (+) Titan Core - a gear!", 5.0f);
+			if (this->popUpMessage) this->popUpMessage->ShowMessage(Tr(L"The portal hums to life. (+) Titan Core - a gear!"), 5.0f);
 			markFinished();
 		}));
 	});

@@ -24,6 +24,7 @@ namespace Demo
 		this->SetSfxVolume(1.0f);
 		this->SetMasterVolume(1.0f);
 		this->SetFullscreen(false);
+		this->currentLanguage = Language::EN;
 
 		keybinds["MOVE_LEFT"] = DIK_A;
 		keybinds["MOVE_UP"] = DIK_W;
@@ -72,6 +73,7 @@ namespace Demo
 			else if (key == "SFX_VOL") this->SetSfxVolume(std::stof(value));
 			else if (key == "FULLSCREEN") this->SetFullscreen(std::stoi(value));
 			else if (key == "RESOLUTION_INDEX") this->SetResolutionIndex(std::stoi(value));
+			else if (key == "LANGUAGE") this->currentLanguage = (value == "VI") ? Language::VI : Language::EN;
 			else this->keybinds[key] = std::stoi(value);
 		}
 
@@ -89,6 +91,7 @@ namespace Demo
 		file << "SFX_VOL=" << sfxVolume << "\n";
 		file << "FULLSCREEN=" << isFullscreen << "\n";
 		file << "RESOLUTION_INDEX=" << currentResIndex << "\n";
+		file << "LANGUAGE=" << (currentLanguage == Language::VI ? "VI" : "EN") << "\n";
 		for (const auto& pair : keybinds)
 		{
 			file << pair.first << "=" << pair.second << "\n";

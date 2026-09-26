@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "TrojanEnemy.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 #include "RNG.h"
 #include "PopUpMessage.h"
@@ -44,13 +45,13 @@ void Demo::TrojanEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_
 			// Apply Weak to player
 			CastAbility([this]() {
 				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 1, 0.f, false);
-				}, popUpMessage, L"Trojan corrupts your systems!");
+				}, popUpMessage, Tr(L"Trojan corrupts your systems!"));
 		}
 		else {
 			// Counter physical attack
 			CastAbility([this]() {
 				this->AddModifier(ModifierType::BuffDefense, 2, 60.f, true);
-				}, popUpMessage, L"Trojan fortifies its defenses!");
+				}, popUpMessage, Tr(L"Trojan fortifies its defenses!"));
 		}
 	}
 }

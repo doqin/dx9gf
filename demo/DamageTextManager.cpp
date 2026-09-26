@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "DamageTextManager.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include <sstream>
 #include <iomanip>
 namespace Demo
@@ -26,7 +28,7 @@ namespace Demo
 	{
 		this->game = gameContext;
 		//set font and size for damage text, should not use fontsize < 11
-		font = std::make_unique<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 12);
+		font = std::make_unique<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kSmallFontSize);
 		fontSprite = std::make_unique<DX9GF::FontSprite>(font.get());
 	}
 
@@ -74,7 +76,7 @@ namespace Demo
 					break;
 
 				case TextType::Dodge:
-					pool[i].displayText = L"Miss";
+					pool[i].displayText = Tr(L"Miss");
 					pool[i].displayColor = D3DCOLOR_ARGB(255, 200, 200, 200);
 					pool[i].velocityY = -0.04f;
 					pool[i].textSize = 0.8f;

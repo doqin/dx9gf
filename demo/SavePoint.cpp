@@ -1,7 +1,8 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "SettingsManager.h"
 #include "SavePoint.h"
 #include "PopupManager.h"
+#include "LocalizationManager.h"
 #include <cmath>
 
 namespace Demo {
@@ -45,17 +46,17 @@ namespace Demo {
         auto inpMan = DX9GF::InputManager::GetInstance();
         if (isPlayerNear && inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
             std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-                { L"Yes(Y)", [this]() {
+                { Tr(L"Yes(Y)"), [this]() {
                     if (auto smLock = this->saveManager.lock()) {
                         smLock->Save("savegame.json");
                         OutputDebugStringA("Successfully saved!\n");
                         DX9GF::AudioManager::GetInstance()->Play("checkpoint", false, 0.7f);
                     }
                 }},
-                { L"No(N)", nullptr }
+                { Tr(L"No(N)"), nullptr }
             };
 
-            PopupManager::GetInstance()->Show("basic_blackwhite", L"SAVE GAME", L"Do you want to save the game?", buttons);
+            PopupManager::GetInstance()->Show("basic_blackwhite", Tr(L"SAVE GAME"), Tr(L"Do you want to save the game?"), buttons);
         }
     }
 

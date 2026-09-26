@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DeadlineEnemy.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 #include "RNG.h"
 #include "PopUpMessage.h"
@@ -43,7 +44,7 @@ void Demo::DeadlineEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 	}
 
 	if (popUpMessage) {
-		popUpMessage->ShowMessage(L"Deadline crunch drains your Energy!");
+		popUpMessage->ShowMessage(Tr(L"Deadline crunch drains your Energy!"));
 	}
 
 	abilityCooldown = 3;

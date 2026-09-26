@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "WarlockEnemy.h"
+#include "LocalizationManager.h"
 #include "PopUpMessage.h"
 #include "resource.h"
 #include "RNG.h"
@@ -55,10 +56,10 @@ void Demo::WarlockEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 		if (RNG::Range(1, 2) == 1) {
 			CastAbility([this]() {
 				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false);
-				}, popUpMessage, L"Crawler slows your connection!");
+				}, popUpMessage, Tr(L"Crawler slows your connection!"));
 		}
 		else {
-			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 4.0f, true); }, popUpMessage, L"Crawler gathers corrupted data!");
+			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 4.0f, true); }, popUpMessage, Tr(L"Crawler gathers corrupted data!"));
 		}
 	}
 }

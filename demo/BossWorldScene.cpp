@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "SettingsManager.h"
 #include "BossWorldScene.h"
+#include "LocalizationManager.h"
 #include "RandomEncounter.h"
 #include "CardShop.h"
 #include "ItemShop.h"
@@ -27,7 +28,7 @@ void Demo::BossWorldScene::OnInit()
 {
 	InitCore(360.f, 190.f, L"./assets/BossMatrix.tmx");
 
-	SetChapterTitle(L"CHAPTER III: THE OVERFLOW", L"< Critical: Memory Leak >");
+	SetChapterTitle(Tr(L"CHAPTER III: THE OVERFLOW"), Tr(L"< Critical: Memory Leak >"));
 
 	NPCConfig daudauConfig = { L"assets/daudau-Sheet.png", 32, 32, 5, 12, 24.f, 8.f, 12.f };
 
@@ -39,39 +40,39 @@ void Demo::BossWorldScene::OnInit()
 		auto qState = QuestManager::GetInstance()->GetQuestState("Quest_AdminLog");
 
 		if (qState == Demo::QuestState::Locked) {
-			self->AddLine(L"Veteran Debugger", L"Halt, traveler. You shouldn't be here.");
-			self->AddLine(L"Veteran Debugger", L"This sector is deeply corrupted-a graveyard of unresolved bugs and dead code.");
-			self->AddLine(L"Player", L"What exactly happened here?");
-			self->AddLine(L"Veteran Debugger", L"What happened? Ambition met reality.");
-			self->AddLine(L"Veteran Debugger", L"Teams of debuggers rushed in, thinking they could fix the core.");
-			self->AddLine(L"Veteran Debugger", L"They couldn't agree on a protocol. The system panicked, spawned massive anomalies, \nand wiped them out.");
-			self->AddLine(L"Veteran Debugger", L"I keep hearing the old admin's logs echoing in my head...");
-			self->AddLine(L"Veteran Debugger", L"...'The red sun sets over the blue ocean, giving life to the green earth, until it fades into\norange autumn'...");
-			self->AddLine(L"Player", L"That doesn't sound like junk data. Want me to check the core logs when I hack a terminal?");
-			self->AddLine(L"Veteran Debugger", L"...If you spot that phrase anywhere in the real logs, come tell me. I need to know I'm not\nglitching out.");
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"Halt, traveler. You shouldn't be here."));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"This sector is deeply corrupted-a graveyard of unresolved bugs and dead code."));
+			self->AddLine(Tr(L"Player"), Tr(L"What exactly happened here?"));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"What happened? Ambition met reality."));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"Teams of debuggers rushed in, thinking they could fix the core."));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"They couldn't agree on a protocol. The system panicked, spawned massive anomalies, \nand wiped them out."));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"I keep hearing the old admin's logs echoing in my head..."));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"...'The red sun sets over the blue ocean, giving life to the green earth, until it fades into\norange autumn'..."));
+			self->AddLine(Tr(L"Player"), Tr(L"That doesn't sound like junk data. Want me to check the core logs when I hack a terminal?"));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"...If you spot that phrase anywhere in the real logs, come tell me. I need to know I'm not\nglitching out."));
 			return []() {
 				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-					{ L"Yes(Y)", []() { QuestManager::GetInstance()->AcceptQuest("Quest_AdminLog"); } },
-					{ L"No(N)", []() {} }
+					{ Tr(L"Yes(Y)"), []() { QuestManager::GetInstance()->AcceptQuest("Quest_AdminLog"); } },
+					{ Tr(L"No(N)"), []() {} }
 				};
-				PopupManager::GetInstance()->Show("stepped_blue", L"New Quest", L"Help the debugger chase the ghost in the logs?", buttons);
+				PopupManager::GetInstance()->Show("stepped_blue", Tr(L"New Quest"), Tr(L"Help the debugger chase the ghost in the logs?"), buttons);
 			};
 		}
 		else if (qState == Demo::QuestState::Active && this->currentHackStep >= 1) {
-			self->AddLine(L"Player", L"I cracked a terminal. The admin's log is in there, word for word - 'red sun... blue ocean...'.");
-			self->AddLine(L"Veteran Debugger", L"So it IS real. I'm not corrupted. It was a message all along.");
-			self->AddLine(L"Veteran Debugger", L"Here - take this. Found it clipped to the admin's old workstation. A shame to let it rot here.");
+			self->AddLine(Tr(L"Player"), Tr(L"I cracked a terminal. The admin's log is in there, word for word - 'red sun... blue ocean...'."));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"So it IS real. I'm not corrupted. It was a message all along."));
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"Here - take this. Found it clipped to the admin's old workstation. A shame to let it rot here."));
 			return [this]() {
 				auto r = QuestManager::GetInstance()->NotifyEvent("ADMIN_LOG_VERIFIED", "", player.get());
 				if (r.hasReward && popUpMessage) popUpMessage->ShowMessage(L"(+) " + r.rewardMessage, 5.0f);
 			};
 		}
 		else if (qState == Demo::QuestState::Active) {
-			self->AddLine(L"Veteran Debugger", L"Hack one of the security terminals and check the logs. If that phrase is really in there,\ncome straight back.");
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"Hack one of the security terminals and check the logs. If that phrase is really in there,\ncome straight back."));
 			return nullptr;
 		}
 		else {
-			self->AddLine(L"Veteran Debugger", L"The admin left a message, not a bug. All these years I thought I was the broken one.\nThank you, traveler.");
+			self->AddLine(Tr(L"Veteran Debugger"), Tr(L"The admin left a message, not a bug. All these years I thought I was the broken one.\nThank you, traveler."));
 			return nullptr;
 		}
 	});
@@ -85,26 +86,26 @@ void Demo::BossWorldScene::OnInit()
 	hNgoc->SetInteractLogic([](NPC* self) -> std::function<void()> {
 		auto qState = QuestManager::GetInstance()->GetQuestState("Quest_BossWorld");
 		if (qState == Demo::QuestState::Locked) {
-			self->AddLine(L"A Hai`", L"You made it to the Core Sector! Wait... you're not a compiled asset. Are you a player?");
-			self->AddLine(L"Player", L"Who are you?");
-			self->AddLine(L"A Hai`", L"Just a dev who flew too close to the sun. I coded the entity behind that gate to manage root data,\nbut my logic was flawed.");
-			self->AddLine(L"A Hai`", L"It gained sentience, went rogue, and trapped me in my own system.");
-			self->AddLine(L"Player", L"So I just need to go in and delete it to get us out?");
-			self->AddLine(L"A Hai`", L"If only it were that simple! It went completely paranoid and sealed itself inside a heavy quarantine zone.");
-			self->AddLine(L"A Hai`", L"To force the gate open, you must hack the four security terminals scattered around this area.\nPlease, clean up my mess!");
+			self->AddLine(Tr(L"A Hai`"), Tr(L"You made it to the Core Sector! Wait... you're not a compiled asset. Are you a player?"));
+			self->AddLine(Tr(L"Player"), Tr(L"Who are you?"));
+			self->AddLine(Tr(L"A Hai`"), Tr(L"Just a dev who flew too close to the sun. I coded the entity behind that gate to manage root data,\nbut my logic was flawed."));
+			self->AddLine(Tr(L"A Hai`"), Tr(L"It gained sentience, went rogue, and trapped me in my own system."));
+			self->AddLine(Tr(L"Player"), Tr(L"So I just need to go in and delete it to get us out?"));
+			self->AddLine(Tr(L"A Hai`"), Tr(L"If only it were that simple! It went completely paranoid and sealed itself inside a heavy quarantine zone."));
+			self->AddLine(Tr(L"A Hai`"), Tr(L"To force the gate open, you must hack the four security terminals scattered around this area.\nPlease, clean up my mess!"));
 			return []() {
 				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-					{ L"Yes(Y)", []() { QuestManager::GetInstance()->AcceptQuest("Quest_BossWorld"); } },
-					{ L"No(N)", []() {} }
+					{ Tr(L"Yes(Y)"), []() { QuestManager::GetInstance()->AcceptQuest("Quest_BossWorld"); } },
+					{ Tr(L"No(N)"), []() {} }
 				};
-				PopupManager::GetInstance()->Show("stepped_blue", L"New Quest", L"Hack the 4 Terminals?", buttons);
+				PopupManager::GetInstance()->Show("stepped_blue", Tr(L"New Quest"), Tr(L"Hack the 4 Terminals?"), buttons);
 			};
 		}
 		else if (qState == Demo::QuestState::Active) {
-			self->AddLine(L"A Hai`", L"The firewall is still active. Hack all four terminals to breach the quarantine zone.\nDon't let my buggy code beat you!");
+			self->AddLine(Tr(L"A Hai`"), Tr(L"The firewall is still active. Hack all four terminals to breach the quarantine zone.\nDon't let my buggy code beat you!"));
 		}
 		else {
-			self->AddLine(L"A Hai`", L"The gate is open! The root data is right ahead.\nEnd that rogue process and get us out of here!");
+			self->AddLine(Tr(L"A Hai`"), Tr(L"The gate is open! The root data is right ahead.\nEnd that rogue process and get us out of here!"));
 		}
 		return nullptr;
 	});
@@ -112,13 +113,13 @@ void Demo::BossWorldScene::OnInit()
 
 	keyeproNPC = std::make_shared<KeyeproNPC>(transformManager, 752.f, -336.f);
 	keyeproNPC->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
-	keyeproNPC->AddLine(L"Anonymous", L"So. You made it through the terminals.");
-	keyeproNPC->AddLine(L"Anonymous", L"You still think this is a sector. A place with walls, a gate, a way out.");
-	keyeproNPC->AddLine(L"Anonymous", L"It isn't. It's a process. Every corridor you walked, every corrupted debugger\nyou talked to - all of it running because I keep it running.");
-	keyeproNPC->AddLine(L"Anonymous", L"I hold the keys. Every one. Nothing in this system closes, resets, or lets go\nwithout my say-so.");
-	keyeproNPC->AddLine(L"Anonymous", L"Which makes me the last thing standing between you and whatever you think\nfreedom looks like on the other side of this gate.");
-	keyeproNPC->AddLine(L"Player", L"Then I guess I'm taking your keys.");
-	keyeproNPC->AddLine(L"Anonymous", L"Try.");
+	keyeproNPC->AddLine(Tr(L"Anonymous"), Tr(L"So. You made it through the terminals."));
+	keyeproNPC->AddLine(Tr(L"Anonymous"), Tr(L"You still think this is a sector. A place with walls, a gate, a way out."));
+	keyeproNPC->AddLine(Tr(L"Anonymous"), Tr(L"It isn't. It's a process. Every corridor you walked, every corrupted debugger\nyou talked to - all of it running because I keep it running."));
+	keyeproNPC->AddLine(Tr(L"Anonymous"), Tr(L"I hold the keys. Every one. Nothing in this system closes, resets, or lets go\nwithout my say-so."));
+	keyeproNPC->AddLine(Tr(L"Anonymous"), Tr(L"Which makes me the last thing standing between you and whatever you think\nfreedom looks like on the other side of this gate."));
+	keyeproNPC->AddLine(Tr(L"Player"), Tr(L"Then I guess I'm taking your keys."));
+	keyeproNPC->AddLine(Tr(L"Anonymous"), Tr(L"Try."));
 
 	auto hackCallback = std::bind(&BossWorldScene::OnTerminalHacked, this, std::placeholders::_1);
 
@@ -415,8 +416,8 @@ void Demo::BossWorldScene::OnUpdate(unsigned long long deltaTime)
 			auto dialogBuilder = std::make_shared<NPC>(transformManager, 0, 0, NPCConfig{});
 
 			if (player->GetInventoryItems().HasItem(10)) {
-				dialogBuilder->AddLine(L"Rusty Chest", L"Wait, is that the key? NOOO! YOU ROB ME!!!");
-				dialogBuilder->AddLine(L"Rusty Chest", L"You found: " + ItemData::GetInstance()->GetItemBlueprint(6)->GetName() + L", " + ItemData::GetInstance()->GetItemBlueprint(7)->GetName() + L", " + ItemData::GetInstance()->GetItemBlueprint(8)->GetName() + L", and a Data Extractor gear!");
+				dialogBuilder->AddLine(Tr(L"Rusty Chest"), Tr(L"Wait, is that the key? NOOO! YOU ROB ME!!!"));
+				dialogBuilder->AddLine(Tr(L"Rusty Chest"), Tr(L"You found: ") + ItemData::GetInstance()->GetItemBlueprint(6)->GetName() + L", " + ItemData::GetInstance()->GetItemBlueprint(7)->GetName() + L", " + ItemData::GetInstance()->GetItemBlueprint(8)->GetName() + Tr(L", and a Data Extractor gear!"));
 				player->GetInventoryItems().ConsumeItem(10);
 				player->GetInventoryItems().AddItem(6, 1);
 				player->GetInventoryItems().AddItem(7, 1);
@@ -425,7 +426,7 @@ void Demo::BossWorldScene::OnUpdate(unsigned long long deltaTime)
 				rustyChest->SetOpened(true);
 			}
 			else {
-				dialogBuilder->AddLine(L"Rusty Chest", L"Don't touch me. You ain't got the key!");
+				dialogBuilder->AddLine(Tr(L"Rusty Chest"), Tr(L"Don't touch me. You ain't got the key!"));
 			}
 
 			for (auto& line : dialogBuilder->GetDialogueLines()) {

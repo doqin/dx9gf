@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "CreditsScene.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 #include "DX9GFInputManager.h"
 #include <algorithm>
@@ -114,7 +116,7 @@ namespace Demo
 
 		fontSprite->Begin();
 		fontSprite->SetScale(1.5f, 1.5f);
-		std::wstring pageText = L"Page " + std::to_wstring(currentPage + 1) + L" / " + std::to_wstring(creditsPages.size());
+		std::wstring pageText = Tr(L"Page ") + std::to_wstring(currentPage + 1) + L" / " + std::to_wstring(creditsPages.size());
 		fontSprite->SetText(std::move(pageText));
 
 		float pWidth = fontSprite->GetWidth() * 1.5f;
@@ -133,7 +135,7 @@ namespace Demo
 		lastScreenHeight = game->GetVirtualHeight();
 
 		// Load Assets
-		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
 		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 		fontSprite->SetColor(0xFFFFFFFF);
 
@@ -181,7 +183,7 @@ namespace Demo
 
 		//check and change this if theres misconception
 		creditsPages.push_back({
-			L"-- GAME DESIGN & CONCEPT --",
+			Tr(L"-- GAME DESIGN & CONCEPT --"),
 			L"",
 			L"24520763 - Khang Tuan Nguyen",
 			L"",
@@ -195,34 +197,34 @@ namespace Demo
 			});
 
 		creditsPages.push_back({
-			L"-- PROGRAMMING & ENGINEERING --",
+			Tr(L"-- PROGRAMMING & ENGINEERING --"),
 			L"",
 			L"DX9GF Custom Engine",
 			L"C++ / DirectX 9",
 			L"",
-			L"Lead Programmer: Khang Tuan Nguyen",
+			Tr(L"Lead Programmer: ") + L"Khang Tuan Nguyen",
 			L"",
-			L"Gameplay Mechanics:",
+			Tr(L"Gameplay Mechanics:"),
 			L"Quynh Pham Truc Ngoc",
 			L"Chi Tran To Viet",
 			L"Ngoc Tran Thi Hoai",
 			L"Khang Le Nguyen Huu"
 			});
 		creditsPages.push_back({
-			L"-- ART & VISUAL RESOURCES --",
+			Tr(L"-- ART & VISUAL RESOURCES --"),
 			L"",
-			L"Tilesets & Animations: Khang Tuan Nguyen",
+			Tr(L"Tilesets & Animations: ") + L"Khang Tuan Nguyen",
 			L"",
-			L"UI & Icons: Khang Tuan Nguyen",
+			Tr(L"UI & Icons: ") + L"Khang Tuan Nguyen",
 			L"",
-			L"Character Sprites: Khang Tuan Nguyen",
+			Tr(L"Character Sprites: ") + L"Khang Tuan Nguyen",
 			L"",
-			L"Enemy Sprites: Chi Tran To Viet",
+			Tr(L"Enemy Sprites: ") + L"Chi Tran To Viet",
 			L"",
 			L"Fonts: StatusPlz, Arcade Among 2"
 			});
 		creditsPages.push_back({
-			L"-- AUDIO RESOURCES --",
+			Tr(L"-- AUDIO RESOURCES --"),
 			L"Inventory Open: LittleRobotSoundFactory",
 			L"- https://freesound.org/s/270393/",
 			L"Close Bag: by TriqyStudio",
@@ -235,7 +237,7 @@ namespace Demo
 			L"- https://freesound.org/s/682449/"
 			});
 		creditsPages.push_back({
-			L"-- AUDIO RESOURCES --",
+			Tr(L"-- AUDIO RESOURCES --"),
 			L"Card Deck 2: Paul Sinnett",
 			L"- https://freesound.org/s/404015/",
 			L"Checkpoint: by Vicces1212",
@@ -249,23 +251,23 @@ namespace Demo
 			L"- https://freesound.org/s/346200/"
 			});
 		creditsPages.push_back({
-			L"-- AUDIO RESOURCES --",
+			Tr(L"-- AUDIO RESOURCES --"),
 			L"Retro, Coin Collect: LilMati",
 			L"- https://freesound.org/s/515736/",
 			L"Coin_C: cabled_mess ",
 			L"- https://freesound.org/s/350871/",
 			L"Text/Dialogue Bleeps: dmochas",
 			L"- https://dmochas-assets.itch.io/dmochas-bleeps-pack",
-			L"Licensed under CC BY 4.0 & Public Domain"
+			Tr(L"Licensed under CC BY 4.0 & Public Domain")
 			});
 		creditsPages.push_back({
-			L"-- SPECIAL THANKS --",
+			Tr(L"-- SPECIAL THANKS --"),
 			L"",
-			L"Supervisor: Hai Vu Tuan",
+			Tr(L"Supervisor: ") + L"Hai Vu Tuan",
 			L"",
-			L"My eyes becuz it didn't give up at 2A.M", //just a joke, delete this shjet if we need to
+			Tr(L"My eyes becuz it didn't give up at 2A.M"), //just a joke, delete this shjet if we need to
 			L"",
-			L"You guys, for playing this game!"
+			Tr(L"You guys, for playing this game!")
 			});
 		UpdateLayout();
 		transformManager->RebuildHierarchy();

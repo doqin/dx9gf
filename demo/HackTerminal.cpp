@@ -87,7 +87,7 @@ namespace Demo {
         if (!statusMessage.empty()) {
             float scale = 0.8f * zoom;
             fontSprite->Begin();
-            fontSprite->SetText(std::wstring(statusMessage.begin(), statusMessage.end()));
+            fontSprite->SetText(DX9GF::Utils::Utf8ToWide(statusMessage));
             fontSprite->SetScale(scale);
             fontSprite->SetColor(0xFF55FF55);
 

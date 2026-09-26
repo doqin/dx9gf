@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "VampireBatEnemy.h"
+#include "LocalizationManager.h"
 #include "PopUpMessage.h"
 #include "resource.h"
 #include "RNG.h"
@@ -52,12 +53,12 @@ void Demo::VampireBatEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::sha
 
 	if (turnInCycle == skillTurnThisCycle) {
 		if (RNG::Range(1, 2) == 1) {
-			CastAbility([this]() { this->Heal(15.f); }, popUpMessage, L"Shrimp siphons your data! (+15 HP)");
+			CastAbility([this]() { this->Heal(15.f); }, popUpMessage, Tr(L"Shrimp siphons your data! (+15 HP)"));
 		}
 		else {
 			CastAbility([this]() {
 				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Vulnerable, 2, 0.f, false);
-				}, popUpMessage, L"Shrimp emits a piercing screech!");
+				}, popUpMessage, Tr(L"Shrimp emits a piercing screech!"));
 		}
 	}
 }

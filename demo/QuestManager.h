@@ -4,6 +4,7 @@
 #include "IconButton.h"
 #include "Player.h"
 #include "GameItems.h"
+#include "LocalizationManager.h"
 #include <nlohmann/json.hpp>
 #include <string>
 #include <map>
@@ -27,7 +28,7 @@ namespace Demo {
 
 	class QuestManager {
 	private:
-		std::wstring questText = L"Quest: ???";
+		std::wstring questText = Tr(L"Quest: ???");
 		bool isExpanded = true;
 		bool isVisible = true;
 		std::shared_ptr<DX9GF::Font> font;
@@ -64,7 +65,7 @@ namespace Demo {
 		void Reset() {
 			questStates.clear();
 			currentTrackedQuest = "";
-			questText = L"Quest: ???";
+			questText = Tr(L"Quest: ???");
 			isExpanded = true;
 			animProgress = 1.0f;
 			InitQuestDatabase();

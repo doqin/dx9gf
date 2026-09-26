@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "SketchyGuyNPC.h"
+#include "LocalizationManager.h"
 
 namespace Demo {
 	SketchyGuyNPC::SketchyGuyNPC(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y)
@@ -28,12 +29,12 @@ namespace Demo {
 		sprite->SetPosition(GetWorldX(), GetWorldY());
 
 		// Intro script - hardcoded so every scene that spawns him gets the same lines.
-		AddLine(L"???", L"Psst. Down here. Don't make it look like we're talking.");
-		AddLine(L"???", L"You didn't see me, I was never here, and this exchange has already\nbeen garbage-collected. We clear?");
-		AddLine(L"Player", L"...Sure. What are you selling?");
-		AddLine(L"???", L"Sealed packs. Contents sourced through channels I'm advised not to\ndescribe out loud.");
-		AddLine(L"???", L"Could be a Legendary. Could be five copies of Strike.\nThat's the thrill. That's what you're paying for.");
-		AddLine(L"Player", L"I already regret this. Catch me next time you're skulking around.");
+		AddLine(Tr(L"???"), Tr(L"Psst. Down here. Don't make it look like we're talking."));
+		AddLine(Tr(L"???"), Tr(L"You didn't see me, I was never here, and this exchange has already\nbeen garbage-collected. We clear?"));
+		AddLine(Tr(L"Player"), Tr(L"...Sure. What are you selling?"));
+		AddLine(Tr(L"???"), Tr(L"Sealed packs. Contents sourced through channels I'm advised not to\ndescribe out loud."));
+		AddLine(Tr(L"???"), Tr(L"Could be a Legendary. Could be five copies of Strike.\nThat's the thrill. That's what you're paying for."));
+		AddLine(Tr(L"Player"), Tr(L"I already regret this. Catch me next time you're skulking around."));
 	}
 
 	void SketchyGuyNPC::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime)
@@ -47,19 +48,19 @@ namespace Demo {
 
 	std::wstring SketchyGuyNPC::GetBuyPromptTitle() const
 	{
-		return L"SEALED PACK";
+		return Tr(L"SEALED PACK");
 	}
 
 	std::wstring SketchyGuyNPC::GetBuyPromptText(int cost) const
 	{
 		if (cost <= 0) {
-			return L"First one's on the house. Five cards, sealed.\nNo receipt, no returns. Want it?";
+			return Tr(L"First one's on the house. Five cards, sealed.\nNo receipt, no returns. Want it?");
 		}
-		return L"One sealed pack. Five cards. " + std::to_wstring(cost) + L" Gold.\nNo questions, no refunds.";
+		return Tr(L"One sealed pack. Five cards. ") + std::to_wstring(cost) + Tr(L" Gold.\nNo questions, no refunds.");
 	}
 
 	std::wstring SketchyGuyNPC::GetBuyConfirmLabel(int cost) const
 	{
-		return cost <= 0 ? L"Take it(Y)" : L"Buy(Y)";
+		return cost <= 0 ? Tr(L"Take it(Y)") : Tr(L"Buy(Y)");
 	}
 }

@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "IEnemy.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include <cmath>
 #include <algorithm>
 #include "DrawUtils.h"
@@ -53,7 +55,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 	this->graphicsDevice = graphicsDevice;
 
 	if (!font) {
-		font = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+		font = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 	}
 	if (!uiTexture) {
@@ -145,7 +147,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 				fontSprite->Begin();
 				fontSprite->SetOutline(true, 0xFF000000, 2.f);
 				fontSprite->SetColor(D3DCOLOR_ARGB((std::max)(idleAlpha, 140), 255, 230, 120));
-				std::wstring hintText = L"Click to get enemy card";
+				std::wstring hintText = Tr(L"Click to get enemy card");
 				fontSprite->SetText(std::move(hintText));
 				float hintWidth = fontSprite->GetWidth();
 				fontSprite->SetPosition(GetWorldX() - hintWidth / 2.f, triggerTop - 24.f);
@@ -210,58 +212,58 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 		if (mod.type == ModifierType::BuffDefense && mod.value <= 0.f) continue;
 		if (mod.duration <= 0) continue;
 
-		std::wstring statusName = L"Unknown";
-		std::wstring statusDescription = L"";
+		std::wstring statusName = Tr(L"Unknown");
+		std::wstring statusDescription = Tr(L"");
 		RECT sourceRect = { 0, 0, 0, 0 };
 
 		if (mod.type == ModifierType::Poison) {
-			statusName = L"Poison";
-			statusDescription = L"Takes damage equal to remaining turns at end of turn.";
+			statusName = Tr(L"Poison");
+			statusDescription = Tr(L"Takes damage equal to remaining turns at end of turn.");
 			sourceRect = { 128, 240, 144, 256 };
 		}
 		else if (mod.type == ModifierType::Burn) {
-			statusName = L"Burn";
-			statusDescription = L"Takes damage equal to its value at end of turn, ignoring block.";
+			statusName = Tr(L"Burn");
+			statusDescription = Tr(L"Takes damage equal to its value at end of turn, ignoring block.");
 			sourceRect = { 240, 288, 256, 304 };
 		}
 		else if (mod.type == ModifierType::Regen) {
-			statusName = L"Regen";
-			statusDescription = L"Heals its value at end of turn.";
+			statusName = Tr(L"Regen");
+			statusDescription = Tr(L"Heals its value at end of turn.");
 			sourceRect = { 272, 288, 288, 304 };
 		}
 		else if (mod.type == ModifierType::Marked) {
-			statusName = L"Marked";
-			statusDescription = L"Takes extra damage from every hit.";
+			statusName = Tr(L"Marked");
+			statusDescription = Tr(L"Takes extra damage from every hit.");
 			sourceRect = { 128, 256, 144, 272 };
 		}
 		else if (mod.type == ModifierType::Vulnerable) {
-			statusName = L"Vulnerable";
-			statusDescription = L"Takes 50% more damage from attacks.";
+			statusName = Tr(L"Vulnerable");
+			statusDescription = Tr(L"Takes 50% more damage from attacks.");
 			sourceRect = { 96, 256, 112, 272 };
 		}
 		else if (mod.type == ModifierType::Weak) {
-			statusName = L"Weak";
-			statusDescription = L"Deals 25% less damage with attacks.";
+			statusName = Tr(L"Weak");
+			statusDescription = Tr(L"Deals 25% less damage with attacks.");
 			sourceRect = { 112, 256, 128, 272 };
 		}
 		else if (mod.type == ModifierType::Stun) {
-			statusName = L"Stun";
-			statusDescription = L"Cannot take action this turn.";
+			statusName = Tr(L"Stun");
+			statusDescription = Tr(L"Cannot take action this turn.");
 			sourceRect = { 224, 288, 240, 304 };
 		}
 		else if (mod.type == ModifierType::BuffDamage) {
-			statusName = L"Atk Up";
-			statusDescription = L"Increases attack damage.";
+			statusName = Tr(L"Atk Up");
+			statusDescription = Tr(L"Increases attack damage.");
 			sourceRect = { 112, 240, 128, 256 };
 		}
 		else if (mod.type == ModifierType::BuffDefense) {
-			statusName = L"Def Up";
-			statusDescription = L"Blocks incoming damage.";
+			statusName = Tr(L"Def Up");
+			statusDescription = Tr(L"Blocks incoming damage.");
 			sourceRect = { 96, 240, 112, 256 };
 		}
 		else if (mod.type == ModifierType::Spark) {
-			statusName = L"Spark";
-			statusDescription = L"Accumulates stacks. Deals no damage until detonated.";
+			statusName = Tr(L"Spark");
+			statusDescription = Tr(L"Accumulates stacks. Deals no damage until detonated.");
 			sourceRect = { 272, 320, 288, 336 };
 		}
 

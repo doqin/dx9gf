@@ -2,6 +2,7 @@
 #include "ICard.h"
 #include "IDraggable.h"
 #include "GameItems.h"
+#include "LocalizationManager.h"
 
 namespace Demo {
 	class VirtualBattleState;
@@ -47,7 +48,7 @@ namespace Demo {
 		virtual bool Execute() = 0;
 		virtual void ResetExecution() {}
 
-		virtual std::wstring GetInputsDescription() const { return L"None"; }
+		virtual std::wstring GetInputsDescription() const { return Tr(L"None"); }
 		virtual bool HasRequiredTargets() const { return true; }
 
 		// Appends what this card would do, in the order Execute would do it, for the damage readout

@@ -1,58 +1,92 @@
 ﻿#include "pch.h"
 #include "GameItems.h"
+#include "LocalizationManager.h"
 namespace Demo
 {
+	// Names and descriptions here reuse the exact same Tr() keys as IBattleScene::DrawModifierIcons
+	// and IEnemy's status list wherever the wording is already instance-independent, so no new
+	// translation is needed for those. Only Poison/Burn/Marked/Regen/EnergyDrain need a
+	// number-free rephrasing, since their in-battle descriptions embed the live value/duration.
+	ModifierInfo GetModifierInfo(ModifierType type)
+	{
+		switch (type) {
+		case ModifierType::BuffDamage: return { Tr(L"Atk Up"), Tr(L"Increases attack damage.") };
+		case ModifierType::BuffDefense: return { Tr(L"Def Up"), Tr(L"Blocks incoming damage.") };
+		case ModifierType::Poison: return { Tr(L"Poison"), Tr(L"Deals damage equal to its remaining duration at the end of each turn.") };
+		case ModifierType::Vulnerable: return { Tr(L"Vulnerable"), Tr(L"Takes 50% more damage from attacks.") };
+		case ModifierType::Weak: return { Tr(L"Weak"), Tr(L"Deals 25% less damage with attacks.") };
+		case ModifierType::Stun: return { Tr(L"Stun"), Tr(L"Cannot take action this turn.") };
+		case ModifierType::Burn: return { Tr(L"Burn"), Tr(L"Deals damage at the end of each turn, ignoring block.") };
+		case ModifierType::Marked: return { Tr(L"Marked"), Tr(L"Takes extra damage from every hit.") };
+		case ModifierType::Regen: return { Tr(L"Regen"), Tr(L"Heals at the end of each turn.") };
+		case ModifierType::Spark: return { Tr(L"Spark"), Tr(L"Accumulates stacks. Deals no damage until detonated.") };
+		case ModifierType::Freeze: return { Tr(L"Freeze"), Tr(L"Player's movement speed is reduced.") };
+		case ModifierType::Immunity: return { Tr(L"Immunity"), Tr(L"Blocks debuffs and tick damage.\nLoses 1 charge per block.") };
+		case ModifierType::EnergyDrain: return { Tr(L"Energy Drain"), Tr(L"Reduces Energy gained at the start of your turn.") };
+		case ModifierType::InvertedControls: return { Tr(L"Reversed Controls"), Tr(L"Movement is flipped: up<->down, left<->right.") };
+		default: return { L"", L"" };
+		}
+	}
+
+	std::wstring GetModifierStackingInfo(bool stacksValue)
+	{
+		if (stacksValue) {
+			return Tr(L"Stacks: strength adds up, duration refreshes to the longer one.");
+		}
+		return Tr(L"Stacks: duration adds up, strength refreshes to the stronger one.");
+	}
+
 	//register an item here
 	void ItemData::LoadData()
 	{
-		itemRegistry[0] = ConsumableItem(0, L"Lesser Heal",
-			L"Instant Heal 25HP",
+		itemRegistry[0] = ConsumableItem(0, Tr(L"Lesser Heal"),
+			Tr(L"Instant Heal 25HP"),
 			{ CombatModifier{ ModifierType::HealHP, 0, 25.0f, true, 0 } },
 			{ 0, 0, 23, 35 });
 
-		itemRegistry[1] = ConsumableItem(1, L"Lesser Defense",
-			L"Buff 30 Defense for 3 turns",
+		itemRegistry[1] = ConsumableItem(1, Tr(L"Lesser Defense"),
+			Tr(L"Buff 30 Defense for 3 turns"),
 			{ CombatModifier{ ModifierType::BuffDefense, 3, 30.0f, true, 1 } },
 			{ 24, 0, 47, 35 });
 
-		itemRegistry[2] = ConsumableItem(2, L"Lesser Damage",
-			L"Buff 2 Damage for 3 turns",
+		itemRegistry[2] = ConsumableItem(2, Tr(L"Lesser Damage"),
+			Tr(L"Buff 2 Damage for 3 turns"),
 			{ CombatModifier{ ModifierType::BuffDamage, 3, 2.0f, true, 1 } },
 			{ 48, 0, 71, 35 });
 
-		itemRegistry[3] = ConsumableItem(3, L"Adrenaline Rush",
-			L"Buff 2 Damage for 6 turns & Instant Heal 15HP",
+		itemRegistry[3] = ConsumableItem(3, Tr(L"Adrenaline Rush"),
+			Tr(L"Buff 2 Damage for 6 turns & Instant Heal 15HP"),
 			{
 				CombatModifier{ ModifierType::BuffDamage, 6, 2.0f, true, 1 },
 				CombatModifier{ ModifierType::HealHP, 0, 15.0f, true, 0 }
 			},
 			{ 72, 0, 95, 35 });
 
-		itemRegistry[4] = ConsumableItem(4, L"Enguard",
-			L"Instant Heal 20HP & Buff 25 Defense for 4 turns",
+		itemRegistry[4] = ConsumableItem(4, Tr(L"Enguard"),
+			Tr(L"Instant Heal 20HP & Buff 25 Defense for 4 turns"),
 			{
 				CombatModifier{ ModifierType::BuffDefense, 4, 25.0f, true, 1 },
 				CombatModifier{ ModifierType::HealHP, 0, 20.0f, true, 0 }
 			},
 			{ 96, 0, 119, 35 });
 
-		itemRegistry[5] = ConsumableItem(5, L"Mega Heal Elixir",
-			L"Instant Heal 50HP",
+		itemRegistry[5] = ConsumableItem(5, Tr(L"Mega Heal Elixir"),
+			Tr(L"Instant Heal 50HP"),
 			{ CombatModifier{ ModifierType::HealHP, 0, 50.0f, true, 0 } },
 			{ 0, 36, 23, 71 });
 
-		itemRegistry[6] = ConsumableItem(6, L"Iron Wall Shield",
-			L"Buff 50.0 Defense for 3 turns",
+		itemRegistry[6] = ConsumableItem(6, Tr(L"Iron Wall Shield"),
+			Tr(L"Buff 50.0 Defense for 3 turns"),
 			{ CombatModifier{ ModifierType::BuffDefense, 3, 50.0f, true, 1 } },
 			{ 24, 36, 47, 71 });
 
-		itemRegistry[7] = ConsumableItem(7, L"Berserker's Wrath",
-			L"Buff 10 Damage for 1 turn",
+		itemRegistry[7] = ConsumableItem(7, Tr(L"Berserker's Wrath"),
+			Tr(L"Buff 10 Damage for 1 turn"),
 			{ CombatModifier{ ModifierType::BuffDamage, 1, 10.0f, true, 1 } },
 			{ 48, 36, 71, 71 });
 
-		itemRegistry[8] = ConsumableItem(8, L"Paladin's Blessing",
-			L"Instant Heal 35HP & Buff 20 Defense and 3 Damage for 3 turns",
+		itemRegistry[8] = ConsumableItem(8, Tr(L"Paladin's Blessing"),
+			Tr(L"Instant Heal 35HP & Buff 20 Defense and 3 Damage for 3 turns"),
 			{
 				CombatModifier{ ModifierType::HealHP, 0, 35.0f, true, 0 },
 				CombatModifier{ ModifierType::BuffDefense, 3, 20.0f, true, 1 },
@@ -60,19 +94,19 @@ namespace Demo
 			},
 			{ 72, 36, 95, 71 });
 
-		itemRegistry[9] = ConsumableItem(9, L"Titan's Resolve",
-			L"Buff 50 Defense and 3 Damage for 3 turns",
+		itemRegistry[9] = ConsumableItem(9, Tr(L"Titan's Resolve"),
+			Tr(L"Buff 50 Defense and 3 Damage for 3 turns"),
 			{
 				CombatModifier{ ModifierType::BuffDefense, 3, 50.0f, true, 1 },
 				CombatModifier{ ModifierType::BuffDamage, 3, 3.0f, true, 1 }
 			},
 			{ 96, 36, 119, 71 });
 
-		itemRegistry[10] = ConsumableItem(99, L"Rusty Key", L"...", {}, { 120, 0, 143, 35 });
-		itemRegistry[11] = ConsumableItem(99, L"G(r)ayStone", L"Has no practical use. Just a trophy for our winner.", {}, { 120, 36, 143, 71 });
+		itemRegistry[10] = ConsumableItem(99, Tr(L"Rusty Key"), Tr(L"..."), {}, { 120, 0, 143, 35 });
+		itemRegistry[11] = ConsumableItem(99, Tr(L"G(r)ayStone"), Tr(L"Has no practical use. Just a trophy for our winner."), {}, { 120, 36, 143, 71 });
 
-		itemRegistry[12] = ConsumableItem(12, L"Authentication Token",
-			L"A one-time access credential, pulled from a terminal in the alley.",
+		itemRegistry[12] = ConsumableItem(12, Tr(L"Authentication Token"),
+			Tr(L"A one-time access credential, pulled from a terminal in the alley."),
 			{}, { 144, 0, 167, 35 });
 
 
@@ -89,22 +123,22 @@ namespace Demo
 		//	{239,7,251,19} },
 		//	GearType::Passive, GearEffect::AddMaxHP, 20, 0};
 
-		gearRegistry[0] = { 0, L"Titan Core", L"Grants 10 Max HP.", //red core
+		gearRegistry[0] = { 0, Tr(L"Titan Core"), Tr(L"Grants 10 Max HP."), //red core
 			{ {7,91,19,103} }, GearType::Passive, GearEffect::AddMaxHP, 10, 0 };
 
-		gearRegistry[1] = { 1, L"Energy Cell", L"Active: Restore 1 Energy.\nCooldown: 3 turns.", //energy cell
+		gearRegistry[1] = { 1, Tr(L"Energy Cell"), Tr(L"Active: Restore 1 Energy.\nCooldown: 3 turns."), //energy cell
 			{ {7, 77, 19, 89} }, GearType::Active, GearEffect::AddEnergy, 1, 3 };
 
-		gearRegistry[2] = { 2, L"Data Extractor", L"Active: Draw 2 card.\nCooldown: 2 turns.", //.rar
+		gearRegistry[2] = { 2, Tr(L"Data Extractor"), Tr(L"Active: Draw 2 card.\nCooldown: 2 turns."), //.rar
 			{ {7, 21, 19, 33} }, GearType::Active, GearEffect::DrawCard, 2, 2 };
 
-		gearRegistry[3] = { 3, L"Memory Locker", L"Active: Retain 1 hand card.\nCooldown: 2 turns.", //lock
+		gearRegistry[3] = { 3, Tr(L"Memory Locker"), Tr(L"Active: Retain 1 hand card.\nCooldown: 2 turns."), //lock
 			{ {7, 35, 19, 47} }, GearType::Active, GearEffect::RetainCard, 1, 2 };
 
-		gearRegistry[4] = { 4, L"Midas Chip", L"Gain extra Gold on win.", //cpu chip
+		gearRegistry[4] = { 4, Tr(L"Midas Chip"), Tr(L"Gain extra Gold on win."), //cpu chip
 			{ {7, 49, 19, 61} }, GearType::Passive, GearEffect::GoldBoost, 20, 0 };
 
-		gearRegistry[5] = { 5, L"Aegis Plating", L"Start combat with 15 Armor in 3 turns.", //actully a white plate
+		gearRegistry[5] = { 5, Tr(L"Aegis Plating"), Tr(L"Start combat with 15 Armor in 3 turns."), //actully a white plate
 			{ {7, 63, 19, 75} }, GearType::Passive, GearEffect::StartArmor, 15, 0 };
 	}
 

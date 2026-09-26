@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SettingsManager.h"
 #include "LabInsideScene.h"
+#include "LocalizationManager.h"
 #include "MainMenu.h"
 #include "SaveGameState.h"
 #include "TransitionCommand.h"
@@ -18,7 +19,7 @@ void Demo::LabInsideScene::OnInit()
 {
 	InitCore(64, -1, L"./assets/labinside.tmx");
 
-	SetChapterTitle(L"KAKOS LAB", L"< What scared her off? >");
+	SetChapterTitle(Tr(L"KAKOS LAB"), Tr(L"< What scared her off? >"));
 	map->SetAreaUpdateHandler("trigger_back", [this](const DX9GF::Map::ObjectArea& area) {
 		CreatePortalTransition(-1, 544.f, -928.f, "bgm_tutorial", 0.5f);
 	});

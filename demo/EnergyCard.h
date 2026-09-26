@@ -1,5 +1,6 @@
-#pragma once
+﻿#pragma once
 #include "IStatementCard.h"
+#include "LocalizationManager.h"
 
 namespace Demo {
 	// Single-use card that takes no targets: spend 1 energy now to start the next turn with
@@ -16,7 +17,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Gain 1 extra energy next turn."; }
+		std::wstring GetDescription() const override { return Tr(L"Gain 1 extra energy next turn."); }
 		RECT GetFaceRect() const override { return RECT{ 0, 336, 80, 352 }; }
 
 		bool Execute() override;

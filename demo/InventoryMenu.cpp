@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include "SettingsManager.h"
 #include "PopupManager.h"
+#include "LocalizationManager.h"
 namespace {
 	constexpr float RAW_ITEM_W = 23.0f;
 	constexpr float RAW_ITEM_H = 35.0f;
@@ -107,16 +108,16 @@ namespace Demo {
 		btnLeaveGame->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
 
 			std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-				{ L"Yes(Y)", [this]() {
+				{ Tr(L"Yes(Y)"), [this]() {
 					this->pendingLeave = true;
 				} },
-				{ L"No(N)", []() {} }
+				{ Tr(L"No(N)"), []() {} }
 			};
 
 			PopupManager::GetInstance()->Show(
 				"stepped_gold",
-				L"Leave Game",
-				L"Are you sure you want to return to Main Menu?",
+				Tr(L"Leave Game"),
+				Tr(L"Are you sure you want to return to Main Menu?"),
 				buttons
 			);
 
@@ -676,7 +677,7 @@ namespace Demo {
 
 				fontSprite->SetPosition(textX, textY);
 				fontSprite->SetOutline(true, 0xFF000000, 3.f);
-				fontSprite->SetText(L"x" + std::to_wstring(inventory[i].quantity));
+				fontSprite->SetText(Tr(L"x") + std::to_wstring(inventory[i].quantity));
 				fontSprite->Draw(*uiCamera, deltaTime);
 
 				if (btn->GetTrigger()->IsHovering(deltaTime) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == btn)) {
@@ -709,12 +710,12 @@ namespace Demo {
 			fontSprite->SetOutline(true, 0xFF000000, 3.f);
 			fontSprite->SetColor(0xFFFFFFFF);
 
-			fontSprite->SetText(L"Current Deck");
+			fontSprite->SetText(Tr(L"Current Deck"));
 			float centerLeft = leftContainerX + containerW / 2.f;
 			fontSprite->SetPosition(centerLeft - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
 
-			fontSprite->SetText(L"Available Cards");
+			fontSprite->SetText(Tr(L"Available Cards"));
 			float centerRight = rightContainerX + containerW / 2.f;
 			fontSprite->SetPosition(centerRight - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
@@ -740,10 +741,10 @@ namespace Demo {
 			fontSprite->SetScale(1.0f, 1.0f);
 			fontSprite->SetOutline(true, 0xFF000000, 3.f);
 			fontSprite->SetColor(0xFFFFFFFF);
-			fontSprite->SetText(L"Core Process");
+			fontSprite->SetText(Tr(L"Core Process"));
 			fontSprite->SetPosition(centerLeft - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
-			fontSprite->SetText(L"Equipment Orbit");
+			fontSprite->SetText(Tr(L"Equipment Orbit"));
 			fontSprite->SetPosition(centerRight - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
 			fontSprite->End();
@@ -775,7 +776,7 @@ namespace Demo {
 			}
 
 			bool showCursor = std::fmod(gearAnimTimer, 1000.0f) < 500.0f;
-			std::wstring consoleText = L"EXECUTE://";
+			std::wstring consoleText = Tr(L"EXECUTE://");
 			std::wstring cursorText = showCursor ? L"_" : L" ";
 			std::wstring gearName = L"";
 			std::wstring gearDesc = L"";
@@ -836,7 +837,7 @@ namespace Demo {
 			fontSprite->Begin();
 			fontSprite->SetScale(0.9f, 0.9f);
 			fontSprite->SetColor(0xFF888888);
-			fontSprite->SetText(L"Press <" + toggleKey + L"> outside to hide/show Gears");
+			fontSprite->SetText(Tr(L"Press <") + toggleKey + Tr(L"> outside to hide/show Gears"));
 			fontSprite->SetPosition(centerLeft - fontSprite->GetWidth() / 2.0f, playerBaseY + 90.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
 			fontSprite->End();
@@ -901,7 +902,7 @@ namespace Demo {
 				fontSprite->SetScale(1.0f, 1.0f);
 				fontSprite->SetColor(0xFF888888);
 				fontSprite->SetPosition(rightContainerX + 20.0f, separatorY + 25.0f);
-				fontSprite->SetText(L"Hover over a gear to view details.");
+				fontSprite->SetText(Tr(L"Hover over a gear to view details."));
 				fontSprite->Draw(*uiCamera, deltaTime);
 				fontSprite->End();
 			}
@@ -919,12 +920,12 @@ namespace Demo {
 			fontSprite->SetOutline(true, 0xFF000000, 3.f);
 			fontSprite->SetColor(0xFFFFFFFF);
 
-			fontSprite->SetText(L"Quest Log");
+			fontSprite->SetText(Tr(L"Quest Log"));
 			float centerLeft = leftContainerX + containerW / 2.f;
 			fontSprite->SetPosition(centerLeft - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
 
-			fontSprite->SetText(L"Quest Details");
+			fontSprite->SetText(Tr(L"Quest Details"));
 			float centerRight = rightContainerX + containerW / 2.f;
 			fontSprite->SetPosition(centerRight - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
@@ -973,7 +974,7 @@ namespace Demo {
 						fontSprite->SetOutline(true, 0xFF000000, 3.0f);
 						fontSprite->SetColor(color);
 
-						std::wstring wText(text.begin(), text.end());
+						std::wstring wText = DX9GF::Utils::Utf8ToWide(text);
 						fontSprite->SetText(wText);
 
 						float padX = (containerW - fontSprite->GetWidth() * 1.2f) / 2.0f;
@@ -1006,7 +1007,7 @@ namespace Demo {
 				fontSprite->SetOutline(false);
 				fontSprite->SetColor(0xFF888888);
 
-				fontSprite->SetText(L"No quest data available.");
+				fontSprite->SetText(Tr(L"No quest data available."));
 				float centerNoDataX = rightContainerX + containerW / 2.0f - fontSprite->GetWidth() / 2.0f;
 				fontSprite->SetPosition(centerNoDataX, containerY + containerH / 2.0f - 10.0f);
 
@@ -1035,7 +1036,7 @@ namespace Demo {
 					fontSprite->SetScale(1.0f, 1.0f);
 					fontSprite->SetColor(state == QuestState::Completed ? 0xFF00FF00 : 0xFFFFFFFF);
 					fontSprite->SetPosition(rightContainerX + padX, drawY);
-					fontSprite->SetText(state == QuestState::Completed ? L"Status: Completed" : L"Status: Active");
+					fontSprite->SetText(state == QuestState::Completed ? Tr(L"Status: Completed") : Tr(L"Status: Active"));
 					fontSprite->Draw(*uiCamera, deltaTime);
 					drawY += 25.0f;
 
@@ -1054,7 +1055,7 @@ namespace Demo {
 
 					fontSprite->SetColor(0xFFFFFFFF);
 					fontSprite->SetPosition(rightContainerX + padX, drawY);
-					fontSprite->SetText(L"Objective:");
+					fontSprite->SetText(Tr(L"Objective:"));
 					fontSprite->Draw(*uiCamera, deltaTime);
 					drawY += 20.0f;
 
@@ -1066,7 +1067,7 @@ namespace Demo {
 					float bottomY = containerY + containerH - 35.0f;
 					fontSprite->SetColor(0xFFFFFFFF);
 					fontSprite->SetPosition(rightContainerX + padX, bottomY - 20.0f);
-					fontSprite->SetText(L"Reward:");
+					fontSprite->SetText(Tr(L"Reward:"));
 					fontSprite->Draw(*uiCamera, deltaTime);
 
 					fontSprite->SetColor(0xFF00FFFF);
@@ -1173,7 +1174,7 @@ namespace Demo {
 
 		auto addQuest = [&](const Demo::QuestInfo& q, bool isActive) {
 			std::string prefix = isActive ? "(+) " : "(-) ";
-			std::string titleStr = std::string(q.title.begin(), q.title.end());
+			std::string titleStr = DX9GF::Utils::WideToUtf8(q.title);
 
 			float questPadX = 15.0f;
 			float btnInnerW = containerW - 4.0f - (questPadX * 2);

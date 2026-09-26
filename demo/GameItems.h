@@ -57,6 +57,28 @@ namespace Demo
 		//...Add more if you have ideas
 	};
 
+	// A status effect a card applies, and how re-applying it on top of an existing instance
+	// behaves - shown in the card's tooltip alongside GetModifierInfo's description. Matches
+	// ICombatant::AddModifier (stacksValue=false: duration adds, value takes the max) vs
+	// ::AddStackingModifier (stacksValue=true: value adds, duration takes the max).
+	struct AppliedStatusEffect {
+		ModifierType type;
+		bool stacksValue;
+	};
+
+	struct ModifierInfo {
+		std::wstring name;
+		std::wstring description;
+	};
+
+	// General, instance-independent explanation of what a status effect does, for previewing a
+	// card's effect before it is played. IBattleScene/IEnemy's own status tooltips describe an
+	// already-applied instance instead, with its live value/duration embedded in the text.
+	ModifierInfo GetModifierInfo(ModifierType type);
+
+	// A short note on how re-applying this status effect while one is already active behaves.
+	std::wstring GetModifierStackingInfo(bool stacksValue);
+
 	struct CombatModifier {
 		ModifierType type;
 		int duration;

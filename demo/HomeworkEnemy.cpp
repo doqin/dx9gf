@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "HomeworkEnemy.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 #include "RNG.h"
 #include "PopUpMessage.h"
@@ -45,7 +46,7 @@ void Demo::HomeworkEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 	}
 
 	if (popUpMessage) {
-		popUpMessage->ShowMessage(L"Homework scrambles your controls!");
+		popUpMessage->ShowMessage(Tr(L"Homework scrambles your controls!"));
 	}
 
 	abilityCooldown = 2;

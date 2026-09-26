@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "KernelEnemy.h"
+#include "LocalizationManager.h"
 #include "PopUpMessage.h"
 #include "resource.h"
 #include "RNG.h"
@@ -150,10 +151,10 @@ namespace Demo {
 
 		if (turnInCycle == skillTurnThisCycle) {
 			if (RNG::Range(1, 2) == 1) {
-				CastAbility([this]() { this->Heal(20.f); }, popUpMessage, L"Kernel runs recovery protocol! (+20 HP)");
+				CastAbility([this]() { this->Heal(20.f); }, popUpMessage, Tr(L"Kernel runs recovery protocol! (+20 HP)"));
 			}
 			else {
-				CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 2.0f, true); }, popUpMessage, L"Kernel elevates privileges!");
+				CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 2.0f, true); }, popUpMessage, Tr(L"Kernel elevates privileges!"));
 			}
 		}
 	}

@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "PopUpMessage.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -23,7 +25,7 @@ void Demo::PopUpMessage::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Came
 {
 	this->graphicsDevice = graphicsDevice;
 	this->camera = camera;
-	font = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+	font = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 	fontSprite->SetColor(0xFF000000);
 	// Measured once on a sample carrying both an ascender and a descender: every slot in the
@@ -252,7 +254,7 @@ void Demo::PopUpMessage::DrawHistory(DX9GF::Camera& uiCamera, unsigned long long
 	fontSprite->Begin();
 	fontSprite->SetOutline(true, 0xFF000000, 2.f);
 
-	std::wstring title = L"BATTLE LOG";
+	std::wstring title = Tr(L"BATTLE LOG");
 	if (history.size() > rowCount) {
 		title += L"  " + std::to_wstring(scrollOffset + rowCount) + L"/" + std::to_wstring(history.size());
 	}

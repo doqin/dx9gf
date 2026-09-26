@@ -26,7 +26,7 @@ namespace Demo::CardCatalog {
 	Rarity GetRarity(const std::string& cardSaveID);
 
 	D3DCOLOR RarityColor(Rarity rarity);
-	const wchar_t* RarityName(Rarity rarity);
+	std::wstring RarityName(Rarity rarity);
 
 	// Every card that has a price, sorted, deduplicated.
 	const std::vector<std::string>& AllCards();

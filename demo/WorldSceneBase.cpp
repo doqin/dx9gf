@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "SettingsManager.h"
 #include "WorldSceneBase.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include "MainMenu.h"
 #include "SaveGameState.h"
 #include "TransitionCommand.h"
@@ -39,10 +41,10 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	popUpMessage->Init(game->GetGraphicsDevice(), &this->uiCamera);
 	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
 	std::wstring wMapFile(mapFile);
-	std::string sMapFile(wMapFile.begin(), wMapFile.end());
+	std::string sMapFile = DX9GF::Utils::WideToUtf8(wMapFile);
 	map->Create(transformManager, colliderManager, sMapFile);
 
-	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
 	chapterTitleUI = std::make_shared<ChapterTitleUI>(font);
 
 	auto borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
@@ -93,7 +95,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	auto OpenChestWithDialogLocal = [&](std::shared_ptr<TreasureChestNPC>& chest) {
 		auto given = chest->Open(player.get());
 		if (given.empty()) return;
-		std::wstring msg = L"You found: ";
+		std::wstring msg = Tr(L"You found: ");
 		for (auto& r : given) {
 			if (r.type == ChestRewardType::ITEM) {
 				auto* bp = ItemData::GetInstance()->GetItemBlueprint(r.itemID);
@@ -104,14 +106,14 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 				}
 			}
 			else if (r.type == ChestRewardType::CARD) {
-				std::wstring wid(r.cardSaveID.begin(), r.cardSaveID.end());
+				std::wstring wid = DX9GF::Utils::Utf8ToWide(r.cardSaveID);
 				msg += wid + L"  ";
 			}
 		}
 		auto [sw, sh] = camera.GetScreenResolution();
 		currentConversation = std::make_shared<IConversation>(
 			std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
-		currentConversation->AddLine({ .name = L"Treasure Chest", .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
+		currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
 	};
 
 	auto inpMan = DX9GF::InputManager::GetInstance();
@@ -191,7 +193,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 		if (!currentConversation && !IsSubsceneModalActive() && chest->CanInteract() && inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
 			auto given = chest->Open(player.get());
 			if (!given.empty()) {
-				std::wstring msg = L"You found: ";
+				std::wstring msg = Tr(L"You found: ");
 				for (auto& r : given) {
 					if (r.type == ChestRewardType::ITEM) {
 						auto* bp = ItemData::GetInstance()->GetItemBlueprint(r.itemID);
@@ -202,14 +204,14 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 						}
 					}
 					else if (r.type == ChestRewardType::CARD) {
-						std::wstring wid(r.cardSaveID.begin(), r.cardSaveID.end());
+						std::wstring wid = DX9GF::Utils::Utf8ToWide(r.cardSaveID);
 						msg += wid + L"  ";
 					}
 				}
 				auto [sw, sh] = camera.GetScreenResolution();
 				currentConversation = std::make_shared<IConversation>(
 					std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
-				currentConversation->AddLine({ .name = L"Treasure Chest", .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
+				currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
 			}
 		}
 	}
@@ -346,7 +348,7 @@ void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>
 {
 	auto given = chest->Open(player.get());
 	if (given.empty()) return;
-	std::wstring msg = L"You found: ";
+	std::wstring msg = Tr(L"You found: ");
 	for (auto& r : given) {
 		if (r.type == ChestRewardType::ITEM) {
 			auto* bp = ItemData::GetInstance()->GetItemBlueprint(r.itemID);
@@ -357,14 +359,14 @@ void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>
 			}
 		}
 		else if (r.type == ChestRewardType::CARD) {
-			std::wstring wid(r.cardSaveID.begin(), r.cardSaveID.end());
+			std::wstring wid = DX9GF::Utils::Utf8ToWide(r.cardSaveID);
 			msg += wid + L"  ";
 		}
 	}
 	auto [sw, sh] = camera.GetScreenResolution();
 	currentConversation = std::make_shared<IConversation>(
 		std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
-	currentConversation->AddLine({ .name = L"Treasure Chest", .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
+	currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
 }
 
 void Demo::WorldSceneBase::SetChapterTitle(const std::wstring& title, const std::wstring& subtitle) {

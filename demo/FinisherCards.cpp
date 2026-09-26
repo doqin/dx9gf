@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "FinisherCards.h"
 #include "IBattleScene.h"
+#include "LocalizationManager.h"
 #include "VirtualBattleState.h"
 // Faces live in the rows added below y = 336 in assets/ui.png, as in UtilityCards.cpp.
 
@@ -84,7 +85,7 @@ bool Demo::SystemPurgeCard::Execute() {
 				enemy->AddModifier(ModifierType::Stun, 1, 0.f, false);
 			}
 		}
-		battleScene->QueuePopUpMessage(L"System purged");
+		battleScene->QueuePopUpMessage(Tr(L"System purged"));
 	}
 	isDone = true;
 	return true;
@@ -111,7 +112,7 @@ bool Demo::OverdriveCard::Execute() {
 	if (owner) {
 		owner->AddStackingModifier(ModifierType::BuffDamage, turns, attackBuff, true);
 		owner->AddStackingModifier(ModifierType::Regen, turns, regenBuff, true);
-		if (battleScene) battleScene->QueuePopUpMessage(L"Overdrive!");
+		if (battleScene) battleScene->QueuePopUpMessage(Tr(L"Overdrive!"));
 	}
 	isDone = true;
 	return true;

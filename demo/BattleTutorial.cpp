@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "BattleTutorial.h"
+#include "LocalizationManager.h"
 #include <algorithm>
 #include <cmath>
 
@@ -121,7 +122,7 @@ namespace Demo {
 		// Pulsing "click to continue" hint below the panel.
 		const int hintAlpha = 150 + static_cast<int>(90.0 * (0.5 + 0.5 * std::sin(appearElapsed * 0.006)));
 		fontSprite->SetScale(1.f, 1.f);
-		fontSprite->SetText(L"Click / Space to continue");
+		fontSprite->SetText(Tr(L"Click / Space to continue"));
 		fontSprite->SetColor(D3DCOLOR_ARGB((std::min)(255, hintAlpha), 255, 255, 255));
 		fontSprite->SetOutline(true, 0xFF000000, 2.f);
 		fontSprite->SetPosition(-fontSprite->GetWidth() / 2.f, -18.f + drawnH / 2.f + 18.f);

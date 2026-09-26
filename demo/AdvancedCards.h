@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "MultiTargetCard.h"
+#include "LocalizationManager.h"
 
 namespace Demo {
 
@@ -14,7 +15,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 2; }
-		std::wstring GetDescription() const override { return L"Deal 16 damage to an enemy."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 16 damage to an enemy."); }
 		RECT GetFaceRect() const override { return RECT{ 128, 272, 224, 288 }; }
 
 		bool Execute() override;
@@ -34,7 +35,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Deal 3 damage to an enemy twice."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 3 damage to an enemy twice."); }
 		RECT GetFaceRect() const override { return RECT{ 128, 288, 224, 304 }; }
 
 		bool Execute() override;
@@ -58,7 +59,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 2; }
-		std::wstring GetDescription() const override { return L"Deal 7 damage to up to 2 enemies."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 7 damage to up to 2 enemies."); }
 		RECT GetFaceRect() const override { return RECT{ 0, 304, 80, 320 }; }
 
 		bool Execute() override;
@@ -78,7 +79,10 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 3; }
-		std::wstring GetDescription() const override { return std::format(L"Deal {} damage to up to 3 enemies, but base damage is reduced by {}% \neach time it targets the same enemy.", baseDamage, damageReductionPerRepeat); }
+		std::wstring GetDescription() const override {
+			return Tr(L"Deal ") + std::to_wstring(static_cast<int>(baseDamage)) + Tr(L" damage to up to 3 enemies, but base damage is reduced by ")
+				+ std::to_wstring(static_cast<int>(damageReductionPerRepeat)) + Tr(L"% \neach time it targets the same enemy.");
+		}
 		RECT GetFaceRect() const override { return RECT{ 80, 304, 192, 320 }; }
 
 		bool Execute() override;
@@ -100,7 +104,8 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return std::format(L"Apply Poison {} (damage equals remaining turns).", poisonTurns); }
+		std::wstring GetDescription() const override { return Tr(L"Apply Poison ") + std::to_wstring(poisonTurns) + Tr(L" (damage equals remaining turns)."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Poison, false } }; }
 		RECT GetFaceRect() const override { return RECT{ 192, 304, 272, 320 }; }
 
 		bool Execute() override;
@@ -123,7 +128,8 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Apply Vulnerable 1 to an enemy."; }
+		std::wstring GetDescription() const override { return Tr(L"Apply Vulnerable 1 to an enemy."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Vulnerable, false } }; }
 		RECT GetFaceRect() const override { return RECT{ 0, 320, 96, 336 }; }
 
 		bool Execute() override;
@@ -145,7 +151,8 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Apply Weak 2 to an enemy."; }
+		std::wstring GetDescription() const override { return Tr(L"Apply Weak 2 to an enemy."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Weak, false } }; }
 		RECT GetFaceRect() const override { return RECT{ 96, 320, 192, 336 }; }
 
 		bool Execute() override;
@@ -165,7 +172,8 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 3; }
-		std::wstring GetDescription() const override { return L"Stun an enemy for 1 turn."; }
+		std::wstring GetDescription() const override { return Tr(L"Stun an enemy for 1 turn."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Stun, false } }; }
 		RECT GetFaceRect() const override { return RECT{ 192, 320, 272, 336 }; }
 
 		bool Execute() override;
@@ -183,7 +191,8 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Apply Spark 2 for 3 turns."; }
+		std::wstring GetDescription() const override { return Tr(L"Apply Spark 2 for 3 turns."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Spark, true } }; }
 
 		RECT GetFaceRect() const override { return RECT{ 80, 400, 160, 416 }; }
 
@@ -202,7 +211,7 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 2; }
-		std::wstring GetDescription() const override { return L"Deal 3 damage. Consumes all Spark on target to deal 5 extra damage per stack."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 3 damage. Consumes all Spark on target to deal 5 extra damage per stack."); }
 		RECT GetFaceRect() const override { return RECT{ 160, 400, 272, 416 }; }
 
 		bool Execute() override;
@@ -222,7 +231,7 @@ namespace Demo {
 
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override {
-			return L"Deal " + std::to_wstring(currentDamage) + L" damage. Increases this card's damage by 3 when played. Resets to 4 damage on discard.";
+			return Tr(L"Deal ") + std::to_wstring(currentDamage) + Tr(L" damage. Increases this card's damage by 3 when played. Resets to 4 damage on discard.");
 		}
 		RECT GetFaceRect() const override { return RECT{ 80, 416, 176, 432 }; }
 
@@ -246,7 +255,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void DrawCardFace(unsigned long long deltaTime) override;
 		size_t GetCost() const override { return 2; }
-		std::wstring GetDescription() const override { return L"Deal 5 DMG. Deal +4 DMG for each Persistent card currently in the Block."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 5 DMG. Deal +4 DMG for each Persistent card currently in the Block."); }
 		RECT GetFaceRect() const override { return RECT{ 0, 416, 80, 432 }; }
 	};
 
@@ -260,7 +269,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void DrawCardFace(unsigned long long deltaTime) override;
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Deal 5 DMG. If the previous card killed its target, deal 8 DMG to the lowest HP enemy instead."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 5 DMG. If the previous card killed its target, deal 8 DMG to the lowest HP enemy instead."); }
 		RECT GetFaceRect() const override { return RECT{ 176, 416, 272, 432 }; }
 	};
 
@@ -274,7 +283,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override { CollectHitsOnTargets(state, 5.f, 1); }
 		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Deal 5 DMG. If fatal, heal 8 HP."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 5 DMG. If fatal, heal 8 HP."); }
 		RECT GetFaceRect() const override { return RECT{ 80, 448, 176, 464 }; }
 	};
 
@@ -288,7 +297,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override { CollectHitsOnTargets(state, 15.f, 1); }
 		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 2; }
-		std::wstring GetDescription() const override { return L"Deal 15 DMG. If fatal, gain 1 Energy next turn."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 15 DMG. If fatal, gain 1 Energy next turn."); }
 		RECT GetFaceRect() const override { return RECT{ 0, 448, 80, 464 }; }
 	};
 
@@ -302,7 +311,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Deal 5 DMG. Deals 2x damage to enemies with Armor. Ignores their defense."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 5 DMG. Deals 2x damage to enemies with Armor. Ignores their defense."); }
 		RECT GetFaceRect() const override { return RECT{ 0, 432, 96, 448 }; }
 	};
 
@@ -316,7 +325,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Deal 8 DMG. Deals 2x damage if target is Weak."; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 8 DMG. Deals 2x damage if target is Weak."); }
 		RECT GetFaceRect() const override { return RECT{ 96, 432, 192, 448 }; }
 	};
 
@@ -330,7 +339,7 @@ namespace Demo {
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return L"Consume all your Armor. Deal damage equal to 1.5x the consumed amount."; }
+		std::wstring GetDescription() const override { return Tr(L"Consume all your Armor. Deal damage equal to 1.5x the consumed amount."); }
 		RECT GetFaceRect() const override { return RECT{ 192, 432, 272, 448 }; }
 	};
 
@@ -348,8 +357,9 @@ namespace Demo {
 
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override {
-			return L"Apply Immunity 3. Blocks 1 incoming Debuff or Tick Damage per charge.";
+			return Tr(L"Apply Immunity 3. Blocks 1 incoming Debuff or Tick Damage per charge.");
 		}
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Immunity, true } }; }
 		RECT GetFaceRect() const override { return RECT{ 176, 448, 256, 464}; }
 		void DrawCardFace(unsigned long long deltaTime) override {
 			DrawSheetFace(deltaTime, GetFaceRect());

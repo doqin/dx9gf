@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "IDraggable.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include <DX9GF.h>
 #include <algorithm>
 #include <cmath>
@@ -305,7 +307,7 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 	manager->Add(dynamic_pointer_cast<IDraggable>(shared_from_this()));
 	color = D3DXCOLOR(RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), 1);
 	if (debugFont.get() == nullptr) {
-		IDraggable::debugFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+		IDraggable::debugFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 	}
 	if (debugFontSprite.get() == nullptr) {
 		IDraggable::debugFontSprite = std::make_shared<DX9GF::FontSprite>(debugFont.get());
@@ -369,13 +371,13 @@ void Demo::IDraggable::Draw(unsigned long long deltaTime)
 		debugFontSprite->Begin();
 		auto [x, y] = GetWorldPosition();
 		debugFontSprite->SetPosition(x + dragAreaWidth / static_cast<float>(2), y + dragAreaHeight / static_cast<float>(2));
-		std::wstring ws(id.begin(), id.end());
+		std::wstring ws = DX9GF::Utils::Utf8ToWide(id);
 		debugFontSprite->SetText(std::move(ws));
 		debugFontSprite->Draw(*camera, deltaTime);
 		if (parent.has_value()) {
 			if (auto draggableParent = dynamic_pointer_cast<IDraggable>(parent.value().lock())) {
 				auto id = draggableParent->GetID();
-				std::wstring parentIDWs(id.begin(), id.end());
+				std::wstring parentIDWs = DX9GF::Utils::Utf8ToWide(id);
 				debugFontSprite->SetText(L"Parent: " + parentIDWs);
 				debugFontSprite->SetPosition(x + dragAreaWidth / static_cast<float>(2), y + dragAreaHeight / static_cast<float>(2) + 30);
 				debugFontSprite->Draw(*camera, deltaTime);

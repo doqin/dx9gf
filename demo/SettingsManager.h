@@ -10,6 +10,11 @@ namespace Demo
 		std::string label;
 	};
 
+	enum class Language {
+		EN,
+		VI
+	};
+
 	class SettingsManager
 	{
 	private:
@@ -27,6 +32,8 @@ namespace Demo
 
 		std::vector<Resolution> supportedResolutions;
 		int currentResIndex;
+
+		Language currentLanguage;
 	public:
 		static SettingsManager* GetInstance()
 		{
@@ -66,5 +73,8 @@ namespace Demo
 
 		// Helper function to apply immediately
 		void ApplyResolution();
+
+		void SetLanguage(Language lang) { this->currentLanguage = lang; }
+		Language GetLanguage() const { return this->currentLanguage; }
 	};
 }

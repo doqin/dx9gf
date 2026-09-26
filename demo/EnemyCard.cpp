@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "EnemyCard.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include "IContainer.h"
 
 std::shared_ptr<Demo::IEnemy> Demo::EnemyCard::GetValue()
@@ -31,13 +33,13 @@ void Demo::EnemyCard::Draw(unsigned long long deltaTime)
 		arrowSprite->SetOrigin(w / 2.0f, h / 2.0f);
 	}
 	if (!nameFont) {
-		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 		nameFontSprite = std::make_shared<DX9GF::FontSprite>(nameFont.get());
 		nameFontSprite->SetColor(0xFF000000);
 	}
 	nameFontSprite->Begin();
 	nameFontSprite->SetPosition(GetWorldX() + 8.f, GetWorldY() + 8.f);
-	nameFontSprite->SetText(L"EnemyCard");
+	nameFontSprite->SetText(Tr(L"EnemyCard"));
 	nameFontSprite->Draw(*camera, deltaTime);
 	nameFontSprite->End();
 

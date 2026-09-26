@@ -1,22 +1,24 @@
 #include "pch.h"
 #include "OutroScene.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 
 void Demo::OutroScene::Init() {
-    font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+    font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
     fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 
     float sw = game->GetVirtualWidth();
     float sh = game->GetVirtualHeight();
     conversation = std::make_shared<IConversation>(fontSprite, sw, sh);
 
-    conversation->AddLine({ .name = L"Player", .content = L"Did I... actually make it out?" });
-    conversation->AddLine({ .name = L"Player", .content = L"The digital world is collapsing behind me. I can see the code breaking apart." });
-    conversation->AddLine({ .name = L"Player", .content = L"All those battles, those terminals, those glitched creatures..." });
-    conversation->AddLine({ .name = L"Player", .content = L"It felt so real. But now the light is pulling me back." });
-    conversation->AddLine({ .name = L"???", .content = L"Hey! Wake up! Are you okay?" });
-    conversation->AddLine({ .name = L"Player", .content = L"I open my eyes. I'm back in my room. My phone is still on the suspicious webpage." });
-    conversation->AddLine({ .name = L"Player", .content = L"A message on the screen reads: \"Session terminated. Welcome back to reality.\"" });
-    conversation->AddLine({ .name = L"Player", .content = L"I immediately close the tab and take a deep breath. Never again." });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"Did I... actually make it out?") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"The digital world is collapsing behind me. I can see the code breaking apart.") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"All those battles, those terminals, those glitched creatures...") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"It felt so real. But now the light is pulling me back.") });
+    conversation->AddLine({ .name = Tr(L"???"), .content = Tr(L"Hey! Wake up! Are you okay?") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"I open my eyes. I'm back in my room. My phone is still on the suspicious webpage.") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"A message on the screen reads: \"Session terminated. Welcome back to reality.\"") });
+    conversation->AddLine({ .name = Tr(L"Player"), .content = Tr(L"I immediately close the tab and take a deep breath. Never again.") });
 }
 
 void Demo::OutroScene::Update(unsigned long long deltaTime) {

@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "IContainer.h"
+#include "LocalizationManager.h"
 #include "DX9GFInputManager.h"
 #include "DX9GFUtils.h"
 
@@ -213,7 +214,7 @@ void Demo::IContainer::Draw(unsigned long long deltaTime)
 						debugFontSprite->SetPosition(textX, textY);
 						debugFontSprite->SetOutline(true, 0xFF000000, 2.0f);
 						debugFontSprite->SetColor(0xFFFFFFFF);
-						debugFontSprite->SetText(L"More...");
+						debugFontSprite->SetText(Tr(L"More..."));
 						debugFontSprite->Draw(*camera, deltaTime);
 						debugFontSprite->End();
 					}

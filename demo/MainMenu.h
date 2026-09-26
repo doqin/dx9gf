@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "TextButton.h"
 #include "IconButton.h"
+#include "TextIconButton.h"
 #include "KeyboardNavigator.h"
 
 namespace Demo
@@ -28,11 +29,11 @@ namespace Demo
 
 		//temporarily comment, only uncomment when needed. Ex: That button changes affect another component in the scene.
 
-		std::shared_ptr<IconButton> continueButton;
-		std::shared_ptr<IconButton> newGameButton;
-		std::shared_ptr<IconButton> optionsButton;
-		std::shared_ptr<IconButton> creditsButton;
-		std::shared_ptr<IconButton> quitButton;
+		std::shared_ptr<TextIconButton> continueButton;
+		std::shared_ptr<TextIconButton> newGameButton;
+		std::shared_ptr<TextIconButton> optionsButton;
+		std::shared_ptr<TextIconButton> creditsButton;
+		std::shared_ptr<TextIconButton> quitButton;
 		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
 		std::shared_ptr<DX9GF::CommandBuffer> commandBuffer;
 
@@ -61,6 +62,10 @@ namespace Demo
 		void Update(unsigned long long deltaTime) override;
 		void DrawWorld(unsigned long long deltaTime) override;
 		void DrawUI(unsigned long long deltaTime) override;
+		// The preview textures are D3DPOOL_DEFAULT render targets holding a one-off snapshot,
+		// not a loaded asset - a device Reset (fullscreen/windowed toggle, resize) wipes them
+		// blank, so they need to be redrawn, not just recreated.
+		void OnDeviceReset() override { RenderMapPreviews(); }
 		void UpdateLayout(int width, int height);
 		void DrawBackground(unsigned long long deltaTime);
 	};

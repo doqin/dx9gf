@@ -18,7 +18,12 @@ namespace Demo {
 		unsigned long long timer = 0;
 		const unsigned long long MS_PER_CHAR = 30;
 		bool isTyping = false;
+		// currentLine.content with some spaces swapped for '\n' so it fits the box. Same length
+		// as the source, so the typewriter's character index maps straight onto it.
+		std::wstring wrappedSource;
+		std::wstring wrappedContent;
 		void ResetAnimation();
+		std::wstring WrapToWidth(const std::wstring& text, float maxWidth);
 	public:
 		IConversation(std::shared_ptr<DX9GF::FontSprite> fontSprite, int screenWidth, int screenHeight);
 

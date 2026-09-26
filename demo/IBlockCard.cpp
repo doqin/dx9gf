@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "IBlockCard.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include "IBattleScene.h"
 #include "DrawUtils.h"
 #include <algorithm>
@@ -13,7 +15,7 @@ bool Demo::IBlockCard::OnDrop(std::shared_ptr<IDraggable> other)
 
 	if (battleScene && !battleScene->CanPlaceCardInBlock(statementCard)) {
 		if (timeSinceLastEnergyPopUp >= energyPopUpCooldown) {
-			battleScene->QueuePopUpMessage(L"Not enough energy");
+			battleScene->QueuePopUpMessage(Tr(L"Not enough energy"));
 			timeSinceLastEnergyPopUp = 0.f;
 		}
 		// Dragging detached it from the hand, and rejecting the drop leaves it parented to
@@ -82,7 +84,7 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 	blockSprite->Draw(*camera, deltaTime);
 	blockSprite->End();
 	if (!nameFont) {
-		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 		nameFontSprite = std::make_shared<DX9GF::FontSprite>(nameFont.get());
 		nameFontSprite->SetColor(0xFF000000);
 	}
@@ -228,7 +230,7 @@ bool Demo::IBlockCard::InsertStatementCardAt(std::shared_ptr<IStatementCard> car
 
 	if (!alreadyAttached && battleScene && !battleScene->CanPlaceCardInBlock(card)) {
 		if (timeSinceLastEnergyPopUp >= energyPopUpCooldown) {
-			battleScene->QueuePopUpMessage(L"Not enough energy");
+			battleScene->QueuePopUpMessage(Tr(L"Not enough energy"));
 			timeSinceLastEnergyPopUp = 0.f;
 		}
 		battleScene->ReturnCardToHand(card);

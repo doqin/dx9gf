@@ -68,6 +68,7 @@
     <ClCompile Include="SpamNPC.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="LocalizationManager.cpp" />
     <ClCompile Include="MimicEnemy.cpp" />
     <ClCompile Include="MultiTargetCard.cpp" />
     <ClCompile Include="NPC1.cpp" />
@@ -191,6 +192,8 @@
     <ClInclude Include="SpamEnemy.h" />
     <ClInclude Include="SpamNPC.h" />
     <ClInclude Include="MainMenu.h" />
+    <ClInclude Include="LocalizationManager.h" />
+    <ClInclude Include="MainFont.h" />
     <ClInclude Include="IEnemy.h" />
     <ClInclude Include="IExpressionCard.h" />
     <ClInclude Include="IStatementCard.h" />
@@ -447,6 +450,7 @@
   <ItemGroup>
     <Font Include="assets\arcade-among-2-r46pv.ttf" />
     <Font Include="assets\statusplz.ttf" />
+    <Font Include="assets\135openpixel-v2-3.ttf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\BossMatrix.tmx" />
@@ -454,6 +458,7 @@
     <None Include="assets\First Asset pack.tsx" />
     <None Include="assets\icon.tsx" />
     <None Include="assets\kako.aseprite" />
+    <None Include="assets\lang\vi.json" />
     <None Include="assets\placeholder-round-projectile.aseprite" />
     <None Include="assets\SecretPuzzle.tmx" />
     <None Include="assets\secretpuzzle.tsx" />

@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "IBattleScene.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include <algorithm>
 #include <array>
 #include <random>
@@ -107,7 +109,7 @@ void Demo::IBattleScene::StartBattle()
 		popUpMessage->Reset();
 		popUpMessage->ClearHistory(); // the log's timestamps count from the start of the battle
 	}
-	popUpMessage->ShowMessage(L"Turn " + std::to_wstring(currentTurn), 3.f);
+	popUpMessage->ShowMessage(Tr(L"Turn ") + std::to_wstring(currentTurn), 3.f);
 	DrawCards(CARDS_DRAWN_PER_TURN);
 	activeTokens.clear();
 	pendingGoldTokenReward = 0;
@@ -228,7 +230,7 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 
 	finalGold += pendingGoldTokenReward;
 	player->AddGold(finalGold);
-	popUpMessage->QueueMessage(&commandBuffer, L"You earned " + std::to_wstring(finalGold) + L" gold!", 1.5f);
+	popUpMessage->QueueMessage(&commandBuffer, Tr(L"You earned ") + std::to_wstring(finalGold) + L" gold!", 1.5f);
 	DX9GF::AudioManager::GetInstance()->Play("coin_gather", false, 0.8f);
 
 	if (onVictoryCallback != nullptr) {
@@ -324,7 +326,7 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 	// silently.
 	if (drawn < count) {
 		if (popUpMessage) {
-			popUpMessage->ShowMessage(L"Deck empty - drew " + std::to_wstring(drawn) + L" of " + std::to_wstring(count));
+			popUpMessage->ShowMessage(Tr(L"Deck empty - drew ") + std::to_wstring(drawn) + L" of " + std::to_wstring(count));
 		}
 		OutputDebugStringA(("DrawCards: requested " + std::to_string(count) + ", drew " + std::to_string(drawn) + " (draw + discard pool exhausted)\n").c_str());
 	}
@@ -555,9 +557,9 @@ const std::vector<std::shared_ptr<Demo::ICard>>& Demo::IBattleScene::GetPile(Pil
 std::wstring Demo::IBattleScene::GetPileName(PileKind kind)
 {
 	switch (kind) {
-	case PileKind::Discard:   return L"Discard Pile";
-	case PileKind::Nullified: return L"Nullified Pile";
-	default:                  return L"Draw Pile";
+	case PileKind::Discard:   return Tr(L"Discard Pile");
+	case PileKind::Nullified: return Tr(L"Nullified Pile");
+	default:                  return Tr(L"Draw Pile");
 	}
 }
 
@@ -666,7 +668,7 @@ void Demo::IBattleScene::BeginNextTurn()
 	++currentTurn;
 	MovePlayedPileToDiscardPileIfNeeded();
 	DrawCards(CARDS_DRAWN_PER_TURN + pendingBonusDraw);
-	popUpMessage->ShowMessage(L"Turn " + std::to_wstring(currentTurn), 3.f);
+	popUpMessage->ShowMessage(Tr(L"Turn ") + std::to_wstring(currentTurn), 3.f);
 	pendingBonusDraw = 0;
 	energy = MAX_ENERGY + pendingBonusEnergy;
 	pendingBonusEnergy = 0;
@@ -983,7 +985,7 @@ void Demo::IBattleScene::RefreshItemMenu()
 			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, slot, blueprint](std::function<void(void)> markFinished) {
 				if (player->GetInventoryItems().IsItemLocked(slot.itemID)) {
 					int turnsLeft = player->GetInventoryItems().GetItemLockedTurns(slot.itemID);
-					popUpMessage->ShowMessage(L"This item is banned for " + std::to_wstring(turnsLeft) + L" more turn(s)!");
+					popUpMessage->ShowMessage(Tr(L"This item is banned for ") + std::to_wstring(turnsLeft) + L" more turn(s)!");
 					DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 				}
 				else if (player->GetInventoryItems().ConsumeItem(slot.itemID)) {
@@ -997,7 +999,7 @@ void Demo::IBattleScene::RefreshItemMenu()
 					}
 					this->RegisterActiveItem(*blueprint);
 
-					std::wstring msg = L"Used " + blueprint->GetName() + L"!";
+					std::wstring msg = Tr(L"Used ") + blueprint->GetName() + Tr(L"!");
 					popUpMessage->QueueMessage(&commandBuffer, msg);
 
 					this->RefreshItemMenu();
@@ -1109,27 +1111,11 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 	FlushPendingEnemies();
 }
 
-void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
+void Demo::IBattleScene::LayoutAttackRowButtons()
 {
-
-	if (battleEventType == EventType::Energy && enemies.size() < 2 && !isFlawlessCompleted) {
-		battleEventType = EventType::None;
-		currentEnergyPieces = 0;
-		isFlawlessChallengeActive = false;
-	}
 	auto app = DX9GF::Application::GetInstance();
 	float screenWidth = static_cast<float>(app->GetScreenWidth());
 	float screenHeight = static_cast<float>(app->GetScreenHeight());
-	handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 20.f);
-	usedEnergy = committedEnergy;
-	for (auto& card : cardHand) {
-		if (auto parent = card->GetParent(); parent.has_value()) {
-			if (auto lock = parent.value().lock(); lock && lock == handContainer) {
-				continue;
-			}
-		}
-		usedEnergy += card->GetCost();
-	}
 	const float buttonY = screenHeight / 2.f - 20 - attackButton->GetHeight();
 	const float sidePadding = 20.f;
 
@@ -1154,11 +1140,31 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	gearButton->SetLocalPosition(gearX, buttonY);
 	executeButton->SetLocalPosition(executeX, buttonY);
 	runInitButton->SetLocalPosition(runInitX, buttonY);
+}
 
-	backButton->SetLocalPosition(leftX, buttonY);
-	gearButton->SetLocalPosition(gearX, buttonY);
-	executeButton->SetLocalPosition(executeX, buttonY);
-	runInitButton->SetLocalPosition(runInitX, buttonY);
+void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
+{
+
+	if (battleEventType == EventType::Energy && enemies.size() < 2 && !isFlawlessCompleted) {
+		battleEventType = EventType::None;
+		currentEnergyPieces = 0;
+		isFlawlessChallengeActive = false;
+	}
+	auto app = DX9GF::Application::GetInstance();
+	float screenWidth = static_cast<float>(app->GetScreenWidth());
+	float screenHeight = static_cast<float>(app->GetScreenHeight());
+	handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 20.f);
+	usedEnergy = committedEnergy;
+	for (auto& card : cardHand) {
+		if (auto parent = card->GetParent(); parent.has_value()) {
+			if (auto lock = parent.value().lock(); lock && lock == handContainer) {
+				continue;
+			}
+		}
+		usedEnergy += card->GetCost();
+	}
+
+	LayoutAttackRowButtons();
 
 	const bool initExecuting = initBlockCard && initBlockCard->IsExecuting();
 	// Unlike the main block finishing, this does not end the turn - the cards are committed and
@@ -1557,7 +1563,7 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 								if (bp) this->currentGearCooldown = bp->maxCooldownTurns;
 								this->pickedUpCard.reset();
 								this->state = State::PlayerAttack;
-								this->popUpMessage->QueueMessage(&this->commandBuffer, L"Card retained!", 1.5f);
+								this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"Card retained!"), 1.5f);
 								DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
 							}
 				});
@@ -1748,7 +1754,7 @@ void Demo::IBattleScene::PlaceStatementCardAt(std::shared_ptr<IStatementCard> ca
 	const bool alreadyInBlock = parent.has_value() && parent.value().lock().get() == block.get();
 
 	if (!alreadyInBlock && !CanPlaceCardInBlock(card)) {
-		QueuePopUpMessage(L"Not enough energy");
+		QueuePopUpMessage(Tr(L"Not enough energy"));
 		return;
 	}
 
@@ -1938,7 +1944,7 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 							this->isDefeatSequence = true;
 							this->defeatElapsedMs = 0.f;
 							this->defeatFadeAlpha = 0.f;
-							this->popUpMessage->QueueMessage(&this->commandBuffer, L"You were defeated", 1.5f);
+							this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"You were defeated"), 1.5f);
 						}
 						else
 						{
@@ -1971,7 +1977,7 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 					this->startingDefenseForFlawless = this->battlePlayer->GetTemporaryDefense();
 
 					if (this->currentTurn == 1) {
-						this->popUpMessage->QueueMessage(&this->commandBuffer, L"FLAWLESS CHALLENGE!", 2.0f);
+						this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"FLAWLESS CHALLENGE!"), 2.0f);
 						DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.8f);
 					}
 				}
@@ -2112,7 +2118,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		isDefeatSequence = true;
 		defeatElapsedMs = 0.f;
 		defeatFadeAlpha = 0.f;
-		popUpMessage->QueueMessage(&commandBuffer, L"You were defeated", 1.5f);
+		popUpMessage->QueueMessage(&commandBuffer, Tr(L"You were defeated"), 1.5f);
 		return false;
 	}
 	if (enemyAttackStartPending) {
@@ -2234,24 +2240,43 @@ void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
 	DrawHealthAndDefenseBar(y, gd);
 }
 
-void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
+void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 {
+	if (mainBlockCard->IsExecuting() || (initBlockCard && initBlockCard->IsExecuting()) || isTransitioning) return;
+	const float outline = 2.0f;
 	game->GetGraphicsDevice()->DrawRectangle(
-		this->uiCamera,
+		this->camera,
+		enemyCardRemoveAreaX - outline,
+		enemyCardRemoveAreaY - outline,
+		enemyCardRemoveAreaWidth + (outline * 2),
+		enemyCardRemoveAreaHeight + (outline * 2),
+		D3DXCOLOR(0.f, 0.f, 0.f, 1.f),
+		true
+	);
+
+	game->GetGraphicsDevice()->DrawRectangle(
+		this->camera,
 		enemyCardRemoveAreaX,
 		enemyCardRemoveAreaY,
 		enemyCardRemoveAreaWidth,
 		enemyCardRemoveAreaHeight,
-		D3DXCOLOR(0.7f, 0.1f, 0.1f, 0.5f),
+		D3DXCOLOR(0.7f, 0.1f, 0.1f, 1.0f),
 		true
 	);
 
 	fontSprite->Begin();
+	fontSprite->SetOutline(false);
 	fontSprite->SetColor(0xFFFFFFFF);
-	fontSprite->SetPosition(enemyCardRemoveAreaX + 8.f, enemyCardRemoveAreaY + 8.f);
-	fontSprite->SetText(L"Discard Enemy Card Here");
-	fontSprite->Draw(this->uiCamera, deltaTime);
+	fontSprite->SetText(Tr(L"Discard Enemy Card Here"));
+	fontSprite->SetPosition(enemyCardRemoveAreaX + (enemyCardRemoveAreaWidth / 2.0f) - fontSprite->GetWidth() / 2.0f, enemyCardRemoveAreaY + (enemyCardRemoveAreaHeight / 2.0f) - fontSprite->GetHeight() / 2.0f);
+	fontSprite->Draw(this->camera, deltaTime);
+	fontSprite->End();
+}
 
+void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
+{
+	fontSprite->Begin();
+	fontSprite->SetColor(0xFFFFFFFF);
 	fontSprite->SetOutline(true, 0xFF000000, 2.f);
 	fontSprite->SetPosition(backButton->GetWorldX() + 32.f, backButton->GetWorldY() - 30.f);
 	// Denominator is this turn's actual maximum, not MAX_ENERGY - bonus and instant energy both
@@ -2288,13 +2313,13 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 			std::wstring tooltipText;
 
 			if (bp) {
-				tooltipText = L"Use Gear: " + bp->name + L"\n" + bp->description;
+				tooltipText = Tr(L"Use Gear: ") + bp->name + L"\n" + bp->description;
 				if (currentGearCooldown > 0) {
 					tooltipText += L"\n(Cooldown: " + std::to_wstring(currentGearCooldown) + L" turns)";
 				}
 			}
 			else {
-				tooltipText = L"No Active Gear Equipped";
+				tooltipText = Tr(L"No Active Gear Equipped");
 			}
 
 			float btnWorldX = gearButton->GetWorldX() + (gearButton->GetWidth() / 2.0f) - 20.f;
@@ -2309,7 +2334,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 			fontSprite->Begin();
 			fontSprite->SetColor(0xFFff4444);
 			fontSprite->SetOutline(true, 0xFF000000, 2.f);
-			fontSprite->SetText(L"CD: " + std::to_wstring(currentGearCooldown) + L"T");
+			fontSprite->SetText(Tr(L"CD: ") + std::to_wstring(currentGearCooldown) + Tr(L"T"));
 
 			fontSprite->SetPosition(
 				gearButton->GetWorldX() + (gearButton->GetWidth() - fontSprite->GetWidth()) / 2.f,
@@ -2382,7 +2407,7 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 		fontSprite->SetColor(0xFFFFFFFF);
 		fontSprite->SetOutline(true, 0xFF000000, 3.f);
 
-		fontSprite->SetText(L"x" + std::to_wstring(slot.quantity));
+		fontSprite->SetText(Tr(L"x") + std::to_wstring(slot.quantity));
 
 		float textW = fontSprite->GetWidth();
 		float textX = btn->GetWorldX() + (ITEM_W / 2.0f) - (textW / 2.0f);
@@ -2394,7 +2419,7 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 		int lockedTurns = player->GetInventoryItems().GetItemLockedTurns(slot.itemID);
 		if (lockedTurns > 0) {
 			fontSprite->SetColor(0xFFFF4444);
-			fontSprite->SetText(L"BANNED");
+			fontSprite->SetText(Tr(L"BANNED"));
 			float lockW = fontSprite->GetWidth();
 			fontSprite->SetPosition(btn->GetWorldX() + (ITEM_W / 2.0f) - (lockW / 2.0f), btn->GetWorldY() - 16.0f);
 			fontSprite->Draw(this->uiCamera, deltaTime);
@@ -2407,7 +2432,7 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 				hoverDescription = blueprint->GetDescription();
 			}
 			if (lockedTurns > 0) {
-				hoverBannedText = L"Banned for " + std::to_wstring(lockedTurns) + L" more turn(s)";
+				hoverBannedText = Tr(L"Banned for ") + std::to_wstring(lockedTurns) + Tr(L" more turn(s)");
 			}
 		}
 		displayIndex++;
@@ -2416,7 +2441,7 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 	if (maxItemPage > 0) {
 		fontSprite->SetColor(0xFFFFFFFF);
 		fontSprite->SetOutline(true, 0xFF000000, 3.f);
-		std::wstring pageText = L"Page " + std::to_wstring(currentItemPage + 1) + L"/" + std::to_wstring(maxItemPage + 1);
+		std::wstring pageText = Tr(L"Page ") + std::to_wstring(currentItemPage + 1) + L"/" + std::to_wstring(maxItemPage + 1);
 		fontSprite->SetPosition(-35.0f, targetHeight / 2.0f - PADDING_Y - 9.0f);
 		fontSprite->SetText(std::move(pageText));
 		fontSprite->Draw(this->uiCamera, deltaTime);
@@ -2513,13 +2538,13 @@ void Demo::IBattleScene::PlayerViewPileDraw(unsigned long long deltaTime)
 	fontSprite->Draw(this->uiCamera, deltaTime);
 
 	if (pileSize == 0) {
-		fontSprite->SetText(L"Empty");
+		fontSprite->SetText(Tr(L"Empty"));
 		fontSprite->SetPosition(-fontSprite->GetWidth() / 2.f, -10.f);
 		fontSprite->Draw(this->uiCamera, deltaTime);
 	}
 
 	if (maxPilePage > 0) {
-		std::wstring pageText = L"Page " + std::to_wstring(currentPilePage + 1) + L"/" + std::to_wstring(maxPilePage + 1);
+		std::wstring pageText = Tr(L"Page ") + std::to_wstring(currentPilePage + 1) + L"/" + std::to_wstring(maxPilePage + 1);
 		fontSprite->SetText(std::move(pageText));
 		fontSprite->SetPosition(-fontSprite->GetWidth() / 2.f, targetHeight / 2.0f - PADDING_Y - 9.0f);
 		fontSprite->Draw(this->uiCamera, deltaTime);
@@ -2710,9 +2735,9 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::
 		if (mod.duration <= 0) continue;
 
 		std::wstring valueText = L"";
-		std::wstring nameText = L"";
-		std::wstring statusName = L"Unknown";
-		std::wstring statusDescription = L"";
+		std::wstring nameText = Tr(L"");
+		std::wstring statusName = Tr(L"Unknown");
+		std::wstring statusDescription = Tr(L"");
 		D3DCOLOR textColor = 0xFFFFFFFF;
 		RECT iconRect = { 0, 0, 0, 0 };
 
@@ -2720,98 +2745,98 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::
 			valueText = std::to_wstring(static_cast<int>(mod.value));
 			textColor = 0xFFfa6a0a;
 			iconRect = { 112, 240, 128, 256 };
-			statusName = L"Atk Up";
-			statusDescription = L"Increases attack damage.";
+			statusName = Tr(L"Atk Up");
+			statusDescription = Tr(L"Increases attack damage.");
 		}
 		else if (mod.type == ModifierType::BuffDefense) {
 			valueText = std::to_wstring(static_cast<int>(mod.value));
 			textColor = 0xFF588dbe;
 			iconRect = { 96, 240, 112, 256 };
-			statusName = L"Def Up";
-			statusDescription = L"Blocks incoming damage.";
+			statusName = Tr(L"Def Up");
+			statusDescription = Tr(L"Blocks incoming damage.");
 		}
 		else if (mod.type == ModifierType::Poison) {
 			int poisonDmg = static_cast<int>(std::round((mod.value > 0.f) ? mod.value : static_cast<float>(mod.duration)));
 			valueText = std::to_wstring(poisonDmg);
 			textColor = 0xFFba4aed;
 			iconRect = { 128, 240, 144, 256 };
-			statusName = L"Poison";
-			statusDescription = L"Takes " + std::to_wstring(poisonDmg) + L" damage at end of turn.";
+			statusName = Tr(L"Poison");
+			statusDescription = Tr(L"Takes ") + std::to_wstring(poisonDmg) + Tr(L" damage at end of turn.");
 		}
 		else if (mod.type == ModifierType::Burn) {
 			int burnDmg = static_cast<int>(std::round(mod.value));
 			valueText = std::to_wstring(burnDmg);
 			textColor = 0xFFff8800;
 			iconRect = { 240, 288, 256, 304 };
-			statusName = L"Burn";
-			statusDescription = L"Takes " + std::to_wstring(burnDmg) + L" damage at end of turn, ignoring block.";
+			statusName = Tr(L"Burn");
+			statusDescription = Tr(L"Takes ") + std::to_wstring(burnDmg) + Tr(L" damage at end of turn, ignoring block.");
 		}
 		else if (mod.type == ModifierType::Regen) {
 			int regenAmount = static_cast<int>(std::round(mod.value));
 			valueText = std::to_wstring(regenAmount);
 			textColor = 0xFF9cdb43;
 			iconRect = { 272, 288, 288, 304 };
-			statusName = L"Regen";
-			statusDescription = L"Heals " + std::to_wstring(regenAmount) + L" at end of turn.";
+			statusName = Tr(L"Regen");
+			statusDescription = Tr(L"Heals ") + std::to_wstring(regenAmount) + Tr(L" at end of turn.");
 		}
 		else if (mod.type == ModifierType::Marked) {
 			int markAmount = static_cast<int>(std::round(mod.value));
 			valueText = std::to_wstring(markAmount);
 			textColor = 0xFFfffc40;
 			iconRect = { 128, 256, 144, 272 };
-			statusName = L"Marked";
-			statusDescription = L"Takes " + std::to_wstring(markAmount) + L" extra damage from every hit.";
+			statusName = Tr(L"Marked");
+			statusDescription = Tr(L"Takes ") + std::to_wstring(markAmount) + Tr(L" extra damage from every hit.");
 		}
 		else if (mod.type == ModifierType::Vulnerable) {
 			iconRect = { 96, 256, 112, 272 };
-			statusName = L"Vulnerable";
-			statusDescription = L"Takes 50% more damage from attacks.";
+			statusName = Tr(L"Vulnerable");
+			statusDescription = Tr(L"Takes 50% more damage from attacks.");
 		}
 		else if (mod.type == ModifierType::Weak) {
 			iconRect = { 112, 256, 128, 272 };
-			statusName = L"Weak";
-			statusDescription = L"Deals 25% less damage with attacks.";
+			statusName = Tr(L"Weak");
+			statusDescription = Tr(L"Deals 25% less damage with attacks.");
 		}
 		else if (mod.type == ModifierType::Stun) {
 			textColor = 0xFFfffc40;
 			iconRect = { 224, 288, 240, 304 };
-			statusName = L"Stun";
-			statusDescription = L"Cannot take action this turn.";
+			statusName = Tr(L"Stun");
+			statusDescription = Tr(L"Cannot take action this turn.");
 		}
 		else if (mod.type == ModifierType::Spark) {
 			int sparkStacks = static_cast<int>(std::round(mod.value));
 			valueText = std::to_wstring(sparkStacks);
 			textColor = 0xFFffaa00;
 			iconRect = { 272, 320, 288, 336 };
-			statusName = L"Spark";
-			statusDescription = L"Accumulates stacks. Deals no damage until detonated.";
+			statusName = Tr(L"Spark");
+			statusDescription = Tr(L"Accumulates stacks. Deals no damage until detonated.");
 		}
 		else if (mod.type == ModifierType::Freeze) {
 			textColor = 0xFF588dbe;
 			iconRect = { 272, 304, 288, 320 };
-			statusName = L"Freeze";
-			statusDescription = L"Player's movement speed is reduced.";
+			statusName = Tr(L"Freeze");
+			statusDescription = Tr(L"Player's movement speed is reduced.");
 		}
 		else if (mod.type == ModifierType::Immunity) {
 			int charges = static_cast<int>(std::round(mod.value));
 			valueText = std::to_wstring(charges);
 			textColor = 0xFF00FFFF;
 			iconRect = { 256, 448, 272, 464};
-			statusName = L"Immunity";
-			statusDescription = L"Blocks debuffs and tick damage.\nLoses 1 charge per block.";
+			statusName = Tr(L"Immunity");
+			statusDescription = Tr(L"Blocks debuffs and tick damage.\nLoses 1 charge per block.");
 		}
 		else if (mod.type == ModifierType::EnergyDrain) {
 			int drain = static_cast<int>(std::round(mod.value));
 			valueText = std::to_wstring(drain);
 			textColor = 0xFF40c4ff;
-			statusName = L"Energy Drain";
-			statusDescription = L"Reduces Energy gained at the start of your turn by " + std::to_wstring(drain) + L".";
+			statusName = Tr(L"Energy Drain");
+			statusDescription = Tr(L"Reduces Energy gained at the start of your turn by ") + std::to_wstring(drain) + Tr(L".");
 		}
 		else if (mod.type == ModifierType::InvertedControls) {
-			nameText = L"Reversed";
+			nameText = Tr(L"Reversed");
 			textColor = 0xFFff66cc;
-			statusName = L"Reversed Controls";
-			statusDescription = L"Movement is flipped: up<->down, left<->right.";
+			statusName = Tr(L"Reversed Controls");
+			statusDescription = Tr(L"Movement is flipped: up<->down, left<->right.");
 		}
 		else {
 			continue;
@@ -2953,7 +2978,7 @@ void Demo::IBattleScene::Init()
 	// Init components
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<DX9GF::TransformManager>();
-	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
 	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
 	// Setup player
 	battlePlayer = std::make_shared<Player>(transformManager);
@@ -3004,10 +3029,10 @@ void Demo::IBattleScene::Init()
 			lastEnemyLayoutState = State::PlayerAttack;
 			//lock card message
 			if (this->pendingLockMessage) {
-				this->popUpMessage->QueueMessage(&this->commandBuffer, L"Enemy locked a card!", 2.0f);
+				this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"Enemy locked a card!"), 2.0f);
 				this->pendingLockMessage = false;
 			}
-			//popUpMessage->QueueMessage(&commandBuffer, L"Click on the enemy sprite to create an Enemy Card and drag it to your attacking card to target it!", 2.5f);
+			//popUpMessage->QueueMessage(&commandBuffer, Tr(L"Click on the enemy sprite to create an Enemy Card and drag it to your attacking card to target it!"), 2.5f);
 			markFinished();
 			}));
 		isExecutingAttacks = false;
@@ -3066,11 +3091,11 @@ void Demo::IBattleScene::Init()
 	itemsButton->SetSpriteScale(2.f, 2.f);
 	fleeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	fleeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-		popUpMessage->QueueMessage(&commandBuffer, L"You tried to flee...");
+		popUpMessage->QueueMessage(&commandBuffer, Tr(L"You tried to flee..."));
 		isFleeing = true;
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
 			if (RNG::Range(0, 1) == 0) {
-				popUpMessage->QueueMessage(&commandBuffer, L"You successfully fled!");
+				popUpMessage->QueueMessage(&commandBuffer, Tr(L"You successfully fled!"));
 				auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 				drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(1.5f));
 				drawBuffer->PushCommand(transitionInCommand);
@@ -3094,7 +3119,7 @@ void Demo::IBattleScene::Init()
 					}));
 			}
 			else {
-				popUpMessage->QueueMessage(&commandBuffer, L"You failed to flee!");
+				popUpMessage->QueueMessage(&commandBuffer, Tr(L"You failed to flee!"));
 				commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
 					this->QueueToEnemyAttack(0);
 					commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished2) {
@@ -3191,11 +3216,11 @@ void Demo::IBattleScene::Init()
 		// a mid-turn draw. Clearing it mid-flight would strand those cards in queuedToDraw -
 		// never reaching the hand, never discarded - so refuse until they have landed.
 		if (!queuedToDraw.empty()) {
-			popUpMessage->ShowMessage(L"Still drawing");
+			popUpMessage->ShowMessage(Tr(L"Still drawing"));
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 		}
 		else if (usedEnergy > energy) {
-			popUpMessage->ShowMessage(L"Not enough energy");
+			popUpMessage->ShowMessage(Tr(L"Not enough energy"));
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 		}
 		else if (mainBlockCard && !mainBlockCard->IsExecuting()) {
@@ -3206,7 +3231,7 @@ void Demo::IBattleScene::Init()
 				|| (runInitFirst && !initBlockCard->HasAllRequiredTargets())) {
 				// Repeats fold into the line already on screen, so pressing this a dozen times
 				// reads as one message counting up rather than a dozen queued pop-ups.
-				popUpMessage->ShowMessage(L"Some cards are missing a target!");
+				popUpMessage->ShowMessage(Tr(L"Some cards are missing a target!"));
 				DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 				return;
 			}
@@ -3240,12 +3265,12 @@ void Demo::IBattleScene::Init()
 		// kicks off survives - but a draw already in flight still has to land first, because the
 		// next Execute would clear the buffer out from under it.
 		if (!queuedToDraw.empty()) {
-			popUpMessage->ShowMessage(L"Still drawing");
+			popUpMessage->ShowMessage(Tr(L"Still drawing"));
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
 		if (usedEnergy > energy) {
-			popUpMessage->ShowMessage(L"Not enough energy");
+			popUpMessage->ShowMessage(Tr(L"Not enough energy"));
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
@@ -3253,7 +3278,7 @@ void Demo::IBattleScene::Init()
 			return;
 		}
 		if (!initBlockCard->HasAllRequiredTargets()) {
-			popUpMessage->ShowMessage(L"Some cards are missing a target!");
+			popUpMessage->ShowMessage(Tr(L"Some cards are missing a target!"));
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
@@ -3395,6 +3420,11 @@ void Demo::IBattleScene::Init()
 	closePileViewButton->Init(&this->uiCamera);
 	btnPilePrevPage->Init(&this->uiCamera);
 	btnPileNextPage->Init(&this->uiCamera);
+
+	// The scene starts in PlayerStandBy, which never repositions gearButton (only PlayerAttackUpdate
+	// does). Laying the row out now gives it a real position before the first draw, so a status
+	// effect inflicted on turn 1 doesn't have its icon anchored to gearButton's un-positioned origin.
+	LayoutAttackRowButtons();
 
 	// Init sprite
 	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
@@ -3870,7 +3900,7 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 				gd->DrawRectangle(camera, -screenW / 2, -screenH / 2, screenW, screenH, D3DCOLOR_ARGB(150, 0, 0, 0), true);
 				gd->SetAlphaBlending(false);
 			}
-
+			DrawDiscardEnemyCardArea(deltaTime);
 			draggableManager->Draw(deltaTime);
 			DrawKeyboardReticleWorld(deltaTime);
 			break;
@@ -3933,7 +3963,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 				fontSprite->SetScale(1.5f, 1.5f);
 				fontSprite->SetColor(0xFF00FF00);
 				fontSprite->SetOutline(true, 0xFF000000, 3.f);
-				std::wstring msg = L"Select a card to Retain (Right-Click to Cancel)";
+				std::wstring msg = Tr(L"Select a card to Retain (Right-Click to Cancel)");
 				fontSprite->SetText(msg);
 				fontSprite->SetPosition(-fontSprite->GetWidth() / 2.0f, -screenH / 4.0f);
 				fontSprite->Draw(uiCamera, deltaTime);
@@ -4021,15 +4051,15 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 			if (mouseWX >= startX && mouseWX <= startX + 28.f && mouseWY >= drawY && mouseWY <= drawY + 44.f) {
 				if (battleEventType == EventType::Gold) {
 					showTooltip = true;
-					tooltipText = L"Gold Event\nSurvive and grab the gold tokens!";
+					tooltipText = Tr(L"Gold Event\nSurvive and grab the gold tokens!");
 				}
 				else if (battleEventType == EventType::Energy) {
 					showTooltip = true;
 					if (isFlawlessCompleted) {
-						tooltipText = L"Challenge Completed!\n+1 Energy gained this battle.";
+						tooltipText = Tr(L"Challenge Completed!\n+1 Energy gained this battle.");
 					}
 					else {
-						tooltipText = L"Flawless Challenge\nEvade perfectly to gain pieces.\n2 Pieces = +1 Energy next turn.";
+						tooltipText = Tr(L"Flawless Challenge\nEvade perfectly to gain pieces.\n2 Pieces = +1 Energy next turn.");
 					}
 				}
 			}
@@ -4111,7 +4141,7 @@ void Demo::IBattleScene::AddEnergyPieceToken() {
 	currentEnergyPieces++;
 	if (currentEnergyPieces >= 2) {
 		QueueBonusEnergy(1);
-		QueuePopUpMessage(L"Gained +1 Energy!");
+		QueuePopUpMessage(Tr(L"Gained +1 Energy!"));
 
 		isFlawlessChallengeActive = false;
 		isFlawlessCompleted = true;
@@ -4128,18 +4158,18 @@ void Demo::IBattleScene::OnGearButtonClicked() {
 		GainEnergyNow(1);
 		currentGearCooldown = bp->maxCooldownTurns;
 		DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
-		popUpMessage->QueueMessage(&commandBuffer, L"Gained 1 Energy!", 1.5f);
+		popUpMessage->QueueMessage(&commandBuffer, Tr(L"Gained 1 Energy!"), 1.5f);
 
 	}
 	else if (gearID == 2) { // Data Extractor
 		if (drawPile.empty() && discardPile.empty()) {
-			popUpMessage->QueueMessage(&commandBuffer, L"No cards left to draw!", 1.5f);
+			popUpMessage->QueueMessage(&commandBuffer, Tr(L"No cards left to draw!"), 1.5f);
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
 		DrawCardsNow(1);
 		currentGearCooldown = bp->maxCooldownTurns;
-		popUpMessage->QueueMessage(&commandBuffer, L"Drew 1 card!", 1.5f);
+		popUpMessage->QueueMessage(&commandBuffer, Tr(L"Drew 1 card!"), 1.5f);
 
 	}
 	else if (gearID == 3) { // Memory Locker
@@ -4155,7 +4185,7 @@ void Demo::IBattleScene::OnGearButtonClicked() {
 			}
 		}
 		if (!hasValidCard) {
-			popUpMessage->QueueMessage(&commandBuffer, L"No valid cards in hand to retain!", 1.5f);
+			popUpMessage->QueueMessage(&commandBuffer, Tr(L"No valid cards in hand to retain!"), 1.5f);
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
@@ -4176,7 +4206,7 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 
 		pickedUpCard.reset();
 		state = State::PlayerAttack;
-		popUpMessage->QueueMessage(&commandBuffer, L"Cancelled.", 1.0f);
+		popUpMessage->QueueMessage(&commandBuffer, Tr(L"Cancelled."), 1.0f);
 		return;
 	}
 
@@ -4204,7 +4234,7 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 					if (bp) this->currentGearCooldown = bp->maxCooldownTurns;
 					pickedUpCard.reset();
 					this->state = State::PlayerAttack;
-					this->popUpMessage->QueueMessage(&this->commandBuffer, L"Card retained for next turn!", 1.5f);
+					this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"Card retained for next turn!"), 1.5f);
 					DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
 					return;
 				}
