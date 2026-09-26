@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DX9GFExtras.h"
 #include "DX9GF.h"
 
@@ -6,6 +6,9 @@ namespace Demo {
 	class DraggableManager;
   class IDraggable : virtual public DX9GF::IGameObject {
 	protected:
+		std::weak_ptr<DX9GF::IGameObject> preDragParent;
+		float preDragWorldX = 0;
+		float preDragWorldY = 0;
 		inline static size_t nextID = 0;
 		std::string id;
 		size_t dragAreaWidth;
@@ -62,6 +65,14 @@ namespace Demo {
 		virtual void Draw(unsigned long long deltaTime);
 		virtual bool OnDrop(std::shared_ptr<IDraggable> other);
 		virtual bool OnHover(std::shared_ptr<IDraggable> other);
+		virtual void OnDropMissed(std::weak_ptr<DX9GF::IGameObject> oldParent, float oldWorldX, float oldWorldY);
+		using DropMissedCallback = std::function<void(std::shared_ptr<IDraggable>)>;
+		DropMissedCallback onDropMissedHandler;
+		void SetOnDropMissedHandler(DropMissedCallback handler) { onDropMissedHandler = handler; }
+		std::weak_ptr<DX9GF::IGameObject> GetPreDragParent() const { return preDragParent; }
+		virtual bool TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent) { return false; }
+		virtual bool CanBeStoredInContainer() const { return true; }
+
 		void SetScissorRect(const RECT& rect);
 		void ClearScissorRect();
 		std::string GetID() const;

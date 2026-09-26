@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "EnemyCard.h"
 #include "IContainer.h"
 
@@ -91,4 +91,15 @@ void Demo::EnemyCard::Draw(unsigned long long deltaTime)
 bool Demo::EnemyCard::OnDrop(std::shared_ptr<IDraggable> draggable)
 {
 	return false;
+}
+
+void Demo::EnemyCard::OnDropMissed(std::weak_ptr<DX9GF::IGameObject> oldParent, float oldWorldX, float oldWorldY)
+{
+	if (auto manager = GetDraggableManager().lock()) {
+		manager->Remove(std::dynamic_pointer_cast<IDraggable>(shared_from_this()));
+	}
+
+	//dirty trick to hide enemy card
+	this->SetHidden(true);
+	this->SetLocalPosition(-10000.f, -10000.f);
 }

@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "IStatementCard.h"
-
+#include "CardContainer.h"
+#include "IBlockCard.h"
 int Demo::IStatementCard::GetStatusCoverPanelWidth() const
 {
 	int contentWidth = 0;
@@ -265,4 +266,26 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 			manager->QueueDraw(cmd);
 		}
 	}
+}
+
+bool Demo::IStatementCard::TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent)
+{
+	auto p = oldParent.lock();
+	if (!p) return false;
+
+	auto container = std::dynamic_pointer_cast<CardContainer>(p);
+	if (!container) return false;
+
+	container->StoreCard(std::dynamic_pointer_cast<ICard>(shared_from_this()));
+	return true;
+}
+
+bool Demo::IStatementCard::IsQueuedInBlock() const
+{
+	if (auto parent = GetParent(); parent.has_value()) {
+		if (auto lock = parent.value().lock()) {
+			return std::dynamic_pointer_cast<IBlockCard>(lock) != nullptr;
+		}
+	}
+	return false;
 }
