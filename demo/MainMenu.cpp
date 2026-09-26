@@ -5,6 +5,8 @@
 #include "SettingsScene.h"
 #include "ThreadAlleyScene.h"
 #include "TutorialWorldScene.h"
+#include "SecretPuzzleScene.h"
+#include "BossWorldScene.h"
 #include "SaveGameState.h"
 #include <fstream>
 #include <cstdio>
@@ -88,39 +90,157 @@ namespace Demo
 		fontSprite->SetPosition(leftAnchorX, y - height * 3 * 2.f - 32.f);
 	}
 
+	void MainMenu::RenderMapPreviews()
+	{
+		const UINT PREVIEW_SIZE = 256;
+		const float PREVIEW_ZOOM = 1.0f;
+		auto gd = game->GetGraphicsDevice();
+
+		auto captureOne = [&](int index, Demo::WorldSceneBase* scene, float focusX, float focusY, float zoom) {
+			scene->Init();
+			scene->GetCamera().SetPosition(focusX, focusY);
+			scene->GetCamera().SetZoom(zoom);
+
+			mapPreviews[index] = std::make_shared<DX9GF::Texture>(gd);
+			mapPreviews[index]->CreateRenderTarget(PREVIEW_SIZE, PREVIEW_SIZE);
+
+			gd->SetRenderTarget(mapPreviews[index].get());
+			gd->SetViewport(0, 0, PREVIEW_SIZE, PREVIEW_SIZE, 0.0f, 1.0f);
+			gd->ResetVirtualTransform();
+			gd->Clear(0xFF000000);
+			scene->DrawWorld(0);
+			gd->RestoreRenderTarget();
+
+			delete scene;
+			};
+
+		// focus points are each map's player spawn location, from its scene's InitCore() call
+		captureOne(0, new TutorialWorldScene(game, saveManager, PREVIEW_SIZE, PREVIEW_SIZE), 248.0f, 184.0f, PREVIEW_ZOOM);
+		captureOne(1, new SecretPuzzleScene(game, saveManager, PREVIEW_SIZE, PREVIEW_SIZE), -84.0f * 16.0f, -39.0f * 16.0f, PREVIEW_ZOOM);
+		captureOne(2, new ThreadAlleyScene(game, saveManager, PREVIEW_SIZE, PREVIEW_SIZE), -544.5f, 128.5f, PREVIEW_ZOOM);
+		captureOne(3, new BossWorldScene(game, saveManager, PREVIEW_SIZE, PREVIEW_SIZE), 360.0f, 190.0f, PREVIEW_ZOOM);
+
+		gd->SetViewport(0, 0, lastScreenWidth, lastScreenHeight, 0.0f, 1.0f);
+	}
+
 	void MainMenu::DrawBackground(unsigned long long deltaTime)
 	{
 		auto [screenWidth, screenHeight] = camera.GetScreenResolution();
+		auto gd = game->GetGraphicsDevice();
 
-		game->GetGraphicsDevice()->DrawRectangle(0.0f, 0.0f, static_cast<float>(screenWidth), static_cast<float>(screenHeight), 0xFF242234, true);
+		gd->DrawRectangle(0.0f, 0.0f, static_cast<float>(screenWidth), static_cast<float>(screenHeight), 0xFF242234, true);
 
 		const D3DCOLOR polyColor = 0xFF9cdb43;
-		//const D3DCOLOR crackColor = 0xFF9cdb43;
+		const int RING_COUNT = 3;
+		const float TWO_PI_OVER_5 = 2.0f * 3.14159f / 5.0f;
 
 		//shared static timer variable for background processes
 		static float timeAcc = 0.0f;
 		timeAcc += static_cast<float>(deltaTime) * 0.001f;
 
-		for (int i = 0; i < 15; ++i) {
-			float size = 100.0f + (i % 3) * 50.0f;
+		// filler pentagons: a dense starfield/galaxy of tiny drifting wireframe specks behind
+		// the map pentagons - mostly small and dim (distant "stars"), a few bigger and
+		// brighter (closer "nebulae"), all gently twinkling in opacity
+		const int FILLER_COUNT = 90;
+		gd->SetAlphaBlending(true);
+		for (int i = 0; i < FILLER_COUNT; ++i) {
+			float sizeFactor = static_cast<float>(i % 9); // 0..8, most speck sizes repeat often
+			float size = 6.0f + sizeFactor * 6.0f; // 6..54
 			float margin = size * 2.0f;
-			float bx = std::fmod((i * 123.0f) + timeAcc * 10.0f, static_cast<float>(screenWidth) + margin * 2.0f) - margin;
-			float by = std::fmod((i * 456.0f) + timeAcc * 5.0f, static_cast<float>(screenHeight) + margin * 2.0f) - margin;
-			float angle = timeAcc * 0.1f + i;
 
-			float glitchSize = size + std::sinf(timeAcc * 2.0f + i) * 5.0f;
+			// parallax: smaller specks drift slower (feel farther away), bigger ones faster
+			float speedScale = 0.3f + (size / 54.0f) * 1.3f;
+			float driftX = 6.0f * speedScale;
+			float driftY = 4.0f * speedScale;
+
+			float bx = std::fmod((i * 191.0f) + timeAcc * driftX, static_cast<float>(screenWidth) + margin * 2.0f) - margin;
+			float by = std::fmod((i * 337.0f) + timeAcc * driftY, static_cast<float>(screenHeight) + margin * 2.0f) - margin;
+			float angle = timeAcc * (0.05f + 0.1f * speedScale) + i * 0.7f;
+			float glitchSize = size + std::sinf(timeAcc * 1.5f + i) * (size * 0.08f);
+
+			int baseAlpha = 6 + static_cast<int>(sizeFactor) * 4;
+			int alpha = std::clamp(static_cast<int>(baseAlpha + std::sinf(timeAcc * 1.3f + i * 2.1f) * 8.0f), 3, 55);
+			D3DCOLOR fillerColor = D3DCOLOR_ARGB(alpha, 0x9c, 0xdb, 0x43);
 
 			float prevX = bx + std::cosf(angle) * glitchSize;
 			float prevY = by + std::sinf(angle) * glitchSize;
-
 			for (int v = 1; v <= 5; ++v) {
-				float vAngle = angle + (v * 72.0f * 3.14159f / 180.0f);
+				float vAngle = angle + v * TWO_PI_OVER_5;
 				float vx = bx + std::cosf(vAngle) * glitchSize;
 				float vy = by + std::sinf(vAngle) * glitchSize;
 
-				game->GetGraphicsDevice()->DrawLine(prevX, prevY, vx, vy, polyColor);
+				gd->DrawLine(prevX, prevY, vx, vy, fillerColor);
 				prevX = vx;
 				prevY = vy;
+			}
+		}
+		gd->SetAlphaBlending(false);
+
+		// shared wrap margin/period for every pentagon so their start phases can be evenly
+		// spread across the cycle - keeps them spaced apart instead of clumping together
+		const float margin = 300.0f;
+		const float periodX = static_cast<float>(screenWidth) + margin * 2.0f;
+		const float periodY = static_cast<float>(screenHeight) + margin * 2.0f;
+
+		for (int i = 0; i < MAP_PREVIEW_COUNT; ++i) {
+			float baseSize = 130.0f + (i % 3) * 30.0f;
+
+			// evenly space starting phases 1/MAP_PREVIEW_COUNT of a cycle apart; y uses a
+			// different permutation of the index so the four don't move as a rigid grid
+			int yIndex = (i * 3) % MAP_PREVIEW_COUNT;
+			float phaseX = (static_cast<float>(i) / MAP_PREVIEW_COUNT) * periodX;
+			float phaseY = (static_cast<float>(yIndex) / MAP_PREVIEW_COUNT) * periodY;
+
+			float cx = std::fmod(phaseX + timeAcc * 28.0f, periodX) - margin;
+			float cy = std::fmod(phaseY + timeAcc * 16.0f, periodY) - margin;
+			float angle = timeAcc * 0.1f + i;
+			float size = baseSize + std::sinf(timeAcc * 2.0f + i) * 5.0f;
+
+			std::vector<D3DXVECTOR2> points;
+			std::vector<D3DXVECTOR2> uvs;
+			points.reserve(5);
+			uvs.reserve(5);
+
+			// Binocular effect, without ever running out of texture: the on-screen pentagon
+			// shape still tumbles (points, using `angle`), but the sampled crop uses its own
+			// fixed-orientation window that does NOT rotate with it, so the backdrop doesn't
+			// spin along with the frame. The crop's pan position follows this pentagon's own
+			// wrap-cycle (panU/panV cycle smoothly through 0..1 as cx/cy wrap), so it always
+			// stays in valid texture range instead of clamping once far from screen center.
+			float panU = (cx + margin) / periodX;
+			float panV = (cy + margin) / periodY;
+			const float uvRadius = 0.3f; // fraction of texture shown per pentagon - raise to zoom out, lower to zoom in (keep under ~0.5 to avoid clamped edges)
+
+			for (int v = 0; v < 5; ++v) {
+				float vAngle = angle + v * TWO_PI_OVER_5;
+				float vx = cx + std::cosf(vAngle) * size;
+				float vy = cy + std::sinf(vAngle) * size;
+				points.push_back(D3DXVECTOR2(vx, vy));
+
+				float canonicalAngle = v * TWO_PI_OVER_5; // no `angle` term - keeps the crop from spinning with the window
+				uvs.push_back(D3DXVECTOR2(
+					panU + std::cosf(canonicalAngle) * uvRadius,
+					panV + std::sinf(canonicalAngle) * uvRadius));
+			}
+
+			if (mapPreviews[i]) {
+				gd->DrawTexturedPolygon(points, uvs, mapPreviews[i].get());
+			}
+
+			for (int ring = 0; ring < RING_COUNT; ++ring) {
+				float ringSize = size * (1.0f + ring * 0.22f);
+				float prevX = cx + std::cosf(angle) * ringSize;
+				float prevY = cy + std::sinf(angle) * ringSize;
+
+				for (int v = 1; v <= 5; ++v) {
+					float vAngle = angle + v * TWO_PI_OVER_5;
+					float vx = cx + std::cosf(vAngle) * ringSize;
+					float vy = cy + std::sinf(vAngle) * ringSize;
+
+					gd->DrawLine(prevX, prevY, vx, vy, polyColor);
+					prevX = vx;
+					prevY = vy;
+				}
 			}
 		}
 	}
@@ -290,6 +410,9 @@ namespace Demo
 
 		audio->Load("bgm_sky", IDR_BGM_SKY);
 		audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
+
+		//render one-off snapshots of the featured maps for the background pentagons
+		RenderMapPreviews();
 
 		//call it to setup the update layout
 		UpdateLayout(lastScreenWidth, lastScreenHeight);

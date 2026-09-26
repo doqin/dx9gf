@@ -51,13 +51,6 @@ namespace Demo {
 
 		WorldSceneBase(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh);
 
-		void Init() override;
-		void InitCore(float playerX, float playerY, const wchar_t* mapFile);
-
-		void Update(unsigned long long deltaTime) override;
-		void DrawWorld(unsigned long long deltaTime) override;
-		void DrawUI(unsigned long long deltaTime) override;
-
 		void GenerateSaveData(nlohmann::json& outData) override;
 		void RestoreSaveData(const nlohmann::json& inData) override;
 
@@ -91,6 +84,12 @@ namespace Demo {
 		virtual void DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
 
 	public:
+		void Init() override;
+		void InitCore(float playerX, float playerY, const wchar_t* mapFile);
+
+		void Update(unsigned long long deltaTime) override;
+		void DrawWorld(unsigned long long deltaTime) override;
+		void DrawUI(unsigned long long deltaTime) override;
 		std::shared_ptr<Player> GetPlayer() const { return player; }
 	};
 }

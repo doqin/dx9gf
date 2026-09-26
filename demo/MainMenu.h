@@ -45,6 +45,11 @@ namespace Demo
 		KeyboardNavigator keyboardNavigator;
 		std::vector<KeyboardNavigator::Candidate> CollectKeyboardCandidates();
 
+		//map preview pentagons: one cropped snapshot of each featured map's world
+		static const int MAP_PREVIEW_COUNT = 4;
+		std::shared_ptr<DX9GF::Texture> mapPreviews[MAP_PREVIEW_COUNT];
+		void RenderMapPreviews();
+
 	public:
 		static std::shared_ptr<SaveGameState> gameSaveState;
 

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <d3d9.h>
+#include <vector>
 #include "DX9GFCamera.h"
 namespace DX9GF {
 	class Texture;
@@ -79,6 +80,13 @@ namespace DX9GF {
 		/// </summary>
 		void DrawTriangle(float centerX, float topY, float width, float height, D3DCOLOR color, bool isFilled);
 		void DrawTriangle(const DX9GF::Camera& camera, float centerX, float topY, float width, float height, D3DCOLOR color, bool isFilled);
+
+		/// <summary>
+		/// Draws a filled, textured convex polygon (as a triangle fan) in screen space.
+		/// </summary>
+		/// <param name="points">Boundary points of the polygon, in order.</param>
+		/// <param name="uvs">Texture coordinates matching each point in points.</param>
+		void DrawTexturedPolygon(const std::vector<D3DXVECTOR2>& points, const std::vector<D3DXVECTOR2>& uvs, DX9GF::Texture* texture, D3DCOLOR color = 0xFFFFFFFF);
 
 	};
 };
