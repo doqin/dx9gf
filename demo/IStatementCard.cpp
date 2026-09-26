@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "IStatementCard.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include "CardContainer.h"
 #include "IBlockCard.h"
 int Demo::IStatementCard::GetStatusCoverPanelWidth() const
@@ -163,7 +165,7 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		graphicsDevice->SetAlphaBlending(false);
 
 		if (!descFont) {
-			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 			descFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
 		}
 
@@ -171,7 +173,7 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		descFontSprite->SetColor(0xFFff4444);
 		descFontSprite->SetOutline(true, 0xFF000000, 2.f);
 		descFontSprite->SetPosition(thisX + trigger->GetWidth() / 2 - 35, thisY + trigger->GetHeight() / 2 - 10);
-		descFontSprite->SetText(L"LOCKED(" + std::to_wstring(this->GetLockedTurns()) + L")");
+		descFontSprite->SetText(Tr(L"LOCKED(") + std::to_wstring(this->GetLockedTurns()) + L")");
 		descFontSprite->Draw(*camera, deltaTime);
 		descFontSprite->End();
 	}
@@ -184,7 +186,7 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		graphicsDevice->SetAlphaBlending(false);
 
 		if (!descFont) {
-			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 			descFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
 		}
 
@@ -192,14 +194,14 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		descFontSprite->SetColor(0xFFffd700);
 		descFontSprite->SetOutline(true, 0xFF000000, 2.f);
 		descFontSprite->SetPosition(thisX + trigger->GetWidth() / 2 - 35, thisY + trigger->GetHeight() / 2 - 10);
-		descFontSprite->SetText(L"RETAINED");
+		descFontSprite->SetText(Tr(L"RETAINED"));
 		descFontSprite->Draw(*camera, deltaTime);
 		descFontSprite->End();
 	}
 
 	if (trigger && trigger->IsHovering(deltaTime)) {
 		if (!descFont) {
-			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, L"StatusPlz", 16);
+			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 			descFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
 		}
 		// The lock overlay shares this sprite and leaves its own colour and outline behind, so
@@ -210,12 +212,16 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		size_t cost = GetCost();
 		std::wstring inputs = GetInputsDescription();
 
-		std::wstring text = desc + L"\nCost: " + std::to_wstring(cost) + L"\nInputs: " + inputs;
+		std::wstring text = desc + L"\n" + Tr(L"Cost: ") + std::to_wstring(cost) + L"\n" + Tr(L"Inputs: ") + inputs;
 		if (HasLimitedUses()) {
-			text += L"\nUses: " + std::to_wstring(GetRemainingUses()) + L"/" + std::to_wstring(GetMaxUses());
+			text += L"\n" + Tr(L"Uses: ") + std::to_wstring(GetRemainingUses()) + L"/" + std::to_wstring(GetMaxUses());
 		}
 		if (!IsPersistent()) {
-			text += L"\nNon-persistent: leaves the program at end of turn.";
+			text += L"\n" + Tr(L"Non-persistent: leaves the program at end of turn.");
+		}
+		for (const auto& effect : GetAppliedStatusEffects()) {
+			ModifierInfo info = GetModifierInfo(effect.type);
+			text += L"\n" + info.name + L": " + info.description + L"\n" + GetModifierStackingInfo(effect.stacksValue);
 		}
 
 		descFontSprite->SetText(std::move(text));

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PasswordMenu.h"
+#include "LocalizationManager.h"
 #include "SettingsManager.h"
 #include "TextInputManager.h"
 #include <algorithm>
@@ -91,7 +92,7 @@ namespace Demo {
 			return;
 		}
 
-		statusMessage = L"ACCESS DENIED";
+		statusMessage = Tr(L"ACCESS DENIED");
 		DX9GF::AudioManager::GetInstance()->PlayRandom("dialog_voice", 0.3f);
 	}
 
@@ -164,7 +165,7 @@ namespace Demo {
 			};
 
 		float y = panelY + 12.0f;
-		drawCentered(L"ENTER 4-DIGIT CODE", y, COLOR_PENDING, 1.0f);
+		drawCentered(Tr(L"ENTER 4-DIGIT CODE"), y, COLOR_PENDING, 1.0f);
 		y += 30.0f;
 
 		// Guess history, oldest visible first.

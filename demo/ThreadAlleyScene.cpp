@@ -2,6 +2,7 @@
 #include "SettingsManager.h"
 #include "ThreadAlleyScene.h"
 #include "RandomEncounter.h"
+#include "LocalizationManager.h"
 #include "CardShop.h"
 #include "ItemShop.h"
 #include <cmath>
@@ -24,7 +25,7 @@
 void Demo::ThreadAlleyScene::OnInit()
 {
 	InitCore(-544.5f, 128.5f, L"./assets/ThreadAlley.tmx");
-	SetChapterTitle(L"CHAPTER II: THREAD ALLEY", L"< Data Transit Zone >");
+	SetChapterTitle(Tr(L"CHAPTER II: THREAD ALLEY"), Tr(L"< Data Transit Zone >"));
 
 	map->SetAreaUpdateHandler("trigger_p", [this](const DX9GF::Map::ObjectArea& area) {
 		CreatePortalTransition(1, 330.f, 263.f, "bgm_boss", 0.3f);
@@ -66,26 +67,26 @@ void Demo::ThreadAlleyScene::OnInit()
 	hKhang->SetInteractLogic([](NPC* self) -> std::function<void()> {
 		auto qState = QuestManager::GetInstance()->GetQuestState("Quest_ThreadAlley_Start");
 		if (qState == Demo::QuestState::Locked) {
-			self->AddLine(L"Huu Khang", L"Hey, keep your firewall up if you're heading down Thread Alley.");
-			self->AddLine(L"Huu Khang", L"I wrote the routing logic for this sector. It was supposed to be a clean shortcut\nfor background processes, but lately... things go in and don't come out.");
-			self->AddLine(L"Player", L"Malware?");
-			self->AddLine(L"Huu Khang", L"Worse. The sneaky kind. It mimics friendly data to bypass the very antivirus protocols\nI implemented.");
-			self->AddLine(L"Huu Khang", L"My admin privileges are locked out until the zone is cleared. If you're heading that way,\nmaybe you can flush the corruption out for me?");
+			self->AddLine(Tr(L"Huu Khang"), Tr(L"Hey, keep your firewall up if you're heading down Thread Alley."));
+			self->AddLine(Tr(L"Huu Khang"), Tr(L"I wrote the routing logic for this sector. It was supposed to be a clean shortcut\nfor background processes, but lately... things go in and don't come out."));
+			self->AddLine(Tr(L"Player"), Tr(L"Malware?"));
+			self->AddLine(Tr(L"Huu Khang"), Tr(L"Worse. The sneaky kind. It mimics friendly data to bypass the very antivirus protocols\nI implemented."));
+			self->AddLine(Tr(L"Huu Khang"), Tr(L"My admin privileges are locked out until the zone is cleared. If you're heading that way,\nmaybe you can flush the corruption out for me?"));
 			return []() {
 				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-					{ L"Yes(Y)", []() { QuestManager::GetInstance()->AcceptQuest("Quest_ThreadAlley_Start"); } },
-					{ L"No(N)", []() {} }
+					{ Tr(L"Yes(Y)"), []() { QuestManager::GetInstance()->AcceptQuest("Quest_ThreadAlley_Start"); } },
+					{ Tr(L"No(N)"), []() {} }
 				};
-				PopupManager::GetInstance()->Show("stepped_blue", L"New Quest", L"Investigate Thread Alley?", buttons);
+				PopupManager::GetInstance()->Show("stepped_blue", Tr(L"New Quest"), Tr(L"Investigate Thread Alley?"), buttons);
 			};
 		}
 		else if (qState == Demo::QuestState::Active) {
-			self->AddLine(L"Huu Khang", L"Watch your back in there. Malware down here doesn't always look like a monster...");
-			self->AddLine(L"Huu Khang", L"Sometimes it uses the exact same asset ID as a friend in need. Trust no one's metadata.");
+			self->AddLine(Tr(L"Huu Khang"), Tr(L"Watch your back in there. Malware down here doesn't always look like a monster..."));
+			self->AddLine(Tr(L"Huu Khang"), Tr(L"Sometimes it uses the exact same asset ID as a friend in need. Trust no one's metadata."));
 		}
 		else {
-			self->AddLine(L"Huu Khang", L"You actually deleted it? And your registry is still intact?");
-			self->AddLine(L"Huu Khang", L"Not bad! My admin dashboard just lit back up. Thread Alley is finally safe to route\ndata through again. I owe you a code review sometime.");
+			self->AddLine(Tr(L"Huu Khang"), Tr(L"You actually deleted it? And your registry is still intact?"));
+			self->AddLine(Tr(L"Huu Khang"), Tr(L"Not bad! My admin dashboard just lit back up. Thread Alley is finally safe to route\ndata through again. I owe you a code review sometime."));
 		}
 		return nullptr;
 	});
@@ -99,7 +100,7 @@ void Demo::ThreadAlleyScene::OnInit()
 
 	authTerminal = std::make_shared<AuthTerminal>(transformManager, 1128.f, -280.f);
 	authTerminal->Init(game, game->GetGraphicsDevice(), &camera, &this->uiCamera, player, colliderManager, font);
-	authTerminal->SetPassword(std::wstring(authPassword.begin(), authPassword.end()));
+	authTerminal->SetPassword(DX9GF::Utils::Utf8ToWide(authPassword));
 	authTerminal->SetVisible(true);
 	authTerminal->SetOnSolved([this]() {
 		authTerminalSolved = true;
@@ -110,30 +111,30 @@ void Demo::ThreadAlleyScene::OnInit()
 		}
 		auto [sw, sh] = camera.GetScreenResolution();
 		currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
-		currentConversation->AddLine({ .name = L"Terminal", .content = L"ACCESS GRANTED.\nYou obtained the Authentication Token." });
+		currentConversation->AddLine({ .name = Tr(L"Terminal"), .content = Tr(L"ACCESS GRANTED.\nYou obtained the Authentication Token.") });
 	});
 
 	trojanNPC = std::make_shared<TrojanNPC>(transformManager, 224.f, -832.f);
 	trojanNPC->AttachQuestMarker("Quest_ThreadAlley_Start", Demo::QuestMarkerRole::Receiver);
 	trojanNPC->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 
-	trojanNPC->AddFriendlyLine(L"???", L"Oh thank the kernel, a live process!\nI was starting to think nobody came down this alley any more.");
-	trojanNPC->AddFriendlyLine(L"???", L"I'm a maintenance job. Was, anyway.\nMy session expired halfway through a patch and now the gate won't read me.");
-	trojanNPC->AddFriendlyLine(L"???", L"There's a terminal further down the alley that still hands out\nauthentication tokens. Four digits, old-style.");
-	trojanNPC->AddFriendlyLine(L"???", L"Bring one back to me and I'll be out of your way.\nYou'd be doing the whole sector a favour, honestly.");
-	trojanNPC->AddFriendlyLine(L"Player", L"...Alright. I'll see what I can find.");
+	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"Oh thank the kernel, a live process!\nI was starting to think nobody came down this alley any more."));
+	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"I'm a maintenance job. Was, anyway.\nMy session expired halfway through a patch and now the gate won't read me."));
+	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"There's a terminal further down the alley that still hands out\nauthentication tokens. Four digits, old-style."));
+	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"Bring one back to me and I'll be out of your way.\nYou'd be doing the whole sector a favour, honestly."));
+	trojanNPC->AddFriendlyLine(Tr(L"Player"), Tr(L"...Alright. I'll see what I can find."));
 
-	trojanNPC->AddWaitingLine(L"???", L"Still looking for that token?\nTake your time. It's not like I'm going anywhere.");
-	trojanNPC->AddWaitingLine(L"???", L"Four digits. The terminal tells you which ones you got right.\nYou'll get there.");
+	trojanNPC->AddWaitingLine(Tr(L"???"), Tr(L"Still looking for that token?\nTake your time. It's not like I'm going anywhere."));
+	trojanNPC->AddWaitingLine(Tr(L"???"), Tr(L"Four digits. The terminal tells you which ones you got right.\nYou'll get there."));
 
-	trojanNPC->AddRevealLine(L"???", L"You actually brought it.");
-	trojanNPC->AddRevealLine(L"???", L"...Honestly? I didn't think that would work.");
-	trojanNPC->AddRevealLine(L"Trojan", L"Let me walk you through what just happened.\nThat token was never mine. It was yours.");
-	trojanNPC->AddRevealLine(L"Trojan", L"I didn't break a single lock. I didn't have to.\nI asked nicely, and you handed me the keys to your own system.");
-	trojanNPC->AddRevealLine(L"Trojan", L"That's all I am. A friendly face wrapped around something\nyou would never have let through the door.");
-	trojanNPC->AddRevealLine(L"Player", L"...No.");
-	trojanNPC->AddRevealLine(L"Player", L"You didn't trick me into anything.\nI'm taking it back - and I'm deleting you with it.");
-	trojanNPC->AddRevealLine(L"Trojan", L"Ha! Then stop talking and try.");
+	trojanNPC->AddRevealLine(Tr(L"???"), Tr(L"You actually brought it."));
+	trojanNPC->AddRevealLine(Tr(L"???"), Tr(L"...Honestly? I didn't think that would work."));
+	trojanNPC->AddRevealLine(Tr(L"Trojan"), Tr(L"Let me walk you through what just happened.\nThat token was never mine. It was yours."));
+	trojanNPC->AddRevealLine(Tr(L"Trojan"), Tr(L"I didn't break a single lock. I didn't have to.\nI asked nicely, and you handed me the keys to your own system."));
+	trojanNPC->AddRevealLine(Tr(L"Trojan"), Tr(L"That's all I am. A friendly face wrapped around something\nyou would never have let through the door."));
+	trojanNPC->AddRevealLine(Tr(L"Player"), Tr(L"...No."));
+	trojanNPC->AddRevealLine(Tr(L"Player"), Tr(L"You didn't trick me into anything.\nI'm taking it back - and I'm deleting you with it."));
+	trojanNPC->AddRevealLine(Tr(L"Trojan"), Tr(L"Ha! Then stop talking and try."));
 
 	sketchyGuy = std::make_shared<SketchyGuyNPC>(transformManager, 1024.f, -416.f);
 	sketchyGuy->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
@@ -338,7 +339,7 @@ void Demo::ThreadAlleyScene::OnRestoreSaveData(const nlohmann::json& inData)
 		authPassword = inData["authTerminal"].value("password", authPassword);
 		authTerminalSolved = inData["authTerminal"].value("solved", false);
 		if (authTerminal) {
-			authTerminal->SetPassword(std::wstring(authPassword.begin(), authPassword.end()));
+			authTerminal->SetPassword(DX9GF::Utils::Utf8ToWide(authPassword));
 			authTerminal->SetSolved(authTerminalSolved);
 		}
 	}
@@ -474,7 +475,7 @@ void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()
 			sceMan->InsertScene(sceMan->GetIndex() + 1, packScene);
 			sceMan->GoToNext();
 		}},
-		{ L"No(N)", nullptr }
+		{ Tr(L"No(N)"), nullptr }
 	};
 	PopupManager::GetInstance()->Show("stepped_gold",
 		sketchyGuy->GetBuyPromptTitle(), sketchyGuy->GetBuyPromptText(cost), buttons);

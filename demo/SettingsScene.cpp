@@ -3,6 +3,8 @@
 #include "resource.h"
 #include "IconButton.h"
 #include "SettingsManager.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include <algorithm>
 #include <cmath>
 #include <dinput.h>
@@ -11,7 +13,7 @@ namespace Demo
 	//Extra helpers, use to get keyname and string
 	std::wstring ToWString(const std::string& s)
 	{
-		return std::wstring(s.begin(), s.end());
+		return DX9GF::Utils::Utf8ToWide(s);
 	}
 	std::string GetKeyName(int dikCode)
 	{
@@ -213,6 +215,10 @@ namespace Demo
 		btnResPrev->SetLocalPosition(SLIDER_COLUMN_X, resRowY + btnOffsetY);
 		btnResNext->SetLocalPosition(SLIDER_COLUMN_X + 180.f, resRowY + btnOffsetY);
 
+		float langRowY = startY + rowSpacing * 5.0f;
+		btnLangEN->SetLocalPosition(SLIDER_COLUMN_X, langRowY + btnOffsetY);
+		btnLangVI->SetLocalPosition(SLIDER_COLUMN_X + 130.f, langRowY + btnOffsetY);
+
 		std::shared_ptr<Demo::TextIconButton> keybindButtons[] = { btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear };
 		for (size_t i = 0; i < std::size(keybindButtons); ++i) {
 			if (keybindButtons[i]) {
@@ -229,7 +235,7 @@ namespace Demo
 		lastScreenHeight = camH;
 
 		//Load assets
-		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 16);
+		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
 		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
 		fontSprite->SetColor(0xFF000000);
 
@@ -300,6 +306,29 @@ namespace Demo
 				sm->SetFullscreen(true);
 				sm->SaveSettings();
 				sm->ApplyResolution();
+			}
+			});
+
+		// Init 2 Language checkboxes (English / Tieng Viet)
+		btnLangEN = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
+		btnLangEN->SetSpriteCoords(sm->GetLanguage() == Language::EN ? 272 : 256, 352, 16, 16, 0, true);
+		btnLangEN->SetSpriteScale(2.f, 2.f);
+		btnLangEN->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+			auto sm = SettingsManager::GetInstance();
+			if (sm->GetLanguage() != Language::EN) {
+				sm->SetLanguage(Language::EN);
+				sm->SaveSettings();
+			}
+			});
+
+		btnLangVI = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
+		btnLangVI->SetSpriteCoords(sm->GetLanguage() == Language::VI ? 272 : 256, 352, 16, 16, 0, true);
+		btnLangVI->SetSpriteScale(2.f, 2.f);
+		btnLangVI->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+			auto sm = SettingsManager::GetInstance();
+			if (sm->GetLanguage() != Language::VI) {
+				sm->SetLanguage(Language::VI);
+				sm->SaveSettings();
 			}
 			});
 
@@ -376,7 +405,7 @@ namespace Demo
 		SetupKeybindBtn(btnToggleGear, "TOGGLE_GEAR", isListeningToggleGear);
 
 		// Active Buttons
-		std::shared_ptr<Demo::IButton> buttons[] = { backButton, btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck };
+		std::shared_ptr<Demo::IButton> buttons[] = { backButton, btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck, btnLangEN, btnLangVI };
 		for (auto& btn : buttons)
 		{
 			if (btn)
@@ -406,6 +435,15 @@ namespace Demo
 		else {
 			btnWindowedCheck->SetSpriteCoords(272, 352, 16, 16, 0, true);
 			btnFullscreenCheck->SetSpriteCoords(256, 352, 16, 16, 0, true);
+		}
+
+		if (sm->GetLanguage() == Language::VI) {
+			btnLangEN->SetSpriteCoords(256, 352, 16, 16, 0, true);
+			btnLangVI->SetSpriteCoords(272, 352, 16, 16, 0, true);
+		}
+		else {
+			btnLangEN->SetSpriteCoords(272, 352, 16, 16, 0, true);
+			btnLangVI->SetSpriteCoords(256, 352, 16, 16, 0, true);
 		}
 
 		for (auto& button : uiButtons) button->Update(deltaTime);
@@ -490,28 +528,29 @@ namespace Demo
 			float rowSpacing = SPACING_Y * 1.5f;
 
 			//Draw label
-			DrawString(L"Master Volume", LABEL_COLUMN_X, startY, 0xFFFFFFFF);
-			DrawString(L"Music Volume", LABEL_COLUMN_X, startY + rowSpacing, 0xFFFFFFFF);
-			DrawString(L"Sfx Volume", LABEL_COLUMN_X, startY + rowSpacing * 2, 0xFFFFFFFF);
+			DrawString(Tr(L"Master Volume"), LABEL_COLUMN_X, startY, 0xFFFFFFFF);
+			DrawString(Tr(L"Music Volume"), LABEL_COLUMN_X, startY + rowSpacing, 0xFFFFFFFF);
+			DrawString(Tr(L"Sfx Volume"), LABEL_COLUMN_X, startY + rowSpacing * 2, 0xFFFFFFFF);
 
 			float displayModeY = startY + rowSpacing * 3.0f;
 			float resRowY = startY + rowSpacing * 4.0f;
+			float langRowY = startY + rowSpacing * 5.0f;
 
-			DrawString(L"Display Mode", LABEL_COLUMN_X, displayModeY, 0xFFFFFFFF);
+			DrawString(Tr(L"Display Mode"), LABEL_COLUMN_X, displayModeY, 0xFFFFFFFF);
 
 			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, displayModeY);
 			fontSprite->SetColor(0xFFFFFFFF);
-			fontSprite->SetText(L"Windowed");
+			fontSprite->SetText(Tr(L"Windowed"));
 			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
 
 			fontSprite->SetPosition(SLIDER_COLUMN_X + 165.f, displayModeY);
-			fontSprite->SetText(L"Fullscreen");
+			fontSprite->SetText(Tr(L"Fullscreen"));
 			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
 
 			auto sm = SettingsManager::GetInstance();
 
 			D3DCOLOR resColor = sm->GetFullscreen() ? 0xFF888888 : 0xFFFFFFFF;
-			DrawString(L"Resolution", LABEL_COLUMN_X, resRowY, resColor);
+			DrawString(Tr(L"Resolution"), LABEL_COLUMN_X, resRowY, resColor);
 
 			int resIdx = sm->GetCurrentResolutionIndex();
 			auto resList = sm->GetSupportedResolutions();
@@ -527,9 +566,21 @@ namespace Demo
 				if (resIdx < resList.size() - 1) btnResNext->Draw(gd, deltaTime);
 			}
 
+			DrawString(Tr(L"Language"), LABEL_COLUMN_X, langRowY, 0xFFFFFFFF);
+
+			// Language names are shown as endonyms, not translated.
+			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, langRowY);
+			fontSprite->SetColor(0xFFFFFFFF);
+			fontSprite->SetText(L"English");
+			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+
+			fontSprite->SetPosition(SLIDER_COLUMN_X + 165.f, langRowY);
+			fontSprite->SetText(L"Tiếng Việt");
+			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+
 			const wchar_t* keybindLabels[] = { L"Move up", L"Move down", L"Move left", L"Move right", L"Accept", L"Open inventory", L"Interact", L"Sprint", L"Toggle Gear" };
 			for (size_t i = 0; i < std::size(keybindLabels); ++i) {
-				DrawString(keybindLabels[i], LABEL_COLUMN_X, startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * i), 0xFFFFFFFF);
+				DrawString(Tr(keybindLabels[i]), LABEL_COLUMN_X, startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * i), 0xFFFFFFFF);
 			}
 
 			//draw tracks

@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "MultiTargetCard.h"
+#include "LocalizationManager.h"
 #include "DrawUtils.h"
 #include "IBattleScene.h"
 #include "VirtualBattleState.h"
@@ -204,6 +205,6 @@ namespace Demo {
 	}
 
 	std::wstring MultiTargetCard::GetInputsDescription() const {
-		return std::to_wstring(targets.size()) + L"/" + std::to_wstring(maxTargets) + L" Enemies";
+		return std::to_wstring(targets.size()) + L"/" + std::to_wstring(maxTargets) + L" " + Tr(L"Enemies");
 	}
 }

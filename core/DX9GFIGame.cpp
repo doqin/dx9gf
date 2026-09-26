@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "DX9GFIGame.h"
 #include "DX9GFSceneManager.h"
 #include "DX9GFIScene.h"
@@ -169,13 +169,16 @@ bool DX9GF::IGame::TryResetDevice(UINT width, UINT height)
 		graphicsDevice->GetBackBuffer() = nullptr;
 	}
 
-	// Release the Render Target from VRAM before resetting
-	if (renderTargetTex != nullptr) {
-		renderTargetTex->ReleaseRawTexture();
-	}
-
 	d3dpp.BackBufferWidth = width;
 	d3dpp.BackBufferHeight = height;
+
+	// Every live ID3DXSprite/ID3DXFont/render-target Texture must release its D3DPOOL_DEFAULT
+	// resources before Reset, or Reset can fail outright - which it did, reliably, on every
+	// fullscreen/windowed toggle once MainMenu's map-preview render targets existed: with
+	// pendingDeviceReset then stuck true, Draw() returned before Present() every frame, leaving
+	// the window showing its WNDCLASS background (WHITE_BRUSH) forever. This also covers
+	// renderTargetTex, so it no longer needs its own release/recreate calls here.
+	graphicsDevice->NotifyLostDevice();
 
 	HRESULT resetResult = graphicsDevice->GetDevice()->Reset(&d3dpp);
 	if (FAILED(resetResult)) {
@@ -186,10 +189,12 @@ bool DX9GF::IGame::TryResetDevice(UINT width, UINT height)
 	graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
 	graphicsDevice->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 
-	// After a successful reset: Restore the Render Target
-	if (renderTargetTex != nullptr) {
-		renderTargetTex->CreateRenderTarget(SCREEN_WIDTH, SCREEN_HEIGHT);
-	}
+	// Restores every registered render target, including renderTargetTex, but only as an
+	// empty D3DPOOL_DEFAULT surface - Reset() cannot preserve what was drawn into it.
+	graphicsDevice->NotifyResetDevice();
+	// Let scenes redraw anything they'd rendered into one of those now-blank surfaces
+	// (e.g. MainMenu's map-preview snapshots).
+	sceneManager->OnDeviceReset();
 
 	pendingDeviceReset = false;
 	return true;

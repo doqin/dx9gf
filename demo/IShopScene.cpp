@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "IShopScene.h"
+#include "MainFont.h"
+#include "LocalizationManager.h"
 #include "IconButton.h"
 #include "DX9GFUtils.h"
 #include <algorithm>
@@ -153,7 +155,7 @@ Demo::IShopScene::IShopScene(Game* game, Player* player, int sw, int sh, std::st
 void Demo::IShopScene::Init()
 {
 	transformManager = std::make_shared<DX9GF::TransformManager>();
-	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"StatusPlz", 24);
+	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kLargeFontSize);
 	myFontSprite = std::make_shared<DX9GF::FontSprite>(myFont.get());
 
 	uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
@@ -342,11 +344,11 @@ void Demo::IShopScene::HandleRow(int index)
 			player->AddGold(-item.cost);
 			if (item.onBuyAction) item.onBuyAction();
 			DX9GF::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
-			ShowMessage(L"Bought " + item.name + L"!");
+			ShowMessage(Tr(L"Bought ") + item.name + Tr(L"!"));
 		}
 		else {
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.3f);
-			ShowMessage(L"Not enough gold!");
+			ShowMessage(Tr(L"Not enough gold!"));
 		}
 		return;
 	}
@@ -355,7 +357,7 @@ void Demo::IShopScene::HandleRow(int index)
 	if (item.onBuyAction) item.onBuyAction();
 	player->AddGold(item.cost);
 	DX9GF::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
-	ShowMessage(L"Sold " + item.name + L" for " + std::to_wstring(item.cost) + L"G");
+	ShowMessage(Tr(L"Sold ") + item.name + Tr(L" for ") + std::to_wstring(item.cost) + Tr(L"G"));
 
 	// The inventory just changed, but we are inside a row button's own callback right now -
 	// tearing its list down here would invalidate the button mid-click. Defer to Update().
@@ -781,7 +783,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 				// "xN" owned count, just left of the price (sell rows only).
 				if (item.stackCount > 1) {
 					myFontSprite->SetColor(COLOR_TEXT_DIM);
-					myFontSprite->SetText(L"x" + std::to_wstring(item.stackCount));
+					myFontSprite->SetText(Tr(L"x") + std::to_wstring(item.stackCount));
 					const float countW = static_cast<float>(myFontSprite->GetWidth());
 					const float countH = static_cast<float>(myFontSprite->GetHeight());
 					myFontSprite->SetPosition(priceX - 16.0f - countW, rowY + (ROW_H - countH) / 2.0f);
@@ -793,8 +795,8 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 			if (items.empty()) {
 				myFontSprite->SetColor(COLOR_TEXT_DIM);
 				myFontSprite->SetText(sellMode
-					? L"You have nothing this shop will buy."
-					: L"Nothing for sale here.");
+					? Tr(L"You have nothing this shop will buy.")
+					: Tr(L"Nothing for sale here."));
 				const float emptyW = static_cast<float>(myFontSprite->GetWidth());
 				myFontSprite->SetPosition(-emptyW * 0.5f, l.listTop + 20.0f);
 				myFontSprite->Draw(uiCamera, deltaTime);
@@ -826,7 +828,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 			// Page indicator, centred between the arrows.
 			if (maxPage > 0) {
 				myFontSprite->SetColor(COLOR_TEXT);
-				myFontSprite->SetText(L"Page " + std::to_wstring(currentPage + 1) + L"/" + std::to_wstring(maxPage + 1));
+				myFontSprite->SetText(Tr(L"Page ") + std::to_wstring(currentPage + 1) + L"/" + std::to_wstring(maxPage + 1));
 				const float pageW = static_cast<float>(myFontSprite->GetWidth());
 				const float pageH = static_cast<float>(myFontSprite->GetHeight());
 				myFontSprite->SetPosition(-pageW * 0.5f, l.footerTop + PAGE_BAR_OFFSET + (PAGE_BTN_SIZE - pageH) / 2.0f);

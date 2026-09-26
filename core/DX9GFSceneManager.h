@@ -26,6 +26,7 @@ namespace DX9GF {
 		void DrawWorld(unsigned long long deltaTime);
 		void DrawUI(unsigned long long deltaTime);
 		void OnResize(int width, int height);
+		void OnDeviceReset();
 		void GoToNext();
 		void GoToPrevious();
 		void GoToScene(size_t index);

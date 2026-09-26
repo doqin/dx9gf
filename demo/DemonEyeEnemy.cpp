@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "DemonEyeEnemy.h"
+#include "LocalizationManager.h"
 #include "PopUpMessage.h"
 #include "resource.h"
 #include "RNG.h"
@@ -58,12 +59,12 @@ void Demo::DemonEyeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 
 	if (turnInCycle == skillTurnThisCycle) {
 		if (RNG::Range(1, 2) == 1) {
-			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 3.0f, true); }, popUpMessage, L"Bug powers up its attack!");
+			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 3.0f, true); }, popUpMessage, Tr(L"Bug powers up its attack!"));
 		}
 		else {
 			CastAbility([this]() {
 				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Vulnerable, 1, 0.f, false);
-				}, popUpMessage, L"Bug injects a vulnerability!");
+				}, popUpMessage, Tr(L"Bug injects a vulnerability!"));
 		}
 	}
 }

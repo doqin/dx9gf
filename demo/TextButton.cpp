@@ -8,7 +8,7 @@ Demo::TextButton::TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
 	: IButton(tm, x, y, w, h, 4)
 {
 	this->text = txtContent;
-	this->wText = std::wstring(txtContent.begin(), txtContent.end());
+	this->wText = DX9GF::Utils::Utf8ToWide(txtContent);
 	this->fontSprite = std::make_shared<DX9GF::FontSprite>(f);
 
 	//Color & bg init
@@ -40,7 +40,7 @@ Demo::TextButton::TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
 Demo::TextButton* Demo::TextButton::SetText(std::string newText)
 {
 	this->text = newText;
-	this->wText = std::wstring(newText.begin(), newText.end());
+	this->wText = DX9GF::Utils::Utf8ToWide(newText);
 	return this;
 }
 

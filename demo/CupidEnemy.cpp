@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "CupidEnemy.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 #include "RNG.h"
 #include "PopUpMessage.h"
@@ -59,12 +60,12 @@ void Demo::CupidEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_p
 
 	if (turnInCycle == skillTurnThisCycle) {
 		if (RNG::Range(1, 2) == 1) {
-			CastAbility([this]() { this->Heal(15.f); }, popUpMessage, L"Pacman heals 15 HP!");
+			CastAbility([this]() { this->Heal(15.f); }, popUpMessage, Tr(L"Pacman heals 15 HP!"));
 		}
 		else {
 			CastAbility([this]() {
 				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Vulnerable, 2, 0.f, false);
-				}, popUpMessage, L"Pacman breaks your guard!");
+				}, popUpMessage, Tr(L"Pacman breaks your guard!"));
 		}
 	}
 }

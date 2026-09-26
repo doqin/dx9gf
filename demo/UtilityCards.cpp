@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "UtilityCards.h"
 #include "IBattleScene.h"
+#include "LocalizationManager.h"
 #include "VirtualBattleState.h"
 // Faces live in the rows added below y = 336 in assets/ui.png. Each is a 16px strip drawn at 2x,
 // so a card's dragArea in the header must be exactly twice its rect here.
@@ -44,7 +45,7 @@ bool Demo::BraceCard::Execute() {
 		// Stacking, so two Brace cards in one program give 10 block rather than 5 - AddModifier
 		// would take max(value) and leave it at 5.
 		owner->AddStackingModifier(ModifierType::BuffDefense, 2, 5.f, true);
-		if (battleScene) battleScene->QueuePopUpMessage(L"+5 block");
+		if (battleScene) battleScene->QueuePopUpMessage(Tr(L"+5 block"));
 	}
 	isDone = true;
 	return true;
@@ -62,7 +63,7 @@ bool Demo::PrefetchCard::Execute() {
 	if (isDone) return true;
 	if (battleScene) {
 		battleScene->DrawCardsNow(2);
-		battleScene->QueuePopUpMessage(L"Drew 2 cards");
+		battleScene->QueuePopUpMessage(Tr(L"Drew 2 cards"));
 	}
 	isDone = true;
 	return true;
@@ -80,7 +81,7 @@ bool Demo::OverclockCard::Execute() {
 	if (isDone) return true;
 	if (battleScene) {
 		battleScene->GainEnergyNow(1);
-		battleScene->QueuePopUpMessage(L"+1 energy");
+		battleScene->QueuePopUpMessage(Tr(L"+1 energy"));
 	}
 	if (owner) {
 		owner->TakeIndirectDamage(4.f, DamageType::Physical);
@@ -101,7 +102,7 @@ bool Demo::JumpstartCard::Execute() {
 	if (isDone) return true;
 	if (battleScene) {
 		battleScene->GainEnergyNow(2);
-		battleScene->QueuePopUpMessage(L"+2 energy");
+		battleScene->QueuePopUpMessage(Tr(L"+2 energy"));
 	}
 	isDone = true;
 	return true;
@@ -119,7 +120,7 @@ bool Demo::ForesightCard::Execute() {
 	if (isDone) return true;
 	if (battleScene) {
 		battleScene->QueueBonusDraw(1);
-		battleScene->QueuePopUpMessage(L"+1 card next turn");
+		battleScene->QueuePopUpMessage(Tr(L"+1 card next turn"));
 	}
 	isDone = true;
 	return true;
@@ -148,12 +149,12 @@ bool Demo::SystemRestartCard::Execute() {
 		if (hasDebuff) {
 			owner->ClearDebuffs();
 			if (battleScene) {
-				battleScene->QueuePopUpMessage(L"Debuffs Cleared!");
+				battleScene->QueuePopUpMessage(Tr(L"Debuffs Cleared!"));
 				DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.6f);
 			}
 		}
 		else if (battleScene) {
-			battleScene->QueuePopUpMessage(L"No debuffs to clear");
+			battleScene->QueuePopUpMessage(Tr(L"No debuffs to clear"));
 		}
 	}
 

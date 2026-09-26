@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PlayerHUD.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 
 namespace {
@@ -86,9 +87,9 @@ void Demo::PlayerHUD::UpdateLayout()
 
 	cellCount = static_cast<int>((std::max)({ static_cast<size_t>(2), hpValue.size(), goldValue.size(), maxHpDigits }));
 
-	fontSprite->SetText(L"HP");
+	fontSprite->SetText(Tr(L"HP"));
 	labelW = static_cast<float>(fontSprite->GetWidth());
-	fontSprite->SetText(L"G");
+	fontSprite->SetText(Tr(L"G"));
 	labelW = (std::max)(labelW, static_cast<float>(fontSprite->GetWidth()));
 
 	groupW = cellCount * CELL_W + (cellCount + 1) * CELL_BORDER;
@@ -212,8 +213,8 @@ void Demo::PlayerHUD::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTi
 	float goldRowY = hpRowY + ROW_H + ROW_GAP;
 
 	bool lowHealth = player->GetHealth() <= player->GetMaxHealth() * 0.25f;
-	DrawStatRow(gd, deltaTime, hpRowY, L"HP", hpValue, lowHealth ? DIGIT_COLOR_LOW : DIGIT_COLOR);
-	DrawStatRow(gd, deltaTime, goldRowY, L"G", goldValue, DIGIT_COLOR);
+	DrawStatRow(gd, deltaTime, hpRowY, Tr(L"HP").c_str(), hpValue, lowHealth ? DIGIT_COLOR_LOW : DIGIT_COLOR);
+	DrawStatRow(gd, deltaTime, goldRowY, Tr(L"G").c_str(), goldValue, DIGIT_COLOR);
 
 	gd->SetAlphaBlending(false);
 

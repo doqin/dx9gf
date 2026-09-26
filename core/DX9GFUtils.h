@@ -24,5 +24,14 @@ namespace DX9GF {
 		static void SetMousePos(int x, int y);
 		static std::tuple<float, float> WindowToWorldCoords(const DX9GF::Camera& camera, float windowX, float windowY);
 		static std::tuple<float, float> WorldToWindowCoords(const DX9GF::Camera& camera, float worldX, float worldY);
+
+		/// <summary>
+		/// Converts a UTF-8 encoded string to a UTF-16 (wide) string using MultiByteToWideChar.
+		/// </summary>
+		static std::wstring Utf8ToWide(const std::string& utf8);
+		/// <summary>
+		/// Converts a UTF-16 (wide) string to a UTF-8 encoded string using WideCharToMultiByte.
+		/// </summary>
+		static std::string WideToUtf8(const std::wstring& wide);
 	};
 };

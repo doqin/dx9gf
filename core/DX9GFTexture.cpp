@@ -44,7 +44,28 @@ DX9GF::Texture::Texture(GraphicsDevice* graphicsDevice) : graphicsDevice(graphic
 
 DX9GF::Texture::~Texture()
 {
+	if (isRegisteredVolatile) graphicsDevice->UnregisterVolatileResource(this);
 	SafeRelease(texture);
+}
+
+void DX9GF::Texture::OnLostDevice()
+{
+	if (isRenderTarget) SafeRelease(texture);
+}
+
+void DX9GF::Texture::OnResetDevice()
+{
+	if (!isRenderTarget || texture != nullptr || width == 0 || height == 0) return;
+	// Mirrors CreateRenderTarget, but must not throw - this runs from inside Reset()
+	// handling, with no exception handler above it to catch it.
+	graphicsDevice->GetDevice()->CreateTexture(
+		width, height, 1,
+		D3DUSAGE_RENDERTARGET,
+		D3DFMT_A8R8G8B8,
+		D3DPOOL_DEFAULT,
+		&texture,
+		nullptr
+	);
 }
 
 void DX9GF::Texture::CreatePlainTexture(D3DCOLOR color, UINT width, UINT height)
@@ -387,6 +408,11 @@ void DX9GF::Texture::CreateRenderTarget(UINT width, UINT height)
 	}
 	this->width = width;
 	this->height = height;
+	isRenderTarget = true;
+	if (!isRegisteredVolatile) {
+		graphicsDevice->RegisterVolatileResource(this);
+		isRegisteredVolatile = true;
+	}
 }
 
 IDirect3DSurface9* DX9GF::Texture::GetSurface()

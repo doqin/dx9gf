@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "QuestManager.h"
 #include "IConversation.h"
+#include "LocalizationManager.h"
 #include <algorithm>
 
 namespace {
@@ -20,50 +21,50 @@ void Demo::QuestManager::InitQuestDatabase() {
 
 	questDatabase["SecretBoss_Pacman"] = {
 		"SecretBoss_Pacman",
-		L"The Hidden Malware",
-		L"There's a hidden boss somewhere in this maze. Defeat it for a secret reward!",
-		L"Secret Boss: 0/1",
-		L"Rusty Key & Midas Chip"
+		Tr(L"The Hidden Malware"),
+		Tr(L"There's a hidden boss somewhere in this maze. Defeat it for a secret reward!"),
+		Tr(L"Secret Boss: 0/1"),
+		Tr(L"Rusty Key & Midas Chip")
 	};
 
 	questDatabase["Quest_BossWorld"] = {
 		"Quest_BossWorld",
-		L"System Override",
-		L"Activate all four terminals to unlock the gate to the core.",
-		L"Activate the terminals: 0/4",
-		L"Access to the Core"
+		Tr(L"System Override"),
+		Tr(L"Activate all four terminals to unlock the gate to the core."),
+		Tr(L"Activate the terminals: 0/4"),
+		Tr(L"Access to the Core")
 	};
 
 	questDatabase["Quest_Tutorial"] = {
 		"Quest_Tutorial",
-		L"First Encounter",
-		L"Learn the basics of survival by defeating your first enemy.",
-		L"First Encounter...?",
-		L"26 Gold"
+		Tr(L"First Encounter"),
+		Tr(L"Learn the basics of survival by defeating your first enemy."),
+		Tr(L"First Encounter...?"),
+		Tr(L"26 Gold")
 	};
 
 	questDatabase["Quest_KakosLab"] = {
 		"Quest_KakosLab",
-		L"Kako's Lab",
-		L"Kako needs your help to clean up the lab.",
-		L"Investigate the lab",
-		L"100 Gold & Aegis Plating"
+		Tr(L"Kako's Lab"),
+		Tr(L"Kako needs your help to clean up the lab."),
+		Tr(L"Investigate the lab"),
+		Tr(L"100 Gold & Aegis Plating")
 	};
 
 	questDatabase["Quest_ThreadAlley_Start"] = {
 		"Quest_ThreadAlley_Start",
-		L"Thread Alley Cleanup",
-		L"A stranger needs an Auth Token to escape. Help them clear the alley.",
-		L"Find the malware!",
-		L"50 Gold & Energy Cell"
+		Tr(L"Thread Alley Cleanup"),
+		Tr(L"A stranger needs an Auth Token to escape. Help them clear the alley."),
+		Tr(L"Find the malware!"),
+		Tr(L"50 Gold & Energy Cell")
 	};
 
 	questDatabase["Quest_AdminLog"] = {
 		"Quest_AdminLog",
-		L"The Admin's Echo",
-		L"The veteran debugger keeps hearing a fragment of the old admin's log. Prove it's real.",
-		L"Hack a terminal, then report back",
-		L"Memory Locker"
+		Tr(L"The Admin's Echo"),
+		Tr(L"The veteran debugger keeps hearing a fragment of the old admin's log. Prove it's real."),
+		Tr(L"Hack a terminal, then report back"),
+		Tr(L"Memory Locker")
 	};
 }
 
@@ -240,7 +241,7 @@ void Demo::QuestManager::AcceptQuest(const std::string& questId) {
 	currentTrackedQuest = questId;
 
 	if (questDatabase.count(questId)) {
-		SetQuest(L"Quest: " + questDatabase[questId].currentObjective);
+		SetQuest(Tr(L"Quest: ") + questDatabase[questId].currentObjective);
 	}
 	DX9GF::AudioManager::GetInstance()->Play("quest_active", false, 0.05f);
 }
@@ -252,14 +253,14 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			questStates["SecretBoss_Pacman"] = QuestState::Completed;
 
 			if (questDatabase.count("SecretBoss_Pacman")) {
-				questDatabase["SecretBoss_Pacman"].currentObjective = L"Secret Boss: 1/1";
-				SetQuest(L"Quest: " + questDatabase["SecretBoss_Pacman"].currentObjective);
+				questDatabase["SecretBoss_Pacman"].currentObjective = Tr(L"Secret Boss: 1/1");
+				SetQuest(Tr(L"Quest: ") + questDatabase["SecretBoss_Pacman"].currentObjective);
 			}
 
 			player->GetInventoryItems().AddItem(10, 1);
 			player->AddGear(4); // midas chip
 			auto* bp = ItemData::GetInstance()->GetItemBlueprint(10);
-			std::wstring msg = L"You found: Midas Chip & ";
+			std::wstring msg = Tr(L"You found: Midas Chip & ");
 			if (bp) msg += bp->GetName();
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			return { true, msg };
@@ -272,14 +273,14 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			if (questDatabase.count("Quest_BossWorld")) {
 				if (step >= 4) {
 					questStates["Quest_BossWorld"] = QuestState::Completed;
-					questDatabase["Quest_BossWorld"].currentObjective = L"Terminals Hacked! The Gate is open.";
-					SetQuest(L"Quest: " + questDatabase["Quest_BossWorld"].currentObjective);
+					questDatabase["Quest_BossWorld"].currentObjective = Tr(L"Terminals Hacked! The Gate is open.");
+					SetQuest(Tr(L"Quest: ") + questDatabase["Quest_BossWorld"].currentObjective);
 					DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
-					return { true, L"Quest Completed: System Override" };
+					return { true, Tr(L"Quest Completed: System Override") };
 				}
 				else {
-					questDatabase["Quest_BossWorld"].currentObjective = L"Activate terminals: " + std::to_wstring(step) + L"/4";
-					SetQuest(L"Quest: " + questDatabase["Quest_BossWorld"].currentObjective);
+					questDatabase["Quest_BossWorld"].currentObjective = Tr(L"Activate terminals: ") + std::to_wstring(step) + L"/4";
+					SetQuest(Tr(L"Quest: ") + questDatabase["Quest_BossWorld"].currentObjective);
 				}
 			}
 		}
@@ -287,22 +288,22 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 
 	if (eventType == "TROJAN_TALKED") {
 		if (questStates["Quest_ThreadAlley_Start"] == QuestState::Active && questDatabase.count("Quest_ThreadAlley_Start")) {
-			questDatabase["Quest_ThreadAlley_Start"].currentObjective = L"Find an auth token";
-			SetQuest(L"Quest: " + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
+			questDatabase["Quest_ThreadAlley_Start"].currentObjective = Tr(L"Find an auth token");
+			SetQuest(Tr(L"Quest: ") + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
 		}
 	}
 
 	if (eventType == "TROJAN_HAS_TOKEN") {
 		if (questStates["Quest_ThreadAlley_Start"] == QuestState::Active && questDatabase.count("Quest_ThreadAlley_Start")) {
-			questDatabase["Quest_ThreadAlley_Start"].currentObjective = L"Bring the auth token back";
-			SetQuest(L"Quest: " + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
+			questDatabase["Quest_ThreadAlley_Start"].currentObjective = Tr(L"Bring the auth token back");
+			SetQuest(Tr(L"Quest: ") + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
 		}
 	}
 
 	if (eventType == "TROJAN_REVEALED") {
 		if (questStates["Quest_ThreadAlley_Start"] == QuestState::Active && questDatabase.count("Quest_ThreadAlley_Start")) {
-			questDatabase["Quest_ThreadAlley_Start"].currentObjective = L"Delete the Trojan!";
-			SetQuest(L"Quest: " + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
+			questDatabase["Quest_ThreadAlley_Start"].currentObjective = Tr(L"Delete the Trojan!");
+			SetQuest(Tr(L"Quest: ") + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
 		}
 	}
 
@@ -311,12 +312,12 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			questStates["Quest_ThreadAlley_Start"] = QuestState::Completed;
 
 			if (questDatabase.count("Quest_ThreadAlley_Start")) {
-				questDatabase["Quest_ThreadAlley_Start"].currentObjective = L"Alley is safe.";
-				SetQuest(L"Quest: " + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
+				questDatabase["Quest_ThreadAlley_Start"].currentObjective = Tr(L"Alley is safe.");
+				SetQuest(Tr(L"Quest: ") + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
 			}
 			player->AddGear(1); // energy cell
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
-			return { true, L"50 Gold & Energy Cell - Quest Completed: Defeated the Trojan" };
+			return { true, Tr(L"50 Gold & Energy Cell - Quest Completed: Defeated the Trojan") };
 		}
 	}
 
@@ -325,12 +326,12 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			questStates["Quest_Tutorial"] = QuestState::Completed;
 
 			if (questDatabase.count("Quest_Tutorial")) {
-				questDatabase["Quest_Tutorial"].currentObjective = L"First Encounter - Completed!";
-				SetQuest(L"Quest: " + questDatabase["Quest_Tutorial"].currentObjective);
+				questDatabase["Quest_Tutorial"].currentObjective = Tr(L"First Encounter - Completed!");
+				SetQuest(Tr(L"Quest: ") + questDatabase["Quest_Tutorial"].currentObjective);
 			}
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			player->AddGold(26);
-			return { true, L"26 Gold - Quest Completed: First Encounter" };
+			return { true, Tr(L"26 Gold - Quest Completed: First Encounter") };
 		}
 	}
 
@@ -339,13 +340,13 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			questStates["Quest_KakosLab"] = QuestState::Completed;
 
 			if (questDatabase.count("Quest_KakosLab")) {
-				questDatabase["Quest_KakosLab"].currentObjective = L"Lab Cleared!";
-				SetQuest(L"Quest: " + questDatabase["Quest_KakosLab"].currentObjective);
+				questDatabase["Quest_KakosLab"].currentObjective = Tr(L"Lab Cleared!");
+				SetQuest(Tr(L"Quest: ") + questDatabase["Quest_KakosLab"].currentObjective);
 			}
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			player->AddGold(100);
 			player->AddGear(5);
-			return { true, L"100 Gold & Aegis Plating - Quest Completed: Kako's Lab" };
+			return { true, Tr(L"100 Gold & Aegis Plating - Quest Completed: Kako's Lab") };
 		}
 	}
 
@@ -354,12 +355,12 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 			questStates["Quest_AdminLog"] = QuestState::Completed;
 
 			if (questDatabase.count("Quest_AdminLog")) {
-				questDatabase["Quest_AdminLog"].currentObjective = L"The log was real after all.";
-				SetQuest(L"Quest: " + questDatabase["Quest_AdminLog"].currentObjective);
+				questDatabase["Quest_AdminLog"].currentObjective = Tr(L"The log was real after all.");
+				SetQuest(Tr(L"Quest: ") + questDatabase["Quest_AdminLog"].currentObjective);
 			}
 			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			player->AddGear(3); // Memory Locker
-			return { true, L"Memory Locker - Quest Completed: The Admin's Echo" };
+			return { true, Tr(L"Memory Locker - Quest Completed: The Admin's Echo") };
 		}
 	}
 
@@ -386,16 +387,16 @@ void Demo::QuestManager::RestoreSaveData(const nlohmann::json& inData) {
 
 		if (questDatabase.count(currentTrackedQuest)) {
 			if (currentTrackedQuest == "SecretBoss_Pacman" && questStates["SecretBoss_Pacman"] == QuestState::Completed) {
-				questDatabase["SecretBoss_Pacman"].currentObjective = L"Secret Boss: 1/1";
+				questDatabase["SecretBoss_Pacman"].currentObjective = Tr(L"Secret Boss: 1/1");
 			}
 			else if (currentTrackedQuest == "Quest_BossWorld" && questStates["Quest_BossWorld"] == QuestState::Completed) {
-				questDatabase["Quest_BossWorld"].currentObjective = L"Defeat the Boss!";
+				questDatabase["Quest_BossWorld"].currentObjective = Tr(L"Defeat the Boss!");
 			}
 			else if (currentTrackedQuest == "Quest_ThreadAlley_Start" && questStates["Quest_ThreadAlley_Start"] == QuestState::Completed) {
-				questDatabase["Quest_ThreadAlley_Start"].currentObjective = L"Alley is safe.";
+				questDatabase["Quest_ThreadAlley_Start"].currentObjective = Tr(L"Alley is safe.");
 			}
 
-			SetQuest(L"Quest: " + questDatabase[currentTrackedQuest].currentObjective);
+			SetQuest(Tr(L"Quest: ") + questDatabase[currentTrackedQuest].currentObjective);
 		}
 	}
 }

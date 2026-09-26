@@ -308,6 +308,7 @@
     <ClCompile Include="SpamNPC.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="LocalizationManager.cpp" />
     <ClCompile Include="MimicEnemy.cpp" />
     <ClCompile Include="MultiTargetCard.cpp" />
     <ClCompile Include="NPC1.cpp" />
@@ -439,6 +440,8 @@
     <ClInclude Include="SpamEnemy.h" />
     <ClInclude Include="SpamNPC.h" />
     <ClInclude Include="MainMenu.h" />
+    <ClInclude Include="LocalizationManager.h" />
+    <ClInclude Include="MainFont.h" />
     <ClInclude Include="IEnemy.h" />
     <ClInclude Include="IExpressionCard.h" />
     <ClInclude Include="IStatementCard.h" />
@@ -500,6 +503,9 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="assets\kako.aseprite" />
+    <None Include="assets\lang\vi.json">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="assets\lab.tsx">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -807,6 +813,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Font>
     <Font Include="assets\statusplz.ttf">
+      <DeploymentContent>true</DeploymentContent>
+    </Font>
+    <Font Include="assets\135openpixel-v2-3.ttf">
       <DeploymentContent>true</DeploymentContent>
     </Font>
   </ItemGroup>

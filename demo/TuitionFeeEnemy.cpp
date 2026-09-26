@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "TuitionFeeEnemy.h"
+#include "LocalizationManager.h"
 #include "PopUpMessage.h"
 #include "GameItems.h"
 #include "RNG.h"
@@ -43,7 +44,7 @@ void Demo::TuitionFeeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::sha
 
 		CastAbility([this, player, popUpMessage]() {
 			this->BanRandomItems(player, popUpMessage);
-			}, popUpMessage, L"");
+			}, popUpMessage, Tr(L""));
 		return;
 	}
 
@@ -54,13 +55,13 @@ void Demo::TuitionFeeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::sha
 	if (turnsSinceSpawn > 0 && turnsSinceSpawn % BUFF_WIPE_INTERVAL == 0) {
 		CastAbility([player]() {
 			if (player) player->ClearBuffs();
-			}, popUpMessage, L"Tuition Fee wipes out all your buffs!");
+			}, popUpMessage, Tr(L"Tuition Fee wipes out all your buffs!"));
 	}
 
 	if (turnsSinceSpawn > 0 && turnsSinceSpawn % 2 == 1) {
 		CastAbility([this]() {
 			if (onRequestVisionDebuff) onRequestVisionDebuff(VISION_DEBUFF_DURATION);
-			}, popUpMessage, L"Tuition Fee blurs your sight!");
+			}, popUpMessage, Tr(L"Tuition Fee blurs your sight!"));
 	}
 }
 
@@ -92,7 +93,7 @@ void Demo::TuitionFeeEnemy::BanRandomItems(std::shared_ptr<Player> player, std::
 	}
 
 	if (popUpMessage && !bannedNames.empty()) {
-		popUpMessage->ShowMessage(L"Tuition Fee bans your access to: " + bannedNames + L"!", 3.f);
+		popUpMessage->ShowMessage(Tr(L"Tuition Fee bans your access to: ") + bannedNames + Tr(L"!"), 3.f);
 	}
 }
 

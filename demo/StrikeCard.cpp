@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "StrikeCard.h"
+#include "LocalizationManager.h"
 #include "DrawUtils.h"
 #include "IBattleScene.h"
 #include "VirtualBattleState.h"
@@ -192,13 +193,13 @@ size_t Demo::StrikeCard::GetCost() const
 
 std::wstring Demo::StrikeCard::GetDescription() const
 {
-	return L"Deal 5 damage to an enemy.";
+	return Tr(L"Deal 5 damage to an enemy.");
 }
 
 std::wstring Demo::StrikeCard::GetInputsDescription() const
 {
 	if (enemyCard.lock()) {
-		return L"1/1 Enemy";
+		return L"1/1 " + Tr(L"Enemy");
 	}
-	return L"0/1 Enemy";
+	return L"0/1 " + Tr(L"Enemy");
 }

@@ -8,7 +8,7 @@
 namespace Demo
 {
     //UI constants
-    constexpr float LABEL_COLUMN_X = -144.0f;
+    constexpr float LABEL_COLUMN_X = -216.0f;
     constexpr float SLIDER_COLUMN_X = 20.0f;
     constexpr float SLIDER_DESIRED_WIDTH = 100.0f;
     constexpr float SLIDER_ORIGINAL_WIDTH = 47.0f;
@@ -18,8 +18,8 @@ namespace Demo
     constexpr float BUTTON_OFFSET_X = 25.0f;
     constexpr float ALIGN_OFFSET_Y = 10.0f;
 
-    // Shift Keybind rows start value so Display Mode and Resolution rows fit cleanly
-    constexpr float KEYBIND_ROW_START = 5.0f;
+    // Shift Keybind rows start value so Display Mode, Resolution, and Language rows fit cleanly
+    constexpr float KEYBIND_ROW_START = 6.0f;
     constexpr float KEYBIND_ROW_STEP = 1.1f;
 
     //save offset to center the keybinds into box (just UI)
@@ -46,6 +46,10 @@ namespace Demo
         // Display Mode Checkboxes
         std::shared_ptr<Demo::IconButton> btnWindowedCheck;
         std::shared_ptr<Demo::IconButton> btnFullscreenCheck;
+
+        // Language Checkboxes
+        std::shared_ptr<Demo::IconButton> btnLangEN;
+        std::shared_ptr<Demo::IconButton> btnLangVI;
 
         bool isGoingBack = false;
 

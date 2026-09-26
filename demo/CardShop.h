@@ -1,6 +1,7 @@
 #pragma once
 #include "IShopScene.h"
 #include "CardCatalog.h"
+#include "LocalizationManager.h"
 
 namespace Demo {
 	class CardShop : public IShopScene {
@@ -13,7 +14,7 @@ namespace Demo {
 		void AddShopCard(const std::string& name) {
 			TCard prototype(this->transformManager);
 			itemsForSale.push_back({
-				std::wstring(name.begin(), name.end()),
+				Tr(DX9GF::Utils::Utf8ToWide(name)),
 				CardCatalog::GetPrice(prototype.GetSaveID()),
 				prototype.GetDescription(),
 				[this]() {

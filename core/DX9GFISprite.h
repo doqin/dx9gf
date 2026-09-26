@@ -1,24 +1,32 @@
 #pragma once
 #include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h"
 #include "DX9GFCamera.h"
+#include "DX9GFIDeviceLostAware.h"
 
 namespace DX9GF {
 	class GraphicsDevice;
 
-	class ISprite {
+	class ISprite : public IDeviceLostAware {
 	protected:
 		GraphicsDevice* graphicsDevice = nullptr;
 		ID3DXSprite* p_sprite = nullptr;
 		D3DXVECTOR3 pos = { 0.0f, 0.0f, 0.0f };
 		D3DCOLOR color = 0xFFFFFFFF;
 		D3DXVECTOR2 scale = D3DXVECTOR2(1.0f, 1.0f);
-		float rotation = 0.0f; 
+		float rotation = 0.0f;
 		D3DXVECTOR2 origin = D3DXVECTOR2(0.0f, 0.0f);
 		bool needUpdate = true;
 		D3DXMATRIX localTransformMatrix;
 		D3DXMATRIX GetTransformMatrix();
 	public:
 		ISprite(GraphicsDevice* graphicsDevice);
+		virtual ~ISprite();
+
+		// Default implementation forwards to p_sprite, which every subclass constructs into
+		// this base-class member. FontSprite's underlying DX9GF::Font registers itself
+		// separately and does not need an override here.
+		void OnLostDevice() override;
+		void OnResetDevice() override;
 
 		virtual void Begin() = 0;
 		virtual void Draw(const Camera& camera, unsigned long long deltaTime) = 0;

@@ -12,11 +12,23 @@ DX9GF::Font::Font(GraphicsDevice* graphicsDevice, std::wstring fontName, INT hei
 		std::string what = std::string(error, error + wcslen(error));
 		throw std::invalid_argument(what);
 	}
+	graphicsDevice->RegisterVolatileResource(this);
 }
 
 DX9GF::Font::~Font()
 {
+	if (graphicsDevice != nullptr) graphicsDevice->UnregisterVolatileResource(this);
 	if (font != nullptr) font->Release();
+}
+
+void DX9GF::Font::OnLostDevice()
+{
+	if (font != nullptr) font->OnLostDevice();
+}
+
+void DX9GF::Font::OnResetDevice()
+{
+	if (font != nullptr) font->OnResetDevice();
 }
 
 ID3DXFont* DX9GF::Font::GetRawFont()

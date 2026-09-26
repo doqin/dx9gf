@@ -5,6 +5,7 @@
 #include "DX9GFAudioManager.h"
 #include "SettingsManager.h"
 #include <cmath>
+#include <algorithm>
 Demo::IConversation::IConversation(std::shared_ptr<DX9GF::FontSprite> fontSprite, int screenWidth, int screenHeight)
 	: fontSprite(fontSprite), virtualWidth((float)screenWidth), virtualHeight((float)screenHeight)
 {
@@ -100,8 +101,24 @@ void Demo::IConversation::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamer
 		sprite->End();
 	}
 
-	float boxWidth = virtualWidth - 40.0f;
-	float boxHeight = 120.0f;
+	const float boxWidth = virtualWidth - 40.0f;
+	const float textPaddingX = 20.0f;
+	const float contentTop = 56.0f;
+	const float contentBottomPadding = 24.0f;
+
+	float contentHeight = 0.0f;
+	if (fontSprite) {
+		fontSprite->SetScale(1.f, 1.f);
+		if (wrappedSource != currentLine.content) {
+			wrappedSource = currentLine.content;
+			wrappedContent = WrapToWidth(currentLine.content, boxWidth - textPaddingX * 2.0f);
+		}
+		// Sized from the whole line, not the typed-so-far part, so the box doesn't grow mid-line.
+		fontSprite->SetText(wrappedContent);
+		contentHeight = static_cast<float>(fontSprite->GetHeight());
+	}
+
+	float boxHeight = (std::max)(120.0f, contentTop + contentHeight + contentBottomPadding);
 	float boxX = leftEdge + 20.0f;
 	float boxY = bottomEdge - boxHeight - 20.0f;
 
@@ -130,8 +147,8 @@ void Demo::IConversation::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamer
 
 	if (fontSprite) {
 		fontSprite->Begin();
-		fontSprite->SetScale(1.2f, 1.2f);
-		fontSprite->SetPosition(boxX + 20.0f, boxY + 10.0f);
+		fontSprite->SetScale(1.5f, 1.5f); // whole multiple of the font's pixel grid, so strokes stay even
+		fontSprite->SetPosition(boxX + textPaddingX, boxY + 10.0f);
 		fontSprite->SetColor(0xFFFFFFFF);
 		fontSprite->SetOutline(true, 0xFF000000, 2.f);
 		fontSprite->SetText(std::wstring(currentLine.name));
@@ -139,13 +156,39 @@ void Demo::IConversation::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamer
 
 		fontSprite->SetOutline(false);
 		fontSprite->SetScale(1.f, 1.f);
-		fontSprite->SetPosition(boxX + 20.0f, boxY + 50.0f);
+		fontSprite->SetPosition(boxX + textPaddingX, boxY + contentTop);
 		fontSprite->SetColor(0xFF000000);
-		fontSprite->SetText(std::wstring(displayedContent));
+		fontSprite->SetText(wrappedContent.substr(0, (std::min)(displayedContent.size(), wrappedContent.size())));
 		fontSprite->Draw(*uiCamera, deltaTime);
 
 		fontSprite->End();
 	}
+}
+
+std::wstring Demo::IConversation::WrapToWidth(const std::wstring& text, float maxWidth)
+{
+	std::wstring out = text;
+	size_t lineStart = 0;
+	size_t lastSpace = std::wstring::npos;
+	for (size_t i = 0; i <= out.size(); ++i) {
+		const wchar_t c = i == out.size() ? L'\n' : out[i];
+		if (c != L' ' && c != L'\n') continue;
+
+		fontSprite->SetText(out.substr(lineStart, i - lineStart));
+		if (fontSprite->GetWidth() > maxWidth && lastSpace != std::wstring::npos) {
+			out[lastSpace] = L'\n';
+			lineStart = lastSpace + 1;
+		}
+
+		if (c == L'\n') {
+			lineStart = i + 1;
+			lastSpace = std::wstring::npos;
+		}
+		else {
+			lastSpace = i;
+		}
+	}
+	return out;
 }
 
 void Demo::IConversation::ResetAnimation() {

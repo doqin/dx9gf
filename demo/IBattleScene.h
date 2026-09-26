@@ -196,7 +196,7 @@ namespace Demo {
 		// PlayerAttack enemy grid. Columns are anchored to the right edge and march toward the
 		// screen midpoint, so the enemy area never reaches the program blocks or the card hand.
 		// Clear of the right edge, leaving room for the status icons an enemy draws at +64..+140.
-		static constexpr float ENEMY_GRID_RIGHT_PAD = 140.f;
+		static constexpr float ENEMY_GRID_RIGHT_PAD = 180.f;
 		static constexpr float ENEMY_GRID_COLUMN_PITCH = 170.f;
 		// Extra clearance when a wide body (the boss is 256px) pushes the next column over.
 		static constexpr float ENEMY_GRID_COLUMN_GAP = 16.f;
@@ -305,6 +305,12 @@ namespace Demo {
 		void RefreshPileView();
 		// Parks the three pile buttons at the right end of the action bar; returns their left edge.
 		float LayOutPileButtons(float screenWidth, float buttonY);
+		// Positions the back/gear/execute/run-init action row (and the pile buttons alongside it).
+		// Called every PlayerAttack frame, and once from Init so gearButton - the anchor
+		// DrawModifierIcons uses in every state - already has a real position before the player
+		// ever reaches PlayerAttack (otherwise a status effect applied on turn 1 draws its icon at
+		// the button's un-positioned local origin, i.e. screen center).
+		void LayoutAttackRowButtons();
 		// Updates
 		void PlayerStandByUpdate(unsigned long long deltaTime);
 		void PlayerAttackUpdate(unsigned long long deltaTime);
@@ -335,6 +341,7 @@ namespace Demo {
 		void DrawKeyboardPlacementUI(unsigned long long deltaTime);
 		// Draws
 		void PlayerStandByDraw(unsigned long long deltaTime);
+		void DrawDiscardEnemyCardArea(unsigned long long deltaTime);
 		void PlayerAttackDraw(unsigned long long deltaTime);
 		void PlayerOpenItemsDraw(unsigned long long deltaTime);
 		void PlayerViewPileDraw(unsigned long long deltaTime);

@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "KeyeproEnemy.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 #include "KeyeEnemy.h"
 #include "PopUpMessage.h"
@@ -78,7 +79,7 @@ void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 						minion->SetOnRequestEnemyCard(this->onRequestEnemyCard);
 						this->onRequestSpawnEnemy(minion);
 					}
-				}, popUpMessage, L"The boss spawned a minion!");
+				}, popUpMessage, Tr(L"The boss spawned a minion!"));
 			}
 		}
 	}
@@ -87,31 +88,31 @@ void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 	if (RNG::Range(0.f, 1.f) <= std::max(LOCK_CHANCE, desperato)) {
 		CastAbility([this]() {
 			if (this->onRequestLockCard) this->onRequestLockCard(2);
-			}, popUpMessage, L"Boss locks your mind!");
+			}, popUpMessage, Tr(L"Boss locks your mind!"));
 	}
 
 	if (RNG::Range(0.f, 1.f) <= desperato) {
 		CastAbility([this]() {
 			this->Heal(45.f);
-			}, popUpMessage, L"Boss regenerates 45HP!");
+			}, popUpMessage, Tr(L"Boss regenerates 45HP!"));
 	}
 
 	if (RNG::Range(0.f, 1.f) <= desperato) {
 		CastAbility([this]() { 
 			this->AddModifier(ModifierType::BuffDefense, 2, 30.0f, true); 
-			}, popUpMessage, L"Boss fortifies itself with 30DEF!");
+			}, popUpMessage, Tr(L"Boss fortifies itself with 30DEF!"));
 	}
 
 	if (currentTurn % 2 == 1 || desperato > 0.6f) {
 		auto abilityRoll = RNG::Range(1, 3);
 		if (abilityRoll == 1) {
-			CastAbility([this]() { this->player.lock()->AddModifier(ModifierType::Vulnerable, 1, 5.0f, false); }, popUpMessage, L"Boss lowers your defenses!");
+			CastAbility([this]() { this->player.lock()->AddModifier(ModifierType::Vulnerable, 1, 5.0f, false); }, popUpMessage, Tr(L"Boss lowers your defenses!"));
 		}
 		else if (abilityRoll == 2) {
-			CastAbility([this]() { this->player.lock()->AddModifier(ModifierType::Weak, 2, 5.0f, false); }, popUpMessage, L"Boss weakens your attacks!");
+			CastAbility([this]() { this->player.lock()->AddModifier(ModifierType::Weak, 2, 5.0f, false); }, popUpMessage, Tr(L"Boss weakens your attacks!"));
 		}
 		else {
-			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 3.0f, true); }, popUpMessage, L"Boss enters a frenzy!");
+			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 3.0f, true); }, popUpMessage, Tr(L"Boss enters a frenzy!"));
 		}
 	}
 }

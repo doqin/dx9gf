@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "KeyeEnemy.h"
+#include "LocalizationManager.h"
 #include "resource.h"
 #include "RNG.h"
 #include "PopUpMessage.h"
@@ -53,12 +54,12 @@ void Demo::KeyeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 
 	if (turnInCycle == skillTurnThisCycle) {
 		if (RNG::Range(1, 2) == 1) {
-			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 5.0f, true); }, popUpMessage, L"Keye focuses its gaze!");
+			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 5.0f, true); }, popUpMessage, Tr(L"Keye focuses its gaze!"));
 		}
 		else {
 			CastAbility([this]() {
 				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false);
-				}, popUpMessage, L"Keye finds your blind spot!");
+				}, popUpMessage, Tr(L"Keye finds your blind spot!"));
 		}
 	}
 }

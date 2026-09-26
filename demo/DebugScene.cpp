@@ -191,7 +191,7 @@ void Demo::DebugScene::DrawUI(unsigned long long deltaTime)
 			myFontSprite->Begin();
 			myFontSprite->SetPosition(20.0f, 50.0f);
 			myFontSprite->SetColor(0xFF00FF00);
-			myFontSprite->SetText(std::wstring(typedText.begin(), typedText.end()));
+			myFontSprite->SetText(DX9GF::Utils::Utf8ToWide(typedText));
 			myFontSprite->Draw(this->uiCamera, deltaTime);
 			myFontSprite->End();
 		}

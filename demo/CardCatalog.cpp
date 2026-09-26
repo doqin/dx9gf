@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CardCatalog.h"
 #include "RNG.h"
+#include "LocalizationManager.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -86,12 +87,12 @@ namespace Demo::CardCatalog {
 		return 0xFFFFFFFF;
 	}
 
-	const wchar_t* RarityName(Rarity rarity) {
+	std::wstring RarityName(Rarity rarity) {
 		switch (rarity) {
-		case Rarity::Common:    return L"COMMON";
-		case Rarity::Uncommon:  return L"UNCOMMON";
-		case Rarity::Rare:      return L"RARE";
-		case Rarity::Legendary: return L"LEGENDARY";
+		case Rarity::Common:    return Tr(L"COMMON");
+		case Rarity::Uncommon:  return Tr(L"UNCOMMON");
+		case Rarity::Rare:      return Tr(L"RARE");
+		case Rarity::Legendary: return Tr(L"LEGENDARY");
 		}
 		return L"";
 	}

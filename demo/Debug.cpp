@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Debug.h"
+#include "MainFont.h"
 #include "MapEnemy.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
@@ -99,7 +100,7 @@ void Demo::Pointable::DrawPosition(unsigned long long deltaTime, DX9GF::Graphics
 {
 	if (!isDrawing) return;
 	if (!font) {
-		font = std::make_shared<DX9GF::Font>(gd, L"StatusPlz", 16);
+		font = std::make_shared<DX9GF::Font>(gd, Demo::kMainFontName, Demo::kMainFontSize);
 	}
 	if (!fontSprite) {
 		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "DX9GFExtras.h"
+#include "GameItems.h"
 
 namespace Demo {
 	class DraggableManager;
@@ -79,6 +80,9 @@ namespace Demo {
 
 		virtual size_t GetCost() const { return 0; }
 		virtual std::wstring GetDescription() const { return L""; }
+		// Status effects this card inflicts when it executes, and how re-applying them stacks -
+		// appended to the tooltip below GetDescription(). Empty for cards with no status effect.
+		virtual std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const { return {}; }
 		// The card's face artwork in assets/ui.png. Drawn at 2x in battle; also used by the
 		// card shop to show what is on sale. Empty for cards with no single-rect face.
 		virtual RECT GetFaceRect() const { return RECT{ 0, 0, 0, 0 }; }

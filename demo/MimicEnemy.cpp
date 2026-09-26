@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "MimicEnemy.h"
+#include "LocalizationManager.h"
 #include "PopUpMessage.h"
 #include "resource.h"
 #include "RNG.h"
@@ -53,12 +54,12 @@ void Demo::MimicEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_p
 
 	if (turnInCycle == skillTurnThisCycle) {
 		if (RNG::Range(1, 2) == 1) {
-			CastAbility([this]() { this->AddModifier(ModifierType::BuffDefense, 2, 15.0f, true); }, popUpMessage, L"A giant pop-up blocks the way!");
+			CastAbility([this]() { this->AddModifier(ModifierType::BuffDefense, 2, 15.0f, true); }, popUpMessage, Tr(L"A giant pop-up blocks the way!"));
 		}
 		else {
 			CastAbility([this]() {
 				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Poison, 2, 2.0f, false);
-				}, popUpMessage, L"Mimic installs malicious adware!");
+				}, popUpMessage, Tr(L"Mimic installs malicious adware!"));
 		}
 	}
 }
