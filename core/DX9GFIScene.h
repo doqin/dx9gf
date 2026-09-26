@@ -33,5 +33,14 @@ namespace DX9GF {
 		/// <param name="deltaTime">The time elapsed since the last frame in milliseconds</param>
 		virtual void DrawWorld(unsigned long long deltaTime) = 0;
 		virtual void DrawUI(unsigned long long deltaTime) = 0;
+
+		/// <summary>
+		/// Called after the graphics device has been Reset (e.g. a fullscreen/windowed toggle
+		/// or window resize). D3DPOOL_DEFAULT resources come back empty - a scene holding a
+		/// pre-rendered snapshot in one (an offscreen render target it drew once and kept,
+		/// rather than a loaded asset) must redraw it here, or it stays blank until the scene
+		/// itself is torn down and rebuilt.
+		/// </summary>
+		virtual void OnDeviceReset() {}
 	};
 };

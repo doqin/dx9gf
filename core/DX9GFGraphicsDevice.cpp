@@ -95,6 +95,27 @@ HRESULT DX9GF::GraphicsDevice::Clear()
 	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 }
 
+void DX9GF::GraphicsDevice::RegisterVolatileResource(IDeviceLostAware* resource)
+{
+	volatileResources.push_back(resource);
+}
+
+void DX9GF::GraphicsDevice::UnregisterVolatileResource(IDeviceLostAware* resource)
+{
+	auto it = std::find(volatileResources.begin(), volatileResources.end(), resource);
+	if (it != volatileResources.end()) volatileResources.erase(it);
+}
+
+void DX9GF::GraphicsDevice::NotifyLostDevice()
+{
+	for (auto* resource : volatileResources) resource->OnLostDevice();
+}
+
+void DX9GF::GraphicsDevice::NotifyResetDevice()
+{
+	for (auto* resource : volatileResources) resource->OnResetDevice();
+}
+
 HRESULT DX9GF::GraphicsDevice::EndDraw()
 {
 	return d3ddev->EndScene();

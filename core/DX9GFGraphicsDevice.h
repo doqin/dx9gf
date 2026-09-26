@@ -2,6 +2,7 @@
 #include <d3d9.h>
 #include <vector>
 #include "DX9GFCamera.h"
+#include "DX9GFIDeviceLostAware.h"
 namespace DX9GF {
 	class Texture;
 
@@ -15,6 +16,10 @@ namespace DX9GF {
 		float virtualOffsetX = 0.0f;
 		float virtualOffsetY = 0.0f;
 		void DrawLineInternal(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness);
+		// Every live ID3DXSprite/ID3DXFont wrapper (sprites, fonts), so Reset() can be preceded
+		// and followed by OnLostDevice/OnResetDevice on all of them - required by the D3DX
+		// helper library or Reset() can fail outright.
+		std::vector<IDeviceLostAware*> volatileResources;
 	public:
 		GraphicsDevice() {};
 		GraphicsDevice(IDirect3DDevice9* d3ddev, IDirect3DSurface9* backbuffer);
@@ -50,6 +55,13 @@ namespace DX9GF {
 
 		HRESULT SetRenderTarget(Texture* renderTarget);
 		HRESULT RestoreRenderTarget();
+
+		// Sprites and fonts register themselves on construction and unregister on destruction.
+		void RegisterVolatileResource(IDeviceLostAware* resource);
+		void UnregisterVolatileResource(IDeviceLostAware* resource);
+		// Call before IDirect3DDevice9::Reset and after a successful Reset, respectively.
+		void NotifyLostDevice();
+		void NotifyResetDevice();
 
 		void SetAlphaBlending(bool enabled);
 		void SetScissorTest(bool enabled);

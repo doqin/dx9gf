@@ -84,6 +84,13 @@ void DX9GF::SceneManager::OnResize(int width, int height)
 	}
 }
 
+void DX9GF::SceneManager::OnDeviceReset()
+{
+	for (auto& scene : scenes) {
+		scene->OnDeviceReset();
+	}
+}
+
 void DX9GF::SceneManager::GoToNext()
 {
 	index++;

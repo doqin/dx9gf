@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DX9GFISprite.h"
+#include "DX9GFGraphicsDevice.h"
 
 D3DXMATRIX DX9GF::ISprite::GetTransformMatrix()
 {
@@ -20,6 +21,19 @@ D3DXMATRIX DX9GF::ISprite::GetTransformMatrix()
 
 DX9GF::ISprite::ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
 	D3DXMatrixIdentity(&localTransformMatrix);
+	if (graphicsDevice != nullptr) graphicsDevice->RegisterVolatileResource(this);
+}
+
+DX9GF::ISprite::~ISprite() {
+	if (graphicsDevice != nullptr) graphicsDevice->UnregisterVolatileResource(this);
+}
+
+void DX9GF::ISprite::OnLostDevice() {
+	if (p_sprite != nullptr) p_sprite->OnLostDevice();
+}
+
+void DX9GF::ISprite::OnResetDevice() {
+	if (p_sprite != nullptr) p_sprite->OnResetDevice();
 }
 
 void DX9GF::ISprite::Translate(
