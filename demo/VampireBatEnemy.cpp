@@ -75,70 +75,62 @@ void Demo::VampireBatEnemy::StartAttack(std::shared_ptr<Player> player, std::vec
 
 void Demo::VampireBatEnemy::PatternEcholocation(float baseDamage, std::vector<std::shared_ptr<IEnemy>>* enemies) {
 	bool isAlone = enemies->size() == 1;
-	const int BULLETS = isAlone ? 10 : 5;
-	const int VELOCITY = isAlone ? 180 : 90;
-	const int SPACING = 96;
-	const int AMPLITUDE = isAlone ? 50 : 25;
-	const int DECAY_TIME = isAlone ? 4 : 8;
-
-	auto rightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, VELOCITY, AMPLITUDE, DECAY_TIME, BULLETS](std::function<void(void)> markFinished) {
-		float finalDamage = this->CalculateOutgoingDamage(baseDamage);
-
-		for (int i = 0; i < BULLETS; i++) {
-			if (auto lock = this->player.lock()) {
-				float startY = (i - BULLETS / 2.f) * SPACING;
-				auto [sineProjTexWidth, sineProjTexHeight] = projTexture->GetSize();
-				projectiles.Spawn(
-					lock,
-					ProjectileDesc(projTexture.get(), 16, 8, 16, 16, 320, startY)
-					.SetTrajectory(D3DXVECTOR2(-1, 0))
-					.SetWave(AMPLITUDE, 4.f)
-					.SetDelay(i * 0.1f)
-					.SetDecayTime(DECAY_TIME)
-					.SetVelocity(VELOCITY)
-					.SetDamage(finalDamage)
-					.SetGhostSprite(projTexture.get(), RECT{ 0, 0, (LONG)sineProjTexWidth, (LONG)sineProjTexHeight }, 16, 8)
-				);
+	const int BULLET_COUNT = 7;
+	const int WAVE_COUNT = 10;
+	const int DISTANCE_FROM_CENTER = 180;
+	const float BULLET_DELAY = 0.01f;
+	const float WAVE_DELAY = 0.7f;
+	const float BULLET_VELOCITY = isAlone ? 500.f : 150.f;
+	for (int wave = 0; wave < WAVE_COUNT; wave++) {
+		for (int i = 0; i < BULLET_COUNT; i++) {
+			int position = RNG::Range(0, 3);
+			int x;
+			int y;
+			switch (position) {
+			case 0: // top
+				x = RNG::Range(-DISTANCE_FROM_CENTER, DISTANCE_FROM_CENTER);
+				y = -DISTANCE_FROM_CENTER;
+				break;
+			case 1: // bottom
+				x = RNG::Range(-DISTANCE_FROM_CENTER, DISTANCE_FROM_CENTER);
+				y = DISTANCE_FROM_CENTER;
+				break;
+			case 2: // left
+				x = -DISTANCE_FROM_CENTER;
+				y = RNG::Range(-DISTANCE_FROM_CENTER, DISTANCE_FROM_CENTER);
+				break;
+			case 3: // right
+				x = DISTANCE_FROM_CENTER;
+				y = RNG::Range(-DISTANCE_FROM_CENTER, DISTANCE_FROM_CENTER);
+				break;
 			}
+			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, x, y, BULLET_VELOCITY](std::function<void(void)> markFinished) {
+				if (auto lock = this->player.lock()) {
+					float finalDamage = this->CalculateOutgoingDamage(baseDamage);
+					projectiles.Spawn(
+						lock,
+						ProjectileDesc(projTexture.get(), 16, 8, 16, 16, x, y)
+						.SetTargetPosition(lock->GetCollider().lock()->GetWorldX(), lock->GetCollider().lock()->GetWorldY())
+						.SetDelay(0.7f)
+						.SetDecayTime(4)
+						.SetVelocity(BULLET_VELOCITY)
+						.SetDamage(finalDamage)
+					);
+				}
+				markFinished();
+				}));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(BULLET_DELAY));
 		}
-		markFinished();
-		});
-
-	auto leftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, VELOCITY, AMPLITUDE, DECAY_TIME, BULLETS](std::function<void(void)> markFinished) {
-		float finalDamage = this->CalculateOutgoingDamage(baseDamage);
-
-		for (int i = 0; i < BULLETS; i++) {
-			if (auto lock = this->player.lock()) {
-				float startY = (i - BULLETS / 2.f) * SPACING;
-				auto [sineProjTexWidth, sineProjTexHeight] = projTexture->GetSize();
-				projectiles.Spawn(
-					lock,
-					ProjectileDesc(projTexture.get(), 16, 8, 16, 16, -320, startY)
-					.SetTrajectory(D3DXVECTOR2(1, 0))
-					.SetWave(AMPLITUDE, 4.f)
-					.SetDelay(i * 0.1f)
-					.SetDecayTime(DECAY_TIME)
-					.SetVelocity(VELOCITY)
-					.SetDamage(finalDamage)
-					.SetGhostSprite(projTexture.get(), RECT{ 0, 0, (LONG)sineProjTexWidth, (LONG)sineProjTexHeight }, 16, 8)
-				);
-			}
-		}
-		markFinished();
-		});
-
-	for (int i = 0; i < 20; i++) {
-		if (RNG::Range(1, 2) == 1) commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*leftAttack));
-		else commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*rightAttack));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
+		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
 	}
 }
 
 void Demo::VampireBatEnemy::PatternSwoopBite(float baseDamage) {
 	const int BULLET_COUNT = 4;
 	const float ANGLE_STEP = 0.02f;
+	const float DECAY_TIME = 5.f;
 
-	auto rightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP](std::function<void(void)> markFinished) {
+	auto rightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP, DECAY_TIME](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -167,7 +159,7 @@ void Demo::VampireBatEnemy::PatternSwoopBite(float baseDamage) {
 					.SetInitialVelocity(400.f)
 					.SetReturnAcceleration(180.f)
 					.SetDelay(i * 0.05f)
-					.SetDecayTime(8.f)
+					.SetDecayTime(DECAY_TIME)
 					.SetDamage(finalDamage)
 					.SetGhostSprite(projTexture.get(), RECT{ 0, 0, (LONG)projTexWidth, (LONG)projTexHeight }, 16, 8)
 				);
@@ -176,7 +168,7 @@ void Demo::VampireBatEnemy::PatternSwoopBite(float baseDamage) {
 		markFinished();
 		});
 
-	auto leftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP](std::function<void(void)> markFinished) {
+	auto leftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP, DECAY_TIME](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -205,7 +197,7 @@ void Demo::VampireBatEnemy::PatternSwoopBite(float baseDamage) {
 					.SetInitialVelocity(400.f)
 					.SetReturnAcceleration(180.f)
 					.SetDelay(i * 0.05f)
-					.SetDecayTime(8.f)
+					.SetDecayTime(DECAY_TIME)
 					.SetDamage(finalDamage)
 					.SetGhostSprite(projTexture.get(), RECT{ 0, 0, (LONG)projTexWidth, (LONG)projTexHeight }, 16, 8)
 				);
@@ -213,7 +205,7 @@ void Demo::VampireBatEnemy::PatternSwoopBite(float baseDamage) {
 		}
 		markFinished();
 		});
-
+	
 	int dist = RNG::Range(15, 20);
 	for (int i = 0; i < dist; i++) {
 		if (RNG::Range(1, 2) == 1) commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*leftAttack));

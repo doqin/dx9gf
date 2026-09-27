@@ -74,10 +74,10 @@ void Demo::TestBattleScene::Init()
 	//keyeEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
 	//enemies.push_back(keyeEnemy);
 
-	//auto trojanEnemy = std::make_shared<TrojanEnemy>(transformManager, 350.f);
-	//trojanEnemy->Init(game->GetGraphicsDevice(), &camera);
-	//trojanEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
-	//enemies.push_back(trojanEnemy);
+	auto trojanEnemy = std::make_shared<TrojanEnemy>(transformManager, 350.f);
+	trojanEnemy->Init(game->GetGraphicsDevice(), &camera);
+	trojanEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
+	enemies.push_back(trojanEnemy);
 
 	//auto kernelEnemy = std::make_shared<KernelEnemy>(transformManager, 100.f);
 	//kernelEnemy->Init(game->GetGraphicsDevice(), &camera);
@@ -89,10 +89,10 @@ void Demo::TestBattleScene::Init()
 	//deadlineEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
 	//enemies.push_back(deadlineEnemy);
 
-	auto homeworkEnemy = std::make_shared<HomeworkEnemy>(transformManager, 100.f);
-	homeworkEnemy->Init(game->GetGraphicsDevice(), &camera);
-	homeworkEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
-	enemies.push_back(homeworkEnemy);
+	//auto homeworkEnemy = std::make_shared<HomeworkEnemy>(transformManager, 100.f);
+	//homeworkEnemy->Init(game->GetGraphicsDevice(), &camera);
+	//homeworkEnemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> enemy) { CreateEnemyCard(enemy); });
+	//enemies.push_back(homeworkEnemy);
 
 	//// Heavy Strike
 	//auto heavy = std::make_shared<HeavyStrikeCard>(transformManager, -260.f, -80.f);
