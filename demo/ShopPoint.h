@@ -5,8 +5,15 @@
 #include "Player.h"
 #include "Game.h"
 #include "Debug.h"
+#include "IShopScene.h"
 
 namespace Demo {
+	enum class ShopType { Card, Item };
+    struct ShopConfig {
+        ShopType type;
+        ShopTier tier;
+        std::function<DX9GF::IScene* (Game*, Player*, int, int)> factory;
+    };
     class ShopPoint : public DX9GF::IGameObject, virtual public Pointable {
     private:
         Game* game;
@@ -19,7 +26,7 @@ namespace Demo {
         std::shared_ptr<DX9GF::FontSprite> fontSprite;
         std::shared_ptr<DX9GF::RectangleCollider> collider;
         std::weak_ptr<DX9GF::CommandBuffer> drawBuffer;
-
+        ShopConfig config;
 		std::function<DX9GF::IScene* (Game*, Player*, int, int)> sceneFactory;
 
 		bool isPlayerNear = false;
@@ -29,7 +36,7 @@ namespace Demo {
 	public:
 		ShopPoint(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0);
 
-        void Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer, std::function<DX9GF::IScene* (Game*, Player*, int, int)> factory);
+        void Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer, const ShopConfig& shopConfig);
 
 		std::pair<float, float> GetPoint() const override {
 			return { GetWorldX(), GetWorldY() };
