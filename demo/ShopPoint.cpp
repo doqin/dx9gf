@@ -64,21 +64,20 @@ namespace Demo {
 
             switch (config.tier) {
             case ShopTier::BASIC:
-                textColor = 0xFFFFFFFF; // Trắng
+                textColor = 0xFFFFFFFF;
                 break;
             case ShopTier::HYBRID:
             case ShopTier::RK_HYBRID:
-                textColor = 0xFF00FFFF; // Lục lam
+                textColor = 0xFF00FFFF;
                 break;
             case ShopTier::PREMIUM:
-                textColor = 0xFFFF00FF; // Tím
+                textColor = 0xFFFF00FF;
                 break;
             }
 
             fontSprite->Begin();
             fontSprite->SetText(text);
 
-            // Tính toán tỷ lệ scale để lọt lòng vùng 65x14
             float baseW = static_cast<float>(fontSprite->GetWidth());
             float baseH = static_cast<float>(fontSprite->GetHeight());
             float scaleX = 65.0f / baseW;
@@ -87,11 +86,8 @@ namespace Demo {
 
             fontSprite->SetScale(scale);
             fontSprite->SetColor(textColor);
-            fontSprite->SetOutline(true, 0xFF000000); // Viền đen
+            fontSprite->SetOutline(true, 0xFF000000);
 
-            // Tính toán vị trí render trên world space
-            // Khung 65x14 nằm ở tọa độ 8,12 -> Tâm của khung là (40.5, 19). 
-            // So với origin của sprite là (40,40) thì tâm khung lệch X = 0.5, Y = -21
             auto [wx, wy] = GetWorldPosition();
             float textW = baseW * scale;
             float textH = baseH * scale;
