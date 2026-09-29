@@ -15,6 +15,7 @@
 #include "PopupManager.h"
 #include "MainFont.h"
 #include "LocalizationManager.h"
+#include "PendingAutoContinue.h"
 
 namespace Demo
 {
@@ -302,7 +303,8 @@ namespace Demo
 		PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 
 		std::ifstream f("savegame.json");
-		if (f.good()) {
+		bool hasSave = f.good();
+		if (hasSave) {
 			continueButton->SetState(IButton::ButtonState::IDLE);
 		}
 		else {
@@ -310,7 +312,7 @@ namespace Demo
 		}
 		f.close();
 
-		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		doContinueGame = [this]() {
 			if (isTransitioning) return;
 			isTransitioning = true;
 			auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
@@ -323,7 +325,13 @@ namespace Demo
 				isTransitioning = false;
 				markFinished();
 				}));
-			drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));			});
+			drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
+			};
+
+
+		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			doContinueGame();
+			});
 
 		//New Game Button
 		InitMenuButton(newGameButton, L"New Game");
@@ -371,6 +379,7 @@ namespace Demo
 				startNewGameLogic();
 			}
 			});
+
 
 		//Options Button
 		InitMenuButton(optionsButton, L"Options");
@@ -448,6 +457,15 @@ namespace Demo
 	void MainMenu::Update(unsigned long long deltaTime)
 	{
 		PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
+
+		if (doContinueGame && Demo::PendingAutoContinue::GetInstance()->ConsumeIfPending()) {
+			std::ifstream f("savegame.json");
+			bool hasSave = f.good();
+			f.close();
+			if (hasSave) {
+				doContinueGame();
+			}
+		}
 
 		auto inpMan = DX9GF::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);

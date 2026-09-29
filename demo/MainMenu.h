@@ -7,6 +7,7 @@
 #include "IconButton.h"
 #include "TextIconButton.h"
 #include "KeyboardNavigator.h"
+#include <functional>
 
 namespace Demo
 {
@@ -42,6 +43,8 @@ namespace Demo
 		int lastScreenHeight;
 
 		bool isTransitioning = false;
+
+		std::function<void()> doContinueGame;
 
 		KeyboardNavigator keyboardNavigator;
 		std::vector<KeyboardNavigator::Candidate> CollectKeyboardCandidates();
