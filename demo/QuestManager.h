@@ -29,6 +29,7 @@ namespace Demo {
 	class QuestManager {
 	private:
 		std::wstring questText = Tr(L"Quest: ???");
+		bool questMenuRequested = false;
 		bool isExpanded = true;
 		bool isVisible = true;
 		std::shared_ptr<DX9GF::Font> font;
@@ -68,6 +69,7 @@ namespace Demo {
 			questText = Tr(L"Quest: ???");
 			isExpanded = true;
 			animProgress = 1.0f;
+			questMenuRequested = false;
 			InitQuestDatabase();
 		}
 
@@ -109,6 +111,12 @@ namespace Demo {
 			auto it = questStates.find(questId);
 			if (it != questStates.end()) return it->second;
 			return QuestState::Locked;
+		}
+
+		bool ConsumeQuestMenuRequest() {
+			bool requested = questMenuRequested;
+			questMenuRequested = false;
+			return requested;
 		}
 	};
 }

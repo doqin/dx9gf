@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "SettingsManager.h"
 #include "WorldSceneBase.h"
 #include "MainFont.h"
@@ -77,10 +77,6 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 {
 	PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
-	QuestManager::GetInstance()->SetUICamera(&this->uiCamera);
-	QuestManager::GetInstance()->SetVirtualResolution(game->GetVirtualWidth(), game->GetVirtualHeight());
-	QuestManager::GetInstance()->SetVisible(!(inventoryMenu && inventoryMenu->IsOpen()) && !IsSubsceneModalActive());
-	QuestManager::GetInstance()->Update(deltaTime);
 
 	if (!hasSeenChapterIntro && !isTransitioning) {
 		hasSeenChapterIntro = true;
@@ -120,6 +116,16 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
 
+	QuestManager::GetInstance()->SetUICamera(&this->uiCamera);
+	QuestManager::GetInstance()->SetVirtualResolution(game->GetVirtualWidth(), game->GetVirtualHeight());
+	QuestManager::GetInstance()->SetVisible(!(inventoryMenu && inventoryMenu->IsOpen()) && !IsSubsceneModalActive());
+	QuestManager::GetInstance()->Update(deltaTime);
+	if (QuestManager::GetInstance()->ConsumeQuestMenuRequest() && inventoryMenu) {
+		inventoryMenu->SetTab(Demo::InventoryMenu::Tab::QUEST);
+		if (!inventoryMenu->IsOpen()) {
+			inventoryMenu->Toggle();
+		}
+	}
 	static float escCooldown = 0.0f;
 	if (escCooldown > 0) escCooldown -= deltaTime;
 
