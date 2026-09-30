@@ -270,6 +270,7 @@
     <ClCompile Include="AuthTerminal.cpp" />
     <ClCompile Include="NPC.cpp" />
     <ClCompile Include="PasswordMenu.cpp" />
+    <ClCompile Include="PendingAutoContinue.cpp" />
     <ClCompile Include="QuestMarker.cpp" />
     <ClCompile Include="TrojanNPC.cpp" />
     <ClCompile Include="KeyeproNPC.cpp" />
@@ -405,6 +406,7 @@
     <ClInclude Include="AuthTerminal.h" />
     <ClInclude Include="NPC.h" />
     <ClInclude Include="PasswordMenu.h" />
+    <ClInclude Include="PendingAutoContinue.h" />
     <ClInclude Include="QuestMarker.h" />
     <ClInclude Include="TrojanNPC.h" />
     <ClInclude Include="KeyeproNPC.h" />

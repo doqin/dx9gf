@@ -21,6 +21,9 @@
 #include "PlayerGlobalData.h"
 #include "IStatementCard.h"
 #include "IBlockCard.h"
+#include "PopupManager.h"
+#include "PendingAutoContinue.h"
+#include <fstream>
 namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
@@ -2070,13 +2073,30 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 			defeatFadeAlpha = (std::min)(1.0f, (defeatElapsedMs - 1000.f) / fadeDurationMs);
 		}
 		if (defeatElapsedMs >= 2500.f) {
-			auto sceMan = game->GetSceneManager();
-			while (sceMan->GetSceneCount() > 1) {
-				sceMan->PopScene();
+			if (!defeatPopupShown) {
+				defeatPopupShown = true;
+
+				std::ifstream f("savegame.json");
+				const bool hasSave = f.good();
+				f.close();
+
+				if (hasSave) {
+					std::vector<std::pair<std::wstring, std::function<void()>>> popupBtns = {
+						{ L"Yes(Y)", [this]() {
+							pendingDefeatAutoContinue = true;
+							pendingDefeatMainMenuTransition = true;
+						} },
+						{ L"No(N)", [this]() {
+							pendingDefeatMainMenuTransition = true;
+						} }
+					};
+					PopupManager::GetInstance()->Show("basic_ghost", L"DEFEATED", L"Load your last savepoint?", popupBtns);
+				}
+				else {
+					pendingDefeatMainMenuTransition = true;
+				}
 			}
-			DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 1.0f);
-			sceMan->GoToScene(0); // Go to main menu
-			return true;
+			return false;
 		}
 		return false;
 	}
@@ -3521,6 +3541,13 @@ void Demo::IBattleScene::Init()
 	popUpMessage->Init(game->GetGraphicsDevice(), &camera);
 	//popUpMessage->ToggleHistory();
 
+	// Init popup
+	auto borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	borderTex->LoadTexture(L"assets/popup-borders.png");
+	auto uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	uiTex->LoadTexture(L"assets/ui.png");
+	PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
+
 	battleMenu = std::make_shared<BattleMenu>(game, transformManager, &uiCamera);
 	battleMenu->Init();
 
@@ -3585,6 +3612,26 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	if (popUpMessage) {
 		popUpMessage->SetCurrentTurn(static_cast<int>(currentTurn));
 		popUpMessage->Update(deltaTime);
+	}
+
+	PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
+	PopupManager::GetInstance()->Update(deltaTime, &this->uiCamera);
+
+	if (pendingDefeatMainMenuTransition) {
+		pendingDefeatMainMenuTransition = false;
+		bool autoContinue = pendingDefeatAutoContinue;
+		pendingDefeatAutoContinue = false;
+
+		if (autoContinue) {
+			PendingAutoContinue::GetInstance()->Request();
+		}
+		auto sceMan = game->GetSceneManager();
+		while (sceMan->GetSceneCount() > 1) {
+			sceMan->PopScene();
+		}
+		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 1.0f);
+		sceMan->GoToScene(0); // Go to main menu
+		return;
 	}
 
 	static float escCooldown = 0.0f;
@@ -4124,6 +4171,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 
 		drawBuffer->Update(deltaTime);
 
+		PopupManager::GetInstance()->DrawUI(deltaTime, &this->uiCamera);
 		if (!keyboardNavigator.IsInKeyboardMode()) {
 			DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		}
