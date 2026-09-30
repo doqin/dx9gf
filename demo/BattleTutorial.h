@@ -2,6 +2,7 @@
 #include "DX9GF.h"
 #include <memory>
 #include <deque>
+#include "TextIconButton.h" 
 
 namespace Demo {
 	// Snapshot of battle state the tutorial inspects each frame to decide which contextual
@@ -21,7 +22,7 @@ namespace Demo {
 	// and swallows battle input while one is on screen (a click / Space / Enter advances).
 	class BattleTutorial {
 	public:
-		explicit BattleTutorial(DX9GF::GraphicsDevice* gd);
+		BattleTutorial(DX9GF::GraphicsDevice* gd, DX9GF::Font* font);
 
 		// Re-evaluates the triggers and queues any newly-due panel. No-op once every panel
 		// has been shown.
@@ -39,6 +40,10 @@ namespace Demo {
 			DX9GF::FontSprite* fontSprite, float screenW, float screenH,
 			unsigned long long deltaTime);
 
+		// Queue all nine panels in teaching order (used by the Guide button). Ignores what was already shown.
+		void ReplayAll();
+		// Drop every pending panel and mark all of them as handled so none reappears.
+		void Skip();
 	private:
 		enum Step {
 			STEP_DRAG_CARDS = 0, // panel 1 - drag cards into the blocks
@@ -57,6 +62,15 @@ namespace Demo {
 		static const PanelRect PANELS[STEP_COUNT];
 
 		void TryQueue(Step s, bool condition);
+
+		void EnsureSkipButton(DX9GF::Camera& uiCamera);
+
+		DX9GF::GraphicsDevice* device = nullptr;
+		std::shared_ptr<DX9GF::Texture> uiTex;
+		std::shared_ptr<DX9GF::TransformManager> uiTransformManager;
+		DX9GF::Font* uiFont = nullptr;
+		std::shared_ptr<TextIconButton> skipBtn;
+		bool skipRequested = false;
 
 		std::shared_ptr<DX9GF::Texture> sheet;
 		std::shared_ptr<DX9GF::StaticSprite> sprite;

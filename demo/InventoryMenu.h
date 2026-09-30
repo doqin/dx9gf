@@ -13,6 +13,7 @@
 #include <utility>
 #include "QuestManager.h"
 #include "GearSlotUI.h"
+#include "BattleTutorial.h"
 
 namespace Demo {
 
@@ -46,6 +47,8 @@ namespace Demo {
 		std::shared_ptr<IconButton> btnResume;
 		std::shared_ptr<IconButton> btnOptions;
 		std::shared_ptr<IconButton> btnLeaveGame;
+		std::shared_ptr<IconButton> btnGuide;
+		std::shared_ptr<BattleTutorial> tutorial; // built lazily on the first Guide click
 
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 
@@ -129,5 +132,6 @@ namespace Demo {
 		void RefreshQuestUI();
 		//utils wraptext
 		std::vector<std::wstring> WrapText(const std::wstring& text, float maxWidth, float scale);
+		bool IsTutorialActive() const { return tutorial && tutorial->IsPanelVisible(); }
 	};
 }
