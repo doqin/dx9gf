@@ -36,25 +36,25 @@ void Demo::ThreadAlleyScene::OnInit()
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, -606, -548));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::HYBRID); }
+		ShopConfig{ ShopType::Card, ShopTier::HYBRID, [](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::HYBRID); } }
 	);
 	shopPoints.back()->SetVisible(true);
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, -449, -1293));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::HYBRID); }
+		ShopConfig{ ShopType::Item, ShopTier::HYBRID, [](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::HYBRID); } }
 	);
 	shopPoints.back()->SetVisible(true);
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, 35, -1413));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::BASIC); }
+		ShopConfig{ ShopType::Card, ShopTier::BASIC, [](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::BASIC); } }
 	);
 	shopPoints.back()->SetVisible(true);
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, 400, -594));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::BASIC); }
+		ShopConfig{ ShopType::Item, ShopTier::BASIC, [](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::BASIC); } }
 	);
 	shopPoints.back()->SetVisible(true);
 
