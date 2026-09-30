@@ -653,9 +653,10 @@ namespace Demo {
 
 		if (currentTab == Tab::ITEMS)
 		{
-
 			auto& inventory = player->GetInventoryItems().GetSlots();
 			hoverDescription = L"";
+			std::wstring hoverName = L"";
+
 			int displayIndex = 0;
 
 			fontSprite->Begin();
@@ -681,6 +682,7 @@ namespace Demo {
 				fontSprite->Draw(*uiCamera, deltaTime);
 
 				if (btn->GetTrigger()->IsHovering(deltaTime) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == btn)) {
+					hoverName = blueprint->GetName();
 					hoverDescription = blueprint->GetDescription();
 				}
 				displayIndex++;
@@ -688,17 +690,29 @@ namespace Demo {
 			fontSprite->End();
 
 			if (!hoverDescription.empty()) {
+				float infoBaseY = sh / 2.0f - 160.0f;
+
 				fontSprite->Begin();
-				fontSprite->SetScale(1.2f, 1.2f);
-				fontSprite->SetColor(0xFFFFFFFF);
 				fontSprite->SetOutline(true, 0xFF000000, 3.f);
-				fontSprite->SetPosition(leftEdge + 50.0f, sh / 2.0f - 150.0f);
-				fontSprite->SetText(std::move(hoverDescription));
+
+				//item's name
+				fontSprite->SetScale(1.3f, 1.3f);
+				fontSprite->SetColor(0xFFFFD700);
+				fontSprite->SetPosition(leftEdge + 50.0f, infoBaseY);
+				fontSprite->SetText(hoverName);
 				fontSprite->Draw(*uiCamera, deltaTime);
+				//desc
+				fontSprite->SetScale(1.1f, 1.1f);
+				fontSprite->SetColor(0xFFE0E0E0);
+				fontSprite->SetPosition(leftEdge + 50.0f, infoBaseY + 35.0f);
+				fontSprite->SetText(hoverDescription);
+				fontSprite->Draw(*uiCamera, deltaTime);
+
 				fontSprite->End();
 				fontSprite->SetOutline(false);
 			}
 		}
+
 		else if (currentTab == Tab::DECK) {
 			float containerGap = 40.0f;
 			float containerW = (sw - 120.0f - containerGap) / 2.0f;

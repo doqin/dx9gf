@@ -115,8 +115,9 @@ void Demo::QuestManager::Init(DX9GF::GraphicsDevice* gd, std::shared_ptr<DX9GF::
 			static_cast<int>(ARROW_SIZE), static_cast<int>(ARROW_SIZE), uiTex, 3);
 		btnToggle->SetSpriteCoords(240, 336, 13, 16, 0);
 		btnToggle->SetSpriteScale(ARROW_SIZE / 13.0f, ARROW_SIZE / 13.0f);
+		btnToggle->Init(uiCamera);
 		btnToggle->SetOnReleaseLeft([this](DX9GF::ITrigger*) {
-			isExpanded = !isExpanded;
+			questMenuRequested = true;
 			});
 	}
 
