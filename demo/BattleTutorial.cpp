@@ -104,9 +104,9 @@ namespace Demo {
 		}
 
 		const bool dismiss =
-			inp->MousePress(DX9GF::InputManager::MouseButton::Left) ||
-			inp->KeyPress(DIK_SPACE) ||
-			inp->KeyPress(DIK_RETURN);
+			inp->MouseDown(DX9GF::InputManager::MouseButton::Left) ||
+			inp->KeyDown(DIK_SPACE) ||
+			inp->KeyDown(DIK_RETURN);
 		if (!dismiss) return;
 
 		inp->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
