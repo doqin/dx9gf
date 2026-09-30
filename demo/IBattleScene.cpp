@@ -21,6 +21,7 @@
 #include "PlayerGlobalData.h"
 #include "IStatementCard.h"
 #include "IBlockCard.h"
+
 namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
@@ -3522,7 +3523,7 @@ void Demo::IBattleScene::Init()
 	//popUpMessage->ToggleHistory();
 
 	battleMenu = std::make_shared<BattleMenu>(game, transformManager, &uiCamera);
-	battleMenu->Init();
+	battleMenu->Init(font.get());
 
 	//Init BGM
 	auto audio = DX9GF::AudioManager::GetInstance();
@@ -3563,7 +3564,7 @@ void Demo::IBattleScene::Init()
 	// First-battle walkthrough: only the very first monster battle (MapBattleScene sets
 	// tutorialEnabled) and only once per save. Marked seen right away so it never replays.
 	if (tutorialEnabled && !PlayerGlobalData::GetInstance()->HasSeenBattleTutorial()) {
-		battleTutorial = std::make_shared<BattleTutorial>(game->GetGraphicsDevice());
+		battleTutorial = std::make_shared<BattleTutorial>(game->GetGraphicsDevice(), font.get());
 		PlayerGlobalData::GetInstance()->SetSeenBattleTutorial(true);
 	}
 

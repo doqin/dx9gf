@@ -53,9 +53,12 @@ namespace Demo {
 		float buttonW = 48.0f * 2;
 		float totalTabW = 4 * buttonW + 3 * tabGap;
 		float startTabX = centerX - totalTabW / 2.0f;
-		float resumeX = -(buttonW + bottomGap + buttonW + bottomGap + buttonW) / 2.0f;
+
+		float totalBottomW = 4 * buttonW + 3 * bottomGap;
+		float resumeX = -totalBottomW / 2.0f;
 		float optionsX = resumeX + buttonW + bottomGap;
-		float leaveX = optionsX + buttonW + bottomGap;
+		float guideX = optionsX + buttonW + bottomGap;
+		float leaveX = guideX + buttonW + bottomGap;
 
 		itemSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 		itemSheetTex->LoadTexture(L"assets/items.png");
@@ -102,6 +105,17 @@ namespace Demo {
 			});
 		btnOptions->SetSpriteScale(2.f, 2.f);
 		btnOptions->Init(uiCamera);
+
+		btnGuide = std::make_shared<IconButton>(transformManager, guideX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
+		btnGuide->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 496, 48, 32, 3));
+		btnGuide->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+			if (!this->tutorial) {
+				this->tutorial = std::make_shared<BattleTutorial>(this->game->GetGraphicsDevice(), this->font);
+			}
+			this->tutorial->ReplayAll();
+			});
+		btnGuide->SetSpriteScale(2.f, 2.f);
+		btnGuide->Init(uiCamera);
 
 		btnLeaveGame = std::make_shared<IconButton>(transformManager, leaveX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
 		btnLeaveGame->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 208, 48, 32, 3));
@@ -179,6 +193,7 @@ namespace Demo {
 
 	void InventoryMenu::Toggle()
 	{
+		if (isOpen && tutorial) tutorial->Skip();
 		isOpen = !isOpen;
 		if (isOpen) {
 			RefreshItemsUI();
@@ -196,7 +211,7 @@ namespace Demo {
 			CommitCards();
 			SetCardsHidden(true);
 		}
-
+		if (IsTutorialActive()) return;
 		if (transformManager) {
 			transformManager->RebuildHierarchy();
 		}
@@ -381,6 +396,7 @@ namespace Demo {
 		if (btnTabQuest) addButton(btnTabQuest);
 		addButton(btnResume);
 		addButton(btnOptions);
+		addButton(btnGuide);
 		addButton(btnLeaveGame);
 
 		if (currentTab == Tab::DECK) {
@@ -463,6 +479,11 @@ namespace Demo {
 	{
 		if (!isOpen) return;
 
+		if (tutorial && tutorial->IsPanelVisible()) {
+			tutorial->Update(deltaTime);
+			return;
+		}
+
 		float sw = static_cast<float>(game->GetVirtualWidth());
 		float sh = static_cast<float>(game->GetVirtualHeight());
 
@@ -481,9 +502,12 @@ namespace Demo {
 		float buttonW = 48.0f * 2;
 		float totalTabW = 4 * buttonW + 3 * tabGap;
 		float startTabX = centerX - totalTabW / 2.0f;
-		float resumeX = -(buttonW + bottomGap + buttonW + bottomGap + buttonW) / 2.0f;
+
+		float totalBottomW = 4 * buttonW + 3 * bottomGap;
+		float resumeX = -totalBottomW / 2.0f;
 		float optionsX = resumeX + buttonW + bottomGap;
-		float leaveX = optionsX + buttonW + bottomGap;
+		float guideX = optionsX + buttonW + bottomGap;
+		float leaveX = guideX + buttonW + bottomGap;
 
 		btnTabItems->SetLocalPosition(startTabX, tabY);
 		btnTabDeck->SetLocalPosition(startTabX + buttonW + tabGap, tabY);
@@ -492,6 +516,7 @@ namespace Demo {
 
 		btnResume->SetLocalPosition(resumeX, bottomY - 80.0f);
 		btnOptions->SetLocalPosition(optionsX, bottomY - 80.0f);
+		btnGuide->SetLocalPosition(guideX, bottomY - 80.0f);
 		btnLeaveGame->SetLocalPosition(leaveX, bottomY - 80.0f);
 
 		float deckContainerY = containerY - 35.0f;
@@ -505,6 +530,7 @@ namespace Demo {
 
 		btnResume->Update(deltaTime);
 		btnOptions->Update(deltaTime);
+		btnGuide->Update(deltaTime);
 		btnLeaveGame->Update(deltaTime);
 
 		// Navigate first so the containers can scroll to follow the keyboard target this frame.
@@ -633,6 +659,7 @@ namespace Demo {
 		if (btnTabQuest) btnTabQuest->Draw(gd, deltaTime);
 		btnResume->Draw(gd, deltaTime);
 		btnOptions->Draw(gd, deltaTime);
+		btnGuide->Draw(gd, deltaTime);
 		btnLeaveGame->Draw(gd, deltaTime);
 
 		fontSprite->Begin();
@@ -1084,6 +1111,12 @@ namespace Demo {
 	void InventoryMenu::DrawKeyboardReticle(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 	{
 		if (!isOpen) return;
+		if (tutorial && tutorial->IsPanelVisible()) {
+			tutorial->Draw(gd, *uiCamera, fontSprite.get(),
+				static_cast<float>(game->GetVirtualWidth()),
+				static_cast<float>(game->GetVirtualHeight()), deltaTime);
+			return;
+		}
 		keyboardNavigator.Draw(gd, *uiCamera, CollectKeyboardCandidates());
 	}
 

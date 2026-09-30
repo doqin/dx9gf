@@ -23,14 +23,23 @@ namespace Demo {
 		constexpr float PANEL_SHEET_WIDTH = 192.f;
 		constexpr float PANEL_SCALE = 3.f;
 		constexpr float OPEN_INPUT_COOLDOWN_MS = 200.f;
+
+		constexpr float SKIP_SCALE = 3.f;
+		constexpr float SKIP_W = 32.f * SKIP_SCALE;
+		constexpr float SKIP_H = 16.f * SKIP_SCALE;
+		constexpr float SKIP_MARGIN = 24.f;
 	}
 
-	BattleTutorial::BattleTutorial(DX9GF::GraphicsDevice* gd)
+	BattleTutorial::BattleTutorial(DX9GF::GraphicsDevice* gd, DX9GF::Font* font)
+		: device(gd), uiFont(font)
 	{
 		sheet = std::make_shared<DX9GF::Texture>(gd);
 		sheet->LoadTexture(L"assets/tutorial.png");
 		sprite = std::make_shared<DX9GF::StaticSprite>(sheet.get());
 		sprite->SetScale(PANEL_SCALE, PANEL_SCALE);
+
+		uiTex = std::make_shared<DX9GF::Texture>(gd);
+		uiTex->LoadTexture(L"assets/ui.png");
 	}
 
 	void BattleTutorial::TryQueue(Step s, bool condition)
@@ -70,9 +79,8 @@ namespace Demo {
 
 	void BattleTutorial::Update(unsigned long long deltaTime)
 	{
-		if (queue.empty()) {
-			return;
-		}
+		if (queue.empty()) return;
+
 		const float dt = static_cast<float>(deltaTime);
 		appearElapsed += dt;
 		if (inputCooldown > 0.f) {
@@ -81,13 +89,25 @@ namespace Demo {
 		}
 
 		auto inp = DX9GF::InputManager::GetInstance();
+
+		if (skipBtn) {
+			skipBtn->Update(deltaTime);
+			if (skipRequested) {
+				skipRequested = false;
+				inp->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
+				Skip();
+				return;
+			}
+			// Pressing on Skip must not also advance to the next panel.
+			const auto st = skipBtn->GetState();
+			if (st == IButton::ButtonState::HOVER || st == IButton::ButtonState::CLICKED) return;
+		}
+
 		const bool dismiss =
 			inp->MousePress(DX9GF::InputManager::MouseButton::Left) ||
 			inp->KeyPress(DIK_SPACE) ||
 			inp->KeyPress(DIK_RETURN);
-		if (!dismiss) {
-			return;
-		}
+		if (!dismiss) return;
 
 		inp->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
 		queue.pop_front();
@@ -132,6 +152,51 @@ namespace Demo {
 		fontSprite->SetOutline(false);
 		fontSprite->SetColor(0xFFFFFFFF);
 
+		// Skip button, bottom-centre.
+		EnsureSkipButton(uiCamera);
+		skipBtn->SetLocalPosition(-SKIP_W / 2.f, screenH / 2.f - SKIP_H - SKIP_MARGIN);
+		uiTransformManager->UpdateAll();
+		skipBtn->Draw(gd, deltaTime);
+
 		gd->SetAlphaBlending(false);
+	}
+
+	void BattleTutorial::ReplayAll()
+	{
+		// Teaching order, not enum order: the lifecycle notes come last.
+		static const Step order[] = {
+			STEP_DRAG_CARDS, STEP_BLOCKS, STEP_ENERGY,
+			STEP_ENEMY_CARD, STEP_TARGET, STEP_EXECUTE, STEP_CYCLE,
+			STEP_NON_PERSISTENT, STEP_USE_LIMIT
+		};
+		queue.clear();
+		for (Step s : order) {
+			handled[s] = true;
+			queue.push_back(s);
+		}
+		inputCooldown = OPEN_INPUT_COOLDOWN_MS;
+		appearElapsed = 0.f;
+	}
+
+	void BattleTutorial::Skip()
+	{
+		queue.clear();
+		for (bool& h : handled) h = true;
+	}
+
+	void BattleTutorial::EnsureSkipButton(DX9GF::Camera& uiCamera)
+	{
+		if (skipBtn) return;
+		uiTransformManager = std::make_shared<DX9GF::TransformManager>();
+		skipBtn = std::make_shared<TextIconButton>(uiTransformManager, 0.f, 0.f,
+			static_cast<int>(SKIP_W), static_cast<int>(SKIP_H), uiTex, uiFont, L"Skip>>", 3);
+		skipBtn->SetSpriteCoords(16, 0, 32, 16, 0, true);
+		skipBtn->SetSpriteScale(SKIP_SCALE, SKIP_SCALE);
+		skipBtn->SetTextScale(1.f, 1.f);
+		skipBtn->SetTextColor(0xFF000000);
+		skipBtn->SetDynamicTextGetter([]() { return Tr(L"Skip >>"); });
+		skipBtn->SetOnReleaseLeft([this](DX9GF::ITrigger*) { skipRequested = true; });
+		skipBtn->Init(&uiCamera);
+		uiTransformManager->RebuildHierarchy();
 	}
 }
