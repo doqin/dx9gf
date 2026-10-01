@@ -71,6 +71,9 @@ void Demo::CardShop::LoadItems()
 		// selling the payoff without the setup would put a dead card in the player's deck.
 		AddShopCard<IgniteCard>("Ignite Card");
 		AddShopCard<FireDetonationCard>("Fire Detonation Card");
+		AddShopCard<ShortCircuitCard>("Short Circuit Card");
+		AddShopCard<StaticChargeCard>("Static Charge Card");
+		AddShopCard<ChainDetonationCard>("Chain Detonation Card");
 		// Cruel Strike doubles off Weak, which this tier already sells.
 		AddShopCard<CruelStrikeCard>("Cruel Strike Card");
 		AddShopCard<ShieldBashCard>("Shield Bash Card");

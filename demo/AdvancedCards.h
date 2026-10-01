@@ -167,14 +167,14 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 1; }
-		std::wstring GetDescription() const override { return Tr(L"Apply Spark 2 for 3 turns."); }
+		std::wstring GetDescription() const override { return Tr(L"Apply Spark 3 for 3 turns."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Spark, true } }; }
 
 		CardTemplate GetCardTemplate() const override { return CardTemplate::Yellow; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override {
-			CollectEffectOnTargets(state, ModifierType::Spark, 2.f, 3, 1);
+			CollectEffectOnTargets(state, ModifierType::Spark, 3.f, 3, 1);
 		}
 	};
 
@@ -186,12 +186,74 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 2; }
-		std::wstring GetDescription() const override { return Tr(L"Deal 3 damage. Consumes all Spark on target to deal 5 extra damage per stack."); }
+		std::wstring GetDescription() const override { return Tr(L"Deal 4 damage. Consumes all Spark on target to deal 8 extra damage per stack."); }
 		CardTemplate GetCardTemplate() const override { return CardTemplate::Yellow; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 
+	};
+
+	// Spark's cheap setup: pays for itself with a little damage, so it is playable without a
+	// detonator in hand. Non-persistent - a persistent copy would out-scale Ignite for the same cost.
+	class ShortCircuitCard : public MultiTargetCard {
+	public:
+		ShortCircuitCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
+			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Short Circuit", x, y, 192, 32) {
+			SetPersistent(false);
+		}
+
+		size_t GetCost() const override { return 1; }
+		std::wstring GetDescription() const override { return Tr(L"Deal 4 damage and apply Spark 2 for 3 turns."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Spark, true } }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Yellow; }
+
+		bool Execute() override;
+		void CollectProjectedSteps(VirtualBattleState& state) override;
+	};
+
+	// The area payoff. Fire Detonation cashes in one enemy; this cashes in all of them at once and
+	// hits the whole field for a little even with no Spark, so it is the card StaticCharge and Ignite
+	// are building towards. Non-persistent - it consumes what it detonates, and a persistent one
+	// would re-fire every turn off StaticCharge's refill.
+	class ChainDetonationCard : public IStatementCard {
+	private:
+		bool isDone = false;
+	public:
+		ChainDetonationCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
+			: IGameObject(tm, x, y), IStatementCard(tm, 224, 32, x, y) {
+			SetPersistent(false);
+		}
+
+		size_t GetCost() const override { return 3; }
+		std::wstring GetDescription() const override {
+			return Tr(L"Deal 6 damage to all enemies, plus 8 per Spark stack on each. Consumes all Spark.");
+		}
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Yellow; }
+
+		bool Execute() override;
+		void CollectProjectedSteps(VirtualBattleState& state) override;
+		void ResetExecution() override { isDone = false; }
+	};
+
+	// A persistent engine rather than a one-off: re-fires every turn it stays installed, so it
+	// builds Spark across the whole field while the rest of the hand plays around it.
+	class StaticChargeCard : public IStatementCard {
+	private:
+		bool isDone = false;
+	public:
+		StaticChargeCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
+			: IGameObject(tm, x, y), IStatementCard(tm, 192, 32, x, y) {
+		}
+
+		size_t GetCost() const override { return 2; }
+		std::wstring GetDescription() const override { return Tr(L"Apply Spark 2 for 3 turns to all enemies."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Spark, true } }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Yellow; }
+
+		bool Execute() override;
+		void CollectProjectedSteps(VirtualBattleState& state) override;
+		void ResetExecution() override { isDone = false; }
 	};
 
 	class RagingStrikeCard : public MultiTargetCard {

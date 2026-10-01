@@ -3,6 +3,7 @@
 #include "IBlockCard.h"
 #include "IBattleScene.h"
 #include "VirtualBattleState.h"
+#include <cmath>
 bool Demo::HeavyStrikeCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -133,7 +134,7 @@ bool Demo::IgniteCard::Execute() {
 	auto target = targets[0].lock();
 	if (!target || !target->GetValue() || target->GetValue()->IsDead()) { isDone = true; return true; }
 
-	target->GetValue()->AddStackingModifier(ModifierType::Spark, 3, 2.f, false);
+	target->GetValue()->AddStackingModifier(ModifierType::Spark, 3, 3.f, false);
 	isDone = true;
 	return true;
 }
@@ -147,7 +148,7 @@ bool Demo::FireDetonationCard::Execute() {
 	auto enemy = target->GetValue();
 	float sparkStacks = enemy->ConsumeModifier(ModifierType::Spark);
 
-	float finalDamage = 3.f + (sparkStacks * 5.f);
+	float finalDamage = 4.f + (sparkStacks * 8.f);
 
 	if (owner) {
 		owner->DealDamage(enemy.get(), finalDamage);
@@ -164,9 +165,75 @@ void Demo::FireDetonationCard::CollectProjectedSteps(VirtualBattleState& state) 
 	auto it = state.enemies.find(enemy);
 	if (it != state.enemies.end()) {
 		float currentSpark = it->second.spark;
-		float finalDamage = 3.f + (currentSpark * 5.f);
+		float finalDamage = 4.f + (currentSpark * 8.f);
 		it->second.spark = 0.f;
 		state.SimulateDamage(enemy, finalDamage);
+	}
+}
+
+bool Demo::ShortCircuitCard::Execute() {
+	if (isDone) return true;
+	if (targets.empty()) { isDone = true; return true; }
+	auto target = targets[0].lock();
+	if (!target || !target->GetValue() || target->GetValue()->IsDead()) { isDone = true; return true; }
+
+	auto enemy = target->GetValue();
+	if (owner) owner->DealDamage(enemy.get(), 4.f);
+	// A dead enemy lingers in the list until it is collected; stacking Spark on it is wasted.
+	if (!enemy->IsDead()) {
+		enemy->AddStackingModifier(ModifierType::Spark, 3, 2.f, false);
+	}
+	isDone = true;
+	return true;
+}
+
+void Demo::ShortCircuitCard::CollectProjectedSteps(VirtualBattleState& state) {
+	CollectHitsOnTargets(state, 4.f, 1);
+	CollectEffectOnTargets(state, ModifierType::Spark, 2.f, 3, 1);
+}
+
+bool Demo::ChainDetonationCard::Execute() {
+	if (isDone) return true;
+	if (battleScene && owner) {
+		for (auto& enemy : battleScene->GetEnemies()) {
+			if (!enemy || enemy->IsDead()) continue;
+			const float stacks = enemy->ConsumeModifier(ModifierType::Spark);
+			owner->DealDamage(enemy.get(), 6.f + stacks * 8.f);
+		}
+	}
+	isDone = true;
+	return true;
+}
+
+void Demo::ChainDetonationCard::CollectProjectedSteps(VirtualBattleState& state) {
+	if (!battleScene) return;
+	for (auto& enemy : battleScene->GetEnemies()) {
+		if (!enemy || enemy->IsDead()) continue;
+		auto it = state.enemies.find(enemy.get());
+		if (it == state.enemies.end()) continue;
+		const float stacks = it->second.spark;
+		it->second.spark = 0.f;
+		state.SimulateDamage(enemy.get(), 6.f + stacks * 8.f);
+	}
+}
+
+bool Demo::StaticChargeCard::Execute() {
+	if (isDone) return true;
+	if (battleScene) {
+		for (auto& enemy : battleScene->GetEnemies()) {
+			if (!enemy || enemy->IsDead()) continue;
+			enemy->AddStackingModifier(ModifierType::Spark, 3, 2.f, false);
+		}
+	}
+	isDone = true;
+	return true;
+}
+
+void Demo::StaticChargeCard::CollectProjectedSteps(VirtualBattleState& state) {
+	if (!battleScene) return;
+	for (auto& enemy : battleScene->GetEnemies()) {
+		if (!enemy || enemy->IsDead()) continue;
+		state.SimulateEnemyModifier(enemy.get(), ModifierType::Spark, 2.f, 3);
 	}
 }
 

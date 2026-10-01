@@ -33,6 +33,9 @@ std::shared_ptr<Demo::ICard> Demo::ICard::CreateCard(const std::string& id, std:
 	else if (id == "MainBlockCard") card = std::make_shared<MainBlockCard>(transformManager);
 	else if (id == "IgniteCard") card = std::make_shared<IgniteCard>(transformManager);
 	else if (id == "FireDetonationCard") card = std::make_shared<FireDetonationCard>(transformManager);
+	else if (id == "ShortCircuitCard") card = std::make_shared<ShortCircuitCard>(transformManager);
+	else if (id == "ChainDetonationCard") card = std::make_shared<ChainDetonationCard>(transformManager);
+	else if (id == "StaticChargeCard") card = std::make_shared<StaticChargeCard>(transformManager);
 	else if (id == "RagingStrikeCard") card = std::make_shared<RagingStrikeCard>(transformManager);
 	else if (id == "OverloadCard") card = std::make_shared<OverloadCard>(transformManager);
 	else if (id == "ChainReactionCard") card = std::make_shared<ChainReactionCard>(transformManager);
