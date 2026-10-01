@@ -32,17 +32,6 @@ void Demo::EnemyCard::Draw(unsigned long long deltaTime)
 		auto [w, h] = arrowTexture->GetSize();
 		arrowSprite->SetOrigin(w / 2.0f, h / 2.0f);
 	}
-	if (!nameFont) {
-		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-		nameFontSprite = std::make_shared<DX9GF::FontSprite>(nameFont.get());
-		nameFontSprite->SetColor(0xFF000000);
-	}
-	nameFontSprite->Begin();
-	nameFontSprite->SetPosition(GetWorldX() + 8.f, GetWorldY() + 8.f);
-	nameFontSprite->SetText(Tr(L"EnemyCard"));
-	nameFontSprite->Draw(*camera, deltaTime);
-	nameFontSprite->End();
-
 	bool isAttachedToContainer = false;
 	if (auto p = GetParent()) {
 		if (auto lock = p->lock()) {
