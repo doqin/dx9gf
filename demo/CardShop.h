@@ -14,6 +14,7 @@ namespace Demo {
 			row.cardTemplate = card.GetCardTemplate();
 			row.cardName = card.GetDisplayName();
 			row.cardCost = card.GetCost();
+			row.cardInputs = CardInputSignature(card.GetInputSlotCount(), 0);
 		}
 		template <typename TCard>
 		void AddShopCard(const std::string& name) {

@@ -31,6 +31,11 @@ namespace Demo {
 	// ICard::GetDisplayName uses this, which is how a new card gets a face without any art.
 	std::wstring CardDisplayNameFromSaveID(const std::string& saveID);
 
+	// The argument list drawn after the name, like a function signature: "()" for no inputs, "(_)" for
+	// one empty slot, "(x,_)" for two with the first filled. Filled and empty slots are the same
+	// width, so a card never resizes when an enemy is attached to it.
+	std::wstring CardInputSignature(size_t slots, size_t filled);
+
 	// Draws a card's face from assets/cardtemplates.png: the template is cut into a left cap
 	// (outline + icon), a one-pixel body column and a right cap, the body is stretched to fit the
 	// card's name, and the name and energy cost are drawn on top as text. Everything here works in
@@ -46,15 +51,16 @@ namespace Demo {
 
 		explicit CardFrame(DX9GF::GraphicsDevice* graphicsDevice);
 
-		// Width of a card face carrying `name`. Independent of the cost - room for one digit is always
-		// reserved - so a card's width never changes while it is on the table.
-		float MeasureWidth(const std::wstring& name, float scale = 2.f);
+		// Width of a card face carrying `name` and its input signature. Independent of the cost - room
+		// for one digit is always reserved - and of which slots are filled, so a card's width never
+		// changes while it is on the table.
+		float MeasureWidth(const std::wstring& name, const std::wstring& inputs, float scale = 2.f);
 		static float Height(float scale = 2.f) { return SHEET_HEIGHT * scale; }
 
 		// `x`,`y` is the top-left corner. `tint` multiplies the whole face, text included, which is how
 		// the shop greys out cards the player cannot afford.
 		void Draw(const DX9GF::Camera& camera, unsigned long long deltaTime, float x, float y,
-			CardTemplate cardTemplate, const std::wstring& name, size_t cost,
+			CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost,
 			float scale = 2.f, D3DCOLOR tint = 0xFFFFFFFF);
 
 	private:

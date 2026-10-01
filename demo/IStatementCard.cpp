@@ -28,7 +28,7 @@ void Demo::IStatementCard::Init(std::shared_ptr<DraggableManager> manager, DX9GF
 	// The face is as wide as its name needs, so the drag area is sized here, before the base class
 	// builds the trigger from it. The constructor's width only stands in until a device exists.
 	frame = CardFrame::Get(graphicsDevice);
-	dragAreaWidth = static_cast<size_t>(frame->MeasureWidth(GetDisplayName()));
+	dragAreaWidth = static_cast<size_t>(frame->MeasureWidth(GetDisplayName(), CardInputSignature(GetInputSlotCount(), 0)));
 	IDraggable::Init(manager, graphicsDevice, camera);
 	trigger->SetWidth(GetWidth());
 }
@@ -139,7 +139,8 @@ void Demo::IStatementCard::DrawCardFace(unsigned long long deltaTime)
 		graphicsDevice->SetScissorRect(scissorRect);
 		graphicsDevice->SetScissorTest(true);
 	}
-	frame->Draw(*camera, deltaTime, GetWorldX(), GetWorldY(), GetCardTemplate(), GetDisplayName(), GetCost());
+	frame->Draw(*camera, deltaTime, GetWorldX(), GetWorldY(), GetCardTemplate(), GetDisplayName(),
+		CardInputSignature(GetInputSlotCount(), GetFilledInputCount()), GetCost());
 	if (isCropped) {
 		graphicsDevice->SetScissorTest(false);
 	}

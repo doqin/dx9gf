@@ -42,6 +42,7 @@ namespace Demo {
 			bool valid = false;
 			CardTemplate cardTemplate = CardTemplate::Red;
 			std::wstring name;
+			std::wstring inputs;
 			size_t cost = 0;
 		};
 		std::vector<CardFace> faces;

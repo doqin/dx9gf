@@ -66,6 +66,14 @@ namespace {
 	static_assert(sizeof(NAME_COLORS) / sizeof(NAME_COLORS[0]) == static_cast<size_t>(Demo::CardTemplate::Count),
 		"one name colour per CardTemplate");
 	constexpr D3DCOLOR COST_COLOR = 0xFFE3E6FF;
+	// The "(_)" after the name was the same cool grey on every card.
+	constexpr D3DCOLOR INPUT_COLOR = 0xFFB3B9D1;
+	// A filled slot's "x" has to stand out from that grey: orange, except on the templates whose own
+	// colours are orange or yellow. Cyan reads on orange but washes out against yellow, which wants
+	// something dark - a saturated blue.
+	constexpr D3DCOLOR FILLED_INPUT_COLOR = 0xFFFF9A1F;
+	constexpr D3DCOLOR FILLED_INPUT_COLOR_ON_ORANGE = 0xFF22E6F0;
+	constexpr D3DCOLOR FILLED_INPUT_COLOR_ON_YELLOW = 0xFF1B3FD6;
 	constexpr D3DCOLOR OUTLINE_COLOR = 0xFF060608;
 
 	// Component-wise multiply, the same way a sprite's colour modulates its texture.
@@ -93,6 +101,15 @@ std::wstring Demo::CardDisplayNameFromSaveID(const std::string& saveID) {
 		id.resize(id.size() - suffix.size());
 	}
 	return DX9GF::Utils::Utf8ToWide(id);
+}
+
+std::wstring Demo::CardInputSignature(size_t slots, size_t filled) {
+	std::wstring signature = L"(";
+	for (size_t i = 0; i < slots; ++i) {
+		if (i > 0) signature += L',';
+		signature += i < filled ? L'x' : L'_';
+	}
+	return signature + L")";
 }
 
 std::shared_ptr<Demo::CardFrame> Demo::CardFrame::Get(DX9GF::GraphicsDevice* graphicsDevice) {
@@ -123,8 +140,8 @@ Demo::CardFrame::CardFrame(DX9GF::GraphicsDevice* graphicsDevice) : graphicsDevi
 	digitWidth = static_cast<float>(fontSprite->GetWidth());
 }
 
-float Demo::CardFrame::MeasureWidth(const std::wstring& name, float scale) {
-	fontSprite->SetText(name);
+float Demo::CardFrame::MeasureWidth(const std::wstring& name, const std::wstring& inputs, float scale) {
+	fontSprite->SetText(name + inputs);
 	const float textScale = scale / FONT_NATIVE_SCALE;
 	const float textW = static_cast<float>(fontSprite->GetWidth()) * textScale;
 	const float digitW = digitWidth * textScale;
@@ -157,9 +174,9 @@ void Demo::CardFrame::DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& 
 }
 
 void Demo::CardFrame::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime, float x, float y,
-	CardTemplate cardTemplate, const std::wstring& name, size_t cost, float scale, D3DCOLOR tint) {
+	CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost, float scale, D3DCOLOR tint) {
 	const RECT t = TemplateRect(cardTemplate);
-	const float width = MeasureWidth(name, scale);
+	const float width = MeasureWidth(name, inputs, scale);
 	const float leftW = LEFT_CAP_W * scale;
 	const float rightW = RIGHT_CAP_W * scale;
 	const float bodyW = width - leftW - rightW;
@@ -179,6 +196,26 @@ void Demo::CardFrame::Draw(const DX9GF::Camera& camera, unsigned long long delta
 	const NameColors& nameColors = NAME_COLORS[static_cast<int>(cardTemplate)];
 	DrawLabel(*topSprite, camera, deltaTime, name, x + leftW, textY, scale, Modulate(nameColors.top, tint), false, tint);
 	DrawLabel(*bottomSprite, camera, deltaTime, name, x + leftW, textY, scale, Modulate(nameColors.bottom, tint), false, tint);
+
+	fontSprite->SetText(name);
+	const float nameW = static_cast<float>(fontSprite->GetWidth()) * textScale;
+	// The signature is drawn in runs so each "x" can take its own colour. Glyph advances add up, so a
+	// run's start is just the measured width of everything before it.
+	D3DCOLOR filledColor = FILLED_INPUT_COLOR;
+	if (cardTemplate == CardTemplate::Orange) filledColor = FILLED_INPUT_COLOR_ON_ORANGE;
+	else if (cardTemplate == CardTemplate::Yellow) filledColor = FILLED_INPUT_COLOR_ON_YELLOW;
+	float runX = x + leftW + nameW;
+	size_t pos = 0;
+	while (pos < inputs.size()) {
+		size_t end = inputs[pos] == L'x' ? pos + 1 : inputs.find(L'x', pos);
+		if (end == std::wstring::npos) end = inputs.size();
+		const std::wstring run = inputs.substr(pos, end - pos);
+		const bool filled = inputs[pos] == L'x';
+		DrawLabel(*fontSprite, camera, deltaTime, run, runX, textY, scale,
+			Modulate(filled ? filledColor : INPUT_COLOR, tint), false, tint);
+		runX += static_cast<float>(fontSprite->GetWidth()) * textScale;
+		pos = end;
+	}
 
 	const float orbX = x + width - rightW - (ORB_RIGHT_GAP + ORB_SIZE) * scale;
 	DrawSlice(*orb, camera, deltaTime, ORB_SRC, orbX, y + (Height(scale) - ORB_SIZE * scale) / 2.f,

@@ -90,6 +90,10 @@ namespace Demo {
 		// Text on the card face. Derived from the class name, so a new card needs no art; override
 		// when the class name is not what the player should read.
 		virtual std::wstring GetDisplayName() const { return CardDisplayNameFromSaveID(GetSaveID()); }
+		// How many enemy cards the card takes and how many are attached right now, shown after its
+		// name as "(_)" / "(x)". Cards that take no input show "()".
+		virtual size_t GetInputSlotCount() const { return 0; }
+		virtual size_t GetFilledInputCount() const { return 0; }
 
 		static std::shared_ptr<ICard> CreateCard(
 			const std::string& id,

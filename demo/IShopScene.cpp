@@ -693,7 +693,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 		for (int i = startIndex; i < endIndex; ++i) {
 			const auto& item = items[i];
 			if (item.iconSheet != ShopIconSheet::CardFaces) continue;
-			const float faceW = cardFrame->MeasureWidth(item.cardName, CARD_FACE_SCALE) / CARD_FACE_SCALE;
+			const float faceW = cardFrame->MeasureWidth(item.cardName, item.cardInputs, CARD_FACE_SCALE) / CARD_FACE_SCALE;
 			const float faceH = static_cast<float>(CardFrame::SHEET_HEIGHT);
 
 			const float rowY = l.listTop + (i - startIndex) * (ROW_H + ROW_GAP);
@@ -704,7 +704,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 			// The cover goes down first: it is pulled back over the face's right edge, and the face drawn
 			// second keeps that edge on top - same order as IStatementCard::Draw in battle.
 			DrawCardCover(item, faceX, faceY, faceW * CARD_FACE_SCALE, affordable, deltaTime);
-			cardFrame->Draw(uiCamera, deltaTime, faceX, faceY, item.cardTemplate, item.cardName, item.cardCost,
+			cardFrame->Draw(uiCamera, deltaTime, faceX, faceY, item.cardTemplate, item.cardName, item.cardInputs, item.cardCost,
 				CARD_FACE_SCALE, affordable ? 0xFFFFFFFF : COLOR_FACE_DISABLED);
 		}
 

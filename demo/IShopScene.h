@@ -48,6 +48,7 @@ namespace Demo {
 		CardTemplate cardTemplate = CardTemplate::Red;
 		std::wstring cardName;
 		size_t cardCost = 0;
+		std::wstring cardInputs;
 	};
 
 	class IShopScene : public DX9GF::IScene {

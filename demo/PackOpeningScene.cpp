@@ -57,7 +57,7 @@ namespace Demo {
 
 		for (const auto& id : cardIds) {
 			auto card = ICard::CreateCard(id, transformManager);
-			faces.push_back(card ? CardFace{ true, card->GetCardTemplate(), card->GetDisplayName(), card->GetCost() } : CardFace{});
+			faces.push_back(card ? CardFace{ true, card->GetCardTemplate(), card->GetDisplayName(), CardInputSignature(card->GetInputSlotCount(), 0), card->GetCost() } : CardFace{});
 			rarities.push_back(CardCatalog::GetRarity(id));
 		}
 
@@ -180,7 +180,7 @@ namespace Demo {
 		if (state == State::Revealing || state == State::Done) {
 			const int idx = (std::min)(revealIndex, (int)cardIds.size() - 1);
 			const CardFace& face = faces[idx];
-			const float fw = face.valid ? cardFrame->MeasureWidth(face.name, CARD_SCALE) : 0.f;
+			const float fw = face.valid ? cardFrame->MeasureWidth(face.name, face.inputs, CARD_SCALE) : 0.f;
 			const float fh = face.valid ? CardFrame::Height(CARD_SCALE) : 0.f;
 			const BYTE a = (BYTE)((std::clamp)(cardAlpha, 0.f, 1.f) * 255.f);
 			const D3DCOLOR rc = CardCatalog::RarityColor(rarities[idx]);
@@ -192,7 +192,7 @@ namespace Demo {
 					D3DCOLOR_ARGB((BYTE)(a * 0.45f), ChR(rc), ChG(rc), ChB(rc)), true);
 
 				cardFrame->Draw(uiCamera, deltaTime, -fw / 2.f, -10.f - fh / 2.f, face.cardTemplate, face.name,
-					face.cost, CARD_SCALE, D3DCOLOR_ARGB(a, 255, 255, 255));
+					face.inputs, face.cost, CARD_SCALE, D3DCOLOR_ARGB(a, 255, 255, 255));
 			}
 
 			fontSprite->Begin();

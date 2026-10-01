@@ -21,6 +21,8 @@ namespace Demo {
 		void Draw(unsigned long long deltaTime) override;
 		std::wstring GetDescription() const override;
 		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
+		size_t GetInputSlotCount() const override { return 1; }
+		size_t GetFilledInputCount() const override { return enemyCard.expired() ? 0 : 1; }
 		std::wstring GetInputsDescription() const override;
 		size_t GetCost() const override;
 		bool CanAcceptEnemyCard() const override { return !enemyCard.lock() && IsQueuedInBlock(); }
