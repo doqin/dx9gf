@@ -3,6 +3,7 @@
 #include "DX9GFExtras.h"
 #include "Game.h"
 #include "CardCatalog.h"
+#include "CardFrame.h"
 #include <string>
 #include <vector>
 
@@ -29,15 +30,21 @@ namespace Demo {
 
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
 		std::shared_ptr<DX9GF::Texture> packTex;
-		std::shared_ptr<DX9GF::Texture> uiTex;
 		std::shared_ptr<DX9GF::Texture> particleTex;
 		std::shared_ptr<DX9GF::AnimatedSprite> packSprite;
-		std::shared_ptr<DX9GF::StaticSprite> cardFaceSprite;
+		std::shared_ptr<CardFrame> cardFrame;
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<DX9GF::FontSprite> fontSprite;
 		std::unique_ptr<DX9GF::ParticleSystem> explosionEmitter;
 
-		std::vector<RECT> faceRects;
+		// What CardFrame needs to draw each revealed card, in the same order as cardIds.
+		struct CardFace {
+			bool valid = false;
+			CardTemplate cardTemplate = CardTemplate::Red;
+			std::wstring name;
+			size_t cost = 0;
+		};
+		std::vector<CardFace> faces;
 		std::vector<CardCatalog::Rarity> rarities;
 
 		State state = State::Opening;

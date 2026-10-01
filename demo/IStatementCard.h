@@ -121,17 +121,13 @@ namespace Demo {
 		int GetStatusCoverPanelWidth() const;
 		void DrawStatusCover(unsigned long long deltaTime);
 
-		std::shared_ptr<DX9GF::Texture> faceTexture;
-		std::shared_ptr<DX9GF::StaticSprite> faceSprite;
-		// Draws a single strip of assets/ui.png at the card's position and scale, honouring the
-		// container's crop. Enough for any card whose face is one sheet rect, which is all of
-		// them - implement DrawCardFace() as a call to this.
-		void DrawSheetFace(unsigned long long deltaTime, const RECT& srcRect);
+		// Shared renderer for the card background, name and cost; created in Init.
+		std::shared_ptr<CardFrame> frame;
 
-		// The card's own artwork. Override this rather than Draw() so the face lands on top of
-		// the uses cover - the cover is pulled back over the card's right edge, and drawing the
-		// face second is what keeps that edge visible instead of buried under the panel.
-		virtual void DrawCardFace(unsigned long long deltaTime) {}
+		// The card's face, drawn from GetCardTemplate / GetDisplayName / GetCost. Drawn after the
+		// uses cover - the cover is pulled back over the card's right edge, and drawing the face
+		// second is what keeps that edge visible instead of buried under the panel.
+		virtual void DrawCardFace(unsigned long long deltaTime);
 
 	public:
 		virtual void Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) override;

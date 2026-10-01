@@ -129,6 +129,9 @@ void Demo::Game::Init()
 	auto app = DX9GF::Application::GetInstance();
 	DX9GF::Font::AddFont(L"assets/arcade-among-2-r46pv.ttf");
 	DX9GF::Font::AddFont(L"assets/statusplz.ttf");
+	DX9GF::Font::AddFont(L"assets/cardpixel.ttf");
+	DX9GF::Font::AddFont(L"assets/cardpixel-top.ttf");
+	DX9GF::Font::AddFont(L"assets/cardpixel-bottom.ttf");
 	DX9GF::Font::AddFont(L"assets/135openpixel-v2-3.ttf");
 	//Load cursor textures
 	auto input = DX9GF::InputManager::GetInstance();

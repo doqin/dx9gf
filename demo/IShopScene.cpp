@@ -31,7 +31,7 @@ namespace {
 
 	constexpr float BUY_BTN_SIZE = 64.0f;
 	constexpr float ICON_SCALE = 1.4f;
-	// Card faces are authored for 2x, same as IStatementCard::DrawSheetFace uses in battle.
+	// Card faces are authored for 2x, same as IStatementCard::DrawCardFace uses in battle.
 	constexpr float CARD_FACE_SCALE = 2.0f;
 	// Kept modest so the widest title ("--- PREMIUM CARD SHOP ---") still clears the
 	// LEAVE button on the left and the gold readout on the right.
@@ -215,10 +215,8 @@ void Demo::IShopScene::BuildUI()
 	itemIconSprite = std::make_shared<DX9GF::StaticSprite>(itemsTex.get());
 	itemIconSprite->SetScale(ICON_SCALE, ICON_SCALE);
 
-	// Card faces live on the UI sheet and are drawn at 2x in battle; matching that here
-	// keeps them pixel-exact rather than resampled.
-	cardFaceSprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
-	cardFaceSprite->SetScale(CARD_FACE_SCALE, CARD_FACE_SCALE);
+	// Card faces are drawn at 2x like in battle, so they stay pixel-exact rather than resampled.
+	cardFrame = CardFrame::Get(game->GetGraphicsDevice());
 
 	// Same sheet rects as IStatementCard::DrawStatusCover.
 	coverBodySprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
@@ -692,27 +690,23 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 		}
 		itemIconSprite->End();
 
-		cardFaceSprite->Begin();
 		for (int i = startIndex; i < endIndex; ++i) {
 			const auto& item = items[i];
 			if (item.iconSheet != ShopIconSheet::CardFaces) continue;
-			const float faceW = static_cast<float>(item.iconRect.right - item.iconRect.left);
-			const float faceH = static_cast<float>(item.iconRect.bottom - item.iconRect.top);
-			if (faceH <= 0.0f) continue;
+			const float faceW = cardFrame->MeasureWidth(item.cardName, CARD_FACE_SCALE) / CARD_FACE_SCALE;
+			const float faceH = static_cast<float>(CardFrame::SHEET_HEIGHT);
 
 			const float rowY = l.listTop + (i - startIndex) * (ROW_H + ROW_GAP);
 			const float faceX = l.rowX + ROW_INNER_PAD;
 			const float faceY = rowY + (ROW_H - faceH * CARD_FACE_SCALE) / 2.0f;
 			// Unaffordable cards get the same grey wash as their buy button.
 			const bool affordable = sellMode || player->GetGold() >= item.cost;
-			cardFaceSprite->SetColor(affordable ? 0xFFFFFFFF : COLOR_FACE_DISABLED);
-			cardFaceSprite->SetSrcRect(item.iconRect);
-			cardFaceSprite->SetPosition(faceX, faceY);
-			cardFaceSprite->Draw(uiCamera, deltaTime);
-
+			// The cover goes down first: it is pulled back over the face's right edge, and the face drawn
+			// second keeps that edge on top - same order as IStatementCard::Draw in battle.
 			DrawCardCover(item, faceX, faceY, faceW * CARD_FACE_SCALE, affordable, deltaTime);
+			cardFrame->Draw(uiCamera, deltaTime, faceX, faceY, item.cardTemplate, item.cardName, item.cardCost,
+				CARD_FACE_SCALE, affordable ? 0xFFFFFFFF : COLOR_FACE_DISABLED);
 		}
-		cardFaceSprite->End();
 
 		// --- Gold pouch icon in the header --------------------------------------
 		myFontSprite->SetScale(GOLD_SCALE, GOLD_SCALE);

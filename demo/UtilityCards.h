@@ -19,13 +19,12 @@ namespace Demo {
 
 		size_t GetCost() const override { return 0; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 3 damage to an enemy."); }
-		RECT GetFaceRect() const override { return RECT{ 80, 336, 160, 352 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override {
 			CollectHitsOnTargets(state, 3.f, 1);
 		}
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	class MarkCard : public MultiTargetCard {
@@ -38,14 +37,13 @@ namespace Demo {
 		size_t GetCost() const override { return 0; }
 		std::wstring GetDescription() const override { return Tr(L"Apply Marked 2 for 2 turns (target takes 2 extra damage per hit)."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Marked, true } }; }
-		RECT GetFaceRect() const override { return RECT{ 160, 336, 240, 352 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Periwinkle; }
 
 		bool Execute() override;
 		// Stacking, so the readout adds 2 per Mark queued ahead of a hit.
 		void CollectProjectedSteps(VirtualBattleState& state) override {
 			CollectEffectOnTargets(state, ModifierType::Marked, 2.f, 2, 1);
 		}
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	class BraceCard : public IStatementCard {
@@ -60,11 +58,10 @@ namespace Demo {
 		size_t GetCost() const override { return 0; }
 		std::wstring GetDescription() const override { return Tr(L"Gain 5 block for 2 turns."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::BuffDefense, true } }; }
-		RECT GetFaceRect() const override { return RECT{ 0, 352, 80, 368 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Steel; }
 
 		bool Execute() override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	// Instant draw. In the init block the new cards arrive in time to be played this turn; in
@@ -81,11 +78,10 @@ namespace Demo {
 
 		size_t GetCost() const override { return 0; }
 		std::wstring GetDescription() const override { return Tr(L"Draw 2 cards now."); }
-		RECT GetFaceRect() const override { return RECT{ 80, 352, 160, 368 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Blue; }
 
 		bool Execute() override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	class OverclockCard : public IStatementCard {
@@ -100,11 +96,10 @@ namespace Demo {
 
 		size_t GetCost() const override { return 0; }
 		std::wstring GetDescription() const override { return Tr(L"Gain 1 energy now. Take 4 damage."); }
-		RECT GetFaceRect() const override { return RECT{ 160, 352, 256, 368 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Cyan; }
 
 		bool Execute() override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	// The 1-cost pair that contrasts the two flavours of resource. Jumpstart pays out now and is
@@ -122,11 +117,10 @@ namespace Demo {
 
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Gain 2 energy now."); }
-		RECT GetFaceRect() const override { return RECT{ 0, 368, 80, 384 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Cyan; }
 
 		bool Execute() override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	class ForesightCard : public IStatementCard {
@@ -139,11 +133,10 @@ namespace Demo {
 
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Draw 1 extra card next turn."); }
-		RECT GetFaceRect() const override { return RECT{ 80, 368, 160, 384 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Blue; }
 
 		bool Execute() override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	// A legendary utility card that clears all debuffs from the player.
@@ -160,10 +153,9 @@ namespace Demo {
 
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Clear all debuffs and tick damage from yourself."); }
-		RECT GetFaceRect() const override { return RECT{ 0, 496, 96, 512}; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Sage; }
 
 		bool Execute() override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 }

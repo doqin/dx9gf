@@ -44,9 +44,7 @@ namespace Demo {
 		packSprite->SetPosition(0.f, 0.f);
 		packSprite->SetScale(PACK_SCALE, PACK_SCALE);
 
-		uiTex = std::make_shared<DX9GF::Texture>(gd);
-		uiTex->LoadTexture(L"assets/ui.png");
-		cardFaceSprite = std::make_shared<DX9GF::StaticSprite>(uiTex.get());
+		cardFrame = CardFrame::Get(gd);
 
 		font = std::make_shared<DX9GF::Font>(gd, Demo::kMainFontName, Demo::kLargeFontSize);
 		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
@@ -59,7 +57,7 @@ namespace Demo {
 
 		for (const auto& id : cardIds) {
 			auto card = ICard::CreateCard(id, transformManager);
-			faceRects.push_back(card ? card->GetFaceRect() : RECT{ 0, 0, 0, 0 });
+			faces.push_back(card ? CardFace{ true, card->GetCardTemplate(), card->GetDisplayName(), card->GetCost() } : CardFace{});
 			rarities.push_back(CardCatalog::GetRarity(id));
 		}
 
@@ -181,26 +179,20 @@ namespace Demo {
 
 		if (state == State::Revealing || state == State::Done) {
 			const int idx = (std::min)(revealIndex, (int)cardIds.size() - 1);
-			const RECT& r = faceRects[idx];
-			const float fw = (float)(r.right - r.left);
-			const float fh = (float)(r.bottom - r.top);
+			const CardFace& face = faces[idx];
+			const float fw = face.valid ? cardFrame->MeasureWidth(face.name, CARD_SCALE) : 0.f;
+			const float fh = face.valid ? CardFrame::Height(CARD_SCALE) : 0.f;
 			const BYTE a = (BYTE)((std::clamp)(cardAlpha, 0.f, 1.f) * 255.f);
 			const D3DCOLOR rc = CardCatalog::RarityColor(rarities[idx]);
 
 			if (fw > 0.f && fh > 0.f) {
-				const float gw = fw * CARD_SCALE + 48.f;
-				const float gh = fh * CARD_SCALE + 48.f;
+				const float gw = fw + 48.f;
+				const float gh = fh + 48.f;
 				gd->DrawRectangle(uiCamera, -gw / 2.f, -gh / 2.f - 10.f, gw, gh,
 					D3DCOLOR_ARGB((BYTE)(a * 0.45f), ChR(rc), ChG(rc), ChB(rc)), true);
 
-				cardFaceSprite->SetSrcRect(r);
-				cardFaceSprite->SetOrigin(fw / 2.f, fh / 2.f);
-				cardFaceSprite->SetScale(CARD_SCALE, CARD_SCALE);
-				cardFaceSprite->SetPosition(0.f, -10.f);
-				cardFaceSprite->SetColor(D3DCOLOR_ARGB(a, 255, 255, 255));
-				cardFaceSprite->Begin();
-				cardFaceSprite->Draw(uiCamera, deltaTime);
-				cardFaceSprite->End();
+				cardFrame->Draw(uiCamera, deltaTime, -fw / 2.f, -10.f - fh / 2.f, face.cardTemplate, face.name,
+					face.cost, CARD_SCALE, D3DCOLOR_ARGB(a, 255, 255, 255));
 			}
 
 			fontSprite->Begin();
@@ -210,7 +202,7 @@ namespace Demo {
 			fontSprite->SetColor(D3DCOLOR_ARGB(a, ChR(rc), ChG(rc), ChB(rc)));
 			fontSprite->SetText(CardCatalog::RarityName(rarities[idx]));
 			const float labelW = fontSprite->GetWidth() * 1.2f;
-			fontSprite->SetPosition(-labelW / 2.f, fh * CARD_SCALE / 2.f + 8.f);
+			fontSprite->SetPosition(-labelW / 2.f, fh / 2.f + 8.f);
 			fontSprite->Draw(uiCamera, deltaTime);
 
 			fontSprite->SetScale(0.9f, 0.9f);

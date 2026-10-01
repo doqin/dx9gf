@@ -15,30 +15,6 @@ bool Demo::HeavyStrikeCard::Execute() {
 	return true;
 }
 
-void Demo::HeavyStrikeCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
-}
-
 bool Demo::TwinStrikeCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -53,30 +29,6 @@ bool Demo::TwinStrikeCard::Execute() {
 		return true;
 	}
 	return false;
-}
-
-void Demo::TwinStrikeCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
 }
 
 void Demo::TwinStrikeCard::ResetExecution() {
@@ -94,30 +46,6 @@ bool Demo::CleaveCard::Execute() {
 	}
 	isDone = true;
 	return true;
-}
-
-void Demo::CleaveCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
 }
 
 bool Demo::ChainLightningCard::Execute() {
@@ -153,30 +81,6 @@ void Demo::ChainLightningCard::CollectProjectedSteps(VirtualBattleState& state) 
 	}
 }
 
-void Demo::ChainLightningCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
-}
-
 bool Demo::PoisonCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -190,10 +94,6 @@ bool Demo::PoisonCard::Execute() {
 	return true;
 }
 
-void Demo::PoisonCard::DrawCardFace(unsigned long long deltaTime) { 
-	DrawSheetFace(deltaTime, GetFaceRect()); 
-}
-
 bool Demo::VulnerableCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -203,11 +103,6 @@ bool Demo::VulnerableCard::Execute() {
 	}
 	isDone = true;
 	return true;
-}
-
-void Demo::VulnerableCard::DrawCardFace(unsigned long long deltaTime)
-{
-	DrawSheetFace(deltaTime, GetFaceRect());
 }
 
 bool Demo::WeaknessCard::Execute() {
@@ -221,10 +116,6 @@ bool Demo::WeaknessCard::Execute() {
 	return true;
 }
 
-void Demo::WeaknessCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::StunCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -234,30 +125,6 @@ bool Demo::StunCard::Execute() {
 	}
 	isDone = true;
 	return true;
-}
-
-void Demo::StunCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
 }
 
 bool Demo::IgniteCard::Execute() {
@@ -357,10 +224,6 @@ void Demo::OverloadCard::CollectProjectedSteps(VirtualBattleState& state) {
 		}
 	}
 	CollectHitsOnTargets(state, 5.f + bonusDamage, 1);
-}
-
-void Demo::OverloadCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
 }
 
 bool Demo::ChainReactionCard::Execute() {
@@ -475,10 +338,6 @@ void Demo::ChainReactionCard::CollectProjectedSteps(VirtualBattleState& state) {
 
 	state.SimulateDamage(finalTargetEnemy, finalDamage);
 }
-void Demo::ChainReactionCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::LethalHarvestCard::Execute() {
 	if (isDone) return true;
 	if (targets.empty()) { isDone = true; return true; }

@@ -98,28 +98,8 @@ void Demo::StrikeCard::Update(unsigned long long deltaTime)
 
 void Demo::StrikeCard::Draw(unsigned long long deltaTime)
 {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
 	auto thisX = GetWorldX();
 	auto thisY = GetWorldY();
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(thisX, thisY);
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
 	IStatementCard::Draw(deltaTime);
 	for (auto& draggable : draggableManager->GetDraggingDraggables()) {
 		if (auto draggedEnemyCard = std::dynamic_pointer_cast<EnemyCard>(draggable); draggableManager->GetDraggingDraggables().size() == 1 && draggedEnemyCard) {

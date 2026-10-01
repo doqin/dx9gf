@@ -353,6 +353,7 @@
     <ClCompile Include="IBlockCard.cpp" />
     <ClCompile Include="IEnemy.cpp" />
     <ClCompile Include="MainBlockCard.cpp" />
+    <ClCompile Include="CardFrame.cpp" />
     <ClCompile Include="StrikeCard.cpp" />
     <ClCompile Include="EnergyCard.cpp" />
     <ClCompile Include="UtilityCards.cpp" />
@@ -469,6 +470,7 @@
     <ClInclude Include="SplashScene.h" />
     <ClInclude Include="TextIconButton.h" />
     <ClInclude Include="TextInputManager.h" />
+    <ClInclude Include="CardFrame.h" />
     <ClInclude Include="StrikeCard.h" />
     <ClInclude Include="EnergyCard.h" />
     <ClInclude Include="TrojanEnemy.h" />
@@ -783,6 +785,9 @@
     <Image Include="assets\tutorial.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="assets\cardtemplates.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="assets\ui.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
@@ -810,6 +815,15 @@
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\arcade-among-2-r46pv.ttf">
+      <DeploymentContent>true</DeploymentContent>
+    </Font>
+    <Font Include="assets\cardpixel.ttf">
+      <DeploymentContent>true</DeploymentContent>
+    </Font>
+    <Font Include="assets\cardpixel-top.ttf">
+      <DeploymentContent>true</DeploymentContent>
+    </Font>
+    <Font Include="assets\cardpixel-bottom.ttf">
       <DeploymentContent>true</DeploymentContent>
     </Font>
     <Font Include="assets\statusplz.ttf">

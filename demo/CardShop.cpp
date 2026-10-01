@@ -118,8 +118,8 @@ void Demo::CardShop::LoadSellItems()
 		row.name = PrettyCardName(id);
 		row.cost = sellValue;
 		row.description = proto->GetDescription();
-		row.iconRect = proto->GetFaceRect();
 		row.iconSheet = ShopIconSheet::CardFaces;
+		ApplyCardFace(row, *proto);
 		row.isPersistent = proto->IsPersistent();
 		row.hasLimitedUses = proto->HasLimitedUses();
 		row.maxUses = proto->HasLimitedUses() ? proto->GetMaxUses() : 0;

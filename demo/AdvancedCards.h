@@ -7,8 +7,6 @@ namespace Demo {
 	// OFFENSIVE CARDS
 
 	class HeavyStrikeCard : public MultiTargetCard {
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 	public:
 		HeavyStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Heavy Strike", x, y, 192, 32) {
@@ -16,19 +14,16 @@ namespace Demo {
 
 		size_t GetCost() const override { return 2; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 16 damage to an enemy."); }
-		RECT GetFaceRect() const override { return RECT{ 128, 272, 224, 288 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override { CollectHitsOnTargets(state, 16.f, 1); }
 
-		void Draw(unsigned long long deltaTime) override;
 	};
 
 	class TwinStrikeCard : public MultiTargetCard {
 	private:
 		int hits = 0;
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 	public:
 		TwinStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Twin Strike", x, y, 192, 32) {
@@ -36,7 +31,7 @@ namespace Demo {
 
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 3 damage to an enemy twice."); }
-		RECT GetFaceRect() const override { return RECT{ 128, 288, 224, 304 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 
 		bool Execute() override;
 		// Two passes over the same target - Execute lands 3 damage twice.
@@ -45,14 +40,11 @@ namespace Demo {
 			CollectHitsOnTargets(state, 3.f, 1);
 		}
 
-		void Draw(unsigned long long deltaTime) override;
 
 		void ResetExecution() override;
 	};
 
 	class CleaveCard : public MultiTargetCard {
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 	public:
 		CleaveCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 2, L"Cleave", x, y, 160, 32) {
@@ -60,17 +52,14 @@ namespace Demo {
 
 		size_t GetCost() const override { return 2; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 7 damage to up to 2 enemies."); }
-		RECT GetFaceRect() const override { return RECT{ 0, 304, 80, 320 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override { CollectHitsOnTargets(state, 7.f); }
 
-		void Draw(unsigned long long deltaTime) override;
 	};
 
 	class ChainLightningCard : public MultiTargetCard {
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 		const float baseDamage = 20.f;
 		const float damageReductionPerRepeat = 75.f;
 	public:
@@ -83,19 +72,16 @@ namespace Demo {
 			return Tr(L"Deal ") + std::to_wstring(static_cast<int>(baseDamage)) + Tr(L" damage to up to 3 enemies, but base damage is reduced by ")
 				+ std::to_wstring(static_cast<int>(damageReductionPerRepeat)) + Tr(L"% \neach time it targets the same enemy.");
 		}
-		RECT GetFaceRect() const override { return RECT{ 80, 304, 192, 320 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 
-		void Draw(unsigned long long deltaTime) override;
 	};
 
 	// EFFECT CARDS
 
 	class PoisonCard : public MultiTargetCard {
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 		const int poisonTurns = 3;
 	public:
 		PoisonCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
@@ -106,7 +92,7 @@ namespace Demo {
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Apply Poison ") + std::to_wstring(poisonTurns) + Tr(L" (damage equals remaining turns)."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Poison, false } }; }
-		RECT GetFaceRect() const override { return RECT{ 192, 304, 272, 320 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Green; }
 
 		bool Execute() override;
 		// No value of its own, so its tick is worth however many turns are on it - and AddModifier
@@ -115,12 +101,9 @@ namespace Demo {
 			CollectEffectOnTargets(state, ModifierType::Poison, 0.f, poisonTurns, 1);
 		}
 
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	class VulnerableCard : public MultiTargetCard {
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 	public:
 		VulnerableCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Vulnerable", x, y, 192, 32) {
@@ -130,7 +113,7 @@ namespace Demo {
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Apply Vulnerable 1 to an enemy."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Vulnerable, false } }; }
-		RECT GetFaceRect() const override { return RECT{ 0, 320, 96, 336 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Magenta; }
 
 		bool Execute() override;
 		// Vulnerable has no value of its own - it is a flat 1.5x on everything queued after it.
@@ -138,12 +121,9 @@ namespace Demo {
 			CollectEffectOnTargets(state, ModifierType::Vulnerable, 0.f, 1, 1);
 		}
 
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	class WeaknessCard : public MultiTargetCard {
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 	public:
 		WeaknessCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Weakness", x, y, 192, 32) {
@@ -153,19 +133,16 @@ namespace Demo {
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Apply Weak 2 to an enemy."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Weak, false } }; }
-		RECT GetFaceRect() const override { return RECT{ 96, 320, 192, 336 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Rose; }
 
 		bool Execute() override;
 
-		void DrawCardFace(unsigned long long deltaTime) override;
 		void CollectProjectedSteps(VirtualBattleState& state) override {
 			CollectEffectOnTargets(state, ModifierType::Weak, 0.f, 2, 2);
 		}
 	};
 
 	class StunCard : public MultiTargetCard {
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 	public:
 		StunCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), MultiTargetCard(tm, 1, L"Stun", x, y, 160, 32) {
@@ -174,11 +151,10 @@ namespace Demo {
 		size_t GetCost() const override { return 3; }
 		std::wstring GetDescription() const override { return Tr(L"Stun an enemy for 1 turn."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Stun, false } }; }
-		RECT GetFaceRect() const override { return RECT{ 192, 320, 272, 336 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Forest; }
 
 		bool Execute() override;
 
-		void Draw(unsigned long long deltaTime) override;
 		void CollectProjectedSteps(VirtualBattleState& state) override {
 			CollectEffectOnTargets(state, ModifierType::Stun, 0.f, 1, 1);
 		}
@@ -194,13 +170,12 @@ namespace Demo {
 		std::wstring GetDescription() const override { return Tr(L"Apply Spark 2 for 3 turns."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Spark, true } }; }
 
-		RECT GetFaceRect() const override { return RECT{ 80, 400, 160, 416 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Yellow; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override {
 			CollectEffectOnTargets(state, ModifierType::Spark, 2.f, 3, 1);
 		}
-		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 	};
 
 	class FireDetonationCard : public MultiTargetCard {
@@ -212,12 +187,11 @@ namespace Demo {
 
 		size_t GetCost() const override { return 2; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 3 damage. Consumes all Spark on target to deal 5 extra damage per stack."); }
-		RECT GetFaceRect() const override { return RECT{ 160, 400, 272, 416 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Yellow; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 
-		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 	};
 
 	class RagingStrikeCard : public MultiTargetCard {
@@ -233,13 +207,12 @@ namespace Demo {
 		std::wstring GetDescription() const override {
 			return Tr(L"Deal ") + std::to_wstring(currentDamage) + Tr(L" damage. Increases this card's damage by 3 when played. Resets to 4 damage on discard.");
 		}
-		RECT GetFaceRect() const override { return RECT{ 80, 416, 176, 432 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override {
 			CollectHitsOnTargets(state, static_cast<float>(currentDamage), 1);
 		}
-		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		void OnDiscard() override {
 			currentDamage = 4;
 		}
@@ -253,10 +226,9 @@ namespace Demo {
 		}
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 		size_t GetCost() const override { return 2; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 5 DMG. Deal +4 DMG for each Persistent card currently in the Block."); }
-		RECT GetFaceRect() const override { return RECT{ 0, 416, 80, 432 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 	};
 
 	class ChainReactionCard : public MultiTargetCard {
@@ -267,10 +239,9 @@ namespace Demo {
 		}
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 5 DMG. If the previous card killed its target, deal 8 DMG to the lowest HP enemy instead."); }
-		RECT GetFaceRect() const override { return RECT{ 176, 416, 272, 432 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 	};
 
 	class LethalHarvestCard : public MultiTargetCard {
@@ -281,10 +252,9 @@ namespace Demo {
 		}
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override { CollectHitsOnTargets(state, 5.f, 1); }
-		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 5 DMG. If fatal, heal 8 HP."); }
-		RECT GetFaceRect() const override { return RECT{ 80, 448, 176, 464 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 	};
 
 	class ExecuteCard : public MultiTargetCard {
@@ -295,10 +265,9 @@ namespace Demo {
 		}
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override { CollectHitsOnTargets(state, 15.f, 1); }
-		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 2; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 15 DMG. If fatal, gain 1 Energy next turn."); }
-		RECT GetFaceRect() const override { return RECT{ 0, 448, 80, 464 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 	};
 
 	class ArmorPiercerCard : public MultiTargetCard {
@@ -309,10 +278,9 @@ namespace Demo {
 		}
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
-		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 5 DMG. Deals 2x damage to enemies with Armor. Ignores their defense."); }
-		RECT GetFaceRect() const override { return RECT{ 0, 432, 96, 448 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 	};
 
 	class CruelStrikeCard : public MultiTargetCard {
@@ -323,10 +291,9 @@ namespace Demo {
 		}
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
-		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 8 DMG. Deals 2x damage if target is Weak."); }
-		RECT GetFaceRect() const override { return RECT{ 96, 432, 192, 448 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 	};
 
 	class ShieldBashCard : public MultiTargetCard {
@@ -337,10 +304,9 @@ namespace Demo {
 		}
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
-		void DrawCardFace(unsigned long long deltaTime) override { DrawSheetFace(deltaTime, GetFaceRect()); }
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Consume all your Armor. Deal damage equal to 1.5x the consumed amount."); }
-		RECT GetFaceRect() const override { return RECT{ 192, 432, 272, 448 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 	};
 
 	class ImmunityCard : public IStatementCard {
@@ -360,9 +326,6 @@ namespace Demo {
 			return Tr(L"Apply Immunity 3. Blocks 1 incoming Debuff or Tick Damage per charge.");
 		}
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Immunity, true } }; }
-		RECT GetFaceRect() const override { return RECT{ 176, 448, 256, 464}; }
-		void DrawCardFace(unsigned long long deltaTime) override {
-			DrawSheetFace(deltaTime, GetFaceRect());
-		}
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Aqua; }
 	};
 }

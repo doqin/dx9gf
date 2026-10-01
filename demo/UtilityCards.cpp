@@ -18,10 +18,6 @@ bool Demo::JabCard::Execute() {
 	return true;
 }
 
-void Demo::JabCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::MarkCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -33,10 +29,6 @@ bool Demo::MarkCard::Execute() {
 	}
 	isDone = true;
 	return true;
-}
-
-void Demo::MarkCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
 }
 
 bool Demo::BraceCard::Execute() {
@@ -55,10 +47,6 @@ void Demo::BraceCard::ResetExecution() {
 	isDone = false;
 }
 
-void Demo::BraceCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::PrefetchCard::Execute() {
 	if (isDone) return true;
 	if (battleScene) {
@@ -71,10 +59,6 @@ bool Demo::PrefetchCard::Execute() {
 
 void Demo::PrefetchCard::ResetExecution() {
 	isDone = false;
-}
-
-void Demo::PrefetchCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
 }
 
 bool Demo::OverclockCard::Execute() {
@@ -94,10 +78,6 @@ void Demo::OverclockCard::ResetExecution() {
 	isDone = false;
 }
 
-void Demo::OverclockCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::JumpstartCard::Execute() {
 	if (isDone) return true;
 	if (battleScene) {
@@ -112,10 +92,6 @@ void Demo::JumpstartCard::ResetExecution() {
 	isDone = false;
 }
 
-void Demo::JumpstartCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::ForesightCard::Execute() {
 	if (isDone) return true;
 	if (battleScene) {
@@ -128,10 +104,6 @@ bool Demo::ForesightCard::Execute() {
 
 void Demo::ForesightCard::ResetExecution() {
 	isDone = false;
-}
-
-void Demo::ForesightCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
 }
 
 bool Demo::SystemRestartCard::Execute() {
@@ -166,6 +138,3 @@ void Demo::SystemRestartCard::ResetExecution() {
 	isDone = false;
 }
 
-void Demo::SystemRestartCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}

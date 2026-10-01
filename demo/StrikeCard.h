@@ -9,8 +9,6 @@ namespace Demo {
 		bool isDone = false;
 		std::shared_ptr<DX9GF::Font> nameFont;
 		std::shared_ptr<DX9GF::FontSprite> nameFontSprite;
-		std::shared_ptr<DX9GF::Texture> strikeTexture;
-		std::shared_ptr<DX9GF::StaticSprite> strikeSprite;
 	public:
 		StrikeCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), IStatementCard(tm, 160, 32, x, y) {}
@@ -22,7 +20,7 @@ namespace Demo {
 		void Update(unsigned long long deltaTime) override;
 		void Draw(unsigned long long deltaTime) override;
 		std::wstring GetDescription() const override;
-		RECT GetFaceRect() const override { return RECT{ 0, 288, 80, 304 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 		std::wstring GetInputsDescription() const override;
 		size_t GetCost() const override;
 		bool CanAcceptEnemyCard() const override { return !enemyCard.lock() && IsQueuedInBlock(); }
