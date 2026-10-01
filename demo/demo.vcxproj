@@ -355,6 +355,7 @@
     <ClCompile Include="MainBlockCard.cpp" />
     <ClCompile Include="CardFrame.cpp" />
     <ClCompile Include="StatusDisplay.cpp" />
+    <ClCompile Include="SynergyCards.cpp" />
     <ClCompile Include="StrikeCard.cpp" />
     <ClCompile Include="EnergyCard.cpp" />
     <ClCompile Include="UtilityCards.cpp" />
@@ -473,6 +474,7 @@
     <ClInclude Include="TextInputManager.h" />
     <ClInclude Include="CardFrame.h" />
     <ClInclude Include="StatusDisplay.h" />
+    <ClInclude Include="SynergyCards.h" />
     <ClInclude Include="StrikeCard.h" />
     <ClInclude Include="EnergyCard.h" />
     <ClInclude Include="TrojanEnemy.h" />

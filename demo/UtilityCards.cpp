@@ -23,7 +23,10 @@ bool Demo::MarkCard::Execute() {
 	if (!targets.empty()) {
 		if (auto enemyCard = targets[0].lock()) {
 			if (auto enemy = enemyCard->GetValue()) {
-				enemy->AddStackingModifier(ModifierType::Marked, 2, 2.f, false);
+				// AddModifier, not AddStackingModifier: Marked takes the strongest source and extra
+				// applications only extend it. Stacked values never decayed while their duration kept
+				// being refreshed, so Marked climbed without limit and out-scaled every other deck.
+				enemy->AddModifier(ModifierType::Marked, 2, 4.f, false);
 			}
 		}
 	}

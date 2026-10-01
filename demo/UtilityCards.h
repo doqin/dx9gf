@@ -35,14 +35,14 @@ namespace Demo {
 		}
 
 		size_t GetCost() const override { return 0; }
-		std::wstring GetDescription() const override { return Tr(L"Apply Marked 2 for 2 turns (target takes 2 extra damage per hit)."); }
-		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Marked, true } }; }
+		std::wstring GetDescription() const override { return Tr(L"Apply Marked 4 for 2 turns (target takes 4 extra damage per hit)."); }
+		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Marked, false } }; }
 		CardTemplate GetCardTemplate() const override { return CardTemplate::Periwinkle; }
 
 		bool Execute() override;
-		// Stacking, so the readout adds 2 per Mark queued ahead of a hit.
+		// Marked takes the strongest source, so a second Mark ahead of a hit adds nothing to the readout.
 		void CollectProjectedSteps(VirtualBattleState& state) override {
-			CollectEffectOnTargets(state, ModifierType::Marked, 2.f, 2, 1);
+			CollectEffectOnTargets(state, ModifierType::Marked, 4.f, 2, 1);
 		}
 	};
 

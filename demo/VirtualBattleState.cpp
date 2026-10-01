@@ -66,7 +66,7 @@ namespace Demo {
 
 		VirtualCombatant& vc = it->second;
 		switch (type) {
-		case ModifierType::Marked: vc.marked += value; break;
+		case ModifierType::Marked: vc.marked = (std::max)(vc.marked, value); break;
 		case ModifierType::Vulnerable: vc.vulnerable = true; break;
 		case ModifierType::Burn: vc.burn += value; break;
 		case ModifierType::Spark: vc.spark += value; break;

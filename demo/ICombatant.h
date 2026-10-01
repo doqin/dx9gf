@@ -64,6 +64,10 @@ namespace Demo {
 		void AddStackingModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns = 0);
 		bool HasModifier(ModifierType type) const;
 		float GetModifierValue(ModifierType type) const;
+		// Turns left on a modifier type, 0 if it is not active.
+		int GetModifierDuration(ModifierType type) const;
+		// Strips up to `amount` of block, the way a hit would, without any damage. Returns what was removed.
+		float RemoveBlock(float amount);
 		const std::vector<CombatModifier>& GetModifiers() const { return modifiers; }
 		bool TryBlockWithImmunity();
 		float ConsumeModifier(ModifierType type);
