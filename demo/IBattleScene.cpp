@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "IBattleScene.h"
 #include "MainFont.h"
+#include "StatusDisplay.h"
 #include "LocalizationManager.h"
 #include <algorithm>
 #include <array>
@@ -2731,173 +2732,21 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::
 	auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
 	auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(this->uiCamera, screenX, screenY);
 
+	auto statusRenderer = StatusRenderer::Get(gd);
 	for (const auto& mod : modifiers) {
 		if (mod.duration <= 0) continue;
 
-		std::wstring valueText = L"";
-		std::wstring nameText = Tr(L"");
-		std::wstring statusName = Tr(L"Unknown");
-		std::wstring statusDescription = Tr(L"");
-		D3DCOLOR textColor = 0xFFFFFFFF;
-		RECT iconRect = { 0, 0, 0, 0 };
+		auto status = DescribeStatus(mod);
+		if (!status) continue;
 
-		if (mod.type == ModifierType::BuffDamage) {
-			valueText = std::to_wstring(static_cast<int>(mod.value));
-			textColor = 0xFFfa6a0a;
-			iconRect = { 112, 240, 128, 256 };
-			statusName = Tr(L"Atk Up");
-			statusDescription = Tr(L"Increases attack damage.");
-		}
-		else if (mod.type == ModifierType::BuffDefense) {
-			valueText = std::to_wstring(static_cast<int>(mod.value));
-			textColor = 0xFF588dbe;
-			iconRect = { 96, 240, 112, 256 };
-			statusName = Tr(L"Def Up");
-			statusDescription = Tr(L"Blocks incoming damage.");
-		}
-		else if (mod.type == ModifierType::Poison) {
-			int poisonDmg = static_cast<int>(std::round((mod.value > 0.f) ? mod.value : static_cast<float>(mod.duration)));
-			valueText = std::to_wstring(poisonDmg);
-			textColor = 0xFFba4aed;
-			iconRect = { 128, 240, 144, 256 };
-			statusName = Tr(L"Poison");
-			statusDescription = Tr(L"Takes ") + std::to_wstring(poisonDmg) + Tr(L" damage at end of turn.");
-		}
-		else if (mod.type == ModifierType::Burn) {
-			int burnDmg = static_cast<int>(std::round(mod.value));
-			valueText = std::to_wstring(burnDmg);
-			textColor = 0xFFff8800;
-			iconRect = { 240, 288, 256, 304 };
-			statusName = Tr(L"Burn");
-			statusDescription = Tr(L"Takes ") + std::to_wstring(burnDmg) + Tr(L" damage at end of turn, ignoring block.");
-		}
-		else if (mod.type == ModifierType::Regen) {
-			int regenAmount = static_cast<int>(std::round(mod.value));
-			valueText = std::to_wstring(regenAmount);
-			textColor = 0xFF9cdb43;
-			iconRect = { 272, 288, 288, 304 };
-			statusName = Tr(L"Regen");
-			statusDescription = Tr(L"Heals ") + std::to_wstring(regenAmount) + Tr(L" at end of turn.");
-		}
-		else if (mod.type == ModifierType::Marked) {
-			int markAmount = static_cast<int>(std::round(mod.value));
-			valueText = std::to_wstring(markAmount);
-			textColor = 0xFFfffc40;
-			iconRect = { 128, 256, 144, 272 };
-			statusName = Tr(L"Marked");
-			statusDescription = Tr(L"Takes ") + std::to_wstring(markAmount) + Tr(L" extra damage from every hit.");
-		}
-		else if (mod.type == ModifierType::Vulnerable) {
-			iconRect = { 96, 256, 112, 272 };
-			statusName = Tr(L"Vulnerable");
-			statusDescription = Tr(L"Takes 50% more damage from attacks.");
-		}
-		else if (mod.type == ModifierType::Weak) {
-			iconRect = { 112, 256, 128, 272 };
-			statusName = Tr(L"Weak");
-			statusDescription = Tr(L"Deals 25% less damage with attacks.");
-		}
-		else if (mod.type == ModifierType::Stun) {
-			textColor = 0xFFfffc40;
-			iconRect = { 224, 288, 240, 304 };
-			statusName = Tr(L"Stun");
-			statusDescription = Tr(L"Cannot take action this turn.");
-		}
-		else if (mod.type == ModifierType::Spark) {
-			int sparkStacks = static_cast<int>(std::round(mod.value));
-			valueText = std::to_wstring(sparkStacks);
-			textColor = 0xFFffaa00;
-			iconRect = { 272, 320, 288, 336 };
-			statusName = Tr(L"Spark");
-			statusDescription = Tr(L"Accumulates stacks. Deals no damage until detonated.");
-		}
-		else if (mod.type == ModifierType::Freeze) {
-			textColor = 0xFF588dbe;
-			iconRect = { 272, 304, 288, 320 };
-			statusName = Tr(L"Freeze");
-			statusDescription = Tr(L"Player's movement speed is reduced.");
-		}
-		else if (mod.type == ModifierType::Immunity) {
-			int charges = static_cast<int>(std::round(mod.value));
-			valueText = std::to_wstring(charges);
-			textColor = 0xFF00FFFF;
-			iconRect = { 256, 448, 272, 464};
-			statusName = Tr(L"Immunity");
-			statusDescription = Tr(L"Blocks debuffs and tick damage.\nLoses 1 charge per block.");
-		}
-		else if (mod.type == ModifierType::EnergyDrain) {
-			int drain = static_cast<int>(std::round(mod.value));
-			valueText = std::to_wstring(drain);
-			textColor = 0xFF40c4ff;
-			statusName = Tr(L"Energy Drain");
-			statusDescription = Tr(L"Reduces Energy gained at the start of your turn by ") + std::to_wstring(drain) + Tr(L".");
-		}
-		else if (mod.type == ModifierType::InvertedControls) {
-			nameText = Tr(L"Reversed");
-			textColor = 0xFFff66cc;
-			statusName = Tr(L"Reversed Controls");
-			statusDescription = Tr(L"Movement is flipped: up<->down, left<->right.");
-		}
-		else {
-			continue;
-		}
+		const float rowY = modY - 8.f;
+		const float rowWidth = statusRenderer->DrawRow(this->uiCamera, 0, x, rowY, *status);
 
-		float currentDrawX = x;
-		float hitBoxX = x;
-		float hitBoxY = modY - 8.f;
-		float hitBoxW = 32.f;
-		float hitBoxH = 32.f;
-
-		//icons/texts
-		if (iconRect.right > 0) {
-			attackBuffIcon->SetSrcRect(iconRect);
-			attackBuffIcon->SetPosition(currentDrawX, hitBoxY);
-			attackBuffIcon->SetScale(2.f, 2.f);
-			attackBuffIcon->Begin();
-			attackBuffIcon->Draw(this->uiCamera, 0);
-			attackBuffIcon->End();
-			currentDrawX += 36.f;
-		}
-		else if (!nameText.empty()) {
-			fontSprite->SetColor(textColor);
-			fontSprite->SetOutline(true, 0xFF000000, 3.f);
-			fontSprite->SetPosition(currentDrawX, modY);
-			fontSprite->SetText(std::move(nameText));
-			fontSprite->Begin();
-			fontSprite->Draw(this->uiCamera, 0);
-			fontSprite->End();
-
-			hitBoxY = modY;
-			hitBoxW = fontSprite->GetWidth();
-			hitBoxH = fontSprite->GetHeight();
-			currentDrawX += hitBoxW + 8.f;
-		}
-
-		//values
-		if (!valueText.empty()) {
-			fontSprite->SetColor(textColor);
-			fontSprite->SetOutline(true, 0xFF000000, 3.f);
-			fontSprite->SetPosition(currentDrawX, modY);
-			fontSprite->SetText(std::move(valueText));
-			fontSprite->Begin();
-			fontSprite->Draw(this->uiCamera, 0);
-			fontSprite->End();
-			currentDrawX += fontSprite->GetWidth() + 8.f;
-		}
-
-		//turns left
-		fontSprite->SetColor(0xFFFFFFFF);
-		fontSprite->SetOutline(true, 0xFF000000, 3.f);
-		fontSprite->SetPosition(currentDrawX, modY);
-		fontSprite->SetText(std::to_wstring(mod.duration) + L" turns");
-		fontSprite->Begin();
-		fontSprite->Draw(this->uiCamera, 0);
-		fontSprite->End();
-
-		bool isHovered = mouseX >= hitBoxX && mouseX <= hitBoxX + hitBoxW && mouseY >= hitBoxY && mouseY <= hitBoxY + hitBoxH;
+		bool isHovered = mouseX >= x && mouseX <= x + rowWidth
+			&& mouseY >= rowY && mouseY <= rowY + StatusRenderer::ROW_HEIGHT;
 		if (isHovered) {
 			isTooltipActive = true;
-			activeTooltipText = statusName + L" (" + std::to_wstring(mod.duration) + L" turns remaining)\n" + statusDescription;
+			activeTooltipText = status->Tooltip();
 		}
 
 		modY -= 32.f;

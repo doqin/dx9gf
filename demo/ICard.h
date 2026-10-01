@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "DX9GFExtras.h"
 #include "GameItems.h"
+#include "CardFrame.h"
 
 namespace Demo {
 	class DraggableManager;
@@ -83,9 +84,16 @@ namespace Demo {
 		// Status effects this card inflicts when it executes, and how re-applying them stacks -
 		// appended to the tooltip below GetDescription(). Empty for cards with no status effect.
 		virtual std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const { return {}; }
-		// The card's face artwork in assets/ui.png. Drawn at 2x in battle; also used by the
-		// card shop to show what is on sale. Empty for cards with no single-rect face.
-		virtual RECT GetFaceRect() const { return RECT{ 0, 0, 0, 0 }; }
+		// Which background in assets/cardtemplates.png the card is drawn on. The name and energy
+		// cost are drawn over it as text by CardFrame, in battle and in the shop alike.
+		virtual CardTemplate GetCardTemplate() const { return CardTemplate::Red; }
+		// Text on the card face. Derived from the class name, so a new card needs no art; override
+		// when the class name is not what the player should read.
+		virtual std::wstring GetDisplayName() const { return CardDisplayNameFromSaveID(GetSaveID()); }
+		// How many enemy cards the card takes and how many are attached right now, shown after its
+		// name as "(_)" / "(x)". Cards that take no input show "()".
+		virtual size_t GetInputSlotCount() const { return 0; }
+		virtual size_t GetFilledInputCount() const { return 0; }
 
 		static std::shared_ptr<ICard> CreateCard(
 			const std::string& id,

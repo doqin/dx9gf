@@ -33,10 +33,6 @@ void Demo::TerminateCard::CollectProjectedSteps(VirtualBattleState& state) {
 	}
 }
 
-void Demo::TerminateCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::InfernoCard::Execute() {
 	if (isDone) return true;
 	if (battleScene && owner) {
@@ -71,10 +67,6 @@ void Demo::InfernoCard::ResetExecution() {
 	isDone = false;
 }
 
-void Demo::InfernoCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::SystemPurgeCard::Execute() {
 	if (isDone) return true;
 	if (battleScene && owner) {
@@ -103,10 +95,6 @@ void Demo::SystemPurgeCard::ResetExecution() {
 	isDone = false;
 }
 
-void Demo::SystemPurgeCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::OverdriveCard::Execute() {
 	if (isDone) return true;
 	if (owner) {
@@ -120,10 +108,6 @@ bool Demo::OverdriveCard::Execute() {
 
 void Demo::OverdriveCard::ResetExecution() {
 	isDone = false;
-}
-
-void Demo::OverdriveCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
 }
 
 void Demo::OverdriveCard::CollectProjectedSteps(VirtualBattleState& state) {

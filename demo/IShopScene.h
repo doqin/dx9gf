@@ -9,6 +9,7 @@
 #include <vector>
 #include <functional>
 #include "IconButton.h"
+#include "CardFrame.h"
 #include "TextIconButton.h"
 #include "KeyboardNavigator.h"
 
@@ -42,6 +43,12 @@ namespace Demo {
 		int maxUses = 0;
 		// How many the player owns, shown as "xN" on Sell rows. 0 hides the count (all Buy rows).
 		int stackCount = 0;
+		// What a ShopIconSheet::CardFaces row draws: the same template, name and cost the card shows in
+		// battle, so shop rows can never drift from the real card.
+		CardTemplate cardTemplate = CardTemplate::Red;
+		std::wstring cardName;
+		size_t cardCost = 0;
+		std::wstring cardInputs;
 	};
 
 	class IShopScene : public DX9GF::IScene {
@@ -105,7 +112,7 @@ namespace Demo {
 		std::shared_ptr<DX9GF::NineSliceSprite> rowHoverSprite;
 		std::shared_ptr<DX9GF::NineSliceSprite> descSprite;
 		std::shared_ptr<DX9GF::StaticSprite> itemIconSprite;
-		std::shared_ptr<DX9GF::StaticSprite> cardFaceSprite;
+		std::shared_ptr<CardFrame> cardFrame;
 		std::shared_ptr<DX9GF::StaticSprite> goldIconSprite;
 
 		// The status cover a card shows in battle (uses cover panel, use pips, non-persistent

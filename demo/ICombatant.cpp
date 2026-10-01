@@ -110,6 +110,32 @@ namespace Demo {
 		return val;
 	}
 
+	int ICombatant::GetModifierDuration(ModifierType type) const {
+		int turns = 0;
+		for (const auto& mod : modifiers) {
+			if (mod.type == type && mod.duration > 0) turns += mod.duration;
+		}
+		return turns;
+	}
+
+	float ICombatant::RemoveBlock(float amount) {
+		const float removed = (std::min)(amount, temporaryDefense);
+		if (removed <= 0.f) return 0.f;
+
+		temporaryDefense -= removed;
+		// Same bookkeeping as a hit absorbed by block: the BuffDefense modifier shrinks with it.
+		float toDeduct = removed;
+		for (auto& mod : modifiers) {
+			if (mod.type == ModifierType::BuffDefense && mod.value > 0.f) {
+				const float deduct = (std::min)(mod.value, toDeduct);
+				mod.value -= deduct;
+				toDeduct -= deduct;
+				if (toDeduct <= 0.f) break;
+			}
+		}
+		return removed;
+	}
+
 	bool ICombatant::TryBlockWithImmunity() {
 		for (auto& mod : modifiers) {
 			if (mod.type == ModifierType::Immunity && mod.duration > 0) {

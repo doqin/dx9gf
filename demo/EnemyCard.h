@@ -5,8 +5,6 @@ namespace Demo {
 	class EnemyCard : public IExpressionCard {
 	private:
 		std::shared_ptr<IEnemy> enemy;
-		std::shared_ptr<DX9GF::Font> nameFont;
-		std::shared_ptr<DX9GF::FontSprite> nameFontSprite;
 		std::shared_ptr<DX9GF::Texture> arrowTexture;
 		std::shared_ptr<DX9GF::StaticSprite> arrowSprite;
 		std::shared_ptr<DX9GF::Texture> uiTexture;

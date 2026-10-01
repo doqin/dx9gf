@@ -28,6 +28,12 @@ namespace Demo {
 		void ResetExecution() override;
 		std::wstring GetInputsDescription() const override;
 		bool HasRequiredTargets() const override { return !targets.empty(); }
+		size_t GetInputSlotCount() const override { return maxTargets; }
+		size_t GetFilledInputCount() const override {
+			size_t filled = 0;
+			for (const auto& wp : targets) if (!wp.expired()) ++filled;
+			return filled;
+		}
 		bool CanAcceptEnemyCard() const override { return targets.size() < maxTargets && IsQueuedInBlock(); }
 		bool AttachEnemyCard(std::shared_ptr<EnemyCard> card) override;
 		void ReleaseEnemyCards() override;

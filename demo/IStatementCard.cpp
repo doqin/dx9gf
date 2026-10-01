@@ -25,6 +25,10 @@ int Demo::IStatementCard::GetStatusCoverPanelWidth() const
 
 void Demo::IStatementCard::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
 {
+	// The face is as wide as its name needs, so the drag area is sized here, before the base class
+	// builds the trigger from it. The constructor's width only stands in until a device exists.
+	frame = CardFrame::Get(graphicsDevice);
+	dragAreaWidth = static_cast<size_t>(frame->MeasureWidth(GetDisplayName(), CardInputSignature(GetInputSlotCount(), 0)));
 	IDraggable::Init(manager, graphicsDevice, camera);
 	trigger->SetWidth(GetWidth());
 }
@@ -126,25 +130,17 @@ void Demo::IStatementCard::DrawStatusCover(unsigned long long deltaTime)
 	}
 }
 
-void Demo::IStatementCard::DrawSheetFace(unsigned long long deltaTime, const RECT& srcRect)
+void Demo::IStatementCard::DrawCardFace(unsigned long long deltaTime)
 {
+	if (!frame) {
+		return;
+	}
 	if (isCropped) {
 		graphicsDevice->SetScissorRect(scissorRect);
 		graphicsDevice->SetScissorTest(true);
 	}
-	if (!faceTexture) {
-		faceTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		faceTexture->LoadTexture(L"assets/ui.png");
-		faceSprite = std::make_shared<DX9GF::StaticSprite>(faceTexture.get());
-		faceSprite->SetSrcRect(srcRect);
-	}
-	if (faceSprite) {
-		faceSprite->Begin();
-		faceSprite->SetPosition(GetWorldX(), GetWorldY());
-		faceSprite->SetScale(2.f, 2.f);
-		faceSprite->Draw(*camera, deltaTime);
-		faceSprite->End();
-	}
+	frame->Draw(*camera, deltaTime, GetWorldX(), GetWorldY(), GetCardTemplate(), GetDisplayName(),
+		CardInputSignature(GetInputSlotCount(), GetFilledInputCount()), GetCost());
 	if (isCropped) {
 		graphicsDevice->SetScissorTest(false);
 	}

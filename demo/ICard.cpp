@@ -5,6 +5,7 @@
 #include "EnergyCard.h"
 #include "UtilityCards.h"
 #include "FinisherCards.h"
+#include "SynergyCards.h"
 #include "MainBlockCard.h"
 
 std::shared_ptr<Demo::ICard> Demo::ICard::CreateCard(const std::string& id, std::weak_ptr<DX9GF::TransformManager> transformManager, std::shared_ptr<DraggableManager> draggableManager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
@@ -33,6 +34,19 @@ std::shared_ptr<Demo::ICard> Demo::ICard::CreateCard(const std::string& id, std:
 	else if (id == "MainBlockCard") card = std::make_shared<MainBlockCard>(transformManager);
 	else if (id == "IgniteCard") card = std::make_shared<IgniteCard>(transformManager);
 	else if (id == "FireDetonationCard") card = std::make_shared<FireDetonationCard>(transformManager);
+	else if (id == "ShortCircuitCard") card = std::make_shared<ShortCircuitCard>(transformManager);
+	else if (id == "ChainDetonationCard") card = std::make_shared<ChainDetonationCard>(transformManager);
+	else if (id == "StaticChargeCard") card = std::make_shared<StaticChargeCard>(transformManager);
+	else if (id == "ToxicCloudCard") card = std::make_shared<ToxicCloudCard>(transformManager);
+	else if (id == "FesteringCard") card = std::make_shared<FesteringCard>(transformManager);
+	else if (id == "ContagionCard") card = std::make_shared<ContagionCard>(transformManager);
+	else if (id == "SepticStrikeCard") card = std::make_shared<SepticStrikeCard>(transformManager);
+	else if (id == "KindleCard") card = std::make_shared<KindleCard>(transformManager);
+	else if (id == "FanTheFlamesCard") card = std::make_shared<FanTheFlamesCard>(transformManager);
+	else if (id == "MeltdownCard") card = std::make_shared<MeltdownCard>(transformManager);
+	else if (id == "BarrageCard") card = std::make_shared<BarrageCard>(transformManager);
+	else if (id == "DragnetCard") card = std::make_shared<DragnetCard>(transformManager);
+	else if (id == "HunterCard") card = std::make_shared<HunterCard>(transformManager);
 	else if (id == "RagingStrikeCard") card = std::make_shared<RagingStrikeCard>(transformManager);
 	else if (id == "OverloadCard") card = std::make_shared<OverloadCard>(transformManager);
 	else if (id == "ChainReactionCard") card = std::make_shared<ChainReactionCard>(transformManager);

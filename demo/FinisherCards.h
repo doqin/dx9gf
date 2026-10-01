@@ -19,11 +19,10 @@ namespace Demo {
 
 		size_t GetCost() const override { return 3; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 30 damage to an enemy, or 60 if it is below 40% health."); }
-		RECT GetFaceRect() const override { return RECT{ 160, 368, 240, 384 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Red; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	// Hits every living enemy with no EnemyCard targets attached, and stacks its Burn each turn
@@ -39,12 +38,11 @@ namespace Demo {
 		size_t GetCost() const override { return 3; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 8 damage to all enemies and apply Burn 5 for 3 turns."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Burn, true } }; }
-		RECT GetFaceRect() const override { return RECT{ 0, 384, 80, 400 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Orange; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	class SystemPurgeCard : public IStatementCard {
@@ -59,12 +57,11 @@ namespace Demo {
 		size_t GetCost() const override { return 4; }
 		std::wstring GetDescription() const override { return Tr(L"Deal 16 damage to all enemies and stun them for 1 turn."); }
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override { return { { ModifierType::Stun, false } }; }
-		RECT GetFaceRect() const override { return RECT{ 80, 384, 176, 400 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Pine; }
 
 		bool Execute() override;
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 
 	class OverdriveCard : public IStatementCard {
@@ -88,13 +85,12 @@ namespace Demo {
 		std::vector<AppliedStatusEffect> GetAppliedStatusEffects() const override {
 			return { { ModifierType::BuffDamage, true }, { ModifierType::Regen, true } };
 		}
-		RECT GetFaceRect() const override { return RECT{ 176, 384, 256, 400 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Chartreuse; }
 
 		bool Execute() override;
 		// The attack buff lands mid-program, so every hit queued after this one gains 4. Regen
 		// only heals the player, so it does not show up in the enemies' readout.
 		void CollectProjectedSteps(VirtualBattleState& state) override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 }

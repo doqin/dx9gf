@@ -5,6 +5,7 @@
 #include "AdvancedCards.h"
 #include "UtilityCards.h"
 #include "FinisherCards.h"
+#include "SynergyCards.h"
 #include "ICard.h"
 #include <cctype>
 #include <map>
@@ -71,6 +72,18 @@ void Demo::CardShop::LoadItems()
 		// selling the payoff without the setup would put a dead card in the player's deck.
 		AddShopCard<IgniteCard>("Ignite Card");
 		AddShopCard<FireDetonationCard>("Fire Detonation Card");
+		AddShopCard<ShortCircuitCard>("Short Circuit Card");
+		AddShopCard<StaticChargeCard>("Static Charge Card");
+		AddShopCard<ChainDetonationCard>("Chain Detonation Card");
+		// Poison, Burn and Marked build-arounds. Inferno, the only Burn source in this shop before Kindle,
+		// is sold in the Premium tier, so Meltdown sits next to it there.
+		AddShopCard<ToxicCloudCard>("Toxic Cloud Card");
+		AddShopCard<ContagionCard>("Contagion Card");
+		AddShopCard<SepticStrikeCard>("Septic Strike Card");
+		AddShopCard<KindleCard>("Kindle Card");
+		AddShopCard<FanTheFlamesCard>("Fan The Flames Card");
+		AddShopCard<DragnetCard>("Dragnet Card");
+		AddShopCard<BarrageCard>("Barrage Card");
 		// Cruel Strike doubles off Weak, which this tier already sells.
 		AddShopCard<CruelStrikeCard>("Cruel Strike Card");
 		AddShopCard<ShieldBashCard>("Shield Bash Card");
@@ -90,6 +103,9 @@ void Demo::CardShop::LoadItems()
 		AddShopCard<ChainReactionCard>("Chain Reaction Card");
 		AddShopCard<ExecuteCard>("Execute Card");
 		AddShopCard<OverloadCard>("Overload Card");
+		AddShopCard<FesteringCard>("Festering Card");
+		AddShopCard<MeltdownCard>("Meltdown Card");
+		AddShopCard<HunterCard>("Hunter Card");
 		// AddShopCard<StunCard>("Stun Card");
 		break;
 	}
@@ -118,8 +134,8 @@ void Demo::CardShop::LoadSellItems()
 		row.name = PrettyCardName(id);
 		row.cost = sellValue;
 		row.description = proto->GetDescription();
-		row.iconRect = proto->GetFaceRect();
 		row.iconSheet = ShopIconSheet::CardFaces;
+		ApplyCardFace(row, *proto);
 		row.isPersistent = proto->IsPersistent();
 		row.hasLimitedUses = proto->HasLimitedUses();
 		row.maxUses = proto->HasLimitedUses() ? proto->GetMaxUses() : 0;

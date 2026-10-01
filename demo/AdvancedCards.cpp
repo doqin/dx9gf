@@ -3,6 +3,7 @@
 #include "IBlockCard.h"
 #include "IBattleScene.h"
 #include "VirtualBattleState.h"
+#include <cmath>
 bool Demo::HeavyStrikeCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -13,30 +14,6 @@ bool Demo::HeavyStrikeCard::Execute() {
 	}
 	isDone = true;
 	return true;
-}
-
-void Demo::HeavyStrikeCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
 }
 
 bool Demo::TwinStrikeCard::Execute() {
@@ -55,30 +32,6 @@ bool Demo::TwinStrikeCard::Execute() {
 	return false;
 }
 
-void Demo::TwinStrikeCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
-}
-
 void Demo::TwinStrikeCard::ResetExecution() {
 	MultiTargetCard::ResetExecution();
 	hits = 0;
@@ -94,30 +47,6 @@ bool Demo::CleaveCard::Execute() {
 	}
 	isDone = true;
 	return true;
-}
-
-void Demo::CleaveCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
 }
 
 bool Demo::ChainLightningCard::Execute() {
@@ -153,30 +82,6 @@ void Demo::ChainLightningCard::CollectProjectedSteps(VirtualBattleState& state) 
 	}
 }
 
-void Demo::ChainLightningCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
-}
-
 bool Demo::PoisonCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -190,10 +95,6 @@ bool Demo::PoisonCard::Execute() {
 	return true;
 }
 
-void Demo::PoisonCard::DrawCardFace(unsigned long long deltaTime) { 
-	DrawSheetFace(deltaTime, GetFaceRect()); 
-}
-
 bool Demo::VulnerableCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -203,11 +104,6 @@ bool Demo::VulnerableCard::Execute() {
 	}
 	isDone = true;
 	return true;
-}
-
-void Demo::VulnerableCard::DrawCardFace(unsigned long long deltaTime)
-{
-	DrawSheetFace(deltaTime, GetFaceRect());
 }
 
 bool Demo::WeaknessCard::Execute() {
@@ -221,10 +117,6 @@ bool Demo::WeaknessCard::Execute() {
 	return true;
 }
 
-void Demo::WeaknessCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::StunCard::Execute() {
 	if (isDone) return true;
 	if (!targets.empty()) {
@@ -236,37 +128,13 @@ bool Demo::StunCard::Execute() {
 	return true;
 }
 
-void Demo::StunCard::Draw(unsigned long long deltaTime) {
-	if (isCropped) {
-		graphicsDevice->SetScissorRect(scissorRect);
-		graphicsDevice->SetScissorTest(true);
-	}
-	if (!strikeTexture) {
-		strikeTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-		strikeTexture->LoadTexture(L"assets/ui.png");
-		strikeSprite = std::make_shared<DX9GF::StaticSprite>(strikeTexture.get());
-		strikeSprite->SetSrcRect(GetFaceRect());
-	}
-	if (strikeSprite) {
-		strikeSprite->Begin();
-		strikeSprite->SetPosition(GetWorldX(), GetWorldY());
-		strikeSprite->SetScale(2.f, 2.f);
-		strikeSprite->Draw(*camera, deltaTime);
-		strikeSprite->End();
-	}
-	if (isCropped) {
-		graphicsDevice->SetScissorTest(false);
-	}
-	MultiTargetCard::Draw(deltaTime);
-}
-
 bool Demo::IgniteCard::Execute() {
 	if (isDone) return true;
 	if (targets.empty()) { isDone = true; return true; }
 	auto target = targets[0].lock();
 	if (!target || !target->GetValue() || target->GetValue()->IsDead()) { isDone = true; return true; }
 
-	target->GetValue()->AddStackingModifier(ModifierType::Spark, 3, 2.f, false);
+	target->GetValue()->AddStackingModifier(ModifierType::Spark, 3, 3.f, false);
 	isDone = true;
 	return true;
 }
@@ -280,7 +148,7 @@ bool Demo::FireDetonationCard::Execute() {
 	auto enemy = target->GetValue();
 	float sparkStacks = enemy->ConsumeModifier(ModifierType::Spark);
 
-	float finalDamage = 3.f + (sparkStacks * 5.f);
+	float finalDamage = 4.f + (sparkStacks * 8.f);
 
 	if (owner) {
 		owner->DealDamage(enemy.get(), finalDamage);
@@ -297,9 +165,75 @@ void Demo::FireDetonationCard::CollectProjectedSteps(VirtualBattleState& state) 
 	auto it = state.enemies.find(enemy);
 	if (it != state.enemies.end()) {
 		float currentSpark = it->second.spark;
-		float finalDamage = 3.f + (currentSpark * 5.f);
+		float finalDamage = 4.f + (currentSpark * 8.f);
 		it->second.spark = 0.f;
 		state.SimulateDamage(enemy, finalDamage);
+	}
+}
+
+bool Demo::ShortCircuitCard::Execute() {
+	if (isDone) return true;
+	if (targets.empty()) { isDone = true; return true; }
+	auto target = targets[0].lock();
+	if (!target || !target->GetValue() || target->GetValue()->IsDead()) { isDone = true; return true; }
+
+	auto enemy = target->GetValue();
+	if (owner) owner->DealDamage(enemy.get(), 4.f);
+	// A dead enemy lingers in the list until it is collected; stacking Spark on it is wasted.
+	if (!enemy->IsDead()) {
+		enemy->AddStackingModifier(ModifierType::Spark, 3, 2.f, false);
+	}
+	isDone = true;
+	return true;
+}
+
+void Demo::ShortCircuitCard::CollectProjectedSteps(VirtualBattleState& state) {
+	CollectHitsOnTargets(state, 4.f, 1);
+	CollectEffectOnTargets(state, ModifierType::Spark, 2.f, 3, 1);
+}
+
+bool Demo::ChainDetonationCard::Execute() {
+	if (isDone) return true;
+	if (battleScene && owner) {
+		for (auto& enemy : battleScene->GetEnemies()) {
+			if (!enemy || enemy->IsDead()) continue;
+			const float stacks = enemy->ConsumeModifier(ModifierType::Spark);
+			owner->DealDamage(enemy.get(), 6.f + stacks * 8.f);
+		}
+	}
+	isDone = true;
+	return true;
+}
+
+void Demo::ChainDetonationCard::CollectProjectedSteps(VirtualBattleState& state) {
+	if (!battleScene) return;
+	for (auto& enemy : battleScene->GetEnemies()) {
+		if (!enemy || enemy->IsDead()) continue;
+		auto it = state.enemies.find(enemy.get());
+		if (it == state.enemies.end()) continue;
+		const float stacks = it->second.spark;
+		it->second.spark = 0.f;
+		state.SimulateDamage(enemy.get(), 6.f + stacks * 8.f);
+	}
+}
+
+bool Demo::StaticChargeCard::Execute() {
+	if (isDone) return true;
+	if (battleScene) {
+		for (auto& enemy : battleScene->GetEnemies()) {
+			if (!enemy || enemy->IsDead()) continue;
+			enemy->AddStackingModifier(ModifierType::Spark, 3, 2.f, false);
+		}
+	}
+	isDone = true;
+	return true;
+}
+
+void Demo::StaticChargeCard::CollectProjectedSteps(VirtualBattleState& state) {
+	if (!battleScene) return;
+	for (auto& enemy : battleScene->GetEnemies()) {
+		if (!enemy || enemy->IsDead()) continue;
+		state.SimulateEnemyModifier(enemy.get(), ModifierType::Spark, 2.f, 3);
 	}
 }
 
@@ -357,10 +291,6 @@ void Demo::OverloadCard::CollectProjectedSteps(VirtualBattleState& state) {
 		}
 	}
 	CollectHitsOnTargets(state, 5.f + bonusDamage, 1);
-}
-
-void Demo::OverloadCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
 }
 
 bool Demo::ChainReactionCard::Execute() {
@@ -475,10 +405,6 @@ void Demo::ChainReactionCard::CollectProjectedSteps(VirtualBattleState& state) {
 
 	state.SimulateDamage(finalTargetEnemy, finalDamage);
 }
-void Demo::ChainReactionCard::DrawCardFace(unsigned long long deltaTime) {
-	DrawSheetFace(deltaTime, GetFaceRect());
-}
-
 bool Demo::LethalHarvestCard::Execute() {
 	if (isDone) return true;
 	if (targets.empty()) { isDone = true; return true; }

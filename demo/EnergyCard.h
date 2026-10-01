@@ -8,8 +8,6 @@ namespace Demo {
 	class EnergyCard : public IStatementCard {
 	private:
 		bool isDone = false;
-		std::shared_ptr<DX9GF::Texture> cardTexture;
-		std::shared_ptr<DX9GF::StaticSprite> cardSprite;
 	public:
 		EnergyCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), IStatementCard(tm, 160, 32, x, y) {
@@ -18,10 +16,9 @@ namespace Demo {
 
 		size_t GetCost() const override { return 1; }
 		std::wstring GetDescription() const override { return Tr(L"Gain 1 extra energy next turn."); }
-		RECT GetFaceRect() const override { return RECT{ 0, 336, 80, 352 }; }
+		CardTemplate GetCardTemplate() const override { return CardTemplate::Cyan; }
 
 		bool Execute() override;
 		void ResetExecution() override;
-		void DrawCardFace(unsigned long long deltaTime) override;
 	};
 }
