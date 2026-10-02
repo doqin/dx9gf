@@ -46,6 +46,63 @@ void Demo::IEnemy::Update(unsigned long long deltaTime)
 	projectiles.Update(deltaTime);
 	commandBuffer.Update(deltaTime);
 	animationBuffer.Update(deltaTime);
+	UpdateDeath(deltaTime);
+}
+
+void Demo::IEnemy::BeginDeath()
+{
+	if (isDying) return;
+	isDying = true;
+	deathTimer = 0.f;
+	deathBurstSpawned = false;
+	if (auto* body = GetBodySprite()) {
+		deathBaseScale = body->GetScale().x;
+	}
+	if (graphicsDevice) {
+		deathParticleTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		deathParticleTexture->CreatePlainTexture(0xFFFFFFFF, 4, 4);
+		deathParticles = std::make_unique<DX9GF::ParticleSystem>(deathParticleTexture.get(), 60);
+		deathParticles->SetOrigin(2.f, 2.f);
+		DX9GF::ConfigureExplosionEmitter(*deathParticles);
+	}
+	DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 1.0f);
+}
+
+void Demo::IEnemy::UpdateDeath(unsigned long long deltaTime)
+{
+	if (!isDying) return;
+	deathTimer += static_cast<float>(deltaTime);
+
+	if (!deathBurstSpawned && deathTimer >= DEATH_FLASH_MS) {
+		deathBurstSpawned = true;
+		if (deathParticles) {
+			constexpr float TWO_PI = 6.2831853f;
+			for (int i = 0; i < 36; ++i) {
+				float ang = RNG::Range(0.f, TWO_PI);
+				float speed = RNG::Range(80.f, 300.f);
+				deathParticles->Spawn(GetWorldX(), GetWorldY(), ang,
+					RNG::Range(0.8f, 1.6f), RNG::Range(0.8f, 1.6f), 0xFFFFFFFF,
+					std::cos(ang) * speed, std::sin(ang) * speed);
+			}
+		}
+	}
+	if (deathParticles) {
+		deathParticles->Update(deltaTime, GetWorldX(), GetWorldY(), 0.f, 1.f, 1.f, 0xFFFFFFFF, false);
+	}
+
+	if (auto* body = GetBodySprite()) {
+		if (deathTimer < DEATH_FLASH_MS) {
+			// Sprite colour only modulates (can't brighten), so the flash is a hard red tint.
+			body->SetColor(D3DCOLOR_ARGB(255, 255, 70, 70));
+		}
+		else {
+			const float fadeMs = 450.f;
+			float t = std::clamp((deathTimer - DEATH_FLASH_MS) / fadeMs, 0.f, 1.f);
+			BYTE a = static_cast<BYTE>(255.f * (1.f - t));
+			body->SetColor(D3DCOLOR_ARGB(a, 255, 70, 70));
+			body->SetScale(deathBaseScale * (1.f - 0.4f * t));
+		}
+	}
 }
 
 void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
@@ -69,7 +126,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 		statusRenderer = StatusRenderer::Get(graphicsDevice);
 	}
 
-	if (!isOnStandby && cardSpawnTrigger) {
+	if (!isOnStandby && cardSpawnTrigger && !isDying) {
 		bool isHovered = cardSpawnTrigger->IsHovering(deltaTime);
 
 		const float triggerLeft = cardSpawnTrigger->GetWorldX() - cardSpawnTrigger->GetOriginX();
@@ -164,7 +221,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 		graphicsDevice->SetAlphaBlending(false);
 	}
 
-	if (cardSpawnTrigger) {
+	if (cardSpawnTrigger && !isDying) {
 		cardSpawnTrigger->Draw(graphicsDevice, *camera);
 	}
 
@@ -177,7 +234,9 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 	fontSprite->SetColor(0xFFFFFFFF);
 	fontSprite->SetPosition(GetWorldX(), GetWorldY() - 105.f);
 	fontSprite->SetText(std::move(healthText));
-	fontSprite->Draw(*camera, deltaTime);
+	if (!isDying) {
+		fontSprite->Draw(*camera, deltaTime);
+	}
 
 	for (auto it = hitImpactSprites.begin(); it != hitImpactSprites.end(); ) {
 		auto& sprite = *it;
@@ -213,6 +272,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 	auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(*camera, screenX, screenY);
 
 	for (const auto& mod : modifiers) {
+		if (isDying) break;
 		if (mod.type == ModifierType::BuffDefense && mod.value <= 0.f) continue;
 		if (mod.duration <= 0) continue;
 
@@ -261,6 +321,12 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 
 	fontSprite->End();
 	projectiles.Draw(graphicsDevice, *camera, deltaTime);
+
+	if (deathParticles) {
+		graphicsDevice->SetAlphaBlending(true);
+		deathParticles->Draw(*camera, deltaTime);
+		graphicsDevice->SetAlphaBlending(false);
+	}
 }
 
 bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
@@ -302,6 +368,7 @@ bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox, oy, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
 	}
 
+	if (IsDead()) BeginDeath();
 	return IsDead();
 }
 
@@ -338,6 +405,7 @@ bool Demo::IEnemy::TakeIndirectDamage(float damage, DamageType type) {
 		textColor
 		});
 
+	if (IsDead()) BeginDeath();
 	return IsDead();
 }
 
@@ -348,7 +416,8 @@ void Demo::IEnemy::SetState(bool isOnStandby)
 
 bool Demo::IEnemy::IsDoneAttacking()
 {
-	return !commandBuffer.IsBusy() && !animationBuffer.IsBusy() && projectiles.IsEmpty() && hitImpactSprites.empty();
+	const bool deathDone = !isDying || deathTimer >= DEATH_DURATION_MS;
+	return !commandBuffer.IsBusy() && !animationBuffer.IsBusy() && projectiles.IsEmpty() && hitImpactSprites.empty() && deathDone;
 }
 
 int Demo::IEnemy::GetSmartRandomPattern(const int&& minPattern, const int&& maxPattern)
