@@ -48,6 +48,22 @@ namespace Demo {
 		int lastPattern = -1;
 		int streakCount = 0;
 		int GetSmartRandomPattern(const int&& minPattern, const int&& maxPattern);
+
+		// Main body sprite, tinted/scaled by the death animation. Null means particles only.
+		virtual DX9GF::ISprite* GetBodySprite() { return nullptr; }
+
+		// Programmatic death animation: red flash, fade + shrink, then a burst of particles.
+		// IsDoneAttacking() stays false until it finishes so the scene waits before collecting.
+		static constexpr float DEATH_FLASH_MS = 150.f;
+		static constexpr float DEATH_DURATION_MS = 800.f; // burst lifetime (500ms) after the flash
+		bool isDying = false;
+		float deathTimer = 0.f;
+		float deathBaseScale = 1.f;
+		bool deathBurstSpawned = false;
+		std::shared_ptr<DX9GF::Texture> deathParticleTexture;
+		std::unique_ptr<DX9GF::ParticleSystem> deathParticles;
+		void BeginDeath();
+		void UpdateDeath(unsigned long long deltaTime);
 	public:
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth) : ICombatant(tm, maxHealth) {}
 
