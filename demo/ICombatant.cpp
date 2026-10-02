@@ -52,7 +52,8 @@ namespace Demo {
 	float ICombatant::CalculateOutgoingDamage(float baseDamage) const {
 		float finalDamage = baseDamage + GetModifierValue(ModifierType::BuffDamage);
 		if (HasModifier(ModifierType::Weak)) {
-			finalDamage *= 0.75f;
+			// Damage is displayed as whole numbers, so keep it whole; a hit that had damage never drops to 0.
+			if (finalDamage > 0.f) finalDamage = (std::max)(1.f, std::floor(finalDamage * 0.75f));
 		}
 		return finalDamage;
 	}
@@ -150,7 +151,7 @@ namespace Demo {
 	}
 
 	bool ICombatant::TakeIndirectDamage(float damage, DamageType type) {
-		health -= damage;
+		health -= std::round(damage);
 		if (health < 0) health = 0;
 		return IsDead();
 	}

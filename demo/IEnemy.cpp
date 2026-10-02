@@ -331,7 +331,8 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 
 bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 {
-	float actualDamage = CalculateActualDamage(damage, ignoreArmor);
+	// Vulnerable/Weak can leave fractions; health is shown rounded, so a leftover 0.25 would read as 0 HP but alive.
+	float actualDamage = std::round(CalculateActualDamage(damage, ignoreArmor));
 	health -= actualDamage;
 	if (health < 0) health = 0;
 
@@ -373,6 +374,7 @@ bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 }
 
 bool Demo::IEnemy::TakeIndirectDamage(float damage, DamageType type) {
+	damage = std::round(damage);
 	health -= damage;
 	if (health < 0) health = 0;
 
