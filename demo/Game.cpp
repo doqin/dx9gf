@@ -138,6 +138,8 @@ void Demo::Game::Init()
 	audio->Load("checkpoint", IDR_CHECKPOINT);
 	audio->Load("quest_active", IDR_QUEST_ACTIVE);
 	audio->Load("quest_completed", IDR_QUEST_COMPLETED);
+	audio->Load("projectile_spawn", IDR_SFX_PROJECTILE_SPAWN);
+	audio->Load("projectile_launch", IDR_SFX_PROJECTILE_LAUNCH);
 
 	//load maps bgm
 	audio->Load("bgm_tutorial", IDR_BGM_TUTORIAL);

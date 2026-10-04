@@ -31,6 +31,8 @@ namespace DX9GF {
 		//play last sound byte will trigger XAudio2 to use this function
 		void STDMETHODCALLTYPE OnBufferEnd(void* pBufferContext) override
 		{
+			//a buffer with a context is an intro that is followed by more audio, not the end of the sound
+			if (pBufferContext) return;
 			isFinished = true;
 		}
 
@@ -72,6 +74,13 @@ namespace DX9GF {
 		float fadeTime = 2.0f;
 	};
 
+	//music that plays an intro once, then loops the main track (same wave format required)
+	struct IntroLoop
+	{
+		std::string intro;
+		std::string loop;
+	};
+
 	bool LoadWavFromResource(int resourceID, SoundBuffer& out_audio);
 
 	class AudioManager {
@@ -82,8 +91,9 @@ namespace DX9GF {
 		std::map<std::string, std::vector<std::string>> soundBanks;
 		std::vector<ActiveVoice*> activeVoices; //list of playing sound
 		std::map<std::string, StemSet> stemSets;
+		std::map<std::string, IntroLoop> introLoops;
 
-		ActiveVoice* PlayInternal(std::string name, bool loop, float volume, AudioType type, std::string group, float fadeMul, bool startNow);
+		ActiveVoice* PlayInternal(std::string name, bool loop, float volume, AudioType type, std::string group, float fadeMul, bool startNow, const std::string& introName = "");
 		void PlayStemSet(std::string setName, float volume);
 		void ApplyVoiceVolume(ActiveVoice* av);
 
@@ -131,6 +141,10 @@ namespace DX9GF {
 		//background music
 		void PlayBGM_Fade(std::string name, float targetVolume = 0.5f, float duration = 1.5f);
 		void PlayRandomBGM_Fade(std::string bankName, float targetVolume = 0.5f, float duration = 1.5f);
+
+		//intro-then-loop music: register already-loaded tracks, then play with PlayBGM_Fade(name).
+		//the intro is heard at full level (no fade-in) and flows seamlessly into the looping track
+		void RegisterIntroLoop(std::string name, std::string introName, std::string loopName);
 
 		//dynamic music: register already-loaded, equal-length stems, then play the set with PlayBGM_Fade(setName)
 		void RegisterStemSet(std::string setName, std::vector<std::string> stemNames);

@@ -17,12 +17,9 @@ namespace Demo {
         IBattleScene::Init();
         std::string finalBGM = encounter.bgmName;
 
-        if (finalBGM == "battle_loop") {
-            std::vector<std::string> bgmPool = {
-                "battle_loop1", "battle_loop2",
-                "battle_loop3", "battle_loop4"
-            };
-            finalBGM = bgmPool[RNG::Range(0, bgmPool.size() - 1)];
+        // regular (non-boss) encounters all share the intro + loop battle track
+        if (finalBGM.rfind("battle_loop", 0) == 0) {
+            finalBGM = "battle_bgm";
         }
 
         this->SetCustomBGM(finalBGM);

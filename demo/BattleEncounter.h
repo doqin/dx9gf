@@ -16,7 +16,7 @@ namespace Demo {
 		std::vector<std::string> enemyTypes;
 		std::vector<std::string> randomPool;
 		bool useGlobalPool = false;
-		std::string bgmName = "battle_loop1";
+		std::string bgmName = "battle_bgm";
 		std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDrawFunc = nullptr;
 
 		std::wstring mapTexturePath;
