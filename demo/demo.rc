@@ -203,6 +203,14 @@ IDR_BGM_B4              WAVE                    "assets\\audio\\battle-loop4.wav
 
 IDR_BGM_BOSS            WAVE                    "assets\\audio\\boss-loop.wav"
 
+IDR_BGM_BATTLE_I        WAVE                    "assets\\audio\\battle_I.wav"
+
+IDR_BGM_BATTLE_I_INTRO  WAVE                    "assets\\audio\\battle_I_intro.wav"
+
+IDR_SFX_PROJECTILE_SPAWN WAVE                   "assets\\audio\\projectile_spawn.wav"
+
+IDR_SFX_PROJECTILE_LAUNCH WAVE                  "assets\\audio\\projectile_launch.wav"
+
 IDR_BGM_SECRET          WAVE                    "assets\\audio\\secret-loop.wav"
 
 IDR_BGM_BOSSWORLD_BASE     WAVE                    "assets\\audio\\bossworld-base.wav"

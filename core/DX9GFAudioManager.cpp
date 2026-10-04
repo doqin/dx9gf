@@ -125,7 +125,7 @@ void DX9GF::AudioManager::Play(std::string name, bool loop, float volume, AudioT
 	PlayInternal(name, loop, volume, type, name, 1.0f, true);
 }
 
-DX9GF::ActiveVoice* DX9GF::AudioManager::PlayInternal(std::string name, bool loop, float volume, AudioType type, std::string group, float fadeMul, bool startNow)
+DX9GF::ActiveVoice* DX9GF::AudioManager::PlayInternal(std::string name, bool loop, float volume, AudioType type, std::string group, float fadeMul, bool startNow, const std::string& introName)
 {
 	//set a limit voice count to protect the engine
 	if (activeVoices.size() > 64) {
@@ -164,6 +164,16 @@ DX9GF::ActiveVoice* DX9GF::AudioManager::PlayInternal(std::string name, bool loo
 	av->fadeMul = fadeMul;
 	av->fadeFrom = fadeMul;
 	ApplyVoiceVolume(av);
+	//optional intro: queued first and played once, the main buffer follows gaplessly
+	auto introIt = introName.empty() ? cache.end() : cache.find(introName);
+	if (introIt != cache.end())
+	{
+		XAUDIO2_BUFFER introBuffer = introIt->second->buffer;
+		introBuffer.LoopCount = 0;
+		introBuffer.Flags = 0; //the stream continues into the main buffer
+		introBuffer.pContext = cb; //non-null context marks "not the final buffer" for OnBufferEnd
+		pVoice->SubmitSourceBuffer(&introBuffer);
+	}
 	//play the sound
 	pVoice->SubmitSourceBuffer(&data->buffer);
 	if (startNow) pVoice->Start(0);
@@ -189,7 +199,8 @@ void DX9GF::AudioManager::Update(unsigned long long deltaTime) {
 					ApplyVoiceVolume(av);
 				}
 
-				if (av->group == fadingInSound) {
+				//intro music starts at full level so its first notes aren't faded away
+				if (av->group == fadingInSound && !introLoops.count(av->group)) {
 					av->fadeMul = progress;
 					ApplyVoiceVolume(av);
 				}
@@ -370,6 +381,10 @@ void DX9GF::AudioManager::PlayBGM_Fade(std::string name, float targetVolume, flo
 
 	// Start the incoming track silent right away so it crossfades with the outgoing one
 	if (stemSets.count(name)) PlayStemSet(name, targetVolume);
+	else if (introLoops.count(name)) {
+		const IntroLoop& il = introLoops[name];
+		PlayInternal(il.loop, true, targetVolume, AudioType::MUSIC, name, 1.0f, true, il.intro);
+	}
 	else PlayInternal(name, true, targetVolume, AudioType::MUSIC, name, 0.0f, true);
 }
 
@@ -391,6 +406,11 @@ void DX9GF::AudioManager::PlayStemSet(std::string setName, float volume)
 	const UINT32 opSet = 1;
 	for (auto av : started) av->pVoice->Start(0, opSet);
 	pEngine->CommitChanges(opSet);
+}
+
+void DX9GF::AudioManager::RegisterIntroLoop(std::string name, std::string introName, std::string loopName)
+{
+	introLoops[name] = IntroLoop{ introName, loopName };
 }
 
 void DX9GF::AudioManager::RegisterStemSet(std::string setName, std::vector<std::string> stemNames)

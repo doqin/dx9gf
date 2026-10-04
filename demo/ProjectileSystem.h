@@ -248,6 +248,7 @@ namespace Demo {
 			float delay, elapsed, decayTime;
 			bool arrivalHeld = false;
 			float holdRemaining = 0.f;
+			bool launched = false; // delay finished and the projectile has started moving
 		};
 		struct CombatComponent {
 			float damage;
@@ -332,6 +333,10 @@ namespace Demo {
 			unsigned int batchIndex;
 		};
 		std::vector<PendingBurst> pendingBursts;
+
+		// Patterns spawn many projectiles at once; cooldowns keep their sounds from stacking.
+		float spawnSfxCooldown = 0.f;
+		float launchSfxCooldown = 0.f;
 
 		std::vector<SpriteBatch> batches;
 		std::weak_ptr<Player> target;

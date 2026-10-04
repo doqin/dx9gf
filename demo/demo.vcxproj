@@ -845,6 +845,10 @@
     <Media Include="assets\audio\battle-loop2.wav" />
     <Media Include="assets\audio\battle-loop3.wav" />
     <Media Include="assets\audio\battle-loop4.wav" />
+    <Media Include="assets\audio\battle_I.wav" />
+    <Media Include="assets\audio\battle_I_intro.wav" />
+    <Media Include="assets\audio\projectile_spawn.wav" />
+    <Media Include="assets\audio\projectile_launch.wav" />
     <Media Include="assets\audio\battle_boss.wav" />
     <Media Include="assets\audio\bleeps\bleep001.wav" />
     <Media Include="assets\audio\bleeps\bleep002.wav" />

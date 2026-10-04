@@ -128,7 +128,7 @@ void Demo::IBattleScene::StartBattle()
 		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(customBGMName, 0.3f, 1.5f);
 	}
 	else {
-		DX9GF::AudioManager::GetInstance()->PlayRandomBGM_Fade("battle_bgm", 0.3f, 1.5f);
+		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("battle_bgm", 0.3f, 1.5f);
 	}
 
 	if (battleEventType == EventType::Gold) {
@@ -3375,13 +3375,12 @@ void Demo::IBattleScene::Init()
 
 	//Init BGM
 	auto audio = DX9GF::AudioManager::GetInstance();
-	audio->Load("battle_loop1", IDR_BGM_B1);
-	audio->Load("battle_loop2", IDR_BGM_B2);
-	audio->Load("battle_loop3", IDR_BGM_B3);
-	audio->Load("battle_loop4", IDR_BGM_B4);
+	audio->Load("battle_I", IDR_BGM_BATTLE_I);
+	audio->Load("battle_I_intro", IDR_BGM_BATTLE_I_INTRO);
 	audio->Load("battle_boss", IDR_BGM_BAT_BOSS);
 
-	audio->RegisterBank("battle_bgm", { "battle_loop1","battle_loop2","battle_loop3","battle_loop4" });
+	//intro plays once, then the main track loops
+	audio->RegisterIntroLoop("battle_bgm", "battle_I_intro", "battle_I");
 
 	//token sfx
 	audio->Load("token_collect1", IDR_TOKEN_COLLECT1);

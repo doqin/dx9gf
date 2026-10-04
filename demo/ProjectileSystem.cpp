@@ -2,6 +2,7 @@
 #include "ProjectileSystem.h"
 #include "RNG.h"
 #include <cmath>
+#include "DX9GFAudioManager.h"
 
 namespace {
 	constexpr float floatEpsilon = 0.000001f;
@@ -524,6 +525,11 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 {
 	target = player;
 
+	if (spawnSfxCooldown <= 0.f) {
+		DX9GF::AudioManager::GetInstance()->Play("projectile_spawn", false, 0.35f);
+		spawnSfxCooldown = 0.05f;
+	}
+
 	transforms.push_back({ desc.x, desc.y, 0.f });
 
 	MotionComponent motion{};
@@ -808,11 +814,13 @@ void Demo::ProjectileSystem::EmitBurst(const PendingBurst& burst)
 
 void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 {
+	const float dtSec = deltaTime / 1000.f;
+	spawnSfxCooldown -= dtSec;
+	launchSfxCooldown -= dtSec;
+
 	if (transforms.empty() && lasers.empty()) {
 		return;
 	}
-
-	const float dtSec = deltaTime / 1000.f;
 	auto player = target.lock();
 
 	RectShape playerRect;
@@ -848,6 +856,14 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 		}
 		else {
 			if (life.elapsed >= life.delay) {
+				if (!life.launched) {
+					life.launched = true;
+					// only projectiles that actually waited get a launch sound
+					if (life.delay > 0.f && launchSfxCooldown <= 0.f) {
+						DX9GF::AudioManager::GetInstance()->Play("projectile_launch", false, 0.4f);
+						launchSfxCooldown = 0.05f;
+					}
+				}
 				switch (motion.behavior) {
 				case ProjectileBehavior::Straight: {
 					tr.x += motion.trajectory.x * motion.velocity * dtSec;
