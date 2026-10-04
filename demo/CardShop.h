@@ -2,6 +2,7 @@
 #include "IShopScene.h"
 #include "CardCatalog.h"
 #include "LocalizationManager.h"
+#include <algorithm>
 
 namespace Demo {
 	class CardShop : public IShopScene {
@@ -34,6 +35,13 @@ namespace Demo {
 				prototype.HasLimitedUses() ? prototype.GetMaxUses() : 0
 				});
 			ApplyCardFace(itemsForSale.back(), prototype);
+			const std::string saveId = prototype.GetSaveID();
+			itemsForSale.back().ownedCount = [this, saveId]() {
+				const auto& inv = this->player->GetInventoryCards();
+				const auto& deck = this->player->GetDeck();
+				return static_cast<int>(std::count(inv.begin(), inv.end(), saveId) +
+					std::count(deck.begin(), deck.end(), saveId));
+				};
 		}
 	public:
         CardShop(Game* game, Player* player, int screenWidth, int screenHeight, ShopTier tier);

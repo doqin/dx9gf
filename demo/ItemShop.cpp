@@ -18,6 +18,12 @@ void Demo::ItemShop::AddShopItem(int itemID, int price)
 			blueprint->GetItemRect(),
 			ShopIconSheet::Items
 			});
+		itemsForSale.back().ownedCount = [this, itemID]() {
+			for (const auto& slot : this->player->GetInventoryItems().GetSlots()) {
+				if (slot.itemID == itemID) return slot.quantity;
+			}
+			return 0;
+			};
 	}
 }
 

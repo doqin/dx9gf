@@ -41,7 +41,7 @@ namespace Demo {
 		bool isPersistent = true;
 		bool hasLimitedUses = false;
 		int maxUses = 0;
-		// How many the player owns, shown as "xN" on Sell rows. 0 hides the count (all Buy rows).
+		// How many the player owns, shown as "xN" on Sell rows. Buy rows use ownedCount instead.
 		int stackCount = 0;
 		// What a ShopIconSheet::CardFaces row draws: the same template, name and cost the card shows in
 		// battle, so shop rows can never drift from the real card.
@@ -49,6 +49,9 @@ namespace Demo {
 		std::wstring cardName;
 		size_t cardCost = 0;
 		std::wstring cardInputs;
+		// Buy rows only: how many of this ware the player already owns, re-read every frame so the
+		// "Owned: N" label stays correct right after a purchase. Empty on Sell rows.
+		std::function<int()> ownedCount;
 	};
 
 	class IShopScene : public DX9GF::IScene {
