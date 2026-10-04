@@ -34,7 +34,7 @@ void Demo::IntroScene::Update(unsigned long long deltaTime) {
 
     if (!conversation && !hasTransitioned) {
         hasTransitioned = true;
-        DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_tutorial", 0.5f, 1.5f);
+        DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_tutorial", 0.5f, 5.0f);
         game->GetSceneManager()->GoToNext();
     }
 }

@@ -205,6 +205,14 @@ IDR_BGM_BOSS            WAVE                    "assets\\audio\\boss-loop.wav"
 
 IDR_BGM_SECRET          WAVE                    "assets\\audio\\secret-loop.wav"
 
+IDR_BGM_BOSSWORLD_BASE     WAVE                    "assets\\audio\\bossworld-base.wav"
+
+IDR_BGM_BOSSWORLD_ISLAND12 WAVE                    "assets\\audio\\bossworld-island12.wav"
+
+IDR_BGM_BOSSWORLD_ISLAND3  WAVE                    "assets\\audio\\bossworld-island3.wav"
+
+IDR_BGM_BOSSWORLD_ISLAND4  WAVE                    "assets\\audio\\bossworld-island4.wav"
+
 IDR_TOKEN_COLLECT1      WAVE                    "assets\\audio\\token-collect-01.wav"
 
 IDR_TOKEN_COLLECT2      WAVE                    "assets\\audio\\token-collect-02.wav"

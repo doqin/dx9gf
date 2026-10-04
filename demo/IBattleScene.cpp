@@ -249,10 +249,10 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 		auto prevScene = sceMan->GetScene(sceMan->GetIndex() - 1);
 		auto audio = DX9GF::AudioManager::GetInstance();
 
-		if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 1.0f);
+		if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
 		else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene)) audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
 		else if (dynamic_cast<Demo::ThreadAlleyScene*>(prevScene)) audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.0f);
-		else if (dynamic_cast<Demo::BossWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_boss", 0.3f, 1.0f);
+		else if (dynamic_cast<Demo::BossWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.0f);
 		sceMan->RemoveScene(sceMan->GetIndex());
 		sceMan->GoToPrevious();
 		markFinished();
@@ -2957,10 +2957,10 @@ void Demo::IBattleScene::Init()
 					auto prevScene = sceMan->GetScene(sceMan->GetIndex() - 1);
 					auto audio = DX9GF::AudioManager::GetInstance();
 
-					if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 1.0f);
+					if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
 					else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene)) audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
 					else if (dynamic_cast<Demo::ThreadAlleyScene*>(prevScene)) audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.0f);
-					else if (dynamic_cast<Demo::BossWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_boss", 0.3f, 1.0f);
+					else if (dynamic_cast<Demo::BossWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.0f);
 
 					sceMan->RemoveScene(sceMan->GetIndex());
 					sceMan->GoToPrevious();

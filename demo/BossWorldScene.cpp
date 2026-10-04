@@ -24,6 +24,13 @@
 #include "MainMenu.h"
 #include "SaveGameState.h"
 
+void Demo::BossWorldScene::SetIsland(int islandID) {
+	currentIslandID = islandID;
+	//stem 0 is the shared base; islands 1-2 share a layer, then one layer each for islands 3 and 4
+	int layer = (islandID <= 2) ? 1 : (islandID == 3 ? 2 : 3);
+	DX9GF::AudioManager::GetInstance()->SetActiveStems("bgm_bossworld", { 0, layer }, 2.0f);
+}
+
 void Demo::BossWorldScene::OnInit()
 {
 	InitCore(360.f, 190.f, L"./assets/BossMatrix.tmx");
@@ -205,35 +212,35 @@ void Demo::BossWorldScene::OnInit()
 	SpawnMapEnemy(2540.f, -490.f, "bw_f_08", {}, false, true, bgDraw, 50);
 
 	map->SetAreaUpdateHandler("trigger_alley", [this](const DX9GF::Map::ObjectArea& area) {
-		CreatePortalTransition(-1, 1239.f, -920.f);
+		CreatePortalTransition(-1, 1239.f, -920.f, "bgm_arcade", 0.2f);
 	});
 
 	map->SetAreaUpdateHandler("trigger_p_1_2", [this](const DX9GF::Map::ObjectArea& area) {
 		player->SetLocalPosition(-1155, 0);
-		this->currentIslandID = 2;
+		this->SetIsland(2);
 	});
 	map->SetAreaUpdateHandler("trigger_p_2_1", [this](const DX9GF::Map::ObjectArea& area) {
 		player->SetLocalPosition(48, 230);
-		this->currentIslandID = 1;
+		this->SetIsland(1);
 	});
 	map->SetAreaUpdateHandler("trigger_p_2_3", [this](const DX9GF::Map::ObjectArea& area) {
 		player->SetLocalPosition(1500, 530);
-		this->currentIslandID = 3;
+		this->SetIsland(3);
 	});
 	map->SetAreaUpdateHandler("trigger_p_2_fake", [this](const DX9GF::Map::ObjectArea& area) {
 		player->SetLocalPosition(-1155, 0);
 	});
 	map->SetAreaUpdateHandler("trigger_p_3_4", [this](const DX9GF::Map::ObjectArea& area) {
 		player->SetLocalPosition(740, -50);
-		this->currentIslandID = 4;
+		this->SetIsland(4);
 	});
 	map->SetAreaUpdateHandler("trigger_p_3_2", [this](const DX9GF::Map::ObjectArea& area) {
 		player->SetLocalPosition(-1155, 0);
-		this->currentIslandID = 2;
+		this->SetIsland(2);
 	});
 	map->SetAreaUpdateHandler("trigger_p_4_3", [this](const DX9GF::Map::ObjectArea& area) {
 		player->SetLocalPosition(2640, -620);
-		this->currentIslandID = 3;
+		this->SetIsland(3);
 	});
 
 	map->SetAreaUpdateHandler("trigger_battle_boss", [this](const DX9GF::Map::ObjectArea& area) {
@@ -538,7 +545,7 @@ void Demo::BossWorldScene::OnGenerateSaveData(nlohmann::json& outData) {
 }
 
 void Demo::BossWorldScene::OnRestoreSaveData(const nlohmann::json& inData) {
-	currentIslandID = inData.value("currentIslandID", 1);
+	SetIsland(inData.value("currentIslandID", 1));
 
 	if (inData.contains("puzzle")) {
 		currentHackStep = inData["puzzle"]["currentHackStep"];

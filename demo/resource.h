@@ -118,12 +118,16 @@
 #define IDR_BLEEP30                     221
 #define IDR_QUEST_ACTIVE                       222
 #define IDR_QUEST_COMPLETED                       223
+#define IDR_BGM_BOSSWORLD_BASE                         224
+#define IDR_BGM_BOSSWORLD_ISLAND12                     225
+#define IDR_BGM_BOSSWORLD_ISLAND3                      226
+#define IDR_BGM_BOSSWORLD_ISLAND4                      227
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        224
+#define _APS_NEXT_RESOURCE_VALUE        228
 #define _APS_NEXT_COMMAND_VALUE         40002
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101
