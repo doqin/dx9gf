@@ -27,6 +27,9 @@ namespace Demo {
         logo1Sprite->SetScale(1.f);
         logo2Sprite->SetScale(1.f);
 
+        //main menu music starts during the splash and carries into the menu
+        DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 3.0f);
+
         logo1Sprite->SetColor(D3DCOLOR_ARGB(0, 255, 255, 255));
         logo2Sprite->SetColor(D3DCOLOR_ARGB(0, 255, 255, 255));
     }

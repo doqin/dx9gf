@@ -93,7 +93,7 @@ namespace Demo {
 				auto audio = DX9GF::AudioManager::GetInstance();
 
 				if (sceneId == "TutorialWorldScene") {
-					audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 1.5f);
+					audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 5.0f);
 				}
 				else if (sceneId == "SecretPuzzleScene") {
 					audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.5f);
@@ -102,7 +102,7 @@ namespace Demo {
 					audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.5f);
 				}
 				else if (sceneId == "BossWorldScene") {
-					audio->PlayBGM_Fade("bgm_boss", 0.3f, 1.5f);
+					audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.5f);
 				}
 			}
 		}

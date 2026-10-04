@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "DX9GFAudioManager.h"
+#include <cmath>
+#include <algorithm>
 
 // chunk structure of WAV files
 #pragma pack(push, 1)
@@ -112,15 +114,26 @@ void DX9GF::AudioManager::Load(std::string name, int resID)
 	}
 }
 
+void DX9GF::AudioManager::ApplyVoiceVolume(ActiveVoice* av)
+{
+	float typeVol = (av->type == AudioType::MUSIC) ? currentMusicVolume : currentSfxVolume;
+	av->pVoice->SetVolume(av->baseVolume * av->fadeMul * av->stemLevel * typeVol * currentMasterVolume);
+}
+
 void DX9GF::AudioManager::Play(std::string name, bool loop, float volume, AudioType type)
 {
-	//set a limit voice count to protect the engine 
+	PlayInternal(name, loop, volume, type, name, 1.0f, true);
+}
+
+DX9GF::ActiveVoice* DX9GF::AudioManager::PlayInternal(std::string name, bool loop, float volume, AudioType type, std::string group, float fadeMul, bool startNow)
+{
+	//set a limit voice count to protect the engine
 	if (activeVoices.size() > 64) {
-		return;
+		return nullptr;
 	}
 
 	//can't find sound name from cache
-	if (!cache.count(name)) return;
+	if (!cache.count(name)) return nullptr;
 
 	SoundBuffer* data = cache[name];
 
@@ -131,7 +144,7 @@ void DX9GF::AudioManager::Play(std::string name, bool loop, float volume, AudioT
 	if (FAILED(pEngine->CreateSourceVoice(&pVoice, &data->wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, cb, NULL, NULL)))
 	{
 		delete cb;
-		return;
+		return nullptr;
 	}
 
 	//set the loop
@@ -146,14 +159,18 @@ void DX9GF::AudioManager::Play(std::string name, bool loop, float volume, AudioT
 		data->buffer.LoopCount = 0;
 	}
 
-	float typeVol = (type == AudioType::MUSIC) ? currentMusicVolume : currentSfxVolume;
-	pVoice->SetVolume(volume * typeVol * currentMasterVolume);
+	ActiveVoice* av = new ActiveVoice{ name, pVoice, cb, type, volume };
+	av->group = group;
+	av->fadeMul = fadeMul;
+	av->fadeFrom = fadeMul;
+	ApplyVoiceVolume(av);
 	//play the sound
 	pVoice->SubmitSourceBuffer(&data->buffer);
-	pVoice->Start(0);
+	if (startNow) pVoice->Start(0);
 
 	//save into list to control it easily
-	activeVoices.push_back(new ActiveVoice{ name, pVoice, cb, type, volume });
+	activeVoices.push_back(av);
+	return av;
 }
 
 void DX9GF::AudioManager::Update(unsigned long long deltaTime) {
@@ -167,15 +184,14 @@ void DX9GF::AudioManager::Update(unsigned long long deltaTime) {
 		for (auto av : activeVoices) {
 			if (av->type == AudioType::MUSIC && !av->pCallback->isFinished) {
 
-				if (av->name == fadingOutSound) {
-					float newVol = av->baseVolume * (1.0f - progress);
-					av->pVoice->SetVolume(newVol * currentMusicVolume * currentMasterVolume);
+				if (av->group == fadingOutSound) {
+					av->fadeMul = av->fadeFrom * (1.0f - progress);
+					ApplyVoiceVolume(av);
 				}
 
-				if (av->name == fadingInSound) {
-					float newVol = fadingInTargetVolume * progress;
-					av->pVoice->SetVolume(newVol * currentMusicVolume * currentMasterVolume);
-					av->baseVolume = newVol;
+				if (av->group == fadingInSound) {
+					av->fadeMul = progress;
+					ApplyVoiceVolume(av);
 				}
 			}
 		}
@@ -184,9 +200,24 @@ void DX9GF::AudioManager::Update(unsigned long long deltaTime) {
 			isFading = false;
 			if (fadingOutSound != "") {
 				Stop(fadingOutSound);
-				Play(fadingInSound, true, fadingInTargetVolume, AudioType::MUSIC);
 			}
 		}
+	}
+
+	//crossfade the stems of any playing stem set towards their active state
+	const float dt = deltaTime / 1000.0f;
+	for (auto av : activeVoices) {
+		if (av->stemIndex < 0 || av->pCallback->isFinished) continue;
+		auto setIt = stemSets.find(av->group);
+		if (setIt == stemSets.end()) continue;
+		const StemSet& set = setIt->second;
+		float target = set.active[av->stemIndex] ? 1.0f : 0.0f;
+		float step = dt / (std::max)(set.fadeTime, 0.001f);
+		if (av->stemT < target) av->stemT = (std::min)(av->stemT + step, target);
+		else if (av->stemT > target) av->stemT = (std::max)(av->stemT - step, target);
+		//equal-power curve: a stem fading in and one fading out keep constant loudness
+		av->stemLevel = std::sin(av->stemT * 1.5707963f);
+		ApplyVoiceVolume(av);
 	}
 
 	for (auto it = activeVoices.begin(); it != activeVoices.end(); )
@@ -209,7 +240,7 @@ void DX9GF::AudioManager::Stop(std::string name)
 {
 	for (auto av : activeVoices)
 	{
-		if (av->name == name && !av->pCallback->isFinished)
+		if ((av->name == name || av->group == name) && !av->pCallback->isFinished)
 		{
 			av->pVoice->Stop();
 			av->pCallback->isFinished = true;
@@ -258,8 +289,7 @@ void DX9GF::AudioManager::SetMasterVolume(float volume)
 	currentMasterVolume = volume;
 	for (auto av : activeVoices)
 	{
-		float typeVol = (av->type == AudioType::MUSIC) ? currentMusicVolume : currentSfxVolume;
-		av->pVoice->SetVolume(av->baseVolume * typeVol * currentMasterVolume);
+		ApplyVoiceVolume(av);
 	}
 }
 
@@ -270,7 +300,7 @@ void DX9GF::AudioManager::SetMusicVolume(float volume)
 	{
 		if (av->type == AudioType::MUSIC)
 		{
-			av->pVoice->SetVolume(av->baseVolume * currentMusicVolume * currentMasterVolume);
+			ApplyVoiceVolume(av);
 		}
 	}
 }
@@ -282,7 +312,7 @@ void DX9GF::AudioManager::SetSfxVolume(float volume)
 	{
 		if (av->type == AudioType::SFX)
 		{
-			av->pVoice->SetVolume(av->baseVolume * currentSfxVolume * currentMasterVolume);
+			ApplyVoiceVolume(av);
 		}
 	}
 }
@@ -308,7 +338,7 @@ void DX9GF::AudioManager::PlayBGM_Fade(std::string name, float targetVolume, flo
 	if (!activeVoices.empty()) {
 		bool isAlreadyPlaying = false;
 		for (auto av : activeVoices) {
-			if (av->name == name && av->type == AudioType::MUSIC && !av->pCallback->isFinished) {
+			if (av->group == name && av->type == AudioType::MUSIC && !av->pCallback->isFinished) {
 				isAlreadyPlaying = true;
 				break;
 			}
@@ -322,17 +352,65 @@ void DX9GF::AudioManager::PlayBGM_Fade(std::string name, float targetVolume, flo
 	fadingInSound = name;
 	fadingInTargetVolume = targetVolume;
 
+	//the loudest playing music group is the one that fades out
 	fadingOutSound = "";
+	float loudest = -1.0f;
 	for (auto av : activeVoices) {
-		if (av->type == AudioType::MUSIC && !av->pCallback->isFinished) {
-			fadingOutSound = av->name;
-			break;
+		if (av->type == AudioType::MUSIC && !av->pCallback->isFinished && av->fadeMul > loudest) {
+			loudest = av->fadeMul;
+			fadingOutSound = av->group;
 		}
 	}
-
-	if (fadingOutSound == "") {
-		Play(fadingInSound, true, 0.01f, AudioType::MUSIC);
+	//any other music left over from an interrupted fade is cut
+	for (auto av : activeVoices) {
+		if (av->type != AudioType::MUSIC || av->pCallback->isFinished) continue;
+		if (av->group == fadingOutSound) av->fadeFrom = av->fadeMul;
+		else Stop(av->group);
 	}
+
+	// Start the incoming track silent right away so it crossfades with the outgoing one
+	if (stemSets.count(name)) PlayStemSet(name, targetVolume);
+	else PlayInternal(name, true, targetVolume, AudioType::MUSIC, name, 0.0f, true);
+}
+
+void DX9GF::AudioManager::PlayStemSet(std::string setName, float volume)
+{
+	const StemSet& set = stemSets[setName];
+	std::vector<ActiveVoice*> started;
+	for (size_t i = 0; i < set.stems.size(); ++i) {
+		ActiveVoice* av = PlayInternal(set.stems[i], true, volume, AudioType::MUSIC, setName, 0.0f, false);
+		if (!av) continue;
+		av->stemIndex = static_cast<int>(i);
+		//start at the current active state so there is no fade-in pop on the stems
+		av->stemT = set.active[i] ? 1.0f : 0.0f;
+		av->stemLevel = std::sin(av->stemT * 1.5707963f);
+		ApplyVoiceVolume(av);
+		started.push_back(av);
+	}
+	//start every stem in one operation set so they are sample-aligned
+	const UINT32 opSet = 1;
+	for (auto av : started) av->pVoice->Start(0, opSet);
+	pEngine->CommitChanges(opSet);
+}
+
+void DX9GF::AudioManager::RegisterStemSet(std::string setName, std::vector<std::string> stemNames)
+{
+	StemSet set;
+	set.stems = stemNames;
+	set.active.assign(stemNames.size(), true);
+	stemSets[setName] = set;
+}
+
+void DX9GF::AudioManager::SetActiveStems(std::string setName, std::vector<int> activeIndices, float fadeTime)
+{
+	auto it = stemSets.find(setName);
+	if (it == stemSets.end()) return;
+	StemSet& set = it->second;
+	set.active.assign(set.stems.size(), false);
+	for (int idx : activeIndices) {
+		if (idx >= 0 && idx < static_cast<int>(set.active.size())) set.active[idx] = true;
+	}
+	set.fadeTime = fadeTime;
 }
 
 void DX9GF::AudioManager::PlayRandomBGM_Fade(std::string bankName, float targetVolume, float duration)

@@ -40,9 +40,28 @@ void Demo::Game::Init()
 	audio->Load("step_m4", IDR_STEP_M4);
 	audio->Load("step_m5", IDR_STEP_M5);
 
+	audio->Load("step_dirt1", IDR_STEP_DIR1);
+	audio->Load("step_dirt2", IDR_STEP_DIR2);
+	audio->Load("step_dirt3", IDR_STEP_DIR3);
+	audio->Load("step_dirt4", IDR_STEP_DIR4);
+	audio->Load("step_dirt5", IDR_STEP_DIR5);
+
+	audio->Load("step_concrete1", IDR_STEP_C1);
+	audio->Load("step_concrete2", IDR_STEP_C2);
+	audio->Load("step_concrete3", IDR_STEP_C3);
+	audio->Load("step_concrete4", IDR_STEP_C4);
+
+	audio->Load("step_vinyl1", IDR_STEP_V1);
+	audio->Load("step_vinyl2", IDR_STEP_V2);
+	audio->Load("step_vinyl3", IDR_STEP_V3);
+	audio->Load("step_vinyl4", IDR_STEP_V4);
+
 	audio->RegisterBank("step_default", { "step_d1", "step_d2", "step_d3", "step_d4" });
 	audio->RegisterBank("step_leaves", { "step_l1", "step_l2", "step_l3", "step_l4" });
 	audio->RegisterBank("step_metal", { "step_m1", "step_m2", "step_m3", "step_m4", "step_m5" });
+	audio->RegisterBank("step_dirt", { "step_dirt1", "step_dirt2", "step_dirt3", "step_dirt4", "step_dirt5" });
+	audio->RegisterBank("step_concrete", { "step_concrete1", "step_concrete2", "step_concrete3", "step_concrete4" });
+	audio->RegisterBank("step_vinyl", { "step_vinyl1", "step_vinyl2", "step_vinyl3", "step_vinyl4" });
 
 	audio->Load("shop_buy", IDR_SHOP_BUY);
 	audio->Load("error", IDR_WAV_ERROR);
@@ -122,8 +141,17 @@ void Demo::Game::Init()
 
 	//load maps bgm
 	audio->Load("bgm_tutorial", IDR_BGM_TUTORIAL);
+	audio->Load("bgm_sky", IDR_BGM_SKY);
 	audio->Load("bgm_secret", IDR_BGM_SECRET);
 	audio->Load("bgm_boss", IDR_BGM_BOSS);
+
+	//boss world dynamic music: shared base plus one layer per island group
+	audio->Load("bossworld_base", IDR_BGM_BOSSWORLD_BASE);
+	audio->Load("bossworld_island12", IDR_BGM_BOSSWORLD_ISLAND12);
+	audio->Load("bossworld_island3", IDR_BGM_BOSSWORLD_ISLAND3);
+	audio->Load("bossworld_island4", IDR_BGM_BOSSWORLD_ISLAND4);
+	audio->RegisterStemSet("bgm_bossworld", { "bossworld_base", "bossworld_island12", "bossworld_island3", "bossworld_island4" });
+	audio->SetActiveStems("bgm_bossworld", { 0, 1 }, 0.0f);
 	audio->Load("bgm_arcade", IDR_BGM_ARCADE);
 
 	auto app = DX9GF::Application::GetInstance();

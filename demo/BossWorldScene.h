@@ -17,6 +17,7 @@ namespace Demo {
 		bool hasGottenUselessItem = false;
 		bool isFinalBossDead = false;
 		int currentIslandID = 1;
+		void SetIsland(int islandID);
 
 		std::shared_ptr<KeyeproNPC> keyeproNPC;
 		std::shared_ptr<DX9GF::RectangleCollider> bossGateCollider;

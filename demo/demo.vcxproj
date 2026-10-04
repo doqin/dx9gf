@@ -877,6 +877,10 @@
     <Media Include="assets\audio\bleeps\bleep029.wav" />
     <Media Include="assets\audio\bleeps\bleep030.wav" />
     <Media Include="assets\audio\boss-loop.wav" />
+    <Media Include="assets\audio\bossworld-base.wav" />
+    <Media Include="assets\audio\bossworld-island12.wav" />
+    <Media Include="assets\audio\bossworld-island3.wav" />
+    <Media Include="assets\audio\bossworld-island4.wav" />
     <Media Include="assets\audio\button-click.wav" />
     <Media Include="assets\audio\button-hover.wav" />
     <Media Include="assets\audio\buy_item.wav" />

@@ -56,6 +56,20 @@ namespace DX9GF {
 		VoiceCallback* pCallback;
 		AudioType type;
 		float baseVolume; //save the volume level when play
+		std::string group; //music fades act on a whole group (a stem set's voices share its name)
+		float fadeMul = 1.0f; //crossfade envelope for the whole group
+		float fadeFrom = 1.0f; //fadeMul when a fade-out started, so an interrupted fade doesn't jump
+		int stemIndex = -1; //>= 0 when this voice is one stem of a stem set
+		float stemT = 1.0f; //0..1 progress of this stem towards active
+		float stemLevel = 1.0f; //equal-power curve of stemT
+	};
+
+	//dynamic music: every stem loops in sync, inactive ones sit at silence
+	struct StemSet
+	{
+		std::vector<std::string> stems;
+		std::vector<bool> active;
+		float fadeTime = 2.0f;
 	};
 
 	bool LoadWavFromResource(int resourceID, SoundBuffer& out_audio);
@@ -67,6 +81,11 @@ namespace DX9GF {
 		std::map<std::string, SoundBuffer*> cache; //cache will save the loaded file (avoid disk loading latency)
 		std::map<std::string, std::vector<std::string>> soundBanks;
 		std::vector<ActiveVoice*> activeVoices; //list of playing sound
+		std::map<std::string, StemSet> stemSets;
+
+		ActiveVoice* PlayInternal(std::string name, bool loop, float volume, AudioType type, std::string group, float fadeMul, bool startNow);
+		void PlayStemSet(std::string setName, float volume);
+		void ApplyVoiceVolume(ActiveVoice* av);
 
 		//settings manager will push values to these vars
 		float currentMasterVolume = 1.0f;
@@ -112,5 +131,10 @@ namespace DX9GF {
 		//background music
 		void PlayBGM_Fade(std::string name, float targetVolume = 0.5f, float duration = 1.5f);
 		void PlayRandomBGM_Fade(std::string bankName, float targetVolume = 0.5f, float duration = 1.5f);
+
+		//dynamic music: register already-loaded, equal-length stems, then play the set with PlayBGM_Fade(setName)
+		void RegisterStemSet(std::string setName, std::vector<std::string> stemNames);
+		//which stems are audible (indices into the set); can be called before or while the set plays
+		void SetActiveStems(std::string setName, std::vector<int> activeIndices, float fadeTime = 2.0f);
 	};
 }
