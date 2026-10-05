@@ -263,6 +263,10 @@ namespace Demo {
 			float altStatusEffectValue;
 			int altStatusEffectDuration;
 			bool statusApplied = false;
+			// Indicator colours, resolved once at spawn from the status effect(s). The alt colour
+			// only differs from the main one for a randomized effect, where the two alternate.
+			D3DCOLOR statusColor = 0xFFFFFFFF;
+			D3DCOLOR altStatusColor = 0xFFFFFFFF;
 		};
 		struct SplitComponent {
 			ProjectileSplitTrigger trigger;
@@ -344,6 +348,7 @@ namespace Demo {
 
 		// Create a new batch if no existing batch matches the projectile's texture, frames, frame rate and origin.
 		unsigned int GetOrCreateBatch(const RenderDesc& desc);
+		static void ResolveStatusColors(CombatComponent& combat);
 		void ApplyHit(Player& player, CombatComponent& combat);
 		void DestroyAt(size_t index);
 		void DestroyLaserAt(size_t index);

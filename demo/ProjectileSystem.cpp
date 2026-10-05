@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "ProjectileSystem.h"
 #include "RNG.h"
+#include "StatusDisplay.h"
 #include <cmath>
+#include <map>
 #include "DX9GFAudioManager.h"
 
 namespace {
@@ -193,6 +195,38 @@ namespace {
 		const float clamped = (std::max)(0.f, (std::min)(1.f, multiplier));
 		const D3DCOLOR alpha = static_cast<D3DCOLOR>(((color >> 24) & 0xFF) * clamped);
 		return (color & 0x00FFFFFF) | (alpha << 24);
+	}
+
+	// The colour a status is shown in everywhere else (StatusDisplay), so a projectile's glow
+	// matches the icon the player gets on hit. Cached because DescribeStatus builds localized strings.
+	D3DCOLOR StatusIndicatorColor(Demo::ModifierType type)
+	{
+		static std::map<Demo::ModifierType, D3DCOLOR> cache;
+		auto it = cache.find(type);
+		if (it == cache.end()) {
+			const auto view = Demo::DescribeStatus({ type, 1, 1.f, false });
+			it = cache.emplace(type, view ? view->color : 0xFFFFFFFF).first;
+		}
+		return it->second;
+	}
+
+	D3DCOLOR LerpColor(D3DCOLOR a, D3DCOLOR b, float t)
+	{
+		auto channel = [&](int shift) {
+			const float ca = static_cast<float>((a >> shift) & 0xFF);
+			const float cb = static_cast<float>((b >> shift) & 0xFF);
+			return static_cast<D3DCOLOR>(ca + (cb - ca) * t) & 0xFF;
+		};
+		return (channel(24) << 24) | (channel(16) << 16) | (channel(8) << 8) | channel(0);
+	}
+
+	// The projectile's current indicator colour; a randomized effect swaps between its two outcomes.
+	D3DCOLOR CurrentStatusColor(D3DCOLOR color, D3DCOLOR altColor, bool randomized, float elapsed)
+	{
+		if (!randomized) {
+			return color;
+		}
+		return LerpColor(color, altColor, std::sin(elapsed * 6.f) * 0.5f + 0.5f);
 	}
 
 	// One beam quad, rotated about its own centre.
@@ -559,6 +593,7 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 	desc.altStatusEffectType, desc.altStatusEffectValue, desc.altStatusEffectDuration,
 	false
 		});
+	ResolveStatusColors(combats.back());
 
 	RenderComponent render{};
 	render.batchIndex = GetOrCreateBatch({ desc.texture, desc.frames, desc.frameRate, desc.spriteOriginX, desc.spriteOriginY });
@@ -642,6 +677,17 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 		});
 
 	laserDead.push_back(0);
+}
+
+void Demo::ProjectileSystem::ResolveStatusColors(CombatComponent& combat)
+{
+	if (!combat.hasStatusEffect) {
+		return;
+	}
+	combat.statusColor = StatusIndicatorColor(combat.statusEffectType);
+	combat.altStatusColor = combat.randomizeStatusEffect
+		? StatusIndicatorColor(combat.altStatusEffectType)
+		: combat.statusColor;
 }
 
 void Demo::ProjectileSystem::ApplyHit(Player& player, CombatComponent& combat)
@@ -980,7 +1026,10 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 		life.elapsed += dtSec;
 
 		if (emitters[i]) {
-			emitters[i]->Update(deltaTime, tr.x, tr.y, tr.rotation, 1.f, 1.f, 0xFFFFFFFF,
+			const D3DCOLOR trailTint = combat.hasStatusEffect
+				? CurrentStatusColor(combat.statusColor, combat.altStatusColor, combat.randomizeStatusEffect, life.elapsed)
+				: 0xFFFFFFFF;
+			emitters[i]->Update(deltaTime, tr.x, tr.y, tr.rotation, 1.f, 1.f, trailTint,
 				!dead[i] && life.elapsed >= life.delay);
 		}
 	}
@@ -1096,6 +1145,18 @@ void Demo::ProjectileSystem::Draw(DX9GF::GraphicsDevice* graphicsDevice, const D
 			const auto& tr = transforms[i];
 			batch.sprite->SetPosition(tr.x, tr.y);
 			batch.sprite->SetRotation(tr.rotation);
+			const auto& combat = combats[i];
+			if (combat.hasStatusEffect) {
+				// A soft, pulsing halo in the status colour, drawn just under the sprite itself.
+				const float t = lifetimes[i].elapsed;
+				const D3DCOLOR color = CurrentStatusColor(combat.statusColor, combat.altStatusColor, combat.randomizeStatusEffect, t);
+				const float pulse = std::sin(t * 9.f) * 0.5f + 0.5f;
+				batch.sprite->SetColor(ScaleAlpha(color, 0.35f + 0.25f * pulse));
+				batch.sprite->SetScale(1.35f + 0.15f * pulse);
+				batch.sprite->Draw(camera, deltaTime);
+				batch.sprite->SetColor(0xFFFFFFFF);
+				batch.sprite->SetScale(1.f);
+			}
 			batch.sprite->Draw(camera, deltaTime);
 		}
 		if (begun) {
