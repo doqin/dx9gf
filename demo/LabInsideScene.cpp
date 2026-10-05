@@ -20,6 +20,7 @@ void Demo::LabInsideScene::OnInit()
 	InitCore(64, -1, L"./assets/labinside.tmx");
 
 	SetChapterTitle(Tr(L"KAKOS LAB"), Tr(L"< What scared her off? >"));
+	RegisterPortalLayer("trigger_back");
 	map->SetAreaUpdateHandler("trigger_back", [this](const DX9GF::Map::ObjectArea& area) {
 		CreatePortalTransition(-1, 544.f, -928.f, "bgm_tutorial", 0.5f);
 	});

@@ -58,6 +58,7 @@
     <ClCompile Include="IStatementCard.cpp" />
     <ClCompile Include="MapBattleScene.cpp" />
     <ClCompile Include="MapEnemy.cpp" />
+    <ClCompile Include="MapView.cpp" />
     <ClCompile Include="misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="PlayerHUD.cpp" />
     <ClCompile Include="ItemShop.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="ItemShop.h" />
     <ClInclude Include="MapBattleScene.h" />
     <ClInclude Include="MapEnemy.h" />
+    <ClInclude Include="MapView.h" />
     <ClInclude Include="misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="PlayerHUD.h" />
     <ClInclude Include="KeyeEnemy.h" />
