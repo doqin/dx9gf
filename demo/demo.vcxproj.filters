@@ -461,6 +461,7 @@
     <Image Include="assets\ahai-Sheet.png" />
     <Image Include="assets\hkhang-Sheet.png" />
     <Image Include="assets\qem-sheet.png" />
+    <Image Include="assets\tutorial-notext.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\arcade-among-2-r46pv.ttf" />
