@@ -11,6 +11,7 @@
 #include "QuestManager.h"
 #include "EnemyFactory.h"
 #include "MapBattleScene.h"
+#include "MapView.h"
 #include "RNG.h"
 #include "backends/imgui_impl_dx9.h"
 #include "backends/imgui_impl_win32.h"
@@ -46,6 +47,10 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 
 	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
 	chapterTitleUI = std::make_shared<ChapterTitleUI>(font);
+
+	mapView.Init(font.get());
+	mapView.Build(*map);
+	mapView.Reveal(playerX, playerY);
 
 	auto borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	borderTex->LoadTexture(L"assets/popup-borders.png");
@@ -129,12 +134,29 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	static float escCooldown = 0.0f;
 	if (escCooldown > 0) escCooldown -= deltaTime;
 
-	if (!IsSubsceneModalActive() && inpMan->KeyDown(SettingsManager::GetInstance()->GetKeybind("OPEN_INVENTORY")) && escCooldown <= 0) {
+	// Full map: the map key toggles it; the inventory key also closes it (without opening the inventory)
+	bool mapClosedThisFrame = false;
+	{
+		auto settings = SettingsManager::GetInstance();
+		if (fullMapOpen) {
+			if (inpMan->KeyDown(settings->GetKeybind("OPEN_MAP")) || inpMan->KeyDown(settings->GetKeybind("OPEN_INVENTORY"))) {
+				fullMapOpen = false;
+				mapClosedThisFrame = true;
+			}
+		}
+		else if (!isTransitioning && !currentConversation && !IsSubsceneModalActive()
+			&& !PopupManager::GetInstance()->IsActive() && !(inventoryMenu && inventoryMenu->IsOpen())
+			&& inpMan->KeyDown(settings->GetKeybind("OPEN_MAP"))) {
+			fullMapOpen = true;
+		}
+	}
+
+	if (!fullMapOpen && !mapClosedThisFrame && !IsSubsceneModalActive() && inpMan->KeyDown(SettingsManager::GetInstance()->GetKeybind("OPEN_INVENTORY")) && escCooldown <= 0) {
 		if (inventoryMenu) inventoryMenu->Toggle();
 		escCooldown = 300.0f;
 	}
 
-	bool isGamePaused = this->isGamePaused || IsSubsceneModalActive();
+	bool isGamePaused = this->isGamePaused || IsSubsceneModalActive() || fullMapOpen;
 
 	if (PopupManager::GetInstance()->IsActive()) {
 		PopupManager::GetInstance()->Update(deltaTime, &this->uiCamera);
@@ -237,6 +259,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 		}
 		player->Update(deltaTime);
 		camera.Update();
+		mapView.Reveal(player->GetWorldX(), player->GetWorldY());
 	}
 
 	this->uiCamera.Update();
@@ -315,6 +338,10 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 		OnDrawUI(deltaTime);
 
 		if (playerHUD) playerHUD->Draw(gd, deltaTime);
+		if (ShowMiniMap() && !fullMapOpen && !(inventoryMenu && inventoryMenu->IsOpen()) && player) {
+			mapView.DrawMini(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(),
+				player->GetWorldX(), player->GetWorldY(), BuildMapMarkers());
+		}
 		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
 		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
 			draggableManager->Draw(deltaTime);
@@ -326,6 +353,11 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 		}
 
 		QuestManager::GetInstance()->Draw(gd, &this->uiCamera, deltaTime);
+
+		if (fullMapOpen) {
+			mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(), BuildMapMarkers(),
+				SettingsManager::GetInstance()->GetKeybindDisplayName("OPEN_MAP"));
+		}
 
 		if (drawBuffer) {
 			drawBuffer->Update(deltaTime);
@@ -374,6 +406,24 @@ void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>
 	currentConversation = std::make_shared<IConversation>(
 		std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
 	currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
+}
+
+std::vector<Demo::MapView::Marker> Demo::WorldSceneBase::BuildMapMarkers() const
+{
+	using K = MapView::MarkerKind;
+	std::vector<MapView::Marker> markers;
+	for (auto& p : savePoints) markers.push_back({ K::Save, p->GetWorldX(), p->GetWorldY() });
+	for (auto& p : shopPoints) markers.push_back({ K::Shop, p->GetWorldX(), p->GetWorldY() });
+	for (auto& p : healingPoints) markers.push_back({ K::Heal, p->GetWorldX(), p->GetWorldY() });
+	for (auto& c : treasureChests) markers.push_back({ K::Chest, c->GetWorldX(), c->GetWorldY(), c->GetIsOpened() });
+	for (auto& n : mapNPCs) markers.push_back({ K::Npc, n->GetWorldX(), n->GetWorldY() });
+	for (const auto& layer : portalLayers) {
+		for (const auto& area : map->GetAreas(layer)) {
+			markers.push_back({ K::Portal, area.x + area.width / 2.f, area.y + area.height / 2.f });
+		}
+	}
+	if (player) markers.push_back({ K::Player, player->GetWorldX(), player->GetWorldY() });
+	return markers;
 }
 
 void Demo::WorldSceneBase::SetChapterTitle(const std::wstring& title, const std::wstring& subtitle) {
@@ -485,6 +535,7 @@ void Demo::WorldSceneBase::GenerateSaveData(nlohmann::json& outData)
 		{"zoom", camera.GetZoom()}
 	};
 	outData["hasSeenChapterIntro"] = hasSeenChapterIntro;
+	mapView.Save(outData["mapFog"]);
 
 	nlohmann::json chestStates = nlohmann::json::array();
 	for (auto& c : treasureChests) chestStates.push_back(c->GetIsOpened());
@@ -509,6 +560,7 @@ void Demo::WorldSceneBase::RestoreSaveData(const nlohmann::json& inData)
 	camera.SetPosition(inData["camera"]["x"], inData["camera"]["y"]);
 	camera.SetZoom(inData["camera"]["zoom"]);
 	hasSeenChapterIntro = inData.value("hasSeenChapterIntro", false);
+	if (inData.contains("mapFog")) mapView.Restore(inData["mapFog"]);
 
 	if (inData.contains("treasureChests")) {
 		auto& arr = inData["treasureChests"];

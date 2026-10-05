@@ -216,6 +216,10 @@ void Demo::BossWorldScene::OnInit()
 	SpawnMapEnemy(2500.f, 20.f, "bw_f_07", { "VampireBatEnemy", "KernelEnemy" }, false, false, bgDraw, 50);
 	SpawnMapEnemy(2540.f, -490.f, "bw_f_08", {}, false, true, bgDraw, 50);
 
+	// trigger_p_2_fake is a decoy and the battle/outro triggers aren't exits, so they stay off the map
+	for (const char* layer : { "trigger_alley", "trigger_p_1_2", "trigger_p_2_1", "trigger_p_2_3", "trigger_p_3_2", "trigger_p_3_4", "trigger_p_4_3" }) {
+		RegisterPortalLayer(layer);
+	}
 	map->SetAreaUpdateHandler("trigger_alley", [this](const DX9GF::Map::ObjectArea& area) {
 		CreatePortalTransition(-1, 1239.f, -920.f, "bgm_arcade", 0.2f);
 	});

@@ -14,6 +14,7 @@
 #include "PlayerHUD.h"
 #include "MapEnemy.h"
 #include "ChapterTitleUI.h"
+#include "MapView.h"
 
 namespace Demo {
 	class WorldSceneBase : public DX9GF::IScene, public DX9GF::ISaveable {
@@ -21,6 +22,12 @@ namespace Demo {
 		bool isGamePaused = false;
 		bool isTransitioning = false;
 		bool hasSeenChapterIntro = false;
+
+		// Minimap / full map. Portal layers must be registered per scene (RegisterPortalLayer)
+		// because not every trigger_* layer is a portal (battle triggers, decoys, secrets).
+		MapView mapView;
+		std::vector<std::string> portalLayers;
+		bool fullMapOpen = false;
 
 		Game* game;
 		std::shared_ptr<DX9GF::ColliderManager> colliderManager;
@@ -58,6 +65,9 @@ namespace Demo {
 
 		void SetChapterTitle(const std::wstring& title, const std::wstring& subtitle);
 
+		void RegisterPortalLayer(const std::string& layerName) { portalLayers.push_back(layerName); }
+		std::vector<MapView::Marker> BuildMapMarkers() const;
+
 		struct DepthNode {
 			float y;
 			std::function<void()> drawCall;
@@ -77,6 +87,8 @@ namespace Demo {
 		// Hook: a subclass-owned modal (e.g. a terminal UI) that should freeze the
 		// world and suppress the shared inventory / interaction input while it is up.
 		virtual bool IsSubsceneModalActive() const { return false; }
+		// Hook: scenes where the corner minimap makes no sense (e.g. a single small room) return false.
+		virtual bool ShowMiniMap() const { return true; }
 		virtual void OnDrawWorld(std::vector<DepthNode>& depthNodes, unsigned long long deltaTime) {}
 		virtual void OnDrawUI(unsigned long long deltaTime) {}
 		virtual void OnGenerateSaveData(nlohmann::json& outData) {}

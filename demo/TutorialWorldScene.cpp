@@ -23,6 +23,9 @@ void Demo::TutorialWorldScene::OnInit()
 	InitCore(248, 184, L"./assets/tutorial.tmx");
 
 	SetChapterTitle(Tr(L"CHAPTER I: CLOUD CANOPY"), Tr(L"< System Initialized >"));
+	// trigger_secret is intentionally left off the map - the secret room should stay a discovery
+	RegisterPortalLayer("trigger_p");
+	RegisterPortalLayer("trigger_lab");
 	map->SetAreaUpdateHandler("trigger_p", [this](const DX9GF::Map::ObjectArea& area) {
 		if (!spamBossDefeated) return;   // locked until the Spam boss guarding it is beaten
 		CreatePortalTransition(3, -417.f, 144.f, "bgm_arcade", 0.2f);

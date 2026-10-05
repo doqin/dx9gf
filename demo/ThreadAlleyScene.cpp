@@ -27,6 +27,8 @@ void Demo::ThreadAlleyScene::OnInit()
 	InitCore(-544.5f, 128.5f, L"./assets/ThreadAlley.tmx");
 	SetChapterTitle(Tr(L"CHAPTER II: THREAD ALLEY"), Tr(L"< Data Transit Zone >"));
 
+	RegisterPortalLayer("trigger_p");
+	RegisterPortalLayer("trigger_tutorial");
 	map->SetAreaUpdateHandler("trigger_p", [this](const DX9GF::Map::ObjectArea& area) {
 		CreatePortalTransition(1, 330.f, 263.f, "bgm_bossworld", 0.3f);
 	});

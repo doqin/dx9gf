@@ -13,6 +13,7 @@ namespace Demo {
 
 	protected:
 		void OnInit() override;
+		bool ShowMiniMap() const override { return false; }
 		void OnGenerateSaveData(nlohmann::json& outData) override;
 		void OnRestoreSaveData(const nlohmann::json& inData) override;
 		void DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
