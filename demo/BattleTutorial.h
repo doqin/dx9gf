@@ -17,7 +17,7 @@ namespace Demo {
 		bool limitedUseCardInHand = false;
 	};
 
-	// The first-battle walkthrough. Nine pre-composed panels live stacked in assets/tutorial.png;
+	// The first-battle walkthrough. Nine pre-composed panels live stacked in assets/tutorial-notext.png;
 	// this surfaces them one at a time, each at the moment its mechanic first becomes relevant,
 	// and swallows battle input while one is on screen (a click / Space / Enter advances).
 	class BattleTutorial {
@@ -57,8 +57,13 @@ namespace Demo {
 			STEP_CYCLE,          // panel 6 - the main block's 3-turn cycle
 			STEP_COUNT
 		};
-		// Source row of each panel in assets/tutorial.png (the sheet is 192px wide).
-		struct PanelRect { long top; long bottom; };
+		// Source row of each panel in assets/tutorial-notext.png (the sheet is 192px wide). The
+		// first `crop` rows are the (now blank) caption band; the caption is drawn with the
+		// FontSprite so it can be translated. A panel may also carry a small inline label,
+		// drawn at (labelX, labelY) in sheet pixels relative to the panel's top row.
+		struct PanelRect { long top; long bottom; long crop; long labelX; long labelY; };
+		struct PanelText { const wchar_t* body; const wchar_t* label; };
+		static const PanelText TEXTS[STEP_COUNT];
 		static const PanelRect PANELS[STEP_COUNT];
 
 		void TryQueue(Step s, bool condition);
