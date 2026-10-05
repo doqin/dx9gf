@@ -1123,7 +1123,13 @@ void Demo::IBattleScene::LayoutAttackRowButtons()
 
 	const float pileButtonsX = LayOutPileButtons(screenWidth, buttonY);
 
-	enemyCardRemoveAreaWidth = 250.f; //fixed area's width
+	// Sized to the (translated) label so the text always fits inside the red box.
+	{
+		DX9GF::FontSprite measure(font.get());
+		measure.SetScale(1.f, 1.f);
+		measure.SetText(Tr(L"Discard Enemy Card Here"));
+		enemyCardRemoveAreaWidth = (std::max)(250.f, static_cast<float>(measure.GetWidth()) + 32.f);
+	}
 	enemyCardRemoveAreaHeight = backButton->GetHeight();
 	enemyCardRemoveAreaY = buttonY;
 
@@ -3468,6 +3474,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 		BattleTutorialContext tctx;
 		tctx.inProgrammingPhase = (state == State::PlayerAttack);
 		tctx.currentTurn = static_cast<int>(currentTurn);
+		tctx.inEnemyAttackPhase = (state == State::EnemyAttack);
 
 		auto blockHasCard = [](const std::shared_ptr<IBlockCard>& block) {
 			if (!block) return false;

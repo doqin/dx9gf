@@ -13,6 +13,7 @@ namespace Demo {
 		bool cardInBlock = false;            // >= 1 statement card queued in the main or init block
 		bool enemyCardExists = false;        // an EnemyCard has been spawned this turn
 		bool enemyCardTargeted = false;      // an EnemyCard is attached to a statement card
+		bool inEnemyAttackPhase = false;     // State::EnemyAttack (dodging projectiles)
 		bool nonPersistentCardInHand = false;
 		bool limitedUseCardInHand = false;
 	};
@@ -55,6 +56,7 @@ namespace Demo {
 			STEP_TARGET,         // panel 3 - drag the Enemy Card onto your card
 			STEP_EXECUTE,        // panel 4 - press Execute
 			STEP_CYCLE,          // panel 6 - the main block's 3-turn cycle
+		STEP_DODGE,          // enemy phase - dodge the projectiles (separate image)
 			STEP_COUNT
 		};
 		// Source row of each panel in assets/tutorial-notext.png (the sheet is 192px wide). The
@@ -79,6 +81,8 @@ namespace Demo {
 
 		std::shared_ptr<DX9GF::Texture> sheet;
 		std::shared_ptr<DX9GF::StaticSprite> sprite;
+		std::shared_ptr<DX9GF::Texture> dodgeTex;   // assets/tutorial-dodge.png, used by STEP_DODGE
+		std::shared_ptr<DX9GF::StaticSprite> dodgeSprite;
 		bool handled[STEP_COUNT] = { false }; // shown, or currently queued
 		std::deque<Step> queue;               // pending panels, front() = the visible one
 		float inputCooldown = 0.f;            // debounces the action that opened the panel

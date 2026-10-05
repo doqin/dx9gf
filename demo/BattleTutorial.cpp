@@ -20,6 +20,7 @@ namespace Demo {
 		{ 401, 498, 28, 0, -1 },   // STEP_TARGET
 		{ 498, 553, 26, 0, -1 },   // STEP_EXECUTE
 		{ 700, 786, 32, 31, 12 },  // STEP_CYCLE
+		{ 0, 0, 0, 0, -1 },        // STEP_DODGE (drawn from tutorial-dodge.png)
 	};
 
 	const BattleTutorial::PanelText BattleTutorial::TEXTS[BattleTutorial::STEP_COUNT] = {
@@ -32,6 +33,7 @@ namespace Demo {
 		{ L"Move the enemy card to your card to target the enemy", nullptr },
 		{ L"Click the Execute button to initiate your attack", nullptr },
 		{ L"The main block has a cycle, which is 3 turns. After a cycle, the cards inside the block is cleared to a blank slate", L"3 turns left before program clears" },
+		{ L"During the enemy's attack, move around with W A S D to dodge the projectiles", nullptr },
 	};
 
 	namespace {
@@ -87,6 +89,10 @@ namespace Demo {
 		sprite = std::make_shared<DX9GF::StaticSprite>(sheet.get());
 		sprite->SetScale(PANEL_SCALE, PANEL_SCALE);
 
+		dodgeTex = std::make_shared<DX9GF::Texture>(gd);
+		dodgeTex->LoadTexture(L"assets/tutorial-dodge.png");
+		dodgeSprite = std::make_shared<DX9GF::StaticSprite>(dodgeTex.get());
+
 		uiTex = std::make_shared<DX9GF::Texture>(gd);
 		uiTex->LoadTexture(L"assets/ui.png");
 	}
@@ -117,13 +123,13 @@ namespace Demo {
 		TryQueue(STEP_ENEMY_CARD, ctx.inProgrammingPhase && ctx.cardInBlock);
 		TryQueue(STEP_TARGET, ctx.enemyCardExists);
 		TryQueue(STEP_EXECUTE, ctx.enemyCardTargeted);
+		TryQueue(STEP_DODGE, ctx.inEnemyAttackPhase);
 
 		const bool onTurnTwo = ctx.inProgrammingPhase && ctx.currentTurn >= 2;
 		TryQueue(STEP_CYCLE, onTurnTwo);
-		// Card-lifecycle notes: shown when such a card first turns up, otherwise held back
-		// until turn 2 so they are never missed.
-		TryQueue(STEP_NON_PERSISTENT, ctx.nonPersistentCardInHand || onTurnTwo);
-		TryQueue(STEP_USE_LIMIT, ctx.limitedUseCardInHand || onTurnTwo);
+		// Card-lifecycle notes: shown only once such a card turns up in the player's hand.
+		TryQueue(STEP_NON_PERSISTENT, ctx.nonPersistentCardInHand);
+		TryQueue(STEP_USE_LIMIT, ctx.limitedUseCardInHand);
 	}
 
 	void BattleTutorial::Update(unsigned long long deltaTime)
@@ -175,8 +181,14 @@ namespace Demo {
 		}
 		const PanelRect& r = PANELS[queue.front()];
 		const PanelText& t = TEXTS[queue.front()];
-		const float gfxH = static_cast<float>(r.bottom - r.top - r.crop) * PANEL_SCALE;
-		const float panelW = PANEL_SHEET_WIDTH * PANEL_SCALE;
+		const bool dodge = (queue.front() == STEP_DODGE);
+		// The dodge panel uses its own (large) image, scaled down to roughly half the screen.
+		const float dodgeScale = dodge ? (screenH * 0.5f) / static_cast<float>(dodgeTex->GetHeight()) : 1.f;
+		const float gfxH = dodge ? static_cast<float>(dodgeTex->GetHeight()) * dodgeScale
+			: static_cast<float>(r.bottom - r.top - r.crop) * PANEL_SCALE;
+		const float panelW = dodge ? static_cast<float>(dodgeTex->GetWidth()) * dodgeScale
+			: PANEL_SHEET_WIDTH * PANEL_SCALE;
+		const float wrapW = (std::max)(panelW, PANEL_SHEET_WIDTH * PANEL_SCALE);
 
 		gd->SetAlphaBlending(true);
 		gd->DrawRectangle(uiCamera, -screenW / 2.f, -screenH / 2.f, screenW, screenH,
@@ -184,7 +196,7 @@ namespace Demo {
 
 		// Caption (translated), wrapped to the panel width and centred above the artwork.
 		fontSprite->SetScale(1.f, 1.f);
-		const std::vector<std::wstring> lines = WrapText(fontSprite, Tr(t.body), panelW);
+		const std::vector<std::wstring> lines = WrapText(fontSprite, Tr(t.body), wrapW);
 		const float lineH = static_cast<float>(fontSprite->GetHeight()) + CAPTION_LINE_SPACING;
 		const float captionH = lineH * static_cast<float>(lines.size());
 		const float totalH = captionH + CAPTION_GAP + gfxH;
@@ -201,12 +213,22 @@ namespace Demo {
 			fontSprite->End();
 		}
 
-		sprite->SetSrcRect(RECT{ 0, r.top + r.crop, static_cast<LONG>(PANEL_SHEET_WIDTH), r.bottom });
-		sprite->SetOrigin(PANEL_SHEET_WIDTH / 2.f, 0.f);
-		sprite->SetPosition(0.f, gfxTop);
-		sprite->Begin();
-		sprite->Draw(uiCamera, deltaTime);
-		sprite->End();
+		if (dodge) {
+			dodgeSprite->SetScale(dodgeScale, dodgeScale);
+			dodgeSprite->SetOrigin(static_cast<float>(dodgeTex->GetWidth()) / 2.f, 0.f);
+			dodgeSprite->SetPosition(0.f, gfxTop);
+			dodgeSprite->Begin();
+			dodgeSprite->Draw(uiCamera, deltaTime);
+			dodgeSprite->End();
+		}
+		else {
+			sprite->SetSrcRect(RECT{ 0, r.top + r.crop, static_cast<LONG>(PANEL_SHEET_WIDTH), r.bottom });
+			sprite->SetOrigin(PANEL_SHEET_WIDTH / 2.f, 0.f);
+			sprite->SetPosition(0.f, gfxTop);
+			sprite->Begin();
+			sprite->Draw(uiCamera, deltaTime);
+			sprite->End();
+		}
 
 		// Inline label next to an icon in the artwork (e.g. the energy / cycle counters).
 		if (t.label && r.labelY >= 0) {
@@ -245,7 +267,7 @@ namespace Demo {
 		// Teaching order, not enum order: the lifecycle notes come last.
 		static const Step order[] = {
 			STEP_DRAG_CARDS, STEP_BLOCKS, STEP_ENERGY,
-			STEP_ENEMY_CARD, STEP_TARGET, STEP_EXECUTE, STEP_CYCLE,
+			STEP_ENEMY_CARD, STEP_TARGET, STEP_EXECUTE, STEP_DODGE, STEP_CYCLE,
 			STEP_NON_PERSISTENT, STEP_USE_LIMIT
 		};
 		queue.clear();

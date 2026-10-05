@@ -786,6 +786,9 @@
     <Image Include="assets\Trojan_outside.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="assets\tutorial-dodge.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="assets\tutorial-notext.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
