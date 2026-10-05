@@ -21,7 +21,7 @@ namespace Demo {
 	public:
 		static OverworldSpriteData GetOverworldSprite(const std::string& enemyType);
 
-		static std::shared_ptr<IEnemy> Create(const std::string& type, std::weak_ptr<DX9GF::TransformManager> tm, DX9GF::GraphicsDevice* gd, DX9GF::Camera* cam);
+		static std::shared_ptr<IEnemy> Create(const std::string& type, std::weak_ptr<DX9GF::TransformManager> tm, DX9GF::GraphicsDevice* gd, DX9GF::Camera* cam, int maxHp = -1); // maxHp <= 0 then roll a fresh value
 
 		static std::shared_ptr<MapEnemy> CreateMapEnemy(
 			float x, float y, const std::string& id,
@@ -33,5 +33,12 @@ namespace Demo {
 			DX9GF::ColliderManager* colMan,
 			std::shared_ptr<Player> player
 		);
+
+		// HP range per enemy type. Returns false for unknown types.
+		static bool TryGetHpRange(const std::string& type, int& lo, int& hi);
+		// Rolls one whole-number max HP for the type (at least 1). Returns 0 for unknown types.
+		static int RollMaxHp(const std::string& type);
+		// Rolls HP for every entry of an encounter, same order as `types`.
+		static std::vector<int> RollEncounterHps(const std::vector<std::string>& types);
 	};
 }

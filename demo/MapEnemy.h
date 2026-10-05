@@ -47,6 +47,10 @@ namespace Demo {
 
         std::shared_ptr<DX9GF::Texture> particleTex;
         std::unique_ptr<DX9GF::ParticleSystem> wealthyAura;
+
+        std::shared_ptr<DX9GF::Font> hpFont;
+        std::shared_ptr<DX9GF::FontSprite> hpFontSprite;
+        void DrawHpLabel(DX9GF::Camera* camera, unsigned long long deltaTime, float x, float y);
     public:
         static bool isDisabled;
         MapEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y, const BattleEncounter& data);
@@ -73,5 +77,7 @@ namespace Demo {
         void SetEventState(EventType type);
         void SetOnEncounterTriggered(std::function<void(std::shared_ptr<MapEnemy>)> callback) { onEncounterTriggered = callback; }
         const BattleEncounter& GetEncounterData() const { return encounterData; }
+        // Restores a previously rolled encounter (from a save). Ignored if the data is inconsistent.
+        void SetEncounterRoll(const std::vector<std::string>& types, const std::vector<int>& hps);
     };
 }

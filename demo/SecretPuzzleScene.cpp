@@ -172,21 +172,27 @@ void Demo::SecretPuzzleScene::OnInit()
 	qem->SetInteractLogic([](NPC* self) -> std::function<void()> {
 		auto qState = QuestManager::GetInstance()->GetQuestState("SecretBoss_Pacman");
 		if (qState == Demo::QuestState::Locked) {
-			self->AddLine(Tr(L"Qem"), Tr(L"There's a hidden boss somewhere in this maze."));
-			self->AddLine(Tr(L"Qem"), Tr(L"Defeat it for a secret reward!"));
+			self->AddLine(Tr(L"Player"), Tr(L"Is there anything special around here?"));
+			self->AddLine(Tr(L"Qem"), Tr(L"Nope~ Weird, right? The map’s called The Root, but it’s completely empty."));
+			self->AddLine(Tr(L"Player"), Tr(L"Really?"));
+			self->AddLine(Tr(L"Qem"), Tr(L"I don’t know a thing! Go check the end of the map and see for yourself."));
 			return []() {
 				std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
 					{ Tr(L"Yes(Y)"), []() { QuestManager::GetInstance()->AcceptQuest("SecretBoss_Pacman"); } },
 					{ Tr(L"No(N)"), []() {} }
 				};
-				PopupManager::GetInstance()->Show("stepped_blue", Tr(L"Secret Boss"), Tr(L"Accept this challenge?"), buttons);
+				PopupManager::GetInstance()->Show("stepped_blue", Tr(L"Hidden Secret"), Tr(L"Accept this explore challenge?"), buttons);
 			};
 		}
 		else if (qState == Demo::QuestState::Active) {
-			self->AddLine(Tr(L"Qem"), Tr(L"The boss is still lurking somewhere... Find it!"));
+			self->AddLine(Tr(L"Qem"), Tr(L"What? You haven't found the hidden surprise yet"));
 		}
 		else {
-			self->AddLine(Tr(L"Qem"), Tr(L"Incredible! You actually defeated the secret boss!"));
+			self->AddLine(Tr(L"Player"), Tr(L"There was a Pacman-like boss near the teleport point."));
+			self->AddLine(Tr(L"Qem"), Tr(L"Complete bullshit. Whoever designed that was dumb as hell."));
+			self->AddLine(Tr(L"Player"), Tr(L"Wait, you knew about it all along?"));
+			self->AddLine(Tr(L"Qem"), Tr(L"Obviously. Read the game files, bro."));
+			self->AddLine(Tr(L"Player"), Tr(L"What does that even mean?"));
 		}
 		return nullptr;
 	});

@@ -14,6 +14,7 @@ namespace Demo {
 	struct BattleEncounter {
 		std::string mapEnemyID;
 		std::vector<std::string> enemyTypes;
+		std::vector<int> enemyHps;
 		std::vector<std::string> randomPool;
 		bool useGlobalPool = false;
 		std::string bgmName = "battle_bgm";

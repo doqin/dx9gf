@@ -227,7 +227,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 
 	const auto currentHealth = static_cast<int>(std::round(health));
 	const auto totalHealth = static_cast<int>(std::round(maxHealth));
-	auto healthText = std::to_wstring(currentHealth) + L"/" + std::to_wstring(totalHealth);
+	auto healthText = std::to_wstring(health) + L"/" + std::to_wstring(maxHealth);
 
 	fontSprite->Begin();
 	fontSprite->SetOutline(true, 0xFF000000, 2.f);
@@ -332,7 +332,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 {
 	// Vulnerable/Weak can leave fractions; health is shown rounded, so a leftover 0.25 would read as 0 HP but alive.
-	float actualDamage = std::round(CalculateActualDamage(damage, ignoreArmor));
+	const int actualDamage = static_cast<int>(std::round(CalculateActualDamage(damage, ignoreArmor)));
 	health -= actualDamage;
 	if (health < 0) health = 0;
 
@@ -374,8 +374,8 @@ bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 }
 
 bool Demo::IEnemy::TakeIndirectDamage(float damage, DamageType type) {
-	damage = std::round(damage);
-	health -= damage;
+	const int dealt = static_cast<int>(std::round(damage));
+	health -= dealt;
 	if (health < 0) health = 0;
 
 	D3DCOLOR textColor = 0xFFFFFFFF;
@@ -398,7 +398,7 @@ bool Demo::IEnemy::TakeIndirectDamage(float damage, DamageType type) {
 	}
 
 	damageIndicators.push_back(DamageIndicator{
-		L"-" + std::to_wstring(static_cast<int>(std::round(damage))),
+		L"-" + std::to_wstring(dealt),
 		0.f,
 		0.f,
 		RNG::Range(-32.f, 32.f),
@@ -449,7 +449,7 @@ int Demo::IEnemy::GetSmartRandomPattern(const int&& minPattern, const int&& maxP
 	return patternId;
 }
 
-void Demo::IEnemy::SpawnHealText(float actualHeal) {
+void Demo::IEnemy::SpawnHealText(int actualHeal) {
 	damageIndicators.push_back(DamageIndicator{
 		L"+" + std::to_wstring(static_cast<int>(std::round(actualHeal))),
 		0.f,

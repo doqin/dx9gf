@@ -2,6 +2,9 @@
 #include "MapEnemy.h"
 #include "MapBattleScene.h"
 #include "EncounterGenerator.h"
+#include "EnemyFactory.h"
+#include "MainFont.h"
+
 namespace Demo {
 	bool MapEnemy::isDisabled = false;
 
@@ -90,6 +93,8 @@ namespace Demo {
 				else if (!encounterData.randomPool.empty()) {
 					encounterData.enemyTypes = EncounterGenerator::GenerateFromTypes(encounterData.randomPool);
 				}
+				// A respawned enemy is a new roll, so its HP is rolled again as well.
+				encounterData.enemyHps = EnemyFactory::RollEncounterHps(encounterData.enemyTypes);
 			}
 			return;
 		}
@@ -295,6 +300,7 @@ namespace Demo {
 		sprite->SetPosition(x, y);
 		sprite->Draw(*camera, deltaTime);
 		sprite->End();
+		DrawHpLabel(camera, deltaTime, x, y);
 		DrawPosition(deltaTime, game->GetGraphicsDevice(), *camera);
 	}
 
@@ -339,5 +345,41 @@ namespace Demo {
 	void MapEnemy::SetEventState(EventType type) {
 		encounterData.eventType = type;
 		if (wealthyAura) wealthyAura->SetEnabled(type != EventType::None);
+	}
+	void MapEnemy::DrawHpLabel(DX9GF::Camera* camera, unsigned long long deltaTime, float x, float y) {
+		if (!game || !game->GetGraphicsDevice()) return;
+		if (!hpFont) {
+			// A smaller font renders crisper than scaling the main one down.
+			hpFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kSmallFontSize);
+			hpFontSprite = std::make_shared<DX9GF::FontSprite>(hpFont.get());
+		}
+
+		// Only a lone enemy has a number worth showing; a group stays hidden on purpose.
+		const bool known = encounterData.enemyTypes.size() == 1
+			&& encounterData.enemyHps.size() == 1
+			&& encounterData.enemyHps[0] > 0;
+		const std::wstring text = known ? (std::to_wstring(encounterData.enemyHps[0]) + L" HP") : L"???";
+
+		const float scaleY = std::abs(this->GetLocalScaleY());
+		const float topY = y - (encounterData.spriteHeight * 0.5f * scaleY) - 18.f;
+
+		hpFontSprite->Begin();
+		hpFontSprite->SetOutline(true, 0xFF000000, 2.f);
+		hpFontSprite->SetColor(0xFFE6E6E6); // light gray
+		hpFontSprite->SetText(text);
+		// Text is set before measuring, so the centering uses the real width.
+		hpFontSprite->SetPosition(x - hpFontSprite->GetWidth() / 2.f, topY);
+		hpFontSprite->Draw(*camera, deltaTime);
+		hpFontSprite->SetOutline(false);
+		hpFontSprite->End();
+	}
+
+	void MapEnemy::SetEncounterRoll(const std::vector<std::string>& types, const std::vector<int>& hps) {
+		if (types.empty() || types.size() != hps.size()) return;
+		for (int hp : hps) {
+			if (hp <= 0) return;
+		}
+		encounterData.enemyTypes = types;
+		encounterData.enemyHps = hps;
 	}
 }

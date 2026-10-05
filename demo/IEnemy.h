@@ -65,11 +65,11 @@ namespace Demo {
 		void BeginDeath();
 		void UpdateDeath(unsigned long long deltaTime);
 	public:
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth) : ICombatant(tm, maxHealth) {}
+		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth) : ICombatant(tm, maxHealth) {}
 
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, maxHealth, x, y, rot, sx, sy) {}
+		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, maxHealth, x, y, rot, sx, sy) {}
 
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, std::weak_ptr<DX9GF::IGameObject> parent, float maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, parent, maxHealth, x, y, rot, sx, sy) {}
+		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, std::weak_ptr<DX9GF::IGameObject> parent, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, parent, maxHealth, x, y, rot, sx, sy) {}
 		void InitCardSpawnTrigger(DX9GF::Camera* camera, float width, float height);
 		void SetOnRequestEnemyCard(std::function<void(std::shared_ptr<IEnemy>)> callback);
 		virtual void Update(unsigned long long deltaTime);
@@ -96,7 +96,7 @@ namespace Demo {
 		}
 
 		bool TakeIndirectDamage(float damage, DamageType type) override;
-		void SpawnHealText(float actualHeal) override;
+		void SpawnHealText(int actualHeal) override;
 		void CastAbility(std::function<void()> effect, std::shared_ptr<PopUpMessage> popUpMessage, const std::wstring& message);
 
 	protected:
