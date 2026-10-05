@@ -177,17 +177,22 @@ void Demo::BossWorldScene::OnInit()
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, 176.f, 192.f));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::RK_HYBRID); }
+		ShopConfig{
+			ShopType::Item,
+			ShopTier::RK_HYBRID,
+			[](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::RK_HYBRID); }
+		}
 	);
+
 	shopPoints.back()->SetVisible(true);
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, -80, -256));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::PREMIUM); }
+		ShopConfig{ ShopType::Card, ShopTier::PREMIUM, [](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::PREMIUM); } }
 	);
 	shopPoints.back()->SetVisible(true);
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, 630.f, -192.f));
 	shopPoints.back()->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		[](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::PREMIUM); }
+		ShopConfig{ ShopType::Item, ShopTier::PREMIUM, [](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::PREMIUM); } }
 	);
 	shopPoints.back()->SetVisible(true);
 
