@@ -23,8 +23,9 @@
 #include "IStatementCard.h"
 #include "IBlockCard.h"
 #include "PopupManager.h"
-#include "PendingAutoContinue.h"
-#include <fstream>
+#include "SaveGameState.h"
+#include "MainMenu.h"
+
 namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
@@ -2077,19 +2078,10 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 			if (!defeatPopupShown) {
 				defeatPopupShown = true;
 
-				std::ifstream f("savegame.json");
-				const bool hasSave = f.good();
-				f.close();
-
-				if (hasSave) {
+				if (SaveGameState::HasSaveFile()) {
 					std::vector<std::pair<std::wstring, std::function<void()>>> popupBtns = {
-						{ L"Yes(Y)", [this]() {
-							pendingDefeatAutoContinue = true;
-							pendingDefeatMainMenuTransition = true;
-						} },
-						{ L"No(N)", [this]() {
-							pendingDefeatMainMenuTransition = true;
-						} }
+						{ L"Yes(Y)", [this]() { pendingDefeatReloadSave = true; } },
+						{ L"No(N)", [this]() { pendingDefeatMainMenuTransition = true; } }
 					};
 					PopupManager::GetInstance()->Show("basic_ghost", L"DEFEATED", L"Load your last savepoint?", popupBtns);
 				}
@@ -3465,20 +3457,25 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
 	PopupManager::GetInstance()->Update(deltaTime, &this->uiCamera);
 
+	if (pendingDefeatReloadSave) {
+		pendingDefeatReloadSave = false;
+		if (MainMenu::gameSaveState && SaveGameState::HasSaveFile()) {
+			// This deletes the current scene (this). Nothing may touch a member after the call.
+			MainMenu::gameSaveState->ReloadLastSave();
+			return;
+		}
+		// Save vanished or state missing: fall back to the main menu path below.
+		pendingDefeatMainMenuTransition = true;
+	}
+
 	if (pendingDefeatMainMenuTransition) {
 		pendingDefeatMainMenuTransition = false;
-		bool autoContinue = pendingDefeatAutoContinue;
-		pendingDefeatAutoContinue = false;
-
-		if (autoContinue) {
-			PendingAutoContinue::GetInstance()->Request();
-		}
 		auto sceMan = game->GetSceneManager();
 		while (sceMan->GetSceneCount() > 1) {
 			sceMan->PopScene();
 		}
 		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 1.0f);
-		sceMan->GoToScene(0); // Go to main menu
+		sceMan->GoToScene(0);
 		return;
 	}
 

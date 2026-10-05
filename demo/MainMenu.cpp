@@ -15,7 +15,6 @@
 #include "PopupManager.h"
 #include "MainFont.h"
 #include "LocalizationManager.h"
-#include "PendingAutoContinue.h"
 
 namespace Demo
 {
@@ -302,15 +301,13 @@ namespace Demo
 
 		PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 
-		std::ifstream f("savegame.json");
-		bool hasSave = f.good();
+		const bool hasSave = SaveGameState::HasSaveFile();
 		if (hasSave) {
 			continueButton->SetState(IButton::ButtonState::IDLE);
 		}
 		else {
 			continueButton->SetState(IButton::ButtonState::DISABLED);
 		}
-		f.close();
 
 		doContinueGame = [this]() {
 			if (isTransitioning) return;
@@ -339,9 +336,7 @@ namespace Demo
 			if (isTransitioning) return;
 
 			//check save file
-			std::ifstream f("savegame.json");
-			bool hasSave = f.good();
-			f.close();
+			const bool hasSave = SaveGameState::HasSaveFile();
 
 			auto startNewGameLogic = [this]() {
 				this->isTransitioning = true;
@@ -351,16 +346,12 @@ namespace Demo
 				this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
 					if (!transitionInCommand->IsFinished()) return;
 
-					std::remove("savegame.json");
+					std::remove(SaveGameState::SAVE_FILE);
 					gameSaveState = SaveGameState::StartNewGame(this->game, this->saveManager);
 					this->isTransitioning = false;
 
 					this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished1) {
-						std::ifstream f2("savegame.json");
-						if (f2.good()) this->continueButton->SetState(IButton::ButtonState::IDLE);
-						else this->continueButton->SetState(IButton::ButtonState::DISABLED);
-						f2.close();
-
+						continueButton->SetState(SaveGameState::HasSaveFile() ? IButton::ButtonState::IDLE : IButton::ButtonState::DISABLED);
 						markFinished1();
 						}));
 					markFinished();
@@ -370,8 +361,8 @@ namespace Demo
 
 			if (hasSave) {
 				std::vector<std::pair<std::wstring, std::function<void()>>> popupBtns = {
-					{ Tr(L"Yes"), startNewGameLogic },
-					{ Tr(L"No"), []() {} }
+					{ Tr(L"Yes (Y)"), startNewGameLogic },
+					{ Tr(L"No (N)"), []() {} }
 				};
 				PopupManager::GetInstance()->Show("stepped_red", Tr(L"WARNING"), Tr(L"Overwrite existing save?"), popupBtns);
 			}
@@ -457,15 +448,6 @@ namespace Demo
 	void MainMenu::Update(unsigned long long deltaTime)
 	{
 		PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
-
-		if (doContinueGame && Demo::PendingAutoContinue::GetInstance()->ConsumeIfPending()) {
-			std::ifstream f("savegame.json");
-			bool hasSave = f.good();
-			f.close();
-			if (hasSave) {
-				doContinueGame();
-			}
-		}
 
 		auto inpMan = DX9GF::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);

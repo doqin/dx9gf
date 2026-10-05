@@ -80,7 +80,7 @@ namespace Demo {
 		float defeatFadeAlpha = 0.f;
 		bool defeatPopupShown = false;
 		bool pendingDefeatMainMenuTransition = false;
-		bool pendingDefeatAutoContinue = false;
+		bool pendingDefeatReloadSave = false;
 		// Keyboard navigation
 		// A destination a picked-up card can be placed at (a slot in the block's execution queue,
 		// or an eligible MultiTargetCard to lock an EnemyCard onto).
