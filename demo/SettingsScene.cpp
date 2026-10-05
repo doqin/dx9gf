@@ -103,8 +103,20 @@ namespace Demo
 
 	bool SettingsScene::IsAnyKeybindListening() const
 	{
-		return isListeningUp || isListeningDown || isListeningLeft || isListeningRight
-			|| isListeningAccept || isListeningOpenInventory || isListeningInteract || isListeningSprint || isListeningToggleGear;
+		return std::any_of(keybindRows.begin(), keybindRows.end(), [](const KeybindRow& row) { return row.listening; });
+	}
+
+	SettingsScene::KeybindRowPos SettingsScene::GetKeybindRowPos(size_t index, float startY, float rowSpacing) const
+	{
+		const size_t rowsPerColumn = (keybindRows.size() + 1) / 2;
+		const size_t column = rowsPerColumn > 0 ? index / rowsPerColumn : 0;
+		const size_t row = rowsPerColumn > 0 ? index % rowsPerColumn : 0;
+		const float labelX = KEYBIND_COL_LABEL_X[std::min<size_t>(column, 1)];
+		return {
+			labelX,
+			labelX + KEYBIND_BUTTON_OFFSET_X,
+			startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * row)
+		};
 	}
 
 	std::vector<KeyboardNavigator::Candidate> SettingsScene::CollectKeyboardCandidates()
@@ -147,17 +159,10 @@ namespace Demo
 	//Update functions for component
 	void SettingsScene::ResetListening()
 	{
-		isListeningUp = isListeningDown = isListeningLeft = isListeningRight = false;
-		isListeningAccept = isListeningOpenInventory = isListeningInteract = isListeningSprint = isListeningToggleGear = false;
-		if (btnUp) btnUp->SetState(Demo::IButton::ButtonState::IDLE);
-		if (btnDown) btnDown->SetState(Demo::IButton::ButtonState::IDLE);
-		if (btnLeft) btnLeft->SetState(Demo::IButton::ButtonState::IDLE);
-		if (btnRight) btnRight->SetState(Demo::IButton::ButtonState::IDLE);
-		if (btnAccept) btnAccept->SetState(Demo::IButton::ButtonState::IDLE);
-		if (btnOpenInventory) btnOpenInventory->SetState(Demo::IButton::ButtonState::IDLE);
-		if (btnInteract) btnInteract->SetState(Demo::IButton::ButtonState::IDLE);
-		if (btnSprint) btnSprint->SetState(Demo::IButton::ButtonState::IDLE);
-		if (btnToggleGear) btnToggleGear->SetState(Demo::IButton::ButtonState::IDLE);
+		for (auto& row : keybindRows) {
+			row.listening = false;
+			if (row.button) row.button->SetState(Demo::IButton::ButtonState::IDLE);
+		}
 	}
 
 	void SettingsScene::UpdateLayout(int screenW, int screenH)
@@ -219,10 +224,10 @@ namespace Demo
 		btnLangEN->SetLocalPosition(SLIDER_COLUMN_X, langRowY + btnOffsetY);
 		btnLangVI->SetLocalPosition(SLIDER_COLUMN_X + 130.f, langRowY + btnOffsetY);
 
-		std::shared_ptr<Demo::TextIconButton> keybindButtons[] = { btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear };
-		for (size_t i = 0; i < std::size(keybindButtons); ++i) {
-			if (keybindButtons[i]) {
-				keybindButtons[i]->SetLocalPosition(SLIDER_COLUMN_X, startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * i));
+		for (size_t i = 0; i < keybindRows.size(); ++i) {
+			if (keybindRows[i].button) {
+				const auto pos = GetKeybindRowPos(i, startY, rowSpacing);
+				keybindRows[i].button->SetLocalPosition(pos.buttonX, pos.y);
 			}
 		}
 	}
@@ -366,7 +371,10 @@ namespace Demo
 			});
 		btnResNext->Init(&uiCamera);
 
-		auto SetupKeybindBtn = [&](std::shared_ptr<Demo::TextIconButton>& btn, const std::string& action, bool& listeningFlag) {
+		auto SetupKeybindBtn = [&](const std::string& action, const wchar_t* label) {
+			const size_t rowIndex = keybindRows.size();
+			keybindRows.push_back({ action, label, nullptr, false });
+			auto& btn = keybindRows.back().button;
 			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, font.get(), L"", 3);
 			btn->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(0, 0, 16, 16, 3));
 			btn->SetSpriteScale(2.f, 2.f);
@@ -387,25 +395,27 @@ namespace Demo
 				return ToWString(GetKeyName(sm->GetKeybind(action)));
 				});
 
-			btn->SetOnReleaseLeft([this, rawBtn, &listeningFlag](DX9GF::ITrigger*) {
+			btn->SetOnReleaseLeft([this, rawBtn, rowIndex](DX9GF::ITrigger*) {
 				this->ResetListening();
-				listeningFlag = true;
+				keybindRows[rowIndex].listening = true;
 				rawBtn->SetState(Demo::IButton::ButtonState::LISTENING);
 				});
 			};
 
-		SetupKeybindBtn(btnUp, "MOVE_UP", isListeningUp);
-		SetupKeybindBtn(btnDown, "MOVE_DOWN", isListeningDown);
-		SetupKeybindBtn(btnLeft, "MOVE_LEFT", isListeningLeft);
-		SetupKeybindBtn(btnRight, "MOVE_RIGHT", isListeningRight);
-		SetupKeybindBtn(btnAccept, "ACCEPT", isListeningAccept);
-		SetupKeybindBtn(btnOpenInventory, "OPEN_INVENTORY", isListeningOpenInventory);
-		SetupKeybindBtn(btnInteract, "INTERACT", isListeningInteract);
-		SetupKeybindBtn(btnSprint, "SPRINT", isListeningSprint);
-		SetupKeybindBtn(btnToggleGear, "TOGGLE_GEAR", isListeningToggleGear);
+		SetupKeybindBtn("MOVE_UP", L"Move up");
+		SetupKeybindBtn("MOVE_DOWN", L"Move down");
+		SetupKeybindBtn("MOVE_LEFT", L"Move left");
+		SetupKeybindBtn("MOVE_RIGHT", L"Move right");
+		SetupKeybindBtn("ACCEPT", L"Accept");
+		SetupKeybindBtn("OPEN_INVENTORY", L"Open inventory");
+		SetupKeybindBtn("INTERACT", L"Interact");
+		SetupKeybindBtn("SPRINT", L"Sprint");
+		SetupKeybindBtn("TOGGLE_GEAR", L"Toggle Gear");
+		SetupKeybindBtn("OPEN_MAP", L"Open map");
 
 		// Active Buttons
-		std::shared_ptr<Demo::IButton> buttons[] = { backButton, btnUp, btnDown, btnLeft, btnRight, btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck, btnLangEN, btnLangVI };
+		std::vector<std::shared_ptr<Demo::IButton>> buttons = { backButton, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck, btnLangEN, btnLangVI };
+		for (auto& row : keybindRows) buttons.push_back(row.button);
 		for (auto& btn : buttons)
 		{
 			if (btn)
@@ -487,15 +497,9 @@ namespace Demo
 				}
 			};
 
-		HandleKeybind(isListeningUp, "MOVE_UP", btnUp);
-		HandleKeybind(isListeningDown, "MOVE_DOWN", btnDown);
-		HandleKeybind(isListeningLeft, "MOVE_LEFT", btnLeft);
-		HandleKeybind(isListeningRight, "MOVE_RIGHT", btnRight);
-		HandleKeybind(isListeningAccept, "ACCEPT", btnAccept);
-		HandleKeybind(isListeningOpenInventory, "OPEN_INVENTORY", btnOpenInventory);
-		HandleKeybind(isListeningInteract, "INTERACT", btnInteract);
-		HandleKeybind(isListeningSprint, "SPRINT", btnSprint);
-		HandleKeybind(isListeningToggleGear, "TOGGLE_GEAR", btnToggleGear);
+		for (auto& row : keybindRows) {
+			HandleKeybind(row.listening, row.action, row.button);
+		}
 
 		if (this->isGoingBack)
 		{
@@ -578,9 +582,9 @@ namespace Demo
 			fontSprite->SetText(L"Tiếng Việt");
 			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
 
-			const wchar_t* keybindLabels[] = { L"Move up", L"Move down", L"Move left", L"Move right", L"Accept", L"Open inventory", L"Interact", L"Sprint", L"Toggle Gear" };
-			for (size_t i = 0; i < std::size(keybindLabels); ++i) {
-				DrawString(Tr(keybindLabels[i]), LABEL_COLUMN_X, startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * i), 0xFFFFFFFF);
+			for (size_t i = 0; i < keybindRows.size(); ++i) {
+				const auto pos = GetKeybindRowPos(i, startY, rowSpacing);
+				DrawString(Tr(keybindRows[i].label), pos.labelX, pos.y, 0xFFFFFFFF);
 			}
 
 			//draw tracks

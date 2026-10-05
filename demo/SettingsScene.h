@@ -22,6 +22,10 @@ namespace Demo
     constexpr float KEYBIND_ROW_START = 6.0f;
     constexpr float KEYBIND_ROW_STEP = 1.1f;
 
+    // Keybinds flow into two columns so the list never runs off the bottom of the screen
+    constexpr float KEYBIND_COL_LABEL_X[2] = { -216.0f, 100.0f };
+    constexpr float KEYBIND_BUTTON_OFFSET_X = 170.0f;
+
     //save offset to center the keybinds into box (just UI)
     constexpr int BTN_VISUAL_SHADOW_OFFSET = -2;
 
@@ -64,19 +68,17 @@ namespace Demo
         std::shared_ptr<Demo::IconButton> btnMusicDec, btnMusicInc;
         std::shared_ptr<Demo::IconButton> btnSFXDec, btnSFXInc;
 
-        //keybind UI
-        std::shared_ptr<Demo::TextIconButton> btnUp, btnDown, btnLeft, btnRight;
-        std::shared_ptr<Demo::TextIconButton> btnAccept, btnOpenInventory, btnInteract, btnSprint, btnToggleGear;
+        //keybind UI - one row per rebindable action; add a line in Init() to add a keybind
+        struct KeybindRow {
+            std::string action;
+            const wchar_t* label;
+            std::shared_ptr<Demo::TextIconButton> button;
+            bool listening = false;
+        };
+        std::vector<KeybindRow> keybindRows;
 
-        bool isListeningUp = false;
-        bool isListeningDown = false;
-        bool isListeningLeft = false;
-        bool isListeningRight = false;
-        bool isListeningAccept = false;
-        bool isListeningOpenInventory = false;
-        bool isListeningInteract = false;
-        bool isListeningSprint = false;
-        bool isListeningToggleGear = false;
+        struct KeybindRowPos { float labelX, buttonX, y; };
+        KeybindRowPos GetKeybindRowPos(size_t index, float startY, float rowSpacing) const;
 
         KeyboardNavigator keyboardNavigator;
         std::vector<KeyboardNavigator::Candidate> CollectKeyboardCandidates();
