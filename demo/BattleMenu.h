@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "IconButton.h"
 #include "KeyboardNavigator.h"
+#include "BattleTutorial.h"
 
 namespace Demo {
 	class BattleMenu {
@@ -26,10 +27,16 @@ namespace Demo {
 		KeyboardNavigator keyboardNavigator;
 		std::vector<KeyboardNavigator::Candidate> CollectKeyboardCandidates();
 
+		std::shared_ptr<IconButton> btnGuide;
+		std::shared_ptr<BattleTutorial> tutorial; // built lazily on the first Guide click
+		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		DX9GF::Font* font = nullptr;
+
+
 	public:
 		BattleMenu(Game* g, std::shared_ptr<DX9GF::TransformManager> tm, DX9GF::Camera* cam);
 
-		void Init();
+		void Init(DX9GF::Font* font);
 		void Update(unsigned long long deltaTime);
 		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
 		void DrawKeyboardReticle(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
@@ -38,5 +45,6 @@ namespace Demo {
 		bool IsOpen() const { return isOpen; }
 		bool IsInKeyboardMode() const { return isOpen && keyboardNavigator.IsInKeyboardMode(); }
 		bool IsPendingLeave() const { return pendingLeave; }
+		bool IsTutorialActive() const { return tutorial && tutorial->IsPanelVisible(); }
 	};
 }

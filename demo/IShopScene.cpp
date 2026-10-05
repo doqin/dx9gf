@@ -46,6 +46,7 @@ namespace {
 	constexpr D3DCOLOR COLOR_DIVIDER = 0x66FFFFFF;
 	constexpr D3DCOLOR COLOR_BTN_DISABLED = 0xFF707070;
 	constexpr D3DCOLOR COLOR_FACE_DISABLED = 0xFF808080;
+	constexpr D3DCOLOR COLOR_OWNED = 0xFFB4F5C3;
 
 	// Status cover geometry, mirrored from IStatementCard's private constants of the same name
 	// so the shop's cover panel matches the one cards draw in battle pixel-for-pixel.
@@ -774,10 +775,23 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 				myFontSprite->SetPosition(priceX, rowY + (ROW_H - priceH) / 2.0f);
 				myFontSprite->Draw(uiCamera, deltaTime);
 
-				// "xN" owned count, just left of the price (sell rows only).
-				if (item.stackCount > 1) {
-					myFontSprite->SetColor(COLOR_TEXT_DIM);
-					myFontSprite->SetText(Tr(L"x") + std::to_wstring(item.stackCount));
+				// Owned count, just left of the price: "xN" on Sell rows (stack size), "Owned: N"
+				// on Buy rows so the player can see what they already carry before buying more.
+				std::wstring countText;
+				D3DCOLOR countColor = COLOR_TEXT_DIM;
+				if (item.ownedCount) {
+					const int owned = item.ownedCount();
+					if (owned > 0) {
+						countText = Tr(L"Owned: ") + std::to_wstring(owned);
+						countColor = COLOR_OWNED;
+					}
+				}
+				else if (item.stackCount > 1) {
+					countText = Tr(L"x") + std::to_wstring(item.stackCount);
+				}
+				if (!countText.empty()) {
+					myFontSprite->SetColor(countColor);
+					myFontSprite->SetText(countText);
 					const float countW = static_cast<float>(myFontSprite->GetWidth());
 					const float countH = static_cast<float>(myFontSprite->GetHeight());
 					myFontSprite->SetPosition(priceX - 16.0f - countW, rowY + (ROW_H - countH) / 2.0f);
