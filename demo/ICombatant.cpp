@@ -1,18 +1,13 @@
 ﻿#include "pch.h"
 #include "ICombatant.h"
 #include "DamageTextManager.h"
+
 namespace Demo {
-	void Demo::ICombatant::Heal(int value) {
-		if (IsDead()) return;
-
-		//heals must be whole
-		const float whole = std::round(value);
-		const float actualHeal = (std::min)(whole, maxHealth - health);
-		health = (std::min)(maxHealth, health + whole);
-
-		if (actualHeal > 0) {
-			SpawnHealText(actualHeal);
-		}
+	void ICombatant::Heal(int value) {
+		if (IsDead() || value <= 0) return;
+		const int actualHeal = (std::min)(value, maxHealth - health);
+		health += actualHeal;
+		if (actualHeal > 0) SpawnHealText(actualHeal);
 	}
 
 	void Demo::ICombatant::SpawnHealText(int actualHeal) {
@@ -146,7 +141,8 @@ namespace Demo {
 	}
 
 	bool ICombatant::TakeIndirectDamage(float damage, DamageType type) {
-		health -= std::round(damage);
+		// Health is whole numbers; round once, then subtract as int.
+		health -= static_cast<int>(std::round(damage));
 		if (health < 0) health = 0;
 		return IsDead();
 	}
@@ -185,7 +181,7 @@ namespace Demo {
 					this->TakeIndirectDamage(it.value, DamageType::Burn);
 				}
 				else if (it.type == ModifierType::Regen && phase == TickPhase::EndOfTurn) {
-					this->Heal(it.value);
+					this->Heal(static_cast<int>(std::round(it.value)));
 				}
 			}
 		}
