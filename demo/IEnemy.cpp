@@ -449,7 +449,7 @@ int Demo::IEnemy::GetSmartRandomPattern(const int&& minPattern, const int&& maxP
 	return patternId;
 }
 
-void Demo::IEnemy::SpawnHealText(float actualHeal) {
+void Demo::IEnemy::SpawnHealText(int actualHeal) {
 	damageIndicators.push_back(DamageIndicator{
 		L"+" + std::to_wstring(static_cast<int>(std::round(actualHeal))),
 		0.f,

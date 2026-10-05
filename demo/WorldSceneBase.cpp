@@ -495,7 +495,9 @@ void Demo::WorldSceneBase::GenerateSaveData(nlohmann::json& outData)
 		enemiesState[enemy->GetEnemyID()] = {
 			{"isDefeated", enemy->IsDefeated()},
 			{"respawnTimer", enemy->GetRespawnTimer()},
-			{"eventType", static_cast<int>(enemy->GetEncounterData().eventType)}
+			{"eventType", static_cast<int>(enemy->GetEncounterData().eventType)},
+			{"enemyTypes", enemy->GetEncounterData().enemyTypes},
+			{"enemyHps", enemy->GetEncounterData().enemyHps}
 		};
 	}
 	outData["mapEnemies"] = enemiesState;
@@ -527,6 +529,13 @@ void Demo::WorldSceneBase::RestoreSaveData(const nlohmann::json& inData)
 
 				enemy->SetDefeatedState(def, timer);
 				enemy->SetEventState(savedEvent);
+
+				// Older saves have no roll; those enemies simply keep the one made when the scene was built.
+				if (enemiesState[id].contains("enemyTypes") && enemiesState[id].contains("enemyHps")) {
+					enemy->SetEncounterRoll(
+						enemiesState[id]["enemyTypes"].get<std::vector<std::string>>(),
+						enemiesState[id]["enemyHps"].get<std::vector<int>>());
+				}
 			}
 		}
 	}

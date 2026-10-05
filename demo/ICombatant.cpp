@@ -2,10 +2,10 @@
 #include "ICombatant.h"
 #include "DamageTextManager.h"
 namespace Demo {
-	void Demo::ICombatant::Heal(float value) {
+	void Demo::ICombatant::Heal(int value) {
 		if (IsDead()) return;
 
-		float actualHeal = value;
+		int actualHeal = value;
 		if (health + value > maxHealth) {
 			actualHeal = maxHealth - health;
 		}
@@ -18,7 +18,7 @@ namespace Demo {
 		}
 	}
 
-	void Demo::ICombatant::SpawnHealText(float actualHeal) {
+	void Demo::ICombatant::SpawnHealText(int actualHeal) {
 		DamageTextManager::GetInstance()->Spawn(actualHeal, GetWorldX(), GetWorldY() - 40.f, TextType::Heal);
 	}
 

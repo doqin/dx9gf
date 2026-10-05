@@ -101,11 +101,11 @@ namespace Demo {
 		void DealDamage(IEnemy* target, float cardBaseDamage, bool ignoreArmor = false);
 		std::weak_ptr<DX9GF::RectangleCollider> GetCollider();
 
-		float GetHealth() const { return PlayerGlobalData::GetInstance()->GetHealth(); }
-		float GetMaxHealth() const { return PlayerGlobalData::GetInstance()->GetMaxHealth(); }
-		void SetHealth(float hp) { PlayerGlobalData::GetInstance()->SetHealth(hp); }
+		int GetHealth() const { return PlayerGlobalData::GetInstance()->GetHealth(); }
+		int GetMaxHealth() const { return PlayerGlobalData::GetInstance()->GetMaxHealth(); }
+		void SetHealth(int hp) { PlayerGlobalData::GetInstance()->SetHealth(hp); }
 		bool IsDead() const { return PlayerGlobalData::GetInstance()->IsDead(); }
-		void Heal(float value) override;
+		void Heal(int value) override;
 
 		int GetGold() const { return PlayerGlobalData::GetInstance()->GetGold(); }
 		void SetGold(int amount) { PlayerGlobalData::GetInstance()->SetGold(amount); }

@@ -531,8 +531,8 @@ bool Demo::Player::TakeIndirectDamage(float damage, DamageType type) {
 	return IsDead();
 }
 
-void Demo::Player::Heal(float value) {
-	float actualHeal = PlayerGlobalData::GetInstance()->Heal(value);
+void Demo::Player::Heal(int value) {
+	int actualHeal = PlayerGlobalData::GetInstance()->Heal(value);
 	if (actualHeal > 0) SpawnHealText(actualHeal);
 }
 

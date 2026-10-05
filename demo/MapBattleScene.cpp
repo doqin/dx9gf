@@ -31,7 +31,8 @@ namespace Demo {
         const size_t enemyCount = encounter.enemyTypes.size();
 
         for (size_t i = 0; i < enemyCount; ++i) {
-            auto enemy = EnemyFactory::Create(encounter.enemyTypes[i], transformManager, game->GetGraphicsDevice(), &camera);
+            const int lockedHp = (i < encounter.enemyHps.size()) ? encounter.enemyHps[i] : -1;
+            auto enemy = EnemyFactory::Create(encounter.enemyTypes[i], transformManager, game->GetGraphicsDevice(), &camera, lockedHp);
             if (enemy) {
                 enemy->SetOnRequestEnemyCard([this](std::shared_ptr<IEnemy> e) {
                     this->CreateEnemyCard(e);
