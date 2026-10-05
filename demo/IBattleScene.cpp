@@ -2599,16 +2599,18 @@ void Demo::IBattleScene::ComputeProjectedDamage(std::unordered_map<IEnemy*, floa
 	for (const auto& enemy : enemies) {
 		if (!enemy || enemy->IsDead()) continue;
 
-		float healthLost = enemy->GetHealth() - state.enemies[enemy.get()].health;
-		float armorLost = enemy->GetTemporaryDefense() - state.enemies[enemy.get()].block;
+		const auto& sim = state.enemies[enemy.get()];
 
-		float tick = state.enemies[enemy.get()].burn;
-		if (state.enemies[enemy.get()].poisonDuration > 0) {
-			tick += (state.enemies[enemy.get()].poisonValue > 0.f) ? state.enemies[enemy.get()].poisonValue : static_cast<float>(state.enemies[enemy.get()].poisonDuration);
+		const float healthLost = enemy->GetHealth() - sim.health;
+		const float armorLost = enemy->GetTemporaryDefense() - sim.block;
+
+		// Indirect damage is rounded per tick in TakeIndirectDamage, so round it here as well.
+		float tick = std::round(sim.burn);
+		if (sim.poisonDuration > 0) {
+			tick += std::round((sim.poisonValue > 0.f) ? sim.poisonValue : static_cast<float>(sim.poisonDuration));
 		}
 
-		float totalProjected = healthLost + armorLost + tick;
-
+		const float totalProjected = healthLost + armorLost + tick;
 		if (totalProjected > 0.f) {
 			out[enemy.get()] = totalProjected;
 		}

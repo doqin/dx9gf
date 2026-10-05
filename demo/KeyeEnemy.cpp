@@ -42,7 +42,8 @@ void Demo::KeyeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 	if (currentCycle != cycle) {
 		currentCycle = cycle;
 
-		if (RNG::Range(1, 100) <= 50) {
+		//if (RNG::Range(1, 100) <= 50) {
+		if (true) {
 			skillTurnThisCycle = RNG::Range(1, 3);
 		}
 		else {
@@ -52,8 +53,10 @@ void Demo::KeyeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 
 	int turnInCycle = (currentTurn - 1) % 3 + 1;
 
-	if (turnInCycle == skillTurnThisCycle) {
-		if (RNG::Range(1, 2) == 1) {
+	//if (turnInCycle == skillTurnThisCycle) {
+	if (true) {
+		//if (RNG::Range(1, 2) == 1) {
+		if (false) {
 			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 5.0f, true); }, popUpMessage, Tr(L"Keye focuses its gaze!"));
 		}
 		else {
