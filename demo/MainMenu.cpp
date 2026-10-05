@@ -15,6 +15,7 @@
 #include "PopupManager.h"
 #include "MainFont.h"
 #include "LocalizationManager.h"
+#include "PendingAutoContinue.h"
 
 namespace Demo
 {
@@ -448,6 +449,15 @@ namespace Demo
 	void MainMenu::Update(unsigned long long deltaTime)
 	{
 		PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
+
+		if (doContinueGame && Demo::PendingAutoContinue::GetInstance()->ConsumeIfPending()) {
+			std::ifstream f("savegame.json");
+			bool hasSave = f.good();
+			f.close();
+			if (hasSave) {
+				doContinueGame();
+			}
+		}
 
 		auto inpMan = DX9GF::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
