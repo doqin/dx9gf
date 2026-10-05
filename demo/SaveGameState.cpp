@@ -11,6 +11,7 @@
 #include "ThreadAlleyScene.h"
 #include "BossWorldScene.h"
 #include "QuestManager.h"
+#include <fstream>
 
 namespace Demo {
 	SaveGameState::SaveGameState(Game* game, std::shared_ptr<DX9GF::SaveManager> saveManager)
@@ -138,16 +139,33 @@ namespace Demo {
 		return saveState;
 	}
 
-	std::shared_ptr<SaveGameState> SaveGameState::LoadSavedGame(Game* game, const std::shared_ptr<DX9GF::SaveManager>& saveManager) {
+	bool SaveGameState::HasSaveFile() {
+		std::ifstream f(SAVE_FILE);
+		return f.good();
+	}
+
+	void SaveGameState::ReloadFromDisk() {
+		// Park on the main menu first. ClearScenes pops everything above index 0, and the
+		// current index may point at a scene that is about to be destroyed.
+		game->GetSceneManager()->GoToScene(0);
 		saveManager->Clear();
-		auto saveState = std::make_shared<SaveGameState>(game, saveManager);
-		saveManager->Register(saveState.get());
+		saveManager->Register(this);
 		saveManager->Register(PlayerGlobalData::GetInstance());
 		saveManager->Register(SketchyGuyGlobalData::GetInstance());
-		saveState->ClearScenes();
-		saveState->BuildScenes();
+		ClearScenes();
+		BuildScenes();
 		QuestManager::GetInstance()->Reset();
-		saveManager->Load("savegame.json");
+		// RestoreSaveData moves the scene manager to the saved "current_scene".
+		saveManager->Load(SAVE_FILE);
+	}
+
+	void SaveGameState::ReloadLastSave() {
+		ReloadFromDisk();
+	}
+
+	std::shared_ptr<SaveGameState> SaveGameState::LoadSavedGame(Game* game, const std::shared_ptr<DX9GF::SaveManager>& saveManager) {
+		auto saveState = std::make_shared<SaveGameState>(game, saveManager);
+		saveState->ReloadFromDisk();
 		return saveState;
 	}
 }

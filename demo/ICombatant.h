@@ -57,6 +57,9 @@ namespace Demo {
 		virtual void TriggerEffects(TickPhase phase);
 		virtual void TickDurations(TickPhase phase);
 
+		static float ScaleOutgoingDamage(float baseDamage, float buffDamage, bool weak);
+		static float ScaleIncomingDamage(float damage, float marked, bool vulnerable);
+
 		void AddModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns = 0);
 		// Like AddModifier, but accumulates value and refreshes duration to the longer of the two
 		// rather than taking max(value) and summing durations. Used by effects that are meant to

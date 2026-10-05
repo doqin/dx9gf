@@ -35,67 +35,67 @@ namespace Demo {
 
 	std::shared_ptr<IEnemy> EnemyFactory::Create(const std::string& type, std::weak_ptr<DX9GF::TransformManager> tm, DX9GF::GraphicsDevice* gd, DX9GF::Camera* cam) {
 		if (type == "TestEnemy") {
-			auto enemy = std::make_shared<TestEnemy>(tm, RNG::Range(40.0f, 60.0f));
+			auto enemy = std::make_shared<TestEnemy>(tm, RNG::Range(40, 60));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "DemonEyeEnemy") {
-			auto enemy = std::make_shared<DemonEyeEnemy>(tm, RNG::Range(25.0f, 45.0f));
+			auto enemy = std::make_shared<DemonEyeEnemy>(tm, RNG::Range(25, 45));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "VampireBatEnemy") {
-			auto enemy = std::make_shared<VampireBatEnemy>(tm, RNG::Range(60.0f, 80.0f));
+			auto enemy = std::make_shared<VampireBatEnemy>(tm, RNG::Range(60, 80));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "MimicEnemy") {
-			auto enemy = std::make_shared<MimicEnemy>(tm, RNG::Range(60.0f, 80.0f));
+			auto enemy = std::make_shared<MimicEnemy>(tm, RNG::Range(60, 80));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "WarlockEnemy") {
-			auto enemy = std::make_shared<WarlockEnemy>(tm, RNG::Range(70.0f, 90.0f));
+			auto enemy = std::make_shared<WarlockEnemy>(tm, RNG::Range(70, 90));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "KeyeEnemy") {
-			auto enemy = std::make_shared<KeyeEnemy>(tm, RNG::Range(20.0f, 40.0f));
+			auto enemy = std::make_shared<KeyeEnemy>(tm, RNG::Range(20, 40));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "KernelEnemy") {
-			auto enemy = std::make_shared<KernelEnemy>(tm, RNG::Range(40.0f, 95.0f));
+			auto enemy = std::make_shared<KernelEnemy>(tm, RNG::Range(40, 95));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "CupidEnemy") {
-			auto enemy = std::make_shared<CupidEnemy>(tm, 200.0f);
+			auto enemy = std::make_shared<CupidEnemy>(tm, 200);
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "KeyeproEnemy") {
-			auto enemy = std::make_shared<KeyeproEnemy>(tm, 500.0f);
+			auto enemy = std::make_shared<KeyeproEnemy>(tm, 500);
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "TrojanEnemy") {
-			auto enemy = std::make_shared<TrojanEnemy>(tm, RNG::Range(40.0f, 60.0f));
+			auto enemy = std::make_shared<TrojanEnemy>(tm, RNG::Range(40, 60));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "TuitionFeeEnemy") {
-			auto enemy = std::make_shared<TuitionFeeEnemy>(tm, RNG::Range(140.0f, 140.0f));
+			auto enemy = std::make_shared<TuitionFeeEnemy>(tm, RNG::Range(140, 140));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "DeadlineEnemy") {
-			auto enemy = std::make_shared<DeadlineEnemy>(tm, RNG::Range(25.0f, 32.0f));
+			auto enemy = std::make_shared<DeadlineEnemy>(tm, RNG::Range(25, 32));
 			enemy->Init(gd, cam);
 			return enemy;
 		}
 		else if (type == "HomeworkEnemy") {
-			auto enemy = std::make_shared<HomeworkEnemy>(tm, RNG::Range(100.0f, 105.0f));
+			auto enemy = std::make_shared<HomeworkEnemy>(tm, RNG::Range(100, 105));
 			enemy->Init(gd, cam);
 			return enemy;
 		}

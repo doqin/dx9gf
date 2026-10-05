@@ -45,19 +45,16 @@ namespace Demo {
 
 		VirtualCombatant& vc = it->second;
 
-		float finalDamage = baseDamage + player.buffDamage;
-		if (player.weak) finalDamage *= 0.75f;
+		const float outgoing = ICombatant::ScaleOutgoingDamage(baseDamage, player.buffDamage, player.weak);
+		const float incoming = ICombatant::ScaleIncomingDamage(outgoing, vc.marked, vc.vulnerable);
 
-		finalDamage += vc.marked;
-		if (vc.vulnerable) finalDamage *= 1.5f;
-
-		float absorbed = (std::min)(vc.block, finalDamage);
+		const float absorbed = (std::min)(vc.block, incoming);
 		vc.block -= absorbed;
-		finalDamage -= absorbed;
 
-		vc.health -= finalDamage;
+		const float dealt = std::round(incoming - absorbed);
+		vc.health -= dealt;
 
-		return finalDamage;
+		return dealt;
 	}
 
 	void VirtualBattleState::SimulateEnemyModifier(IEnemy* target, ModifierType type, float value, int duration) {

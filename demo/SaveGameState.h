@@ -14,12 +14,17 @@ namespace Demo {
         std::unordered_map<std::string, size_t> sceneMap;
         void BuildScenes();
 		void ClearScenes();
+        // Shared by LoadSavedGame and ReloadLastSave so the load sequence lives in one place.
+        void ReloadFromDisk();
     public:
+        static constexpr const char* SAVE_FILE = "savegame.json";
+        static bool HasSaveFile();
         std::shared_ptr<Player> GetPlayerFromScene(DX9GF::IScene* scene) const;
         SaveGameState(Game* game, std::shared_ptr<DX9GF::SaveManager> saveManager);
         std::string GetSaveID() const override;
         void GenerateSaveData(nlohmann::json& outData) override;
         void RestoreSaveData(const nlohmann::json& inData) override;
+        void ReloadLastSave();
         static std::shared_ptr<SaveGameState> StartNewGame(Game* game, const std::shared_ptr<DX9GF::SaveManager>& saveManager);
         static std::shared_ptr<SaveGameState> LoadSavedGame(Game* game, const std::shared_ptr<DX9GF::SaveManager>& saveManager);
     };

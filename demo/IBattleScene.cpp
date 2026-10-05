@@ -22,6 +22,9 @@
 #include "PlayerGlobalData.h"
 #include "IStatementCard.h"
 #include "IBlockCard.h"
+#include "PopupManager.h"
+#include "SaveGameState.h"
+#include "MainMenu.h"
 
 namespace {
 	constexpr float HiddenPileX = -10000.f;
@@ -2078,13 +2081,21 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 			defeatFadeAlpha = (std::min)(1.0f, (defeatElapsedMs - 1000.f) / fadeDurationMs);
 		}
 		if (defeatElapsedMs >= 2500.f) {
-			auto sceMan = game->GetSceneManager();
-			while (sceMan->GetSceneCount() > 1) {
-				sceMan->PopScene();
+			if (!defeatPopupShown) {
+				defeatPopupShown = true;
+
+				if (SaveGameState::HasSaveFile()) {
+					std::vector<std::pair<std::wstring, std::function<void()>>> popupBtns = {
+						{ L"Yes(Y)", [this]() { pendingDefeatReloadSave = true; } },
+						{ L"No(N)", [this]() { pendingDefeatMainMenuTransition = true; } }
+					};
+					PopupManager::GetInstance()->Show("basic_ghost", L"DEFEATED", L"Load your last savepoint?", popupBtns);
+				}
+				else {
+					pendingDefeatMainMenuTransition = true;
+				}
 			}
-			DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 1.0f);
-			sceMan->GoToScene(0); // Go to main menu
-			return true;
+			return false;
 		}
 		return false;
 	}
@@ -2594,16 +2605,18 @@ void Demo::IBattleScene::ComputeProjectedDamage(std::unordered_map<IEnemy*, floa
 	for (const auto& enemy : enemies) {
 		if (!enemy || enemy->IsDead()) continue;
 
-		float healthLost = enemy->GetHealth() - state.enemies[enemy.get()].health;
-		float armorLost = enemy->GetTemporaryDefense() - state.enemies[enemy.get()].block;
+		const auto& sim = state.enemies[enemy.get()];
 
-		float tick = state.enemies[enemy.get()].burn;
-		if (state.enemies[enemy.get()].poisonDuration > 0) {
-			tick += (state.enemies[enemy.get()].poisonValue > 0.f) ? state.enemies[enemy.get()].poisonValue : static_cast<float>(state.enemies[enemy.get()].poisonDuration);
+		const float healthLost = enemy->GetHealth() - sim.health;
+		const float armorLost = enemy->GetTemporaryDefense() - sim.block;
+
+		// Indirect damage is rounded per tick in TakeIndirectDamage, so round it here as well.
+		float tick = std::round(sim.burn);
+		if (sim.poisonDuration > 0) {
+			tick += std::round((sim.poisonValue > 0.f) ? sim.poisonValue : static_cast<float>(sim.poisonDuration));
 		}
 
-		float totalProjected = healthLost + armorLost + tick;
-
+		const float totalProjected = healthLost + armorLost + tick;
 		if (totalProjected > 0.f) {
 			out[enemy.get()] = totalProjected;
 		}
@@ -3377,6 +3390,13 @@ void Demo::IBattleScene::Init()
 	popUpMessage->Init(game->GetGraphicsDevice(), &camera);
 	//popUpMessage->ToggleHistory();
 
+	// Init popup
+	auto borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	borderTex->LoadTexture(L"assets/popup-borders.png");
+	auto uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	uiTex->LoadTexture(L"assets/ui.png");
+	PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
+
 	battleMenu = std::make_shared<BattleMenu>(game, transformManager, &uiCamera);
 	battleMenu->Init(font.get());
 
@@ -3440,6 +3460,31 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	if (popUpMessage) {
 		popUpMessage->SetCurrentTurn(static_cast<int>(currentTurn));
 		popUpMessage->Update(deltaTime);
+	}
+
+	PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
+	PopupManager::GetInstance()->Update(deltaTime, &this->uiCamera);
+
+	if (pendingDefeatReloadSave) {
+		pendingDefeatReloadSave = false;
+		if (MainMenu::gameSaveState && SaveGameState::HasSaveFile()) {
+			// This deletes the current scene (this). Nothing may touch a member after the call.
+			MainMenu::gameSaveState->ReloadLastSave();
+			return;
+		}
+		// Save vanished or state missing: fall back to the main menu path below.
+		pendingDefeatMainMenuTransition = true;
+	}
+
+	if (pendingDefeatMainMenuTransition) {
+		pendingDefeatMainMenuTransition = false;
+		auto sceMan = game->GetSceneManager();
+		while (sceMan->GetSceneCount() > 1) {
+			sceMan->PopScene();
+		}
+		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 1.0f);
+		sceMan->GoToScene(0);
+		return;
 	}
 
 	static float escCooldown = 0.0f;
@@ -3980,6 +4025,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 
 		drawBuffer->Update(deltaTime);
 
+		PopupManager::GetInstance()->DrawUI(deltaTime, &this->uiCamera);
 		if (!keyboardNavigator.IsInKeyboardMode()) {
 			DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		}

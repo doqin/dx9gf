@@ -5,13 +5,10 @@ namespace Demo {
 	void Demo::ICombatant::Heal(float value) {
 		if (IsDead()) return;
 
-		float actualHeal = value;
-		if (health + value > maxHealth) {
-			actualHeal = maxHealth - health;
-		}
-
-		health += value;
-		if (health > maxHealth) health = maxHealth;
+		//heals must be whole
+		const float whole = std::round(value);
+		const float actualHeal = (std::min)(whole, maxHealth - health);
+		health = (std::min)(maxHealth, health + whole);
 
 		if (actualHeal > 0) {
 			SpawnHealText(actualHeal);
@@ -25,10 +22,10 @@ namespace Demo {
 	float ICombatant::CalculateActualDamage(float baseDamage, bool ignoreArmor) {
 		// Marked is a flat bonus per hit, so it lands before Vulnerable scales the total and
 		// before block eats into it.
-		float finalDamage = baseDamage + GetModifierValue(ModifierType::Marked);
-		if (HasModifier(ModifierType::Vulnerable)) {
-			finalDamage *= 1.5f;
-		}
+		float finalDamage = ScaleIncomingDamage(
+			baseDamage,
+			GetModifierValue(ModifierType::Marked),
+			HasModifier(ModifierType::Vulnerable));
 
 		if (temporaryDefense > 0.f && !ignoreArmor) {
 			float blockedDamage = (std::min)(temporaryDefense, finalDamage);
@@ -50,12 +47,10 @@ namespace Demo {
 	}
 
 	float ICombatant::CalculateOutgoingDamage(float baseDamage) const {
-		float finalDamage = baseDamage + GetModifierValue(ModifierType::BuffDamage);
-		if (HasModifier(ModifierType::Weak)) {
-			// Damage is displayed as whole numbers, so keep it whole; a hit that had damage never drops to 0.
-			if (finalDamage > 0.f) finalDamage = (std::max)(1.f, std::floor(finalDamage * 0.75f));
-		}
-		return finalDamage;
+		return ScaleOutgoingDamage(
+			baseDamage,
+			GetModifierValue(ModifierType::BuffDamage),
+			HasModifier(ModifierType::Weak));
 	}
 
 	void ICombatant::AddModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns) {
@@ -254,5 +249,24 @@ namespace Demo {
 				return !mod.isBuff;
 			}),
 			modifiers.end());
+	}
+
+	float ICombatant::ScaleOutgoingDamage(float baseDamage, float buffDamage, bool weak) {
+		float damage = baseDamage + buffDamage;
+		if (weak && damage > 0.f) {
+			// Rounded per hit to match how each card resolves on its own. A hit that had
+			// damage never drops to 0.
+			damage = (std::max)(1.f, std::round(damage * 0.75f));
+		}
+		return damage;
+	}
+
+	float ICombatant::ScaleIncomingDamage(float damage, float marked, bool vulnerable) {
+		// Marked is a flat bonus per hit and lands before Vulnerable scales the total.
+		float scaled = damage + marked;
+		if (vulnerable) {
+			scaled *= 1.5f;
+		}
+		return scaled;
 	}
 }
