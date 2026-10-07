@@ -2,6 +2,8 @@
 #include "Debug.h"
 #include "MainFont.h"
 #include "MapEnemy.h"
+#include "WorldSceneBase.h"
+#include "PlayerGlobalData.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include <string>
@@ -75,6 +77,21 @@ void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
 	ImGui::InputInt("Gear ID", &gearToGive);
 	if (ImGui::Button("Give Gear")) {
 		player->AddGear(gearToGive);
+	}
+
+	ImGui::Text("Fast Travel (save points)");
+	if (ImGui::Button("Unlock All Save Points")) {
+		auto sceMan = game->GetSceneManager();
+		for (size_t i = 0; i < sceMan->GetSceneCount(); ++i) {
+			if (auto world = dynamic_cast<WorldSceneBase*>(sceMan->GetScene(i))) {
+				for (const auto& sp : world->GetSavePoints()) {
+					PlayerGlobalData::GetInstance()->UnlockSavePoint(sp->GetId());
+				}
+			}
+		}
+	}
+	if (ImGui::Button("Lock All Save Points")) {
+		PlayerGlobalData::GetInstance()->ClearUnlockedSavePoints();
 	}
 
 	ImGui::Text("Toggleables");

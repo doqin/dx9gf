@@ -27,6 +27,7 @@ namespace Demo {
 		// Set once the player has been walked through the first battle, so the walkthrough
 		// never replays. Persisted with the save.
 		bool seenBattleTutorial = false;
+		std::vector<std::string> unlockedSavePoints;
 		PlayerGlobalData() { Reset(); }
 	public:
 		static PlayerGlobalData* GetInstance() {
@@ -50,6 +51,17 @@ namespace Demo {
 
 		bool HasSeenBattleTutorial() const { return seenBattleTutorial; }
 		void SetSeenBattleTutorial(bool seen) { seenBattleTutorial = seen; }
+		// Save points double as fast travel points; ids look like "<SceneSaveID>#<index>".
+		bool IsSavePointUnlocked(const std::string& id) const {
+			return std::find(unlockedSavePoints.begin(), unlockedSavePoints.end(), id) != unlockedSavePoints.end();
+		}
+		// Returns true if the point was newly unlocked.
+		bool UnlockSavePoint(const std::string& id) {
+			if (IsSavePointUnlocked(id)) return false;
+			unlockedSavePoints.push_back(id);
+			return true;
+		}
+		void ClearUnlockedSavePoints() { unlockedSavePoints.clear(); }
 		bool HasGearEquipped(int gearID) const { return equippedActiveGearID == gearID || equippedPassiveGearID == gearID; }
 
 		void EquipGear(int gearID);

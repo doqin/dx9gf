@@ -41,6 +41,22 @@ namespace Demo {
 		}
 	}
 
+	int SaveGameState::GetSceneIndex(const std::string& saveId) const {
+		auto it = sceneMap.find(saveId);
+		return it != sceneMap.end() ? static_cast<int>(it->second) : -1;
+	}
+
+	const SaveGameState::SceneInfo* SaveGameState::GetSceneInfo(const std::string& saveId) {
+		static const std::unordered_map<std::string, SceneInfo> infos = {
+			{ "TutorialWorldScene", { L"Cloud Canopy", "bgm_tutorial",  0.5f, 5.0f } },
+			{ "SecretPuzzleScene",  { L"The Root",     "bgm_secret",    0.3f, 1.5f } },
+			{ "ThreadAlleyScene",   { L"Thread Alley", "bgm_arcade",    0.2f, 1.5f } },
+			{ "BossWorldScene",     { L"The Overflow", "bgm_bossworld", 0.3f, 1.5f } },
+		};
+		auto it = infos.find(saveId);
+		return it != infos.end() ? &it->second : nullptr;
+	}
+
 	std::shared_ptr<Player> SaveGameState::GetPlayerFromScene(DX9GF::IScene* scene) const {
 		if (auto tutorialScene = dynamic_cast<Demo::TutorialWorldScene*>(scene)) {
 			return tutorialScene->GetPlayer();
@@ -91,19 +107,8 @@ namespace Demo {
 			if (sceneIt != sceneMap.end()) {
 				sceneManager->GoToScene(sceneIt->second);
 
-				auto audio = DX9GF::AudioManager::GetInstance();
-
-				if (sceneId == "TutorialWorldScene") {
-					audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 5.0f);
-				}
-				else if (sceneId == "SecretPuzzleScene") {
-					audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.5f);
-				}
-				else if (sceneId == "ThreadAlleyScene") {
-					audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.5f);
-				}
-				else if (sceneId == "BossWorldScene") {
-					audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.5f);
+				if (const SceneInfo* info = GetSceneInfo(sceneId)) {
+					DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(info->bgm, info->bgmVolume, info->bgmFadeSeconds);
 				}
 			}
 		}

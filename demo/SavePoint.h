@@ -23,6 +23,14 @@ namespace Demo {
         const float INTERACTION_DISTANCE = 50.0f;
         bool isVisible = false;
 
+        // Fast travel: a save point unlocks the first time it is used, and the unlock is saved
+        // in PlayerGlobalData under this id ("<SceneSaveID>#<index>").
+        std::string id;
+        std::function<void()> onOpenMap;
+        float indicatorTime = 0.f;
+        // Size of the visible (virtual) screen in UI units; the UI camera can draw past it into the letterbox bars
+        float screenW = 0.f, screenH = 0.f;
+
     public:
         SavePoint(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0);
 
@@ -37,5 +45,17 @@ namespace Demo {
 
         void SetVisible(bool visible) { isVisible = visible; }
         bool IsVisible() const { return isVisible; }
+
+        // Called by the owning scene once all of its save points exist.
+        void SetScreenSize(float w, float h) { screenW = w; screenH = h; }
+        void ConfigureTravel(std::string pointId, std::function<void()> openMap) {
+            id = std::move(pointId);
+            onOpenMap = std::move(openMap);
+        }
+        const std::string& GetId() const { return id; }
+        bool IsUnlocked() const;
+        // Where the player appears when travelling here: just in front of the point, clear of its collider.
+        // The scene refines this to a walkable spot (WorldSceneBase::FindSpawnNear); this is only the anchor.
+        std::pair<float, float> GetSpawnPosition() const { return { GetWorldX(), GetWorldY() + 32.f }; }
     };
 }

@@ -20,6 +20,8 @@
 #include "EnergyToken.h"
 #include "GoldToken.h"
 #include "BattleTutorial.h"
+#include <typeindex>
+
 namespace Demo {
 	class IBattleScene : public DX9GF::IScene {
 	protected:

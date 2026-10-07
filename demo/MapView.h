@@ -17,21 +17,42 @@ namespace Demo {
 		struct Marker {
 			MarkerKind kind;
 			float x, y;           // world position
-			bool dimmed = false;  // e.g. an already opened chest
+			bool dimmed = false;  // e.g. an already opened chest, or a save point whose fast travel is still locked
+			std::string id;       // save points only: identifies the marker in TravelHits
 		};
+
+		// Fast travel mode for the full map: a row of world tabs on top, and clickable save points.
+		struct Rect { float x0, y0, x1, y1; };
+		struct TravelUI {
+			std::vector<std::wstring> tabs;
+			int selectedTab = 0;
+			std::string hoverId;  // save point under the mouse or keyboard selection, drawn highlighted
+			int hoverTab = -1;    // tab under the mouse
+		};
+		struct SaveHit { std::string id; Rect rect; bool locked; };
+		struct TravelHits {
+			std::vector<Rect> tabs;
+			std::vector<SaveHit> saves;
+		};
+
+		static constexpr float kMiniSize = 128.f;
+		static constexpr float kMiniMargin = 16.f;
 
 		void Init(DX9GF::Font* font);
 		// Bakes the grid from the loaded map. Layers named "background*" are ignored, so
 		// decorative sky/water doesn't count as explorable ground.
 		void Build(const DX9GF::Map& map);
 		bool IsBuilt() const { return built; }
+		// True if the world position sits on a floor tile (not wall, collision rectangle, or outside the map)
+		bool IsWalkable(float worldX, float worldY) const;
 
 		void Reveal(float worldX, float worldY);
 
 		void DrawMini(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, int virtualWidth, int virtualHeight,
 			float playerX, float playerY, const std::vector<Marker>& markers);
 		void DrawFull(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, int virtualWidth, int virtualHeight,
-			const std::vector<Marker>& markers, const std::wstring& closeKeyName);
+			const std::vector<Marker>& markers, const std::wstring& closeKeyName,
+			const TravelUI* travel = nullptr, TravelHits* hits = nullptr);
 
 		void Save(nlohmann::json& out) const;
 		void Restore(const nlohmann::json& in);
@@ -59,7 +80,8 @@ namespace Demo {
 		void DrawCells(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float screenOriginX, float screenOriginY,
 			float scale, const ClipRect& clip) const;
 		void DrawMarkers(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float screenOriginX, float screenOriginY,
-			float scale, float dotSize, const ClipRect& clip, const std::vector<Marker>& markers) const;
+			float scale, float dotSize, const ClipRect& clip, const std::vector<Marker>& markers,
+			const TravelUI* travel = nullptr, TravelHits* hits = nullptr) const;
 		void DrawText(DX9GF::Camera& uiCamera, const std::wstring& text, float x, float y, D3DCOLOR color);
 	};
 }
