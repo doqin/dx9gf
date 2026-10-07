@@ -5,6 +5,7 @@
 #include "DX9GFUtils.h"
 #include <algorithm>
 #include <cmath>
+#include <tuple>
 
 namespace {
 	// assets/cardtemplates.png: 48x16 cards in two columns. The left column holds 8 templates from
@@ -125,10 +126,7 @@ std::shared_ptr<Demo::CardFrame> Demo::CardFrame::Get(DX9GF::GraphicsDevice* gra
 Demo::CardFrame::CardFrame(DX9GF::GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
 	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/cardtemplates.png");
-	leftCap = std::make_shared<DX9GF::StaticSprite>(texture.get());
-	body = std::make_shared<DX9GF::StaticSprite>(texture.get());
-	rightCap = std::make_shared<DX9GF::StaticSprite>(texture.get());
-	orb = std::make_shared<DX9GF::StaticSprite>(texture.get());
+	sheet = std::make_shared<DX9GF::StaticSprite>(texture.get());
 
 	font = std::make_shared<DX9GF::Font>(graphicsDevice, CARD_FONT_NAME, CARD_FONT_SIZE);
 	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
@@ -140,10 +138,26 @@ Demo::CardFrame::CardFrame(DX9GF::GraphicsDevice* graphicsDevice) : graphicsDevi
 	digitWidth = static_cast<float>(fontSprite->GetWidth());
 }
 
+namespace {
+	// Faces queued while collecting. Static because the collector is driven from DraggableManager::Draw,
+	// which has no device to look a CardFrame up by; the frame that queued them draws them.
+	bool g_collecting = false;
+}
+
+float Demo::CardFrame::TextWidth(const std::wstring& text) {
+	auto it = widthCache.find(text);
+	if (it != widthCache.end()) return it->second;
+	// Names and signatures are a small closed set, but don't let an odd caller grow this forever.
+	if (widthCache.size() > 4096) widthCache.clear();
+	fontSprite->SetText(text);
+	const float w = static_cast<float>(fontSprite->GetWidth());
+	widthCache.emplace(text, w);
+	return w;
+}
+
 float Demo::CardFrame::MeasureWidth(const std::wstring& name, const std::wstring& inputs, float scale) {
-	fontSprite->SetText(name + inputs);
 	const float textScale = scale / FONT_NATIVE_SCALE;
-	const float textW = static_cast<float>(fontSprite->GetWidth()) * textScale;
+	const float textW = TextWidth(name + inputs) * textScale;
 	const float digitW = digitWidth * textScale;
 	const float sheetW = LEFT_CAP_W + NAME_COST_GAP + DIGIT_ORB_GAP + ORB_SIZE + ORB_RIGHT_GAP + RIGHT_CAP_W;
 	// Whole sheet pixels, so the body column scales by an exact multiple.
@@ -154,11 +168,9 @@ void Demo::CardFrame::DrawSlice(DX9GF::StaticSprite& sprite, const DX9GF::Camera
 	RECT src, float x, float y, float scaleX, float scaleY, D3DCOLOR tint) {
 	sprite.SetSrcRect(src);
 	sprite.SetColor(tint);
-	sprite.Begin();
 	sprite.SetPosition(x, y);
 	sprite.SetScale(scaleX, scaleY);
 	sprite.Draw(camera, deltaTime);
-	sprite.End();
 }
 
 void Demo::CardFrame::DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
@@ -166,61 +178,176 @@ void Demo::CardFrame::DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& 
 	sprite.SetText(text);
 	sprite.SetColor(color);
 	sprite.SetOutline(outlined, Modulate(OUTLINE_COLOR, tint), scale);
-	sprite.Begin();
 	sprite.SetScale(scale / FONT_NATIVE_SCALE, scale / FONT_NATIVE_SCALE);
 	sprite.SetPosition(x, y);
 	sprite.Draw(camera, deltaTime);
-	sprite.End();
+}
+
+void Demo::CardFrame::DrawGroup(unsigned long long deltaTime, const Entry* entries, size_t count) {
+	if (count == 0) return;
+	const DX9GF::Camera& camera = *entries[0].camera;
+
+	struct Layout {
+		float width;
+		float leftW;
+		float rightW;
+		float textScale;
+		float textY;
+	};
+	std::vector<Layout> layouts;
+	layouts.reserve(count);
+	for (size_t i = 0; i < count; ++i) {
+		const Entry& e = entries[i];
+		Layout l;
+		l.width = MeasureWidth(e.name, e.inputs, e.scale);
+		l.leftW = LEFT_CAP_W * e.scale;
+		l.rightW = RIGHT_CAP_W * e.scale;
+		l.textScale = e.scale / FONT_NATIVE_SCALE;
+		l.textY = e.y + TEXT_TOP * e.scale;
+		layouts.push_back(l);
+	}
+
+	// Pass 1: every card's frame and energy orb, in one sprite batch.
+	sheet->Begin();
+	for (size_t i = 0; i < count; ++i) {
+		const Entry& e = entries[i];
+		const Layout& l = layouts[i];
+		const RECT t = TemplateRect(e.cardTemplate);
+		const float bodyW = l.width - l.leftW - l.rightW;
+		DrawSlice(*sheet, camera, deltaTime, { t.left, t.top, t.left + LEFT_CAP_W, t.bottom },
+			e.x, e.y, e.scale, e.scale, e.tint);
+		// The body is one source column stretched across; its width in sheet pixels is the scale factor.
+		DrawSlice(*sheet, camera, deltaTime, { t.left + BODY_SRC_X, t.top, t.left + BODY_SRC_X + 1, t.bottom },
+			e.x + l.leftW, e.y, bodyW, e.scale, e.tint);
+		DrawSlice(*sheet, camera, deltaTime, { t.right - RIGHT_CAP_W, t.top, t.right, t.bottom },
+			e.x + l.width - l.rightW, e.y, e.scale, e.scale, e.tint);
+		const float orbX = e.x + l.width - l.rightW - (ORB_RIGHT_GAP + ORB_SIZE) * e.scale;
+		DrawSlice(*sheet, camera, deltaTime, ORB_SRC, orbX, e.y + (Height(e.scale) - ORB_SIZE * e.scale) / 2.f,
+			e.scale, e.scale, e.tint);
+	}
+	sheet->End();
+
+	// Passes 2 and 3: each font only has its half of every letter, so together they make the whole name.
+	topSprite->Begin();
+	for (size_t i = 0; i < count; ++i) {
+		const Entry& e = entries[i];
+		const NameColors& nameColors = NAME_COLORS[static_cast<int>(e.cardTemplate)];
+		DrawLabel(*topSprite, camera, deltaTime, e.name, e.x + layouts[i].leftW, layouts[i].textY, e.scale,
+			Modulate(nameColors.top, e.tint), false, e.tint);
+	}
+	topSprite->End();
+	bottomSprite->Begin();
+	for (size_t i = 0; i < count; ++i) {
+		const Entry& e = entries[i];
+		const NameColors& nameColors = NAME_COLORS[static_cast<int>(e.cardTemplate)];
+		DrawLabel(*bottomSprite, camera, deltaTime, e.name, e.x + layouts[i].leftW, layouts[i].textY, e.scale,
+			Modulate(nameColors.bottom, e.tint), false, e.tint);
+	}
+	bottomSprite->End();
+
+	// Pass 4: input signatures and cost digits.
+	fontSprite->Begin();
+	for (size_t i = 0; i < count; ++i) {
+		const Entry& e = entries[i];
+		const Layout& l = layouts[i];
+		const float nameW = TextWidth(e.name) * l.textScale;
+		// The signature is drawn in runs so each "x" can take its own colour. Glyph advances add up, so a
+		// run's start is just the measured width of everything before it.
+		D3DCOLOR filledColor = FILLED_INPUT_COLOR;
+		if (e.cardTemplate == CardTemplate::Orange) filledColor = FILLED_INPUT_COLOR_ON_ORANGE;
+		else if (e.cardTemplate == CardTemplate::Yellow) filledColor = FILLED_INPUT_COLOR_ON_YELLOW;
+		float runX = e.x + l.leftW + nameW;
+		size_t pos = 0;
+		while (pos < e.inputs.size()) {
+			size_t end = e.inputs[pos] == L'x' ? pos + 1 : e.inputs.find(L'x', pos);
+			if (end == std::wstring::npos) end = e.inputs.size();
+			const std::wstring run = e.inputs.substr(pos, end - pos);
+			const bool filled = e.inputs[pos] == L'x';
+			DrawLabel(*fontSprite, camera, deltaTime, run, runX, l.textY, e.scale,
+				Modulate(filled ? filledColor : INPUT_COLOR, e.tint), false, e.tint);
+			runX += TextWidth(run) * l.textScale;
+			pos = end;
+		}
+
+		const float orbX = e.x + l.width - l.rightW - (ORB_RIGHT_GAP + ORB_SIZE) * e.scale;
+		const float digitX = orbX - DIGIT_ORB_GAP * e.scale - digitWidth * l.textScale;
+		DrawLabel(*fontSprite, camera, deltaTime, std::to_wstring(e.cost), digitX, l.textY, e.scale,
+			Modulate(COST_COLOR, e.tint), true, e.tint);
+	}
+	fontSprite->End();
 }
 
 void Demo::CardFrame::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime, float x, float y,
 	CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost, float scale, D3DCOLOR tint) {
-	const RECT t = TemplateRect(cardTemplate);
-	const float width = MeasureWidth(name, inputs, scale);
-	const float leftW = LEFT_CAP_W * scale;
-	const float rightW = RIGHT_CAP_W * scale;
-	const float bodyW = width - leftW - rightW;
+	// Anything queued before this face was drawn before it, so it has to land first.
+	FlushCollected();
+	const Entry entry{ &camera, x, y, cardTemplate, name, inputs, cost, scale, tint, false, RECT{} };
+	DrawGroup(deltaTime, &entry, 1);
+}
 
-	DrawSlice(*leftCap, camera, deltaTime, { t.left, t.top, t.left + LEFT_CAP_W, t.bottom },
-		x, y, scale, scale, tint);
-	// The body is one source column stretched across; its width in sheet pixels is the scale factor.
-	DrawSlice(*body, camera, deltaTime, { t.left + BODY_SRC_X, t.top, t.left + BODY_SRC_X + 1, t.bottom },
-		x + leftW, y, bodyW / 1.f, scale, tint);
-	DrawSlice(*rightCap, camera, deltaTime, { t.right - RIGHT_CAP_W, t.top, t.right, t.bottom },
-		x + width - rightW, y, scale, scale, tint);
+void Demo::CardFrame::BeginCollect() {
+	g_collecting = true;
+}
 
-	const float textScale = scale / FONT_NATIVE_SCALE;
-	const float textY = y + TEXT_TOP * scale;
+void Demo::CardFrame::EndCollect() {
+	FlushCollected();
+	g_collecting = false;
+}
 
-	// Two passes: each font only has its half of every letter, so together they make the whole name.
-	const NameColors& nameColors = NAME_COLORS[static_cast<int>(cardTemplate)];
-	DrawLabel(*topSprite, camera, deltaTime, name, x + leftW, textY, scale, Modulate(nameColors.top, tint), false, tint);
-	DrawLabel(*bottomSprite, camera, deltaTime, name, x + leftW, textY, scale, Modulate(nameColors.bottom, tint), false, tint);
+bool Demo::CardFrame::IsCollecting() {
+	return g_collecting;
+}
 
-	fontSprite->SetText(name);
-	const float nameW = static_cast<float>(fontSprite->GetWidth()) * textScale;
-	// The signature is drawn in runs so each "x" can take its own colour. Glyph advances add up, so a
-	// run's start is just the measured width of everything before it.
-	D3DCOLOR filledColor = FILLED_INPUT_COLOR;
-	if (cardTemplate == CardTemplate::Orange) filledColor = FILLED_INPUT_COLOR_ON_ORANGE;
-	else if (cardTemplate == CardTemplate::Yellow) filledColor = FILLED_INPUT_COLOR_ON_YELLOW;
-	float runX = x + leftW + nameW;
-	size_t pos = 0;
-	while (pos < inputs.size()) {
-		size_t end = inputs[pos] == L'x' ? pos + 1 : inputs.find(L'x', pos);
-		if (end == std::wstring::npos) end = inputs.size();
-		const std::wstring run = inputs.substr(pos, end - pos);
-		const bool filled = inputs[pos] == L'x';
-		DrawLabel(*fontSprite, camera, deltaTime, run, runX, textY, scale,
-			Modulate(filled ? filledColor : INPUT_COLOR, tint), false, tint);
-		runX += static_cast<float>(fontSprite->GetWidth()) * textScale;
-		pos = end;
+std::vector<Demo::CardFrame::Entry> Demo::CardFrame::pending;
+Demo::CardFrame* Demo::CardFrame::pendingOwner = nullptr;
+
+void Demo::CardFrame::Queue(const DX9GF::Camera& camera, float x, float y,
+	CardTemplate cardTemplate, std::wstring name, std::wstring inputs, size_t cost, float scale, D3DCOLOR tint, const RECT* scissor) {
+	// Faces from another device's frame can't share a batch.
+	if (pendingOwner && pendingOwner != this) FlushCollected();
+	pendingOwner = this;
+	pending.push_back(Entry{ &camera, x, y, cardTemplate, std::move(name), std::move(inputs), cost, scale, tint,
+		scissor != nullptr, scissor ? *scissor : RECT{} });
+}
+
+void Demo::CardFrame::FlushCollected() {
+	if (pending.empty() || !pendingOwner) return;
+	CardFrame* owner = pendingOwner;
+	std::vector<Entry> entries = std::move(pending);
+	pending.clear();
+	pendingOwner = nullptr;
+	owner->FlushPending(entries);
+}
+
+void Demo::CardFrame::FlushPending(std::vector<Entry>& entries) {
+	// Group faces that can share one batch. A stable sort keeps submission order inside a group; faces
+	// only change order relative to faces with a different camera or scissor, which don't overlap.
+	std::stable_sort(entries.begin(), entries.end(), [](const Entry& a, const Entry& b) {
+		if (a.camera != b.camera) return a.camera < b.camera;
+		if (a.cropped != b.cropped) return a.cropped < b.cropped;
+		if (!a.cropped) return false;
+		return std::tie(a.scissor.left, a.scissor.top, a.scissor.right, a.scissor.bottom)
+			< std::tie(b.scissor.left, b.scissor.top, b.scissor.right, b.scissor.bottom);
+		});
+
+	auto sameGroup = [](const Entry& a, const Entry& b) {
+		return a.camera == b.camera && a.cropped == b.cropped
+			&& (!a.cropped || (a.scissor.left == b.scissor.left && a.scissor.top == b.scissor.top
+				&& a.scissor.right == b.scissor.right && a.scissor.bottom == b.scissor.bottom));
+		};
+
+	size_t begin = 0;
+	while (begin < entries.size()) {
+		size_t end = begin + 1;
+		while (end < entries.size() && sameGroup(entries[begin], entries[end])) ++end;
+		if (entries[begin].cropped) {
+			graphicsDevice->SetScissorRect(entries[begin].scissor);
+			graphicsDevice->SetScissorTest(true);
+		}
+		DrawGroup(0, entries.data() + begin, end - begin);
+		if (entries[begin].cropped) {
+			graphicsDevice->SetScissorTest(false);
+		}
+		begin = end;
 	}
-
-	const float orbX = x + width - rightW - (ORB_RIGHT_GAP + ORB_SIZE) * scale;
-	DrawSlice(*orb, camera, deltaTime, ORB_SRC, orbX, y + (Height(scale) - ORB_SIZE * scale) / 2.f,
-		scale, scale, tint);
-
-	const float digitX = orbX - DIGIT_ORB_GAP * scale - digitWidth * textScale;
-	DrawLabel(*fontSprite, camera, deltaTime, std::to_wstring(cost), digitX, textY, scale, Modulate(COST_COLOR, tint), true, tint);
 }

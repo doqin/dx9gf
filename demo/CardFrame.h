@@ -2,6 +2,8 @@
 #include "DX9GFExtras.h"
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace Demo {
 	// One entry per card background in assets/cardtemplates.png, named by colour since the icon
@@ -63,13 +65,41 @@ namespace Demo {
 			CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost,
 			float scale = 2.f, D3DCOLOR tint = 0xFFFFFFFF);
 
+		// Batched drawing. While collecting (DraggableManager::Draw turns it on), Queue() records a face
+		// instead of drawing it; FlushCollected() then draws everything queued with one pass over the
+		// sheet and one per font, instead of a Begin/End per slice per card. Faces sharing a camera and
+		// scissor rect are drawn together, so the caller must flush before drawing anything that has to
+		// land between two faces (Draw() and FlushCollected() order themselves correctly already).
+		// `scissor` may be null for an uncropped face.
+		static void BeginCollect();
+		static void EndCollect();
+		static bool IsCollecting();
+		static void FlushCollected();
+		void Queue(const DX9GF::Camera& camera, float x, float y,
+			CardTemplate cardTemplate, std::wstring name, std::wstring inputs, size_t cost,
+			float scale = 2.f, D3DCOLOR tint = 0xFFFFFFFF, const RECT* scissor = nullptr);
+
 	private:
+		struct Entry {
+			const DX9GF::Camera* camera;
+			float x, y;
+			CardTemplate cardTemplate;
+			std::wstring name;
+			std::wstring inputs;
+			size_t cost;
+			float scale;
+			D3DCOLOR tint;
+			bool cropped;
+			RECT scissor;
+		};
+
+		static std::vector<Entry> pending;
+		static CardFrame* pendingOwner;
+
 		DX9GF::GraphicsDevice* graphicsDevice;
 		std::shared_ptr<DX9GF::Texture> texture;
-		std::shared_ptr<DX9GF::StaticSprite> leftCap;
-		std::shared_ptr<DX9GF::StaticSprite> body;
-		std::shared_ptr<DX9GF::StaticSprite> rightCap;
-		std::shared_ptr<DX9GF::StaticSprite> orb;
+		// Every slice of the sheet (caps, body column, orb) goes through this one sprite.
+		std::shared_ptr<DX9GF::StaticSprite> sheet;
 		// The card font in three cuts of the same metrics: every row (cost digit, measuring), and the
 		// rows above / below the card's light-to-dark band split, which the name is drawn in two colours.
 		std::shared_ptr<DX9GF::Font> font;
@@ -81,9 +111,18 @@ namespace Demo {
 		// Width of one digit in the font's native pixels; the cost column is this wide.
 		float digitWidth = 0.f;
 
+		// Pixel width of `text` in the card font, memoised - measuring goes through the font and is
+		// otherwise repeated for every card every frame.
+		float TextWidth(const std::wstring& text);
+		std::unordered_map<std::wstring, float> widthCache;
+
+		// Draw one slice / label inside an already-begun sprite.
 		void DrawSlice(DX9GF::StaticSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
 			RECT src, float x, float y, float scaleX, float scaleY, D3DCOLOR tint);
 		void DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
 			const std::wstring& text, float x, float y, float scale, D3DCOLOR color, bool outlined, D3DCOLOR tint);
+		// Draws `count` faces that share a camera and scissor state: one sheet pass, then one per font.
+		void DrawGroup(unsigned long long deltaTime, const Entry* entries, size_t count);
+		void FlushPending(std::vector<Entry>& entries);
 	};
 }

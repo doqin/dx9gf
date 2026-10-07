@@ -135,6 +135,16 @@ void Demo::IStatementCard::DrawCardFace(unsigned long long deltaTime)
 	if (!frame) {
 		return;
 	}
+	// Plain faces are queued and drawn in one batch by DraggableManager. Cards with something drawn
+	// over (or under) the face right here - the lock / retained overlay, the status cover - keep
+	// drawing immediately so their layering stays exactly as before.
+	if (CardFrame::IsCollecting() && !IsLocked() && !IsRetained() && GetStatusCoverWidth() == 0) {
+		frame->Queue(*camera, GetWorldX(), GetWorldY(), GetCardTemplate(), GetDisplayName(),
+			CardInputSignature(GetInputSlotCount(), GetFilledInputCount()), GetCost(),
+			2.f, 0xFFFFFFFF, isCropped ? &scissorRect : nullptr);
+		return;
+	}
+	CardFrame::FlushCollected();
 	if (isCropped) {
 		graphicsDevice->SetScissorRect(scissorRect);
 		graphicsDevice->SetScissorTest(true);

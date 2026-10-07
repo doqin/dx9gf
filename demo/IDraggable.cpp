@@ -169,6 +169,9 @@ void Demo::DraggableManager::Update(unsigned long long deltaTime)
 
 void Demo::DraggableManager::Draw(unsigned long long deltaTime)
 {
+	// Card faces are collected and drawn in batches. Flushing after every level keeps parents
+	// below their children, and flushing before the dragged cards keeps those on top.
+	CardFrame::BeginCollect();
 	for (size_t i = 0; i < levels.size(); ++i) {
 		for (size_t j = levels[i].startIdx; j < levels[i].endIdx; ++j) {
 			if (auto lock = hierarchy[j].lock()) {
@@ -184,12 +187,14 @@ void Demo::DraggableManager::Draw(unsigned long long deltaTime)
 				continue;
 			}
 		}
+		CardFrame::FlushCollected();
 	}
 	for (auto& draggable : isDraggingDraggables) {
 		if (!draggable->IsHidden()) {
 			draggable->Draw(deltaTime);
 		}
 	}
+	CardFrame::EndCollect();
 	isDraggingDraggables.clear();
 	drawBuffer.Update(deltaTime);
 }
@@ -239,6 +244,7 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 	//trigger->SetOriginCenter();
 
 	trigger->SetOnHeldLeft([&](DX9GF::ITrigger* thisObj) {
+		if (dragDisabled) return;
 		if (auto card = dynamic_cast<Demo::ICard*>(this)) {
 			if (card->IsLocked() || card->IsRetained()) {
 				DX9GF::AudioManager::GetInstance()->PlayRandom("error", 0.4f);
@@ -293,6 +299,10 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 		});
 
 	trigger->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+		if (dragDisabled) {
+			if (onClickHandler) onClickHandler(std::dynamic_pointer_cast<IDraggable>(shared_from_this()));
+			return;
+		}
 		auto parent = dynamic_pointer_cast<IDraggable>(thisObj->GetParent().value().lock());
 		parent->GetDraggableManager().lock()->AttachDroppable(parent);
 		if (parent->GetParent().has_value()) {
@@ -342,6 +352,8 @@ void Demo::IDraggable::DetachParent()
 
 void Demo::IDraggable::Update(unsigned long long deltaTime)
 {
+	// Culled / pooled cards must not react to the mouse where they sit off-screen.
+	if (isHidden && !isDragging) return;
 	this->trigger->Update(deltaTime);
 	if (trigger->IsHeldLeft(deltaTime)) {
 		auto inpMan = DX9GF::InputManager::GetInstance();

@@ -314,15 +314,18 @@ namespace Demo {
 		auto card = ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), uiCamera);
 		auto draggable = std::dynamic_pointer_cast<IDraggable>(card);
 		if (draggable) {
-			draggable->SetOnDropMissedHandler([this](std::shared_ptr<IDraggable> droppedCard) {
-				if (auto p = droppedCard->GetPreDragParent().lock()) {
-					if (p.get() == this->deckContainer.get()) {
-						this->deckContainer->StoreCard(std::dynamic_pointer_cast<ICard>(droppedCard));
-					}
-					else if (p.get() == this->inventoryContainer.get()) {
-						this->inventoryContainer->StoreCard(std::dynamic_pointer_cast<ICard>(droppedCard));
-					}
-				}
+			// Cards are moved between Deck / Available by clicking, not dragging.
+			draggable->SetDragDisabled(true);
+			draggable->SetOnClickHandler([this](std::shared_ptr<IDraggable> clicked) {
+				if (currentTab != Tab::DECK || clicked->IsHidden()) return;
+				auto parent = clicked->GetParent();
+				auto p = parent.has_value() ? parent.value().lock() : nullptr;
+				std::shared_ptr<CardContainer> to;
+				if (p.get() == deckContainer.get()) to = inventoryContainer;
+				else if (p.get() == inventoryContainer.get()) to = deckContainer;
+				else return;
+				to->AddChildProgrammatically(clicked);
+				DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 				});
 		}
 		return card;

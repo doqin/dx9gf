@@ -24,6 +24,7 @@ namespace Demo {
 		RECT scissorRect;
 		bool isCropped = false;
 		bool isHidden = false;
+		bool dragDisabled = false;
 	public:
 		inline static bool debug = false;
 		inline IDraggable(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager), dragAreaWidth(0), dragAreaHeight(0) { 
@@ -69,6 +70,11 @@ namespace Demo {
 		using DropMissedCallback = std::function<void(std::shared_ptr<IDraggable>)>;
 		DropMissedCallback onDropMissedHandler;
 		void SetOnDropMissedHandler(DropMissedCallback handler) { onDropMissedHandler = handler; }
+		// With dragging disabled, a left click (release) invokes the click handler instead.
+		using ClickCallback = std::function<void(std::shared_ptr<IDraggable>)>;
+		ClickCallback onClickHandler;
+		void SetOnClickHandler(ClickCallback handler) { onClickHandler = handler; }
+		void SetDragDisabled(bool disabled) { dragDisabled = disabled; }
 		std::weak_ptr<DX9GF::IGameObject> GetPreDragParent() const { return preDragParent; }
 		virtual bool TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent) { return false; }
 		virtual bool CanBeStoredInContainer() const { return true; }
