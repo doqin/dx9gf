@@ -24,6 +24,10 @@
 #include "IBlockCard.h"
 #include "CardFrame.h"
 #include "PopupManager.h"
+#include "Debug.h"
+#include "imgui.h"
+#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_win32.h"
 #include "SaveGameState.h"
 #include "MainMenu.h"
 
@@ -935,17 +939,12 @@ void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy)
 
 void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
 {
-	const float left = enemyCardRemoveAreaX;
-	const float top = enemyCardRemoveAreaY;
-	const float right = enemyCardRemoveAreaX + enemyCardRemoveAreaWidth;
-	const float bottom = enemyCardRemoveAreaY + enemyCardRemoveAreaHeight;
-
 	enemyCards.erase(std::remove_if(enemyCards.begin(), enemyCards.end(), [&](const std::shared_ptr<EnemyCard>& enemyCard) {
 		if (!enemyCard || enemyCard->IsDragging()) {
 			return false;
 		}
 		auto [x, y] = enemyCard->GetWorldPosition();
-		if (x >= left && x <= right && y >= top && y <= bottom) {
+		if (IsInEnemyCardRemoveArea(x, y)) {
 			if (auto manager = enemyCard->GetDraggableManager().lock()) {
 				manager->Remove(enemyCard);
 			}
@@ -953,6 +952,34 @@ void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
 		}
 		return false;
 		}), enemyCards.end());
+}
+
+bool Demo::IBattleScene::IsInEnemyCardRemoveArea(float x, float y) const
+{
+	return x >= enemyCardRemoveAreaX && x <= enemyCardRemoveAreaX + enemyCardRemoveAreaWidth
+		&& y >= enemyCardRemoveAreaY && y <= enemyCardRemoveAreaY + enemyCardRemoveAreaHeight;
+}
+
+bool Demo::IBattleScene::IsDraggingEnemyCardOverRemoveArea()
+{
+	for (const auto& enemyCard : enemyCards) {
+		if (!enemyCard || !enemyCard->IsDragging()) {
+			continue;
+		}
+		auto [x, y] = enemyCard->GetWorldPosition();
+		const float centerX = x + static_cast<float>(enemyCard->GetWidth()) / 2.f;
+		const float centerY = y + static_cast<float>(enemyCard->GetHeight()) / 2.f;
+		if (IsInEnemyCardRemoveArea(centerX, centerY)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Demo::IBattleScene::IsDraggingAnyEnemyCard() const
+{
+	return std::any_of(enemyCards.begin(), enemyCards.end(),
+		[](const std::shared_ptr<EnemyCard>& enemyCard) { return enemyCard && enemyCard->IsDragging(); });
 }
 
 void Demo::IBattleScene::RefreshItemMenu()
@@ -2287,8 +2314,9 @@ void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
 void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 {
 	if (mainBlockCard->IsExecuting() || (initBlockCard && initBlockCard->IsExecuting()) || isTransitioning) return;
+	auto gd = game->GetGraphicsDevice();
 	const float outline = 2.0f;
-	game->GetGraphicsDevice()->DrawRectangle(
+	gd->DrawRectangle(
 		this->camera,
 		enemyCardRemoveAreaX - outline,
 		enemyCardRemoveAreaY - outline,
@@ -2298,7 +2326,7 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 		true
 	);
 
-	game->GetGraphicsDevice()->DrawRectangle(
+	gd->DrawRectangle(
 		this->camera,
 		enemyCardRemoveAreaX,
 		enemyCardRemoveAreaY,
@@ -2307,6 +2335,25 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 		D3DXCOLOR(0.7f, 0.1f, 0.1f, 1.0f),
 		true
 	);
+
+	if (IsDraggingAnyEnemyCard()) {
+		const unsigned long long tick = GetTickCount64();
+		D3DCOLOR dashColor = 0xFFFFFFFF;
+		if (IsDraggingEnemyCardOverRemoveArea()) {
+			const float phase = static_cast<float>(tick % 1000) / 1000.f; // one blink per second
+			const float pulse = (std::sin(phase * 2.f * D3DX_PI) + 1.f) * 0.5f;
+			dashColor = D3DCOLOR_ARGB(120 + static_cast<int>(135.f * pulse), 255, 230, 120);
+		}
+		const float pad = 4.f;
+
+		gd->SetAlphaBlending(true);
+		Demo::DrawAnimatedDashedRectangle(
+			gd, this->camera,
+			enemyCardRemoveAreaX - pad, enemyCardRemoveAreaY - pad,
+			enemyCardRemoveAreaWidth + pad * 2.f, enemyCardRemoveAreaHeight + pad * 2.f,
+			3.f, dashColor, false, 4.f, dashColor, 20.f, 10.f, 40.f, tick);
+		gd->SetAlphaBlending(false);
+	}
 
 	fontSprite->Begin();
 	fontSprite->SetOutline(false);
@@ -3868,6 +3915,12 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
 
+	CreateImGuiBattleDebugFrame([this]() {
+		for (auto& enemy : enemies) {
+			if (enemy && !enemy->IsDead()) enemy->TakeDamage(999999.f, true);
+		}
+	});
+
 	if (SUCCEEDED(gd->BeginDraw())) {
 		auto screenW = (float)game->GetVirtualWidth();
 		auto screenH = (float)game->GetVirtualHeight();
@@ -4054,6 +4107,8 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 		if (!keyboardNavigator.IsInKeyboardMode()) {
 			DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		}
+		ImGui::Render();
+		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 		gd->EndDraw();
 	}
 }

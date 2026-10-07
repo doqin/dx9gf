@@ -15,4 +15,6 @@ namespace Demo {
 	};
 
 	void CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game);
+	// Debug window for battles. onKillAllEnemies is invoked when the "Kill All Enemies" button is pressed.
+	void CreateImGuiBattleDebugFrame(const std::function<void()>& onKillAllEnemies);
 }

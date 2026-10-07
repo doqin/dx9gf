@@ -32,7 +32,7 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	player = std::make_shared<Player>(transformManager, playerX, playerY);
 	camera.SetPosition(playerX, playerY);
 	player->Init(game->GetGraphicsDevice(), colliderManager.get(), &camera);
-	auto gearTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	gearTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
 	player->InitGearAnim(gearTex);
 	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
@@ -157,6 +157,28 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	}
 
 	bool isGamePaused = this->isGamePaused || IsSubsceneModalActive() || fullMapOpen;
+
+	// Pay out quests whose goal was already done before the player accepted them.
+	if (!isTransitioning && !currentConversation && !PopupManager::GetInstance()->IsActive()) {
+		auto deferred = QuestManager::GetInstance()->ResolveDeferredEvents(player.get());
+		if (deferred.hasReward && popUpMessage) {
+			popUpMessage->ShowMessage(L"(+) " + deferred.rewardMessage, 5.0f);
+		}
+	}
+
+	// Announce freshly obtained gears one at a time, once any dialogue / other popup is out of the way.
+	auto& pendingGears = PlayerGlobalData::GetInstance()->GetPendingGearPopups();
+	if (!pendingGears.empty() && !isTransitioning && !currentConversation && !IsSubsceneModalActive()
+		&& !PopupManager::GetInstance()->IsActive()) {
+		int gearID = pendingGears.front();
+		pendingGears.erase(pendingGears.begin());
+		auto bp = ItemData::GetInstance()->GetGearBlueprint(gearID);
+		if (bp) {
+			std::vector<std::pair<std::wstring, std::function<void()>>> buttons = { { Tr(L"OK"), nullptr } };
+			PopupManager::GetInstance()->ShowWithIcon("stepped_gold", Tr(L"Gear Obtained!"), Tr(bp->name),
+				buttons, gearTex, bp->frames);
+		}
+	}
 
 	if (PopupManager::GetInstance()->IsActive()) {
 		PopupManager::GetInstance()->Update(deltaTime, &this->uiCamera);

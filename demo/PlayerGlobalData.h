@@ -20,6 +20,7 @@ namespace Demo {
 		std::vector<std::string> inventoryCards;
 		ItemInventory inventoryItems;
 		std::vector<int> inventoryGears;
+		std::vector<int> pendingGearPopups;
 		int equippedActiveGearID = -1;
 		int equippedPassiveGearID = -1;
 		bool showGearOnMap = true;
@@ -53,7 +54,10 @@ namespace Demo {
 
 		void EquipGear(int gearID);
 		void UnequipGear(int gearID);
-		void AddGear(int gearID) { inventoryGears.push_back(gearID); }
+		// Also queues an "obtained" popup; loading a save fills inventoryGears directly so it doesn't.
+		void AddGear(int gearID) { inventoryGears.push_back(gearID); pendingGearPopups.push_back(gearID); }
+		// Gears picked up but not yet announced; the world scene drains this into popups.
+		std::vector<int>& GetPendingGearPopups() { return pendingGearPopups; }
 
 		int GetGold() const { return gold; }
 		void SetGold(int amount) { gold = amount; }
