@@ -96,6 +96,22 @@ void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
 	ImGui::EndFrame();
 }
 
+void Demo::CreateImGuiBattleDebugFrame(const std::function<void()>& onKillAllEnemies)
+{
+	ImGui_ImplDX9_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+#ifdef _DEBUG
+	ImGui::NewFrame();
+	ImGui::Begin("Battle Debug");
+	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+	if (ImGui::Button("Kill All Enemies") && onKillAllEnemies) {
+		onKillAllEnemies();
+	}
+	ImGui::End();
+#endif
+	ImGui::EndFrame();
+}
+
 void Demo::Pointable::DrawPosition(unsigned long long deltaTime, DX9GF::GraphicsDevice* gd, const DX9GF::Camera& camera) const
 {
 	if (!isDrawing) return;
