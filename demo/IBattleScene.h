@@ -329,6 +329,9 @@ namespace Demo {
 		// Vertical band the enemy grid may occupy, in world coordinates.
 		void GetEnemyGridBand(float& top, float& bottom) const;
 		void RemoveEnemyCardsInRemoveArea();
+		bool IsInEnemyCardRemoveArea(float x, float y) const;
+		bool IsDraggingEnemyCardOverRemoveArea();
+		bool IsDraggingAnyEnemyCard() const;
 		void StartAttackCountdown(std::shared_ptr<std::vector<std::shared_ptr<IEnemy>>> attackingEnemies);
 		bool UpdateAttackCountdown(unsigned long long deltaTime);
 		void DrawAttackCountdown(unsigned long long deltaTime);
