@@ -21,6 +21,7 @@ void Demo::CupidEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera
 	arrowTexture->LoadTexture(L"assets/bubbleprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
+	SetCardDropPool({ "ChainDetonationCard", "CruelStrikeCard", "ForesightCard" }, 1, 3);
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
