@@ -274,6 +274,7 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	const float victoryHoldSeconds = battleCardDrops.empty() ? 2.5f : 1.5f + CARD_DROP_MESSAGE_SECONDS;
 	drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(victoryHoldSeconds));
+	drawBuffer->PushCommand(transitionInCommand);
 	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
