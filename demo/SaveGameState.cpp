@@ -41,6 +41,11 @@ namespace Demo {
 		}
 	}
 
+	int SaveGameState::GetSceneIndex(const std::string& saveId) const {
+		auto it = sceneMap.find(saveId);
+		return it != sceneMap.end() ? static_cast<int>(it->second) : -1;
+	}
+
 	std::shared_ptr<Player> SaveGameState::GetPlayerFromScene(DX9GF::IScene* scene) const {
 		if (auto tutorialScene = dynamic_cast<Demo::TutorialWorldScene*>(scene)) {
 			return tutorialScene->GetPlayer();

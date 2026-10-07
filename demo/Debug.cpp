@@ -2,6 +2,8 @@
 #include "Debug.h"
 #include "MainFont.h"
 #include "MapEnemy.h"
+#include "FastTravel.h"
+#include "PlayerGlobalData.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include <string>
@@ -75,6 +77,17 @@ void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
 	ImGui::InputInt("Gear ID", &gearToGive);
 	if (ImGui::Button("Give Gear")) {
 		player->AddGear(gearToGive);
+	}
+
+	ImGui::Text("Fast Travel");
+	for (const auto& dest : FastTravel::Destinations()) {
+		auto data = PlayerGlobalData::GetInstance();
+		if (data->IsFastTravelUnlocked(dest.sceneId)) {
+			ImGui::Text("  %s: unlocked", dest.sceneId.c_str());
+		}
+		else if (ImGui::Button(("Unlock " + dest.sceneId).c_str())) {
+			data->UnlockFastTravel(dest.sceneId);
+		}
 	}
 
 	ImGui::Text("Toggleables");

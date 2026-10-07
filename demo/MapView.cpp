@@ -203,8 +203,8 @@ void Demo::MapView::DrawMini(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera,
 	float playerX, float playerY, const std::vector<Marker>& markers)
 {
 	if (!built) return;
-	constexpr float kSize = 128.f;
-	constexpr float kMargin = 16.f;
+	constexpr float kSize = kMiniSize;
+	constexpr float kMargin = kMiniMargin;
 	constexpr float kScale = 4.f;  // pixels per tile
 	const float winX = virtualWidth / 2.f - kMargin - kSize;
 	const float winY = -virtualHeight / 2.f + kMargin;

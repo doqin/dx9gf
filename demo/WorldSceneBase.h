@@ -15,6 +15,8 @@
 #include "MapEnemy.h"
 #include "ChapterTitleUI.h"
 #include "MapView.h"
+#include "TextIconButton.h"
+#include "FastTravel.h"
 
 namespace Demo {
 	class WorldSceneBase : public DX9GF::IScene, public DX9GF::ISaveable {
@@ -28,6 +30,10 @@ namespace Demo {
 		MapView mapView;
 		std::vector<std::string> portalLayers;
 		bool fullMapOpen = false;
+		std::shared_ptr<TextIconButton> fastTravelButton;
+		void LayoutFastTravelButton();
+		void OpenFastTravelMenu();
+		void FastTravelTo(const FastTravel::Destination& dest);
 
 		Game* game;
 		std::shared_ptr<DX9GF::ColliderManager> colliderManager;
@@ -78,6 +84,7 @@ namespace Demo {
 		void AddDepthNode(std::vector<DepthNode>& nodes, float y, std::function<void()> drawCall);
 
 		void CreatePortalTransition(int sceneOffset, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f);
+		void TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f);
 
 		void SpawnMapEnemy(float x, float y, std::string id, std::vector<std::string> types,
 			bool isRand, bool isGlobal, std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDraw,

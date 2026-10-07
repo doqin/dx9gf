@@ -27,6 +27,7 @@ namespace Demo {
 		// Set once the player has been walked through the first battle, so the walkthrough
 		// never replays. Persisted with the save.
 		bool seenBattleTutorial = false;
+		std::vector<std::string> unlockedFastTravel;
 		PlayerGlobalData() { Reset(); }
 	public:
 		static PlayerGlobalData* GetInstance() {
@@ -50,6 +51,12 @@ namespace Demo {
 
 		bool HasSeenBattleTutorial() const { return seenBattleTutorial; }
 		void SetSeenBattleTutorial(bool seen) { seenBattleTutorial = seen; }
+		bool IsFastTravelUnlocked(const std::string& sceneId) const {
+			return std::find(unlockedFastTravel.begin(), unlockedFastTravel.end(), sceneId) != unlockedFastTravel.end();
+		}
+		void UnlockFastTravel(const std::string& sceneId) {
+			if (!IsFastTravelUnlocked(sceneId)) unlockedFastTravel.push_back(sceneId);
+		}
 		bool HasGearEquipped(int gearID) const { return equippedActiveGearID == gearID || equippedPassiveGearID == gearID; }
 
 		void EquipGear(int gearID);

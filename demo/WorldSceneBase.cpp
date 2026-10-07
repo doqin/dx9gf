@@ -69,6 +69,19 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	});
 	playerHUD->Init();
 
+	fastTravelButton = std::make_shared<TextIconButton>(transformManager, 0, 0, 96, 32, uiTex, font.get(), L"", 3);
+	fastTravelButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(0, 0, 16, 16, 3));
+	fastTravelButton->SetSliceMargins(4, 4);
+	fastTravelButton->SetSpriteScale(2.f, 2.f);
+	fastTravelButton->SetAutoResize(true, 16.f);
+	fastTravelButton->SetTextScale(1.f, 1.f);
+	fastTravelButton->SetTextColor(D3DCOLOR_XRGB(0, 0, 0));
+	fastTravelButton->SetTextOutline(false);
+	fastTravelButton->SetDynamicTextGetter([]() { return Tr(L"Fast Travel"); });
+	fastTravelButton->SetOnReleaseLeft([this](DX9GF::ITrigger*) { OpenFastTravelMenu(); });
+	fastTravelButton->Init(&this->uiCamera);
+	LayoutFastTravelButton();
+
 	map->SetAreaUpdateHandler("audio_zone_leaves", [this](const DX9GF::Map::ObjectArea&) {
 		GetPlayer()->SetSurface("leaves");
 	});
@@ -273,6 +286,11 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 
 	if (playerHUD && !isGamePaused) playerHUD->Update(deltaTime);
 
+	if (fastTravelButton && ShowMiniMap()) {
+		LayoutFastTravelButton();
+		if (!isGamePaused && !isTransitioning) fastTravelButton->Update(deltaTime);
+	}
+
 	OnUpdate(deltaTime);
 
 	if (!isGamePaused && !isTransitioning) {
@@ -363,6 +381,7 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 		if (ShowMiniMap() && !fullMapOpen && !(inventoryMenu && inventoryMenu->IsOpen()) && player) {
 			mapView.DrawMini(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(),
 				player->GetWorldX(), player->GetWorldY(), BuildMapMarkers());
+			if (fastTravelButton) fastTravelButton->Draw(gd, deltaTime);
 		}
 		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
 		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
@@ -460,28 +479,67 @@ void Demo::WorldSceneBase::AddDepthNode(std::vector<DepthNode>& nodes, float y, 
 
 void Demo::WorldSceneBase::CreatePortalTransition(int sceneOffset, float targetX, float targetY, const char* bgm, float bgmVol)
 {
+	TransitionToScene(static_cast<int>(game->GetSceneManager()->GetIndex()) + sceneOffset, targetX, targetY, bgm, bgmVol);
+}
+
+void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm, float bgmVol)
+{
 	if (isTransitioning) return;
 	isTransitioning = true;
 
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->PushCommand(transitionInCommand);
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand, sceneOffset, targetX, targetY, bgm, bgmVol](std::function<void(void)> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand, sceneIndex, targetX, targetY, bgm, bgmVol](std::function<void(void)> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
 		}
 		auto sceMan = game->GetSceneManager();
-		auto targetScene = sceMan->GetScene(static_cast<size_t>(sceMan->GetIndex()) + sceneOffset);
+		auto targetScene = sceMan->GetScene(static_cast<size_t>(sceneIndex));
 		auto targetPlayer = MainMenu::gameSaveState->GetPlayerFromScene(targetScene);
 		targetPlayer->SetLocalPosition(targetX, targetY);
 		if (bgm) {
 			DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(bgm, bgmVol, 1.5f);
 		}
-		sceMan->GoToScene(sceMan->GetIndex() + sceneOffset);
+		sceMan->GoToScene(sceneIndex);
 		isTransitioning = false;
 		markFinished();
-	}));
+		}));
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
+
+void Demo::WorldSceneBase::LayoutFastTravelButton()
+{
+	const float virtualW = static_cast<float>(game->GetVirtualWidth());
+	const float virtualH = static_cast<float>(game->GetVirtualHeight());
+	const float miniLeft = virtualW / 2.f - MapView::kMiniMargin - MapView::kMiniSize;
+	fastTravelButton->SetLocalPosition(
+		miniLeft - 2.f - 8.f - static_cast<float>(fastTravelButton->GetWidth()),
+		-virtualH / 2.f + MapView::kMiniMargin);
+}
+
+void Demo::WorldSceneBase::OpenFastTravelMenu()
+{
+	std::vector<std::pair<std::wstring, std::function<void()>>> buttons;
+	for (const auto& dest : FastTravel::Destinations()) {
+		if (!PlayerGlobalData::GetInstance()->IsFastTravelUnlocked(dest.sceneId)) continue;
+		buttons.push_back({ Tr(dest.name), [this, &dest]() { FastTravelTo(dest); } });
+	}
+	if (buttons.empty()) {
+		PopupManager::GetInstance()->Show("stepped_blue", Tr(L"Fast Travel"),
+			Tr(L"Beat an area's boss to unlock it."), { { Tr(L"OK"), nullptr } });
+		return;
+	}
+	buttons.push_back({ Tr(L"Cancel"), nullptr });
+	PopupManager::GetInstance()->Show("stepped_blue", Tr(L"Fast Travel"), Tr(L"Return to the start of:"), buttons);
+}
+
+void Demo::WorldSceneBase::FastTravelTo(const FastTravel::Destination& dest)
+{
+	const int sceneIndex = MainMenu::gameSaveState->GetSceneIndex(dest.sceneId);
+	if (sceneIndex < 0) return;
+	TransitionToScene(sceneIndex, dest.startX, dest.startY, dest.bgm, dest.bgmVolume);
+}
+
 void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 	std::vector<std::string> types, bool isRand, bool isGlobal,
 	std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDraw,

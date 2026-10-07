@@ -229,6 +229,7 @@
     <ClCompile Include="DemonEyeEnemy.cpp" />
     <ClCompile Include="DrawUtils.cpp" />
     <ClCompile Include="EnemyFactory.cpp" />
+    <ClCompile Include="FastTravel.cpp" />
     <ClCompile Include="GearSlotUI.cpp" />
     <ClCompile Include="HomeworkEnemy.cpp" />
     <ClCompile Include="ICard.cpp" />
@@ -387,6 +388,7 @@
     <ClInclude Include="DrawUtils.h" />
     <ClInclude Include="EncounterGenerator.h" />
     <ClInclude Include="EnergyToken.h" />
+    <ClInclude Include="FastTravel.h" />
     <ClInclude Include="GearSlotUI.h" />
     <ClInclude Include="GoldToken.h">
       <DeploymentContent>false</DeploymentContent>

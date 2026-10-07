@@ -121,6 +121,8 @@
     <ClCompile Include="GearSlotUI.cpp" />
     <ClCompile Include="DeadlineEnemy.cpp" />
     <ClCompile Include="HomeworkEnemy.cpp" />
+    <ClCompile Include="PendingAutoContinue.cpp" />
+    <ClCompile Include="FastTravel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdvancedCards.h" />
@@ -252,6 +254,8 @@
     <ClInclude Include="GearSlotUI.h" />
     <ClInclude Include="DeadlineEnemy.h" />
     <ClInclude Include="HomeworkEnemy.h" />
+    <ClInclude Include="PendingAutoContinue.h" />
+    <ClInclude Include="FastTravel.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc" />

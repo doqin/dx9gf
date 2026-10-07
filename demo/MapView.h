@@ -20,6 +20,9 @@ namespace Demo {
 			bool dimmed = false;  // e.g. an already opened chest
 		};
 
+		static constexpr float kMiniSize = 128.f;
+		static constexpr float kMiniMargin = 16.f;
+
 		void Init(DX9GF::Font* font);
 		// Bakes the grid from the loaded map. Layers named "background*" are ignored, so
 		// decorative sky/water doesn't count as explorable ground.

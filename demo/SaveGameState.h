@@ -20,6 +20,7 @@ namespace Demo {
         static constexpr const char* SAVE_FILE = "savegame.json";
         static bool HasSaveFile();
         std::shared_ptr<Player> GetPlayerFromScene(DX9GF::IScene* scene) const;
+        int GetSceneIndex(const std::string& saveId) const;
         SaveGameState(Game* game, std::shared_ptr<DX9GF::SaveManager> saveManager);
         std::string GetSaveID() const override;
         void GenerateSaveData(nlohmann::json& outData) override;

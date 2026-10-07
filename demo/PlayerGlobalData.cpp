@@ -62,6 +62,7 @@ void Demo::PlayerGlobalData::Reset() {
 	equippedPassiveGearID = -1;
 	showGearOnMap = true;
 	seenBattleTutorial = false;
+	unlockedFastTravel.clear();
 }
 
 float Demo::PlayerGlobalData::Heal(float value) {
@@ -88,6 +89,7 @@ void Demo::PlayerGlobalData::GenerateSaveData(nlohmann::json& outData) {
 	outData["equippedPassiveGearID"] = equippedPassiveGearID;
 	outData["showGearOnMap"] = showGearOnMap;
 	outData["seenBattleTutorial"] = seenBattleTutorial;
+	outData["unlockedFastTravel"] = unlockedFastTravel;
 
 	outData["inventoryGears"] = nlohmann::json::array();
 	for (int gear : inventoryGears) {
@@ -113,6 +115,10 @@ void Demo::PlayerGlobalData::RestoreSaveData(const nlohmann::json& inData) {
 	if (inData.contains("gold")) gold = inData["gold"];
 	if (inData.contains("showGearOnMap")) showGearOnMap = inData["showGearOnMap"];
 	if (inData.contains("seenBattleTutorial")) seenBattleTutorial = inData["seenBattleTutorial"];
+	unlockedFastTravel.clear();
+	if (inData.contains("unlockedFastTravel")) {
+		unlockedFastTravel = inData["unlockedFastTravel"].get<std::vector<std::string>>();
+	}
 
 	if (inData.contains("equippedGearID")) {
 		int oldGearID = inData["equippedGearID"];
