@@ -22,6 +22,11 @@ Demo::WorldSceneBase::WorldSceneBase(Game* game, std::shared_ptr<DX9GF::SaveMana
 
 void Demo::WorldSceneBase::Init() {
 	OnInit();
+	// Every save point is a fast travel point; ids are stable because scenes add them in a fixed order
+	for (size_t i = 0; i < savePoints.size(); ++i) {
+		savePoints[i]->SetScreenSize(static_cast<float>(game->GetVirtualWidth()), static_cast<float>(game->GetVirtualHeight()));
+		savePoints[i]->ConfigureTravel(GetSaveID() + "#" + std::to_string(i), [this]() { OpenTravelMap(); });
+	}
 }
 
 void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t* mapFile)
@@ -68,19 +73,6 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 		if (inventoryMenu && !inventoryMenu->IsOpen()) inventoryMenu->Toggle();
 	});
 	playerHUD->Init();
-
-	fastTravelButton = std::make_shared<TextIconButton>(transformManager, 0, 0, 96, 32, uiTex, font.get(), L"", 3);
-	fastTravelButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(0, 0, 16, 16, 3));
-	fastTravelButton->SetSliceMargins(4, 4);
-	fastTravelButton->SetSpriteScale(2.f, 2.f);
-	fastTravelButton->SetAutoResize(true, 16.f);
-	fastTravelButton->SetTextScale(1.f, 1.f);
-	fastTravelButton->SetTextColor(D3DCOLOR_XRGB(0, 0, 0));
-	fastTravelButton->SetTextOutline(false);
-	fastTravelButton->SetDynamicTextGetter([]() { return Tr(L"Fast Travel"); });
-	fastTravelButton->SetOnReleaseLeft([this](DX9GF::ITrigger*) { OpenFastTravelMenu(); });
-	fastTravelButton->Init(&this->uiCamera);
-	LayoutFastTravelButton();
 
 	map->SetAreaUpdateHandler("audio_zone_leaves", [this](const DX9GF::Map::ObjectArea&) {
 		GetPlayer()->SetSurface("leaves");
@@ -153,7 +145,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 		auto settings = SettingsManager::GetInstance();
 		if (fullMapOpen) {
 			if (inpMan->KeyDown(settings->GetKeybind("OPEN_MAP")) || inpMan->KeyDown(settings->GetKeybind("OPEN_INVENTORY"))) {
-				fullMapOpen = false;
+				CloseFullMap();
 				mapClosedThisFrame = true;
 			}
 		}
@@ -170,6 +162,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	}
 
 	bool isGamePaused = this->isGamePaused || IsSubsceneModalActive() || fullMapOpen;
+	if (travelMapOpen) UpdateTravelMap(deltaTime);
 
 	// Pay out quests whose goal was already done before the player accepted them.
 	if (!isTransitioning && !currentConversation && !PopupManager::GetInstance()->IsActive()) {
@@ -241,8 +234,10 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 		}
 	}
 
-	for (auto& savePoint : savePoints) {
-		savePoint->Update(deltaTime);
+	if (!fullMapOpen) {
+		for (auto& savePoint : savePoints) {
+			savePoint->Update(deltaTime);
+		}
 	}
 	for (auto& shopPoint : shopPoints) {
 		shopPoint->Update(deltaTime);
@@ -285,11 +280,6 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	}
 
 	if (playerHUD && !isGamePaused) playerHUD->Update(deltaTime);
-
-	if (fastTravelButton && ShowMiniMap()) {
-		LayoutFastTravelButton();
-		if (!isGamePaused && !isTransitioning) fastTravelButton->Update(deltaTime);
-	}
 
 	OnUpdate(deltaTime);
 
@@ -381,7 +371,6 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 		if (ShowMiniMap() && !fullMapOpen && !(inventoryMenu && inventoryMenu->IsOpen()) && player) {
 			mapView.DrawMini(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(),
 				player->GetWorldX(), player->GetWorldY(), BuildMapMarkers());
-			if (fastTravelButton) fastTravelButton->Draw(gd, deltaTime);
 		}
 		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
 		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
@@ -396,8 +385,24 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 		QuestManager::GetInstance()->Draw(gd, &this->uiCamera, deltaTime);
 
 		if (fullMapOpen) {
-			mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(), BuildMapMarkers(),
-				SettingsManager::GetInstance()->GetKeybindDisplayName("OPEN_MAP"));
+			const auto closeKey = SettingsManager::GetInstance()->GetKeybindDisplayName("OPEN_MAP");
+			if (travelMapOpen && travelTab >= 0 && travelTab < static_cast<int>(travelWorlds.size())) {
+				MapView::TravelUI ui;
+				for (auto* world : travelWorlds) {
+					const auto* info = SaveGameState::GetSceneInfo(world->GetSaveID());
+					ui.tabs.push_back(info ? Tr(info->displayName) : std::wstring(L"?"));
+				}
+				ui.selectedTab = travelTab;
+				ui.hoverId = travelHoverId;
+				ui.hoverTab = travelHoverTab;
+				travelHits = {};
+				WorldSceneBase* shown = travelWorlds[travelTab];
+				shown->mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(),
+					shown->BuildMapMarkers(shown == this), closeKey, &ui, &travelHits);
+			}
+			else {
+				mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(), BuildMapMarkers(), closeKey);
+			}
 		}
 
 		if (drawBuffer) {
@@ -449,11 +454,11 @@ void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>
 	currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
 }
 
-std::vector<Demo::MapView::Marker> Demo::WorldSceneBase::BuildMapMarkers() const
+std::vector<Demo::MapView::Marker> Demo::WorldSceneBase::BuildMapMarkers(bool includePlayer) const
 {
 	using K = MapView::MarkerKind;
 	std::vector<MapView::Marker> markers;
-	for (auto& p : savePoints) markers.push_back({ K::Save, p->GetWorldX(), p->GetWorldY() });
+	for (auto& p : savePoints) markers.push_back({ K::Save, p->GetWorldX(), p->GetWorldY(), !p->IsUnlocked(), p->GetId() });
 	for (auto& p : shopPoints) markers.push_back({ K::Shop, p->GetWorldX(), p->GetWorldY() });
 	for (auto& p : healingPoints) markers.push_back({ K::Heal, p->GetWorldX(), p->GetWorldY() });
 	for (auto& c : treasureChests) markers.push_back({ K::Chest, c->GetWorldX(), c->GetWorldY(), c->GetIsOpened() });
@@ -463,7 +468,7 @@ std::vector<Demo::MapView::Marker> Demo::WorldSceneBase::BuildMapMarkers() const
 			markers.push_back({ K::Portal, area.x + area.width / 2.f, area.y + area.height / 2.f });
 		}
 	}
-	if (player) markers.push_back({ K::Player, player->GetWorldX(), player->GetWorldY() });
+	if (player && includePlayer) markers.push_back({ K::Player, player->GetWorldX(), player->GetWorldY() });
 	return markers;
 }
 
@@ -507,37 +512,158 @@ void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, floa
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
-void Demo::WorldSceneBase::LayoutFastTravelButton()
+void Demo::WorldSceneBase::OpenTravelMap()
 {
-	const float virtualW = static_cast<float>(game->GetVirtualWidth());
-	const float virtualH = static_cast<float>(game->GetVirtualHeight());
-	const float miniLeft = virtualW / 2.f - MapView::kMiniMargin - MapView::kMiniSize;
-	fastTravelButton->SetLocalPosition(
-		miniLeft - 2.f - 8.f - static_cast<float>(fastTravelButton->GetWidth()),
-		-virtualH / 2.f + MapView::kMiniMargin);
+	if (isTransitioning) return;
+	travelWorlds.clear();
+	auto sceMan = game->GetSceneManager();
+	for (size_t i = 0; i < sceMan->GetSceneCount(); ++i) {
+		auto* world = dynamic_cast<WorldSceneBase*>(sceMan->GetScene(i));
+		if (!world) continue;
+		const bool visited = std::any_of(world->savePoints.begin(), world->savePoints.end(),
+			[](const std::shared_ptr<SavePoint>& sp) { return sp->IsUnlocked(); });
+		if (world == this || visited) {
+			if (world == this) travelTab = static_cast<int>(travelWorlds.size());
+			travelWorlds.push_back(world);
+		}
+	}
+	travelHits = {};
+	travelHoverId.clear();
+	travelHoverTab = -1;
+	travelInputGraceMs = 200.f;
+	travelMapOpen = true;
+	fullMapOpen = true;
 }
 
-void Demo::WorldSceneBase::OpenFastTravelMenu()
+void Demo::WorldSceneBase::CloseFullMap()
 {
-	std::vector<std::pair<std::wstring, std::function<void()>>> buttons;
-	for (const auto& dest : FastTravel::Destinations()) {
-		if (!PlayerGlobalData::GetInstance()->IsFastTravelUnlocked(dest.sceneId)) continue;
-		buttons.push_back({ Tr(dest.name), [this, &dest]() { FastTravelTo(dest); } });
+	fullMapOpen = false;
+	travelMapOpen = false;
+}
+
+void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime)
+{
+	if (travelInputGraceMs > 0.f) travelInputGraceMs -= static_cast<float>(deltaTime);
+	travelHoverTab = -1;
+	if (PopupManager::GetInstance()->IsActive() || isTransitioning) return;
+	const int tabCount = static_cast<int>(travelWorlds.size());
+	if (travelTab < 0 || travelTab >= tabCount) return;
+
+	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto settings = SettingsManager::GetInstance();
+	const bool inputReady = travelInputGraceMs <= 0.f;
+
+	auto switchTab = [&](int tab) {
+		travelTab = tab;
+		travelHoverId.clear();
+		travelHits = {};
+	};
+
+	// Keyboard: left/right switches world, up/down steps through the unlocked save points
+	if (inputReady) {
+		const bool left = inpMan->KeyDown(DIK_LEFT) || inpMan->KeyDown(settings->GetKeybind("MOVE_LEFT"));
+		const bool right = inpMan->KeyDown(DIK_RIGHT) || inpMan->KeyDown(settings->GetKeybind("MOVE_RIGHT"));
+		if (left != right && tabCount > 1) {
+			switchTab((travelTab + (right ? 1 : tabCount - 1)) % tabCount);
+			return;
+		}
+		const bool up = inpMan->KeyDown(DIK_UP) || inpMan->KeyDown(settings->GetKeybind("MOVE_UP"));
+		const bool down = inpMan->KeyDown(DIK_DOWN) || inpMan->KeyDown(settings->GetKeybind("MOVE_DOWN"));
+		if (up != down) {
+			std::vector<const MapView::SaveHit*> selectable;
+			for (const auto& hit : travelHits.saves) {
+				if (!hit.locked) selectable.push_back(&hit);
+			}
+			if (!selectable.empty()) {
+				int current = -1;
+				for (size_t i = 0; i < selectable.size(); ++i) {
+					if (selectable[i]->id == travelHoverId) current = static_cast<int>(i);
+				}
+				const int count = static_cast<int>(selectable.size());
+				const int next = current < 0 ? (down ? 0 : count - 1) : (current + (down ? 1 : count - 1)) % count;
+				travelHoverId = selectable[next]->id;
+			}
+		}
 	}
-	if (buttons.empty()) {
-		PopupManager::GetInstance()->Show("stepped_blue", Tr(L"Fast Travel"),
-			Tr(L"Beat an area's boss to unlock it."), { { Tr(L"OK"), nullptr } });
+
+	auto [mouseX, mouseY] = inpMan->GetVirtualAbsoluteMousePos(&uiCamera);
+	auto [mx, my] = DX9GF::Utils::WindowToWorldCoords(uiCamera, mouseX, mouseY);
+	auto inside = [&](const MapView::Rect& r) { return mx >= r.x0 && mx <= r.x1 && my >= r.y0 && my <= r.y1; };
+
+	for (size_t i = 0; i < travelHits.tabs.size(); ++i) {
+		if (inside(travelHits.tabs[i])) { travelHoverTab = static_cast<int>(i); break; }
+	}
+	const MapView::SaveHit* hoveredSave = nullptr;
+	for (const auto& hit : travelHits.saves) {
+		if (!hit.locked && inside(hit.rect)) { hoveredSave = &hit; break; }
+	}
+	// Moving the mouse onto a save point selects it; otherwise the keyboard selection stays
+	if (hoveredSave) travelHoverId = hoveredSave->id;
+
+	auto travelToSelected = [&]() {
+		if (travelHoverId.empty()) return;
+		WorldSceneBase* world = travelWorlds[travelTab];
+		for (const auto& sp : world->savePoints) {
+			if (sp->GetId() == travelHoverId && sp->IsUnlocked()) {
+				ConfirmTravel(world, *sp);
+				return;
+			}
+		}
+	};
+
+	if (!inputReady) return;
+	if (inpMan->KeyDown(settings->GetKeybind("ACCEPT")) || inpMan->KeyDown(settings->GetKeybind("INTERACT"))) {
+		travelToSelected();
 		return;
 	}
-	buttons.push_back({ Tr(L"Cancel"), nullptr });
-	PopupManager::GetInstance()->Show("stepped_blue", Tr(L"Fast Travel"), Tr(L"Return to the start of:"), buttons);
+	// Clicks act on release, like the rest of the UI buttons
+	if (!inpMan->MouseUp(DX9GF::InputManager::Left)) return;
+	if (travelHoverTab >= 0) {
+		if (travelHoverTab != travelTab) switchTab(travelHoverTab);
+		return;
+	}
+	if (hoveredSave) travelToSelected();
 }
 
-void Demo::WorldSceneBase::FastTravelTo(const FastTravel::Destination& dest)
+std::pair<float, float> Demo::WorldSceneBase::FindSpawnNear(const SavePoint& point) const
 {
-	const int sceneIndex = MainMenu::gameSaveState->GetSceneIndex(dest.sceneId);
-	if (sceneIndex < 0) return;
-	TransitionToScene(sceneIndex, dest.startX, dest.startY, dest.bgm, dest.bgmVolume);
+	const float px = point.GetWorldX(), py = point.GetWorldY();
+	// The player's whole footprint has to be on floor, not just one point
+	auto clear = [&](float x, float y) {
+		constexpr float kPad = 10.f;
+		return mapView.IsWalkable(x, y) && mapView.IsWalkable(x - kPad, y) && mapView.IsWalkable(x + kPad, y)
+			&& mapView.IsWalkable(x, y - kPad) && mapView.IsWalkable(x, y + kPad);
+	};
+	// Prefer in front of the point, then sideways, then behind, widening the search each ring
+	for (float r : { 32.f, 48.f, 64.f, 96.f }) {
+		const float offsets[][2] = { {0, r}, {r, 0}, {-r, 0}, {r, r}, {-r, r}, {0, -r}, {r, -r}, {-r, -r} };
+		for (const auto& o : offsets) {
+			if (clear(px + o[0], py + o[1])) return { px + o[0], py + o[1] };
+		}
+	}
+	return point.GetSpawnPosition();
+}
+
+void Demo::WorldSceneBase::ConfirmTravel(WorldSceneBase* world, const SavePoint& target)
+{
+	const std::string sceneId = world->GetSaveID();
+	const auto* info = SaveGameState::GetSceneInfo(sceneId);
+	const std::wstring worldName = info ? Tr(info->displayName) : std::wstring(L"?");
+	const auto spawn = world->FindSpawnNear(target);
+	const bool sameScene = world == this;
+
+	std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
+		{ Tr(L"Travel"), [this, sceneId, info, spawn, sameScene]() {
+			const int sceneIndex = MainMenu::gameSaveState->GetSceneIndex(sceneId);
+			if (sceneIndex < 0) return;
+			CloseFullMap();
+			// Don't restart the music when hopping between save points of the same world
+			TransitionToScene(sceneIndex, spawn.first, spawn.second,
+				(info && !sameScene) ? info->bgm : nullptr, info ? info->bgmVolume : 0.3f);
+		}},
+		{ Tr(L"Cancel"), nullptr }
+	};
+	PopupManager::GetInstance()->Show("basic_blackwhite", Tr(L"FAST TRAVEL"), Tr(L"Travel to this save point in ") + worldName + L"?", buttons);
 }
 
 void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,

@@ -16,7 +16,6 @@
 #include "ChapterTitleUI.h"
 #include "MapView.h"
 #include "TextIconButton.h"
-#include "FastTravel.h"
 
 namespace Demo {
 	class WorldSceneBase : public DX9GF::IScene, public DX9GF::ISaveable {
@@ -30,10 +29,20 @@ namespace Demo {
 		MapView mapView;
 		std::vector<std::string> portalLayers;
 		bool fullMapOpen = false;
-		std::shared_ptr<TextIconButton> fastTravelButton;
-		void LayoutFastTravelButton();
-		void OpenFastTravelMenu();
-		void FastTravelTo(const FastTravel::Destination& dest);
+
+		// Fast travel map: the full map with a tab per visited world, opened from a save point.
+		// Worlds count as visited once one of their save points has been unlocked.
+		bool travelMapOpen = false;
+		int travelTab = 0;
+		float travelInputGraceMs = 0.f;  // ignores clicks right after opening, so the popup click can't leak through
+		std::vector<WorldSceneBase*> travelWorlds;
+		MapView::TravelHits travelHits;
+		std::string travelHoverId;  // save point highlighted by mouse hover or keyboard selection
+		int travelHoverTab = -1;
+		void OpenTravelMap();
+		void CloseFullMap();
+		void UpdateTravelMap(unsigned long long deltaTime);
+		void ConfirmTravel(WorldSceneBase* world, const SavePoint& target);
 
 		Game* game;
 		std::shared_ptr<DX9GF::ColliderManager> colliderManager;
@@ -73,7 +82,6 @@ namespace Demo {
 		void SetChapterTitle(const std::wstring& title, const std::wstring& subtitle);
 
 		void RegisterPortalLayer(const std::string& layerName) { portalLayers.push_back(layerName); }
-		std::vector<MapView::Marker> BuildMapMarkers() const;
 
 		struct DepthNode {
 			float y;
@@ -111,5 +119,10 @@ namespace Demo {
 		void DrawWorld(unsigned long long deltaTime) override;
 		void DrawUI(unsigned long long deltaTime) override;
 		std::shared_ptr<Player> GetPlayer() const { return player; }
+		const std::vector<std::shared_ptr<SavePoint>>& GetSavePoints() const { return savePoints; }
+		// A walkable position beside the save point, so fast travel never lands in a wall or off the map
+		std::pair<float, float> FindSpawnNear(const SavePoint& point) const;
+		// includePlayer is false when another world's scene draws this one's map (its player isn't "here")
+		std::vector<MapView::Marker> BuildMapMarkers(bool includePlayer = true) const;
 	};
 }

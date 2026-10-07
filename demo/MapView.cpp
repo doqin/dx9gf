@@ -19,7 +19,7 @@ namespace {
 		case K::Player: return 0xFFFF4040;
 		case K::Chest:  return dimmed ? 0xFF7A6A2A : 0xFFFFD23F;
 		case K::Npc:    return 0xFF4FC3F7;
-		case K::Save:   return 0xFF66E07A;
+		case K::Save:   return dimmed ? 0xFF8A8F99 : 0xFF66E07A;
 		case K::Heal:   return 0xFFFF6BB5;
 		case K::Shop:   return 0xFFFFA040;
 		case K::Portal: return 0xFFB57BFF;
@@ -114,6 +114,12 @@ bool Demo::MapView::WorldToCell(float worldX, float worldY, int& cx, int& cy) co
 	return cx >= 0 && cy >= 0 && cx < cols && cy < rows;
 }
 
+bool Demo::MapView::IsWalkable(float worldX, float worldY) const
+{
+	int cx, cy;
+	return built && WorldToCell(worldX, worldY, cx, cy) && cells[static_cast<size_t>(cy) * cols + cx] == Floor;
+}
+
 void Demo::MapView::Reveal(float worldX, float worldY)
 {
 	if (!built) return;
@@ -171,7 +177,8 @@ void Demo::MapView::DrawCells(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera
 }
 
 void Demo::MapView::DrawMarkers(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float screenOriginX, float screenOriginY,
-	float scale, float dotSize, const ClipRect& clip, const std::vector<Marker>& markers) const
+	float scale, float dotSize, const ClipRect& clip, const std::vector<Marker>& markers,
+	const TravelUI* travel, TravelHits* hits) const
 {
 	// Player last so it is never hidden under another marker
 	for (int pass = 0; pass < 2; ++pass) {
@@ -183,8 +190,21 @@ void Demo::MapView::DrawMarkers(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCame
 			const float sy = std::round(screenOriginY + (m.y / tileH - originY) * scale);
 			const float half = dotSize / 2.f;
 			if (sx - half < clip.x0 || sy - half < clip.y0 || sx + half > clip.x1 || sy + half > clip.y1) continue;
+			const bool isSave = m.kind == MarkerKind::Save;
+			const bool hovered = isSave && travel && !m.id.empty() && travel->hoverId == m.id;
+			if (hovered) {
+				gd->DrawRectangle(uiCamera, sx - half - 3, sy - half - 3, dotSize + 6, dotSize + 6, 0xFFFFFFFF, true);
+			}
 			gd->DrawRectangle(uiCamera, sx - half - 1, sy - half - 1, dotSize + 2, dotSize + 2, kDotOutline, true);
 			gd->DrawRectangle(uiCamera, sx - half, sy - half, dotSize, dotSize, MarkerColor(m.kind, m.dimmed), true);
+			if (isSave && m.dimmed) {
+				// Hollow centre reads as "locked" even without the colour
+				const float inset = dotSize / 3.f;
+				gd->DrawRectangle(uiCamera, sx - half + inset, sy - half + inset, dotSize - inset * 2, dotSize - inset * 2, kDotOutline, true);
+			}
+			if (hits && isSave && !m.id.empty()) {
+				hits->saves.push_back({ m.id, { sx - half - 3, sy - half - 3, sx + half + 3, sy + half + 3 }, m.dimmed });
+			}
 		}
 	}
 }
@@ -226,7 +246,7 @@ void Demo::MapView::DrawMini(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera,
 }
 
 void Demo::MapView::DrawFull(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, int virtualWidth, int virtualHeight,
-	const std::vector<Marker>& markers, const std::wstring& closeKeyName)
+	const std::vector<Marker>& markers, const std::wstring& closeKeyName, const TravelUI* travel, TravelHits* hits)
 {
 	const float halfW = virtualWidth / 2.f, halfH = virtualHeight / 2.f;
 	gd->SetAlphaBlending(true);
@@ -238,7 +258,29 @@ void Demo::MapView::DrawFull(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera,
 	gd->DrawRectangle(uiCamera, area.x0 - 2, area.y0 - 2, area.x1 - area.x0 + 4, area.y1 - area.y0 + 4, kBorderColor, true);
 	gd->DrawRectangle(uiCamera, area.x0, area.y0, area.x1 - area.x0, area.y1 - area.y0, kPanelColor, true);
 
-	DrawText(uiCamera, Tr(L"Map"), area.x0, -halfH + 20.f, 0xFFFFFFFF);
+	if (travel) {
+		// World tabs replace the plain "Map" title
+		float tabX = area.x0;
+		const float tabY = -halfH + 14.f, tabH = 34.f;
+		for (size_t i = 0; i < travel->tabs.size(); ++i) {
+			fontSprite->Begin();
+			fontSprite->SetText(travel->tabs[i]);
+			const float textW = static_cast<float>(fontSprite->GetWidth());
+			const float textH = static_cast<float>(fontSprite->GetHeight());
+			fontSprite->End();
+			const float tabW = textW + 24.f;
+			const bool selected = static_cast<int>(i) == travel->selectedTab;
+			const bool hovered = !selected && static_cast<int>(i) == travel->hoverTab;
+			gd->DrawRectangle(uiCamera, tabX - 2, tabY - 2, tabW + 4, tabH + 4, selected || hovered ? kBorderColor : 0xFF55606E, true);
+			gd->DrawRectangle(uiCamera, tabX, tabY, tabW, tabH, selected ? 0xFF2F4A6B : hovered ? 0xFF24364D : kPanelColor, true);
+			DrawText(uiCamera, travel->tabs[i], tabX + 12.f, tabY + (tabH - textH) / 2.f, selected || hovered ? 0xFFFFFFFF : 0xFFAAB4C0);
+			if (hits) hits->tabs.push_back({ tabX, tabY, tabX + tabW, tabY + tabH });
+			tabX += tabW + 10.f;
+		}
+	}
+	else {
+		DrawText(uiCamera, Tr(L"Map"), area.x0, -halfH + 20.f, 0xFFFFFFFF);
+	}
 
 	if (built && visMaxX >= visMinX) {
 		const float spanW = static_cast<float>(visMaxX - visMinX + 1);
@@ -250,7 +292,7 @@ void Demo::MapView::DrawFull(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera,
 		const float screenOriginX = std::round((area.x0 + area.x1) / 2.f - (visMinX + spanW / 2.f) * scale);
 		const float screenOriginY = std::round((area.y0 + area.y1) / 2.f - (visMinY + spanH / 2.f) * scale);
 		DrawCells(gd, uiCamera, screenOriginX, screenOriginY, scale, area);
-		DrawMarkers(gd, uiCamera, screenOriginX, screenOriginY, scale, (std::max)(4.f, (std::min)(scale, 8.f)), area, markers);
+		DrawMarkers(gd, uiCamera, screenOriginX, screenOriginY, scale, (std::max)(4.f, (std::min)(scale, 8.f)), area, markers, travel, hits);
 	}
 	gd->SetAlphaBlending(false);
 
@@ -267,7 +309,19 @@ void Demo::MapView::DrawFull(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera,
 		gd->DrawRectangle(uiCamera, lx + 1, ly + 4, 8, 8, MarkerColor(kinds[i], false), true);
 		DrawText(uiCamera, Tr(MarkerLabel(kinds[i])), lx + 18.f, ly, 0xFFFFFFFF);
 	}
-	DrawText(uiCamera, closeKeyName + L" - " + Tr(L"Close"), area.x0, halfH - 32.f, 0xFFBBBBBB);
+	if (travel) {
+		// Locked save points get their own legend entry, in the free cell after the standard ones
+		const size_t i = std::size(kinds);
+		const float lx = area.x0 + colW * (i % kPerRow);
+		const float ly = legendY + 24.f * (i / kPerRow);
+		gd->DrawRectangle(uiCamera, lx, ly + 3, 10, 10, kDotOutline, true);
+		gd->DrawRectangle(uiCamera, lx + 1, ly + 4, 8, 8, MarkerColor(MarkerKind::Save, true), true);
+		gd->DrawRectangle(uiCamera, lx + 3, ly + 6, 4, 4, kDotOutline, true);
+		DrawText(uiCamera, Tr(L"Locked save point"), lx + 18.f, ly, 0xFFFFFFFF);
+	}
+	std::wstring hint = closeKeyName + L" - " + Tr(L"Close");
+	if (travel) hint += L"    " + Tr(L"Click or press Enter on a save point to travel");
+	DrawText(uiCamera, hint, area.x0, halfH - 32.f, 0xFFBBBBBB);
 }
 
 void Demo::MapView::Save(nlohmann::json& out) const

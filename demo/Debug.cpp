@@ -2,7 +2,7 @@
 #include "Debug.h"
 #include "MainFont.h"
 #include "MapEnemy.h"
-#include "FastTravel.h"
+#include "WorldSceneBase.h"
 #include "PlayerGlobalData.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
@@ -79,15 +79,19 @@ void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
 		player->AddGear(gearToGive);
 	}
 
-	ImGui::Text("Fast Travel");
-	for (const auto& dest : FastTravel::Destinations()) {
-		auto data = PlayerGlobalData::GetInstance();
-		if (data->IsFastTravelUnlocked(dest.sceneId)) {
-			ImGui::Text("  %s: unlocked", dest.sceneId.c_str());
+	ImGui::Text("Fast Travel (save points)");
+	if (ImGui::Button("Unlock All Save Points")) {
+		auto sceMan = game->GetSceneManager();
+		for (size_t i = 0; i < sceMan->GetSceneCount(); ++i) {
+			if (auto world = dynamic_cast<WorldSceneBase*>(sceMan->GetScene(i))) {
+				for (const auto& sp : world->GetSavePoints()) {
+					PlayerGlobalData::GetInstance()->UnlockSavePoint(sp->GetId());
+				}
+			}
 		}
-		else if (ImGui::Button(("Unlock " + dest.sceneId).c_str())) {
-			data->UnlockFastTravel(dest.sceneId);
-		}
+	}
+	if (ImGui::Button("Lock All Save Points")) {
+		PlayerGlobalData::GetInstance()->ClearUnlockedSavePoints();
 	}
 
 	ImGui::Text("Toggleables");

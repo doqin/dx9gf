@@ -2,6 +2,7 @@
 #include "SettingsManager.h"
 #include "SavePoint.h"
 #include "PopupManager.h"
+#include "PlayerGlobalData.h"
 #include "LocalizationManager.h"
 #include <cmath>
 
@@ -45,23 +46,43 @@ namespace Demo {
 
         auto inpMan = DX9GF::InputManager::GetInstance();
         if (isPlayerNear && inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
+            // Interacting unlocks the point as a fast travel destination. The unlock is part of
+            // the save, so it only survives a reload once the player saves.
+            const bool newlyUnlocked = !id.empty() && PlayerGlobalData::GetInstance()->UnlockSavePoint(id);
+            if (newlyUnlocked) {
+                DX9GF::AudioManager::GetInstance()->Play("checkpoint", false, 0.7f);
+            }
+
             std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-                { Tr(L"Yes(Y)"), [this]() {
+                { Tr(L"Save"), [this]() {
                     if (auto smLock = this->saveManager.lock()) {
                         smLock->Save("savegame.json");
                         OutputDebugStringA("Successfully saved!\n");
                         DX9GF::AudioManager::GetInstance()->Play("checkpoint", false, 0.7f);
                     }
                 }},
-                { Tr(L"No(N)"), nullptr }
+                { Tr(L"Open Map"), [this]() {
+                    if (onOpenMap) onOpenMap();
+                }},
+                { Tr(L"Cancel"), nullptr }
             };
 
-            PopupManager::GetInstance()->Show("basic_blackwhite", Tr(L"SAVE GAME"), Tr(L"Do you want to save the game?"), buttons);
+            const std::wstring message = newlyUnlocked
+                ? Tr(L"Fast travel unlocked! Save the game or open the map?")
+                : Tr(L"Save the game or open the map?");
+            PopupManager::GetInstance()->Show("basic_blackwhite", Tr(L"SAVE POINT"), message, buttons);
         }
+    }
+
+    bool SavePoint::IsUnlocked() const {
+        return !id.empty() && PlayerGlobalData::GetInstance()->IsSavePointUnlocked(id);
     }
 
     void SavePoint::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime) {
         if (!isVisible) return;
+        indicatorTime += static_cast<float>(deltaTime);
+        // A save point that hasn't been used yet looks dormant
+        sprite->SetColor(IsUnlocked() ? 0xFFFFFFFF : 0xFF6E7380);
         sprite->Begin();
         sprite->Draw(camera, deltaTime);
         sprite->End();
@@ -71,11 +92,41 @@ namespace Demo {
     void SavePoint::DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime) {
         if (!isVisible || !uiCamera || !worldCamera) return;
 
+        auto [worldX, worldY] = GetWorldPosition();
+        float zoom = worldCamera->GetZoom();
+        float uiX = (worldX - worldCamera->GetPosition().x) * zoom;
+        float uiY = (worldY - worldCamera->GetPosition().y) * zoom;
+
+        // The UI camera can draw into the letterbox bars, so skip anything that isn't fully on screen
+        const float cx = std::round(uiX);
+        const float cy = std::round(uiY - 24.f * zoom);
+        const float u = zoom;  // one world pixel on screen
+        const float reach = 8.f * u;
+        if (screenW > 0.f && (cx - reach < -screenW / 2.f || cx + reach > screenW / 2.f
+            || cy - reach < -screenH / 2.f || cy + reach > screenH / 2.f)) return;
+
+        // Fast travel indicator: a padlock while locked, a pulsing green gem once unlocked
+        {
+            gd->SetAlphaBlending(true);
+            if (IsUnlocked()) {
+                const float pulse = 0.5f + 0.5f * std::sin(indicatorTime / 300.f);
+                const BYTE glow = static_cast<BYTE>(60 + 80 * pulse);
+                gd->DrawRectangle(*uiCamera, cx - 6 * u, cy - 6 * u, 12 * u, 12 * u, D3DCOLOR_ARGB(glow, 102, 224, 122), true);
+                gd->DrawRectangle(*uiCamera, cx - 4 * u, cy - 4 * u, 8 * u, 8 * u, 0xFF000000, true);
+                gd->DrawRectangle(*uiCamera, cx - 3 * u, cy - 3 * u, 6 * u, 6 * u, 0xFF66E07A, true);
+            }
+            else {
+                // shackle, then body
+                gd->DrawRectangle(*uiCamera, cx - 4 * u, cy - 7 * u, 8 * u, 7 * u, 0xFF000000, true);
+                gd->DrawRectangle(*uiCamera, cx - 3 * u, cy - 6 * u, 6 * u, 6 * u, 0xFF8A8F99, true);
+                gd->DrawRectangle(*uiCamera, cx - 2 * u, cy - 5 * u, 4 * u, 5 * u, 0xFF000000, true);
+                gd->DrawRectangle(*uiCamera, cx - 5 * u, cy - 2 * u, 10 * u, 8 * u, 0xFF000000, true);
+                gd->DrawRectangle(*uiCamera, cx - 4 * u, cy - 1 * u, 8 * u, 6 * u, 0xFF8A8F99, true);
+            }
+            gd->SetAlphaBlending(false);
+        }
+
         if (isPlayerNear && !PopupManager::GetInstance()->IsActive()) {
-            auto [worldX, worldY] = GetWorldPosition();
-            float zoom = worldCamera->GetZoom();
-            float uiX = (worldX - worldCamera->GetPosition().x) * zoom;
-            float uiY = (worldY - worldCamera->GetPosition().y) * zoom;
 
             float scale = 1.0f * zoom;
             fontSprite->Begin();
@@ -85,7 +136,7 @@ namespace Demo {
 
             fontSprite->SetScale(scale);
             fontSprite->SetColor(0xFFFFFFFF);
-            fontSprite->SetPosition(uiX - textW / 2.f, uiY - 30.f * zoom - textH / 2.f);
+            fontSprite->SetPosition(uiX - textW / 2.f, uiY - 44.f * zoom - textH / 2.f);
             fontSprite->SetOutline(true, 0xFF000000);
             fontSprite->Draw(*uiCamera, deltaTime);
             fontSprite->End();

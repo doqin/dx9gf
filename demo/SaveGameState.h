@@ -21,6 +21,16 @@ namespace Demo {
         static bool HasSaveFile();
         std::shared_ptr<Player> GetPlayerFromScene(DX9GF::IScene* scene) const;
         int GetSceneIndex(const std::string& saveId) const;
+
+        // Per-world presentation data, shared by loading a save and fast travelling.
+        struct SceneInfo {
+            const wchar_t* displayName;
+            const char* bgm;
+            float bgmVolume;
+            float bgmFadeSeconds;
+        };
+        // Returns nullptr for scenes that have no info (intro, lab interior).
+        static const SceneInfo* GetSceneInfo(const std::string& saveId);
         SaveGameState(Game* game, std::shared_ptr<DX9GF::SaveManager> saveManager);
         std::string GetSaveID() const override;
         void GenerateSaveData(nlohmann::json& outData) override;

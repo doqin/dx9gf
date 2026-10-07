@@ -77,7 +77,6 @@ namespace Demo {
 		size_t initialEnemyCount = 0;
 		int battleGoldReward = 0;
 		std::vector<std::string> battleCardDrops;
-		std::vector<std::type_index> defeatedEnemyTypes;
 		bool isBattleEnding = false;
 		bool isDefeatSequence = false;
 		float defeatElapsedMs = 0.f;

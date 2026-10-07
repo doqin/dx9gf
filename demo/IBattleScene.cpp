@@ -23,7 +23,6 @@
 #include "IStatementCard.h"
 #include "IBlockCard.h"
 #include "CardFrame.h"
-#include "FastTravel.h"
 #include "PopupManager.h"
 #include "Debug.h"
 #include "imgui.h"
@@ -109,7 +108,6 @@ void Demo::IBattleScene::StartBattle()
 	initialEnemyCount = enemies.size();
 	battleGoldReward = 0;
 	battleCardDrops.clear();
-	defeatedEnemyTypes.clear();
 	isBattleEnding = false;
 	isDefeatSequence = false;
 	defeatElapsedMs = 0.f;
@@ -220,7 +218,6 @@ void Demo::IBattleScene::CollectDeadEnemies()
 			battleGoldReward += enemies[i]->GetGoldReward();
 			const auto cardDrops = enemies[i]->RollCardDrops();
 			battleCardDrops.insert(battleCardDrops.end(), cardDrops.begin(), cardDrops.end());
-			defeatedEnemyTypes.emplace_back(typeid(*enemies[i]));
 			enemies.erase(enemies.begin() + i);
 			--i;
 		}
@@ -268,12 +265,6 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 		}
 		const std::wstring label = battleCardDrops.size() > 1 ? Tr(L"New cards: ") : Tr(L"New card: ");
 		popUpMessage->QueueMessage(&commandBuffer, label + cardList + L"!", CARD_DROP_MESSAGE_SECONDS);
-	}
-
-	for (const auto& type : defeatedEnemyTypes) {
-		if (const auto* dest = FastTravel::UnlockByBoss(type)) {
-			popUpMessage->ShowMessage(Tr(L"Fast travel unlocked: ") + Tr(dest->name), 4.f);
-		}
 	}
 
 	if (onVictoryCallback != nullptr) {
