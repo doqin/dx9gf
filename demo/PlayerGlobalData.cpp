@@ -57,6 +57,7 @@ void Demo::PlayerGlobalData::Reset() {
 	inventoryItems = ItemInventory();
 	inventoryItems.InitFixedInventory(13);
 	inventoryGears.clear();
+	pendingGearPopups.clear();
 	equippedActiveGearID = -1;
 	equippedPassiveGearID = -1;
 	showGearOnMap = true;

@@ -8,6 +8,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <map>
+#include <set>
 #include <vector>
 
 namespace Demo {
@@ -44,6 +45,9 @@ namespace Demo {
 
 		std::map<std::string, QuestState> questStates;
 		std::string currentTrackedQuest;
+		// Completion events that fired before their quest was accepted ("event|target" keys).
+		// Replayed by ResolveDeferredEvents once the quest becomes active.
+		std::set<std::string> earlyEvents;
 
 		std::map<std::string, QuestInfo> questDatabase;
 
@@ -66,6 +70,7 @@ namespace Demo {
 		void Reset() {
 			questStates.clear();
 			currentTrackedQuest = "";
+			earlyEvents.clear();
 			questText = Tr(L"Quest: ???");
 			isExpanded = true;
 			animProgress = 1.0f;
@@ -99,6 +104,9 @@ namespace Demo {
 
 		void AcceptQuest(const std::string& questId);
 		QuestEventResult NotifyEvent(const std::string& eventType, const std::string& targetId, Player* player);
+		// Completes quests whose goal was already achieved before they were accepted (e.g. the
+		// boss was beaten first). Call every frame from the world scene; returns the reward, if any.
+		QuestEventResult ResolveDeferredEvents(Player* player);
 
 		void GenerateSaveData(nlohmann::json& outData);
 		void RestoreSaveData(const nlohmann::json& inData);

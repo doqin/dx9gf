@@ -41,6 +41,7 @@ namespace Demo {
 		std::vector<std::shared_ptr<ShopPoint>> shopPoints;
 		std::vector<std::shared_ptr<HealingPoint>> healingPoints;
 		std::shared_ptr<DX9GF::Font> font;
+		std::shared_ptr<DX9GF::Texture> gearTex;
 		std::shared_ptr<Player> player;
 		std::shared_ptr<DX9GF::Map> map;
 		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;

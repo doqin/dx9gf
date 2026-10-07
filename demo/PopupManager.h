@@ -56,6 +56,11 @@ namespace Demo {
         std::vector<RECT> btnRectsMed;
         std::vector<RECT> btnRectsLarge;
 
+        // Optional animated icon drawn between the title and the message (e.g. an obtained gear).
+        std::shared_ptr<DX9GF::Texture> iconTexture; // keeps the texture iconSprite points at alive
+        std::shared_ptr<DX9GF::AnimatedSprite> iconSprite;
+        float iconSize = 0.0f;
+
         float popupWidth = 400.0f;
         float popupHeight = 200.0f;
         float popupX = 0.0f;
@@ -82,6 +87,12 @@ namespace Demo {
 
         void Show(const std::string& styleName, const std::wstring& title, const std::wstring& message,
             const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons);
+
+        // Same as Show, with an animated icon (frames cut from iconTex) shown under the title,
+        // scaled so its first frame is iconSize pixels tall.
+        void ShowWithIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
+            const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
+            std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize = 96.0f);
 
         void Close();
         bool IsActive() const { return isActive; }
