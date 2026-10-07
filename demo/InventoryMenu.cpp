@@ -42,6 +42,9 @@ namespace {
 	}
 
 	constexpr D3DCOLOR ITEM_UNUSABLE_TINT = 0xFF707070;
+	constexpr D3DCOLOR ITEM_HOVER_TINT = D3DCOLOR_ARGB(60, 255, 255, 255);
+	constexpr D3DCOLOR ITEM_PRESS_TINT = D3DCOLOR_ARGB(110, 255, 220, 120);
+	constexpr D3DCOLOR ITEM_OUTLINE_COLOR = 0xFFFFD700;
 	constexpr D3DCOLOR ITEM_STATUS_ERROR = 0xFFFF8080;
 	constexpr D3DCOLOR ITEM_STATUS_OK = 0xFF80FF80;
 	constexpr float ITEM_STATUS_SECONDS = 2.0f;
@@ -716,6 +719,22 @@ namespace Demo {
 				if (displayIndex >= buffItems.size()) break;
 				auto btn = buffItems[displayIndex];
 				btn->Draw(gd, deltaTime);
+
+				if (IsHealOnlyItem(*blueprint)) {
+					const bool pressed = btn->GetState() == IButton::ButtonState::CLICKED;
+					const bool hovered = pressed || btn->GetState() == IButton::ButtonState::HOVER
+						|| (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == btn);
+					if (hovered) {
+						const float bx = btn->GetWorldX();
+						const float by = btn->GetWorldY();
+						gd->SetAlphaBlending(true);
+						gd->DrawRectangle(*uiCamera, bx, by, ITEM_W, ITEM_H,
+							pressed ? ITEM_PRESS_TINT : ITEM_HOVER_TINT, true);
+						gd->SetAlphaBlending(false);
+						gd->DrawRectangle(*uiCamera, bx, by, ITEM_W, ITEM_H, ITEM_OUTLINE_COLOR, false);
+						gd->DrawRectangle(*uiCamera, bx - 1.0f, by - 1.0f, ITEM_W + 2.0f, ITEM_H + 2.0f, ITEM_OUTLINE_COLOR, false);
+					}
+				}
 
 				float textX = btn->GetWorldX() + (ITEM_W / 2.0f) - 10.0f;
 				float textY = btn->GetWorldY() + ITEM_H + 5.0f;
