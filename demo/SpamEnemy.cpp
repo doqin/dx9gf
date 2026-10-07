@@ -23,6 +23,7 @@ void Demo::SpamEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera*
 	projTexture->LoadTexture(L"assets/spamprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
+	SetCardDropPool({ "HeavyStrikeCard", "LethalHarvestCard", "ArmorPiercerCard" }, 1, 3);
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 

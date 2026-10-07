@@ -17,6 +17,7 @@ void Demo::TrojanEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camer
 	projFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
+	SetCardDropPool({ "StaticChargeCard", "WeaknessCard", "BarrageCard" }, 1, 3);
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 

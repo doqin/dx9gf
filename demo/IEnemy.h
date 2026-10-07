@@ -13,6 +13,9 @@ namespace Demo {
 	class IEnemy : public ICombatant {
 	protected:
 		int goldReward = 0;
+		std::vector<std::string> cardDropPool;
+		int cardDropMin = 1;
+		int cardDropMax = 1;
 		struct DamageIndicator {
 			std::wstring text;
 			float offsetX = 0.f;
@@ -45,6 +48,11 @@ namespace Demo {
 		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
 		unsigned long long timeSinceStart = 0;
 		void SetGoldReward(int reward) { goldReward = reward; }
+		void SetCardDropPool(std::vector<std::string> pool, int minCount = 1, int maxCount = 1) {
+			cardDropPool = std::move(pool);
+			cardDropMin = minCount;
+			cardDropMax = maxCount;
+		}
 		int lastPattern = -1;
 		int streakCount = 0;
 		int GetSmartRandomPattern(const int&& minPattern, const int&& maxPattern);
@@ -80,6 +88,7 @@ namespace Demo {
 		bool IsOnStandby() const { return isOnStandby; }
 		bool IsDoneAttacking();
 		int GetGoldReward() const { return goldReward; }
+		std::vector<std::string> RollCardDrops() const;
 		// On-screen size of the sprite, used by the battle scene to pack enemies without
 		// overlapping them. Subclasses that draw larger art override these; the default matches
 		// the common 64px frame at the 2x scale every enemy sets in Init.
