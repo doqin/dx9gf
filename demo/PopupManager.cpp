@@ -62,6 +62,9 @@ namespace Demo {
         this->currentTitle = title;
         this->currentMessage = message;
         this->isActive = true;
+        this->iconSprite = nullptr;
+        this->iconTexture = nullptr;
+        this->iconSize = 0.0f;
         this->activeButtons.clear();
         this->internalTm = std::make_shared<DX9GF::TransformManager>();
 
@@ -136,6 +139,27 @@ namespace Demo {
 
         LayoutButtons();
         keyboardNavigator.Reset();
+    }
+
+    void PopupManager::ShowWithIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
+        const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
+        std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize)
+    {
+        Show(styleName, title, message, buttons);
+        if (!isActive || !iconTex || iconFrames.empty()) return;
+
+        this->iconTexture = iconTex;
+        this->iconSprite = std::make_shared<DX9GF::AnimatedSprite>(iconTex.get(), iconFrames);
+        this->iconSprite->SetFrameRate(12);
+        this->iconSize = iconSize;
+        float frameH = static_cast<float>(iconFrames[0].bottom - iconFrames[0].top);
+        float s = frameH > 0.0f ? iconSize / frameH : 1.0f;
+        this->iconSprite->SetScale(s, s);
+
+        // Make room for the icon (plus its spacing) and let the buttons follow the new bottom edge.
+        popupHeight += iconSize + 20.0f;
+        backgroundSprite->SetTargetSize(popupWidth, popupHeight);
+        LayoutButtons();
     }
 
     std::vector<KeyboardNavigator::Candidate> PopupManager::CollectKeyboardCandidates() {
@@ -252,9 +276,18 @@ namespace Demo {
         fontSprite->SetColor(style.msgColor);
 
         float msgW = fontSprite->GetWidth();
-        fontSprite->SetPosition(popupX + (popupWidth - msgW) / 2.0f, popupY + 25.0f + titleH + 20.0f);
+        float iconBlock = iconSprite ? iconSize + 20.0f : 0.0f;
+        fontSprite->SetPosition(popupX + (popupWidth - msgW) / 2.0f, popupY + 25.0f + titleH + 20.0f + iconBlock);
         fontSprite->Draw(*uiCamera, deltaTime);
         fontSprite->End();
+
+        if (iconSprite) {
+            gd->SetAlphaBlending(true);
+            iconSprite->Begin();
+            iconSprite->SetPosition(popupX + (popupWidth - iconSize) / 2.0f, popupY + 25.0f + titleH + 20.0f);
+            iconSprite->Draw(*uiCamera, deltaTime);
+            iconSprite->End();
+        }
 
         gd->SetAlphaBlending(true);
         for (auto& btn : activeButtons) {

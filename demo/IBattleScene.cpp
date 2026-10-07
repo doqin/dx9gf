@@ -23,6 +23,10 @@
 #include "IStatementCard.h"
 #include "IBlockCard.h"
 #include "PopupManager.h"
+#include "Debug.h"
+#include "imgui.h"
+#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_win32.h"
 #include "SaveGameState.h"
 #include "MainMenu.h"
 
@@ -3843,6 +3847,12 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
 
+	CreateImGuiBattleDebugFrame([this]() {
+		for (auto& enemy : enemies) {
+			if (enemy && !enemy->IsDead()) enemy->TakeDamage(999999.f, true);
+		}
+	});
+
 	if (SUCCEEDED(gd->BeginDraw())) {
 		auto screenW = (float)game->GetVirtualWidth();
 		auto screenH = (float)game->GetVirtualHeight();
@@ -4029,6 +4039,8 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 		if (!keyboardNavigator.IsInKeyboardMode()) {
 			DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		}
+		ImGui::Render();
+		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 		gd->EndDraw();
 	}
 }

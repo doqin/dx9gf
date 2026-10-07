@@ -247,7 +247,34 @@ void Demo::QuestManager::AcceptQuest(const std::string& questId) {
 	DX9GF::AudioManager::GetInstance()->Play("quest_active", false, 0.05f);
 }
 
+namespace {
+	struct DeferrableEvent { const char* eventType; const char* targetId; const char* questId; };
+	// Kill/clear events that complete a quest. If one fires before the quest is accepted it is remembered.
+	const DeferrableEvent kDeferrableEvents[] = {
+		{ "ENTITY_DEAD", "SecretBoss_Pacman", "SecretBoss_Pacman" },
+		{ "FIRST_ENCOUNTER_DEFEATED", "", "Quest_Tutorial" },
+		{ "TROJAN_DEFEATED", "", "Quest_ThreadAlley_Start" },
+		{ "KAKOS_LAB_CLEARED", "Quest_KakosLab", "Quest_KakosLab" },
+	};
+}
+
+Demo::QuestEventResult Demo::QuestManager::ResolveDeferredEvents(Player* player) {
+	for (const auto& ev : kDeferrableEvents) {
+		std::string key = std::string(ev.eventType) + "|" + ev.targetId;
+		if (earlyEvents.count(key) && GetQuestState(ev.questId) == QuestState::Active) {
+			earlyEvents.erase(key);
+			return NotifyEvent(ev.eventType, ev.targetId, player);
+		}
+	}
+	return { false, L"" };
+}
+
 Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventType, const std::string& targetId, Player* player) {
+	for (const auto& ev : kDeferrableEvents) {
+		if (eventType == ev.eventType && targetId == ev.targetId && GetQuestState(ev.questId) == QuestState::Locked) {
+			earlyEvents.insert(eventType + "|" + targetId);
+		}
+	}
 
 	if (eventType == "ENTITY_DEAD" && targetId == "SecretBoss_Pacman") {
 		if (questStates["SecretBoss_Pacman"] == QuestState::Active) {
@@ -374,6 +401,7 @@ void Demo::QuestManager::GenerateSaveData(nlohmann::json& outData) {
 		questsJson[pair.first] = static_cast<int>(pair.second);
 	}
 	outData["questStates"] = questsJson;
+	outData["earlyQuestEvents"] = earlyEvents;
 	outData["trackedQuest"] = currentTrackedQuest;
 }
 
@@ -382,6 +410,10 @@ void Demo::QuestManager::RestoreSaveData(const nlohmann::json& inData) {
 		for (auto& item : inData["questStates"].items()) {
 			questStates[item.key()] = static_cast<QuestState>(item.value().get<int>());
 		}
+	}
+	earlyEvents.clear();
+	if (inData.contains("earlyQuestEvents")) {
+		earlyEvents = inData["earlyQuestEvents"].get<std::set<std::string>>();
 	}
 	if (inData.contains("trackedQuest")) {
 		currentTrackedQuest = inData["trackedQuest"].get<std::string>();
