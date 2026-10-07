@@ -67,6 +67,11 @@ namespace Demo {
 		float angularVelocity = 0.f;
 		// Boomerang
 		float returnAcceleration = 0.f;
+		// Acceleration along the heading (units/s^2) for Straight, Homing and SineWave shots.
+		// Speed stops changing at velocityLimit; a decelerating shot with no limit stops at 0
+		// instead of reversing (that is what Boomerang is for).
+		float acceleration = 0.f;
+		float velocityLimit = UNSPECIFIED;
 		// Airburst: the projectile bursts into a ring of children that inherit its
 		// sprite, collider and status effect, then travel straight outward.
 		ProjectileSplitTrigger splitTrigger = ProjectileSplitTrigger::None;
@@ -143,6 +148,7 @@ namespace Demo {
 		ProjectileDesc& SetSpiralParams(float initialAngle, float radialSpeed, float angularVelocity);
 		ProjectileDesc& SetInitialVelocity(float velocity);
 		ProjectileDesc& SetReturnAcceleration(float acceleration);
+		ProjectileDesc& SetAcceleration(float acceleration, float velocityLimit = UNSPECIFIED);
 		// Aims the projectile at (targetX, targetY) and arms it to burst there.
 		ProjectileDesc& SetSplitOnArrival(float targetX, float targetY, int count, float velocity);
 		// Bursts wherever the projectile happens to be when its decay timer expires.
@@ -243,6 +249,8 @@ namespace Demo {
 			float radius, angle;     // spiral state
 			float radialSpeed, angularVelocity;
 			float returnAcceleration;
+			float acceleration;
+			float velocityLimit = UNSPECIFIED;
 		};
 		struct LifetimeComponent {
 			float delay, elapsed, decayTime;

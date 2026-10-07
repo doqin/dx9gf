@@ -326,6 +326,13 @@ Demo::ProjectileDesc& Demo::ProjectileDesc::SetReturnAcceleration(float accelera
 	return *this;
 }
 
+Demo::ProjectileDesc& Demo::ProjectileDesc::SetAcceleration(float acceleration, float velocityLimit)
+{
+	this->acceleration = acceleration;
+	this->velocityLimit = velocityLimit;
+	return *this;
+}
+
 Demo::ProjectileDesc& Demo::ProjectileDesc::SetSplitOnArrival(float targetX, float targetY, int count, float velocity)
 {
 	SetTargetPosition(targetX, targetY);
@@ -581,6 +588,8 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 	motion.radialSpeed = desc.radialSpeed;
 	motion.angularVelocity = desc.angularVelocity;
 	motion.returnAcceleration = desc.returnAcceleration;
+	motion.acceleration = desc.acceleration;
+	motion.velocityLimit = desc.velocityLimit;
 	motions.push_back(motion);
 
 	lifetimes.push_back({ desc.delay, 0.f, desc.decayTime });
@@ -908,6 +917,22 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 					if (life.delay > 0.f && launchSfxCooldown <= 0.f) {
 						DX9GF::AudioManager::GetInstance()->Play("projectile_launch", false, 0.4f);
 						launchSfxCooldown = 0.05f;
+					}
+				}
+				// Spiral moves on radialSpeed and Boomerang on its own return pull, so only the
+				// behaviours that travel on `velocity` pick up the generic acceleration.
+				if (motion.acceleration != 0.f &&
+					motion.behavior != ProjectileBehavior::Spiral &&
+					motion.behavior != ProjectileBehavior::Boomerang) {
+					motion.velocity += motion.acceleration * dtSec;
+					if (motion.acceleration > 0.f) {
+						if (motion.velocityLimit != UNSPECIFIED) {
+							motion.velocity = (std::min)(motion.velocity, motion.velocityLimit);
+						}
+					}
+					else {
+						const float floor = motion.velocityLimit != UNSPECIFIED ? motion.velocityLimit : 0.f;
+						motion.velocity = (std::max)(motion.velocity, floor);
 					}
 				}
 				switch (motion.behavior) {
