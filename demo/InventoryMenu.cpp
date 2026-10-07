@@ -25,6 +25,13 @@ namespace {
 
 	constexpr float PADDING_X = 20.0f;
 	constexpr float PADDING_Y = 30.0f;
+
+	
+	constexpr float ORBIT_RADIUS = 90.0f;
+	constexpr float INNER_ORBIT_RADIUS = 35.0f;
+
+	constexpr float ORBIT_START_ANGLE = -D3DX_PI / 2.0f;
+	constexpr D3DCOLOR ORBIT_RING_COLOR = D3DCOLOR_ARGB(90, 100, 100, 120);
 }
 namespace Demo {
 
@@ -578,26 +585,22 @@ namespace Demo {
 			float gearContainerH = sh * 0.55f;
 			float centerX = rightContainerX + containerW / 2.0f;
 			float centerY = containerY + gearContainerH * 0.4f;
-			float radius = 90.0f;
 			float slotSize = 16.0f * 3.0f;
 
-			float innerAngle = -orbitAngle * 1.5f;
-			float innerRadius = 35.0f;
-
-			activeSlot->SetLocalPosition(std::round(centerX + innerRadius * std::cos(innerAngle) - slotSize / 2.0f),
-				std::round(centerY + innerRadius * std::sin(innerAngle) - slotSize / 2.0f));
+			// Active on the right of the core, passive on the left - the same sides their sprites
+			// float on beside the player in the Core Process panel.
+			activeSlot->SetLocalPosition(std::round(centerX + INNER_ORBIT_RADIUS - slotSize / 2.0f),
+				std::round(centerY - slotSize / 2.0f));
 			activeSlot->Update(deltaTime);
 
-			passiveSlot->SetLocalPosition(std::round(centerX + innerRadius * std::cos(innerAngle + D3DX_PI) - slotSize / 2.0f),
-				std::round(centerY + innerRadius * std::sin(innerAngle + D3DX_PI) - slotSize / 2.0f));
+			passiveSlot->SetLocalPosition(std::round(centerX - INNER_ORBIT_RADIUS - slotSize / 2.0f),
+				std::round(centerY - slotSize / 2.0f));
 			passiveSlot->Update(deltaTime);
 
-			orbitAngle += 0.5f * (deltaTime / 1000.0f);
-
 			for (int i = 0; i < 8; i++) {
-				float angle = orbitAngle + i * (D3DX_PI / 4.0f);
-				float x = std::round(centerX + radius * std::cos(angle) - slotSize / 2.0f);
-				float y = std::round(centerY + radius * std::sin(angle) - slotSize / 2.0f);
+				float angle = ORBIT_START_ANGLE + i * (D3DX_PI / 4.0f);
+				float x = std::round(centerX + ORBIT_RADIUS * std::cos(angle) - slotSize / 2.0f);
+				float y = std::round(centerY + ORBIT_RADIUS * std::sin(angle) - slotSize / 2.0f);
 
 				orbitSlots[i]->SetLocalPosition(x, y);
 				orbitSlots[i]->Update(deltaTime);
@@ -882,6 +885,12 @@ namespace Demo {
 			fontSprite->SetPosition(centerLeft - fontSprite->GetWidth() / 2.0f, playerBaseY + 90.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
 			fontSprite->End();
+
+			const float orbitCenterY = containerY + gearContainerH * 0.4f;
+			gd->SetAlphaBlending(true);
+			gd->DrawEllipse(*uiCamera, centerRight, orbitCenterY, ORBIT_RADIUS * 2.0f, ORBIT_RADIUS * 2.0f, ORBIT_RING_COLOR, false);
+			gd->DrawEllipse(*uiCamera, centerRight, orbitCenterY, INNER_ORBIT_RADIUS * 2.0f, INNER_ORBIT_RADIUS * 2.0f, ORBIT_RING_COLOR, false);
+			gd->SetAlphaBlending(false);
 
 			activeSlot->Draw(gd, uiCamera, deltaTime);
 			passiveSlot->Draw(gd, uiCamera, deltaTime);

@@ -76,7 +76,6 @@ namespace Demo {
 		std::shared_ptr<DX9GF::AnimatedSprite> activeGearAnim;
 		std::shared_ptr<DX9GF::AnimatedSprite> passiveGearAnim;
 		std::vector<std::shared_ptr<GearSlotUI>> orbitSlots;
-		float orbitAngle = 0.0f;
 
 		// Tab Quests
 		std::vector<QuestButtonData> questButtons;
