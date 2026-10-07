@@ -62,6 +62,11 @@ namespace Demo {
 		std::vector<std::shared_ptr<IconButton>> buffItems;
 		bool isItemsDirty = true;
 		std::wstring hoverDescription = L"";
+		std::wstring itemStatusText;
+		D3DCOLOR itemStatusColor = 0xFFFFFFFF;
+		float itemStatusTimer = 0.0f;
+		void ShowItemStatus(const std::wstring& text, D3DCOLOR color);
+		void UseItemOutsideCombat(int itemID, const ConsumableItem& item);
 
 		// Tab Gear
 		std::shared_ptr<DX9GF::Texture> uiPlayerTex;

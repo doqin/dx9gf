@@ -32,6 +32,19 @@ namespace {
 
 	constexpr float ORBIT_START_ANGLE = -D3DX_PI / 2.0f;
 	constexpr D3DCOLOR ORBIT_RING_COLOR = D3DCOLOR_ARGB(90, 100, 100, 120);
+
+	bool IsHealOnlyItem(const Demo::ConsumableItem& item)
+	{
+		const auto& mods = item.GetModifiers();
+		if (mods.empty()) return false;
+		return std::all_of(mods.begin(), mods.end(),
+			[](const Demo::CombatModifier& mod) { return mod.type == Demo::ModifierType::HealHP; });
+	}
+
+	constexpr D3DCOLOR ITEM_UNUSABLE_TINT = 0xFF707070;
+	constexpr D3DCOLOR ITEM_STATUS_ERROR = 0xFFFF8080;
+	constexpr D3DCOLOR ITEM_STATUS_OK = 0xFF80FF80;
+	constexpr float ITEM_STATUS_SECONDS = 2.0f;
 }
 namespace Demo {
 
@@ -559,6 +572,7 @@ namespace Demo {
 		else if (currentTab == Tab::ITEMS) {
 			btnTabItems->SetState(Demo::IButton::ButtonState::CLICKED);
 			if (isItemsDirty) RefreshItemsUI();
+			if (itemStatusTimer > 0.0f) itemStatusTimer -= deltaTime / 1000.0f;
 
 			for (auto& btn : buffItems) {
 				btn->Update(deltaTime);
@@ -738,6 +752,18 @@ namespace Demo {
 				fontSprite->SetText(hoverDescription);
 				fontSprite->Draw(*uiCamera, deltaTime);
 
+				fontSprite->End();
+				fontSprite->SetOutline(false);
+			}
+
+			if (itemStatusTimer > 0.0f && !itemStatusText.empty()) {
+				fontSprite->Begin();
+				fontSprite->SetOutline(true, 0xFF000000, 3.f);
+				fontSprite->SetScale(1.1f, 1.1f);
+				fontSprite->SetColor(itemStatusColor);
+				fontSprite->SetPosition(leftEdge + 50.0f, sh / 2.0f - 200.0f);
+				fontSprite->SetText(itemStatusText);
+				fontSprite->Draw(*uiCamera, deltaTime);
 				fontSprite->End();
 				fontSprite->SetOutline(false);
 			}
@@ -1179,8 +1205,12 @@ namespace Demo {
 			btn->Update(0);
 
 			btn->SetSpriteRects({ blueprint->GetItemRect() });
-			btn->SetOnReleaseLeft([&, slot, blueprint](DX9GF::ITrigger* thisObj) {
-				//Nothing happens
+			if (!IsHealOnlyItem(*blueprint)) {
+				btn->SetSpriteColor(ITEM_UNUSABLE_TINT);
+			}
+			const int itemID = slot.itemID;
+			btn->SetOnReleaseLeft([this, itemID, blueprint](DX9GF::ITrigger* thisObj) {
+				UseItemOutsideCombat(itemID, *blueprint);
 				});
 
 			buffItems.push_back(btn);
@@ -1192,6 +1222,37 @@ namespace Demo {
 			transformManager->UpdateAll();
 		}
 		isItemsDirty = false;
+	}
+
+	void InventoryMenu::ShowItemStatus(const std::wstring& text, D3DCOLOR color)
+	{
+		itemStatusText = text;
+		itemStatusColor = color;
+		itemStatusTimer = ITEM_STATUS_SECONDS;
+	}
+
+	void InventoryMenu::UseItemOutsideCombat(int itemID, const ConsumableItem& item)
+	{
+		if (!player) return;
+		auto audio = DX9GF::AudioManager::GetInstance();
+
+		if (!IsHealOnlyItem(item)) {
+			audio->PlayRandom("error", 0.4f);
+			ShowItemStatus(Tr(L"Only usable in battle!"), ITEM_STATUS_ERROR);
+			return;
+		}
+		if (player->GetHealth() >= player->GetMaxHealth()) {
+			audio->PlayRandom("error", 0.4f);
+			ShowItemStatus(Tr(L"HP is already full!"), ITEM_STATUS_ERROR);
+			return;
+		}
+		if (!player->GetInventoryItems().ConsumeItem(itemID)) return;
+
+		float heal = 0.f;
+		for (const auto& mod : item.GetModifiers()) heal += mod.value;
+		player->Heal(static_cast<int>(std::round(heal)));
+		ShowItemStatus(Tr(L"Used ") + item.GetName() + Tr(L"!"), ITEM_STATUS_OK);
+		isItemsDirty = true;
 	}
 
 	void InventoryMenu::RefreshQuestUI() {
