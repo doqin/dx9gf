@@ -476,3 +476,15 @@ void Demo::IEnemy::CastAbility(std::function<void()> effect, std::shared_ptr<Pop
 	}));
 	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
 }
+
+std::vector<std::string> Demo::IEnemy::RollCardDrops() const
+{
+	std::vector<std::string> drops;
+	if (cardDropPool.empty() || cardDropMax <= 0) return drops;
+
+	const int count = RNG::Range(cardDropMin, cardDropMax);
+	for (int i = 0; i < count; ++i) {
+		drops.push_back(cardDropPool[RNG::Range(0, static_cast<int>(cardDropPool.size()) - 1)]);
+	}
+	return drops;
+}

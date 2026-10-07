@@ -22,6 +22,7 @@
 #include "PlayerGlobalData.h"
 #include "IStatementCard.h"
 #include "IBlockCard.h"
+#include "CardFrame.h"
 #include "PopupManager.h"
 #include "SaveGameState.h"
 #include "MainMenu.h"
@@ -102,6 +103,7 @@ void Demo::IBattleScene::StartBattle()
 	isFlawlessCompleted = false;
 	initialEnemyCount = enemies.size();
 	battleGoldReward = 0;
+	battleCardDrops.clear();
 	isBattleEnding = false;
 	isDefeatSequence = false;
 	defeatElapsedMs = 0.f;
@@ -210,6 +212,8 @@ void Demo::IBattleScene::CollectDeadEnemies()
 	for (size_t i = 0; i < enemies.size(); ++i) {
 		if (enemies[i]->IsDead() && enemies[i]->IsDoneAttacking()) {
 			battleGoldReward += enemies[i]->GetGoldReward();
+			const auto cardDrops = enemies[i]->RollCardDrops();
+			battleCardDrops.insert(battleCardDrops.end(), cardDrops.begin(), cardDrops.end());
 			enemies.erase(enemies.begin() + i);
 			--i;
 		}
@@ -222,6 +226,7 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 		return;
 	}
 	isBattleEnding = true;
+	constexpr float CARD_DROP_MESSAGE_SECONDS = 5.0f;
 	int finalGold = battleGoldReward;
 	if (initialEnemyCount > 1) {
 		const float multiplier = 1.25f * static_cast<float>(initialEnemyCount - 1);
@@ -238,13 +243,33 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 	popUpMessage->QueueMessage(&commandBuffer, Tr(L"You earned ") + std::to_wstring(finalGold) + L" gold!", 1.5f);
 	DX9GF::AudioManager::GetInstance()->Play("coin_gather", false, 0.8f);
 
+	if (!battleCardDrops.empty()) {
+		std::vector<std::pair<std::string, int>> grouped;
+		for (const auto& cardId : battleCardDrops) {
+			player->AddCardToInventory(cardId);
+			auto it = std::find_if(grouped.begin(), grouped.end(),
+				[&](const auto& entry) { return entry.first == cardId; });
+			if (it != grouped.end()) it->second++;
+			else grouped.push_back({ cardId, 1 });
+		}
+
+		std::wstring cardList;
+		for (const auto& [cardId, count] : grouped) {
+			if (!cardList.empty()) cardList += L", ";
+			cardList += CardDisplayNameFromSaveID(cardId);
+			if (count > 1) cardList += L" x" + std::to_wstring(count);
+		}
+		const std::wstring label = battleCardDrops.size() > 1 ? Tr(L"New cards: ") : Tr(L"New card: ");
+		popUpMessage->QueueMessage(&commandBuffer, label + cardList + L"!", CARD_DROP_MESSAGE_SECONDS);
+	}
+
 	if (onVictoryCallback != nullptr) {
 		onVictoryCallback();
 	}
 
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
-	drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(2.5f));
-	drawBuffer->PushCommand(transitionInCommand);
+	const float victoryHoldSeconds = battleCardDrops.empty() ? 2.5f : 1.5f + CARD_DROP_MESSAGE_SECONDS;
+	drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(victoryHoldSeconds));
 	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
