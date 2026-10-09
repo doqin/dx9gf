@@ -278,8 +278,10 @@ namespace Demo
 
 		//LOCAL FUNCTION to init a menu text-icon button: blank slice-able frame + auto-sizing translated label
 		auto InitMenuButton = [&](std::shared_ptr<Demo::TextIconButton>& btn, const std::wstring& english) {
-			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, font.get(), L"", 3);
-			btn->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(0, 0, 16, 16, 3));
+			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, font.get(), L"", 4);
+			auto rects = DX9GF::Utils::CreateRectsVertical(0, 0, 16, 16, 3);
+			rects.push_back({ 288, 48, 304, 64 }); // disabled frame
+			btn->SetSpriteRects(rects);
 			btn->SetSliceMargins(4, 4);
 			btn->SetSpriteScale(2.f, 2.f);
 			btn->SetAutoResize(true, 16.f);

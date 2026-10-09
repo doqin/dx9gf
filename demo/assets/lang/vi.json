@@ -273,6 +273,13 @@
 
     "Current Deck": "Bộ bài hiện tại",
     "Available Cards": "Thẻ bài khả dụng",
+    "New": "Mới",
+    "Delete": "Xóa",
+    "Name": "Tên",
+    "Type": "Loại",
+    "Cost": "Phí",
+    "Delete Deck": "Xóa bộ bài",
+    "Delete this deck? Its cards return to Available Cards.": "Xóa bộ bài này? Các thẻ sẽ quay về Thẻ bài khả dụng.",
     "Core Process": "Tiến trình lõi",
     "Equipment Orbit": "Vòng trang bị",
     "EXECUTE://": "THỰC THI://",

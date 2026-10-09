@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "Player.h"
 #include "TextButton.h"
+#include "TextIconButton.h"
 #include "CardContainer.h"
 #include "IconButton.h"
 #include "KeyboardNavigator.h"
@@ -11,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <functional>
 #include "QuestManager.h"
 #include "GearSlotUI.h"
 #include "BattleTutorial.h"
@@ -97,6 +99,28 @@ namespace Demo {
 		std::vector<std::string> syncedInventory;
 		std::vector<std::pair<int, int>> syncedItemSig; // (itemID, quantity) of non-empty slots
 		std::unordered_map<std::string, std::vector<std::shared_ptr<ICard>>> cardPool;
+
+		// --- Deck selector + sorting (DECK tab) -----------------------------------------
+		enum class SortKey { NAME, TYPE, COST };
+		SortKey sortKey = SortKey::NAME;
+		bool sortAscending = true;
+		std::shared_ptr<TextIconButton> btnDeckPrev;
+		std::shared_ptr<TextIconButton> btnDeckNext;
+		std::shared_ptr<TextIconButton> btnDeckNew;
+		std::shared_ptr<TextIconButton> btnDeckDelete;
+		std::shared_ptr<TextIconButton> btnSortName;
+		std::shared_ptr<TextIconButton> btnSortType;
+		std::shared_ptr<TextIconButton> btnSortCost;
+
+		float deckLabelX = 0.f; // left edge of the deck name, set by LayoutDeckControls
+		std::wstring GetDeckLabel() const;
+		void InitDeckControls();
+		void LayoutDeckControls(float leftX, float rightX, float y);
+		void UpdateSortLabels();
+		void ApplySort(SortKey key);
+		void SortContainer(const std::shared_ptr<CardContainer>& container);
+		// Commits the visible lists, runs `change` on the player's decks, then rebuilds the lists.
+		void ChangeDeck(const std::function<void()>& change);
 
 		void SyncCards();
 		void ReconcileContainer(const std::shared_ptr<CardContainer>& container, const std::vector<std::string>& targetIds);
