@@ -487,14 +487,14 @@ void Demo::WorldSceneBase::CreatePortalTransition(int sceneOffset, float targetX
 	TransitionToScene(static_cast<int>(game->GetSceneManager()->GetIndex()) + sceneOffset, targetX, targetY, bgm, bgmVol);
 }
 
-void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm, float bgmVol)
+void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm, float bgmVol, bool fastTravel)
 {
 	if (isTransitioning) return;
 	isTransitioning = true;
 
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->PushCommand(transitionInCommand);
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand, sceneIndex, targetX, targetY, bgm, bgmVol](std::function<void(void)> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand, sceneIndex, targetX, targetY, bgm, bgmVol, fastTravel](std::function<void(void)> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
 		}
@@ -504,6 +504,9 @@ void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, floa
 		targetPlayer->SetLocalPosition(targetX, targetY);
 		if (bgm) {
 			DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(bgm, bgmVol, 1.5f);
+		}
+		if (fastTravel) {
+			if (auto* world = dynamic_cast<WorldSceneBase*>(targetScene)) world->OnFastTravelArrive(targetX, targetY);
 		}
 		sceMan->GoToScene(sceneIndex);
 		isTransitioning = false;
@@ -659,7 +662,7 @@ void Demo::WorldSceneBase::ConfirmTravel(WorldSceneBase* world, const SavePoint&
 			CloseFullMap();
 			// Don't restart the music when hopping between save points of the same world
 			TransitionToScene(sceneIndex, spawn.first, spawn.second,
-				(info && !sameScene) ? info->bgm : nullptr, info ? info->bgmVolume : 0.3f);
+				(info && !sameScene) ? info->bgm : nullptr, info ? info->bgmVolume : 0.3f, true);
 		}},
 		{ Tr(L"Cancel"), nullptr }
 	};

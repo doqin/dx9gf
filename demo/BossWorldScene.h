@@ -41,6 +41,7 @@ namespace Demo {
 		void OnDrawUI(unsigned long long deltaTime) override;
 		void OnGenerateSaveData(nlohmann::json& outData) override;
 		void OnRestoreSaveData(const nlohmann::json& inData) override;
+		void OnFastTravelArrive(float x, float y) override;
 		void DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
 	};
 }

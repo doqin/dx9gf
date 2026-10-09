@@ -31,6 +31,21 @@ void Demo::BossWorldScene::SetIsland(int islandID) {
 	DX9GF::AudioManager::GetInstance()->SetActiveStems("bgm_bossworld", { 0, layer }, 2.0f);
 }
 
+// Fast travel teleports straight to a save point without passing the portals that normally
+// switch islands, so pick the island from the save point the player landed next to.
+void Demo::BossWorldScene::OnFastTravelArrive(float x, float y) {
+	// Island each save point stands on, in the order OnInit adds them
+	static const int savePointIslands[] = { 1, 4 };
+	int best = -1;
+	float bestDist = 0.f;
+	for (size_t i = 0; i < savePoints.size() && i < std::size(savePointIslands); ++i) {
+		auto [px, py] = savePoints[i]->GetWorldPosition();
+		float d = (px - x) * (px - x) + (py - y) * (py - y);
+		if (best < 0 || d < bestDist) { best = static_cast<int>(i); bestDist = d; }
+	}
+	if (best >= 0) SetIsland(savePointIslands[best]);
+}
+
 void Demo::BossWorldScene::OnInit()
 {
 	InitCore(360.f, 190.f, L"./assets/BossMatrix.tmx");
