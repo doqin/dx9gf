@@ -13,6 +13,7 @@ namespace Demo {
         float textScaleX = 1.0f;
         float textScaleY = 1.0f;
         D3DCOLOR textColor = 0xFF111111;
+        D3DCOLOR disabledTextColor = 0xFF5A6078;
         bool hasOutline = false;
         D3DCOLOR outlineColor = 0xFF000000;
 
@@ -36,6 +37,7 @@ namespace Demo {
 
         void SetText(const std::wstring& text) { this->label = text; }
         void SetTextColor(D3DCOLOR color) { this->textColor = color; }
+        void SetDisabledTextColor(D3DCOLOR color) { this->disabledTextColor = color; }
         void SetTextScale(float scaleX, float scaleY) { this->textScaleX = scaleX; this->textScaleY = scaleY; }
         void SetTextOutline(bool outline, D3DCOLOR color = 0xFF000000) { this->hasOutline = outline; this->outlineColor = color; }
         void SetBaseTextOffsetY(float offset) { this->baseTextOffsetY = offset; }

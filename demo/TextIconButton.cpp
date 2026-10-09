@@ -16,6 +16,7 @@ namespace Demo {
         this->stateOffsetsY[ButtonState::HOVER] = 1.0f;
         this->stateOffsetsY[ButtonState::CLICKED] = 3.0f;
         this->stateOffsetsY[ButtonState::LISTENING] = 3.0f;
+        this->stateOffsetsY[ButtonState::DISABLED] = 3.0f; //the disabled frame is drawn flat like a pressed one
 
         //never shrink below the size the button was designed at
         this->minWidth = static_cast<float>(imgW);
@@ -73,6 +74,7 @@ namespace Demo {
         this->stateOffsetsY[ButtonState::HOVER] = 1.0f * scaleY;
         this->stateOffsetsY[ButtonState::CLICKED] = 3.0f * scaleY;
         this->stateOffsetsY[ButtonState::LISTENING] = 3.0f * scaleY;
+        this->stateOffsetsY[ButtonState::DISABLED] = 3.0f * scaleY;
     }
 
     void Demo::TextIconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
@@ -91,7 +93,7 @@ namespace Demo {
         fontSprite->Begin();
         fontSprite->SetText(std::wstring(currentText));
         fontSprite->SetScale(textScaleX, textScaleY);
-        fontSprite->SetColor(textColor);
+        fontSprite->SetColor(this->currentState == ButtonState::DISABLED ? disabledTextColor : textColor);
         fontSprite->SetOutline(hasOutline, outlineColor, 2.0f);
 
         //the metrics come back unscaled, so apply the text scale before centring

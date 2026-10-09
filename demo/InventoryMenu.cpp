@@ -212,6 +212,161 @@ namespace Demo {
 				});
 			orbitSlots.push_back(slot);
 		}
+
+		InitDeckControls();
+	}
+
+	void InventoryMenu::InitDeckControls()
+	{
+		// Blue-grey text-icon frames in ui.png (idle / hover / pressed / disabled), stretched by slicing.
+		auto makeButton = [this](const std::wstring& label, float minW, std::function<void()> onClick) {
+			auto btn = std::make_shared<TextIconButton>(transformManager, 0.f, 0.f, (int)minW, 32, uiTex, font, label, 4);
+			btn->SetSpriteRects({ { 288, 0, 304, 16 }, { 288, 16, 304, 32 }, { 288, 32, 304, 48 }, { 288, 48, 304, 64 } });
+			btn->SetSliceMargins(4, 4);
+			btn->SetSpriteScale(2.f, 2.f);
+			btn->SetAutoResize(true, 12.f);
+			btn->SetOnReleaseLeft([this, onClick](DX9GF::ITrigger*) {
+				if (currentTab != Tab::DECK) return;
+				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
+				onClick();
+				});
+			btn->Init(uiCamera);
+			return btn;
+			};
+
+		btnDeckPrev = makeButton(L"<", 32.f, [this]() {
+			auto* pd = PlayerGlobalData::GetInstance();
+			int count = pd->GetDeckCount();
+			ChangeDeck([=]() { pd->SwitchDeck((pd->GetActiveDeckIndex() + count - 1) % count); });
+			});
+		btnDeckNext = makeButton(L">", 32.f, [this]() {
+			auto* pd = PlayerGlobalData::GetInstance();
+			int count = pd->GetDeckCount();
+			ChangeDeck([=]() { pd->SwitchDeck((pd->GetActiveDeckIndex() + 1) % count); });
+			});
+		btnDeckNew = makeButton(Tr(L"New"), 64.f, [this]() {
+			ChangeDeck([]() { PlayerGlobalData::GetInstance()->CreateDeck(); });
+			});
+		btnDeckDelete = makeButton(Tr(L"Delete"), 80.f, [this]() {
+			auto* pd = PlayerGlobalData::GetInstance();
+			if (pd->GetDeckCount() <= 1) return;
+			std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
+				{ Tr(L"Yes(Y)"), [this]() {
+					ChangeDeck([]() {
+						auto* pd = PlayerGlobalData::GetInstance();
+						pd->DeleteDeck(pd->GetActiveDeckIndex());
+					});
+				} },
+				{ Tr(L"No(N)"), []() {} }
+			};
+			PopupManager::GetInstance()->Show("stepped_gold", Tr(L"Delete Deck"),
+				Tr(L"Delete this deck? Its cards return to Available Cards."), buttons);
+			});
+
+		btnSortName = makeButton(L"", 96.f, [this]() { ApplySort(SortKey::NAME); });
+		btnSortType = makeButton(L"", 96.f, [this]() { ApplySort(SortKey::TYPE); });
+		btnSortCost = makeButton(L"", 96.f, [this]() { ApplySort(SortKey::COST); });
+		UpdateSortLabels();
+	}
+
+	// Places the deck selector over the left column and the sort buttons over the right one.
+	void InventoryMenu::LayoutDeckControls(float leftX, float rightX, float y)
+	{
+		const float gap = 8.f;
+		float x = leftX;
+		btnDeckPrev->SetLocalPosition(x, y);
+		x += btnDeckPrev->GetWidth() + gap;
+		deckLabelX = x;
+		fontSprite->SetText(GetDeckLabel());
+		x += fontSprite->GetWidth() + gap; // the name sits with an equal gap on both sides
+		btnDeckNext->SetLocalPosition(x, y);
+		x += btnDeckNext->GetWidth() + gap;
+		btnDeckNew->SetLocalPosition(x, y);
+		x += btnDeckNew->GetWidth() + gap;
+		btnDeckDelete->SetLocalPosition(x, y);
+
+		x = rightX;
+		for (auto& b : { btnSortName, btnSortType, btnSortCost }) {
+			b->SetLocalPosition(x, y);
+			x += b->GetWidth() + gap;
+		}
+
+		const bool canDelete = PlayerGlobalData::GetInstance()->GetDeckCount() > 1;
+		if (!canDelete) btnDeckDelete->SetState(IButton::ButtonState::DISABLED);
+		else if (btnDeckDelete->GetState() == IButton::ButtonState::DISABLED) btnDeckDelete->SetState(IButton::ButtonState::IDLE);
+	}
+
+	std::wstring InventoryMenu::GetDeckLabel() const
+	{
+		auto* pd = PlayerGlobalData::GetInstance();
+		return DX9GF::Utils::Utf8ToWide(pd->GetDeckName(pd->GetActiveDeckIndex())) +
+			L" (" + std::to_wstring(pd->GetActiveDeckIndex() + 1) + L"/" + std::to_wstring(pd->GetDeckCount()) + L")";
+	}
+
+	void InventoryMenu::UpdateSortLabels()
+	{
+		auto label = [this](SortKey key, const std::wstring& name) {
+			std::wstring text = name;
+			if (sortKey == key) text += sortAscending ? L" ^" : L" v";
+			return text;
+			};
+		btnSortName->SetText(label(SortKey::NAME, Tr(L"Name")));
+		btnSortType->SetText(label(SortKey::TYPE, Tr(L"Type")));
+		btnSortCost->SetText(label(SortKey::COST, Tr(L"Cost")));
+	}
+
+	void InventoryMenu::ApplySort(SortKey key)
+	{
+		if (sortKey == key) sortAscending = !sortAscending;
+		else { sortKey = key; sortAscending = true; }
+		UpdateSortLabels();
+		SortContainer(deckContainer);
+		SortContainer(inventoryContainer);
+		DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
+	}
+
+	void InventoryMenu::SortContainer(const std::shared_ptr<CardContainer>& container)
+	{
+		struct Entry {
+			std::shared_ptr<IDraggable> child;
+			std::wstring name;
+			int type;
+			size_t cost;
+		};
+		std::vector<Entry> entries;
+		for (auto& weakChild : container->GetChildren()) {
+			auto child = weakChild.lock();
+			if (!child) continue;
+			auto card = std::dynamic_pointer_cast<ICard>(child);
+			if (!card) continue;
+			entries.push_back({ child, card->GetDisplayName(), (int)card->GetCardTemplate(), card->GetCost() });
+		}
+
+		const SortKey key = sortKey;
+		const bool asc = sortAscending;
+		std::stable_sort(entries.begin(), entries.end(), [key, asc](const Entry& a, const Entry& b) {
+			int primary = 0;
+			if (key == SortKey::TYPE) primary = (a.type > b.type) - (a.type < b.type);
+			else if (key == SortKey::COST) primary = (a.cost > b.cost) - (a.cost < b.cost);
+			if (primary != 0) return asc ? primary < 0 : primary > 0;
+			int byName = a.name.compare(b.name);
+			if (key == SortKey::NAME) return asc ? byName < 0 : byName > 0;
+			return byName < 0; // ties on type/cost always fall back to A-Z
+			});
+
+		std::vector<std::shared_ptr<IDraggable>> sorted;
+		sorted.reserve(entries.size());
+		for (auto& e : entries) sorted.push_back(e.child);
+		container->SetChildList(sorted);
+	}
+
+	void InventoryMenu::ChangeDeck(const std::function<void()>& change)
+	{
+		CommitCards();
+		change();
+		cardsSynced = false; // force SyncCards to rebuild both lists from the player's new state
+		SyncCards();
+		if (transformManager) transformManager->RebuildHierarchy();
 	}
 
 	void InventoryMenu::Toggle()
@@ -426,6 +581,11 @@ namespace Demo {
 		addButton(btnLeaveGame);
 
 		if (currentTab == Tab::DECK) {
+			for (auto& b : { btnDeckPrev, btnDeckNext, btnDeckNew, btnDeckDelete, btnSortName, btnSortType, btnSortCost }) {
+				if (!b || b->GetState() == IButton::ButtonState::DISABLED) continue;
+				candidates.push_back({ b, b->GetWorldX(), b->GetWorldY(),
+					(float)b->GetWidth(), (float)b->GetHeight(), [b]() { b->Activate(); } });
+			}
 			// Cards in either container; activating one moves it to the other container
 			// (deck order doesn't matter - it's shuffled at battle start).
 			auto addCards = [&](std::shared_ptr<CardContainer> from, std::shared_ptr<CardContainer> to) {
@@ -570,6 +730,11 @@ namespace Demo {
 					deckContainer->ScrollChildIntoView(target);
 					inventoryContainer->ScrollChildIntoView(target);
 				}
+			}
+
+			LayoutDeckControls(leftContainerX, rightContainerX, topY + 106.0f);
+			for (auto& b : { btnDeckPrev, btnDeckNext, btnDeckNew, btnDeckDelete, btnSortName, btnSortType, btnSortCost }) {
+				b->Update(deltaTime);
 			}
 
 			deckContainer->Update(deltaTime);
@@ -812,6 +977,20 @@ namespace Demo {
 			fontSprite->SetPosition(centerRight - fontSprite->GetWidth() / 2.f, topEdge + 150.0f);
 			fontSprite->Draw(*uiCamera, deltaTime);
 			fontSprite->End();
+
+			for (auto& b : { btnDeckPrev, btnDeckNext, btnDeckNew, btnDeckDelete, btnSortName, btnSortType, btnSortCost }) {
+				b->Draw(gd, deltaTime);
+			}
+			// Active deck name, centred between the < > buttons.
+			fontSprite->Begin();
+			fontSprite->SetScale(1.0f, 1.0f);
+			fontSprite->SetOutline(true, 0xFF000000, 3.f);
+			fontSprite->SetColor(0xFFFFFFFF);
+			fontSprite->SetText(GetDeckLabel());
+			fontSprite->SetPosition(deckLabelX, topEdge + 106.0f + 6.f);
+			fontSprite->Draw(*uiCamera, deltaTime);
+			fontSprite->End();
+			fontSprite->SetOutline(false);
 
 			deckContainer->Draw(deltaTime);
 			inventoryContainer->Draw(deltaTime);

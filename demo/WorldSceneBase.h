@@ -92,7 +92,10 @@ namespace Demo {
 		void AddDepthNode(std::vector<DepthNode>& nodes, float y, std::function<void()> drawCall);
 
 		void CreatePortalTransition(int sceneOffset, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f);
-		void TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f);
+		void TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f, bool fastTravel = false);
+		// Called on the destination scene once a fast travel has placed the player, so scenes with
+		// per-area state (e.g. the boss world's island) can match it to where the player landed.
+		virtual void OnFastTravelArrive(float x, float y) {}
 
 		void SpawnMapEnemy(float x, float y, std::string id, std::vector<std::string> types,
 			bool isRand, bool isGlobal, std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDraw,

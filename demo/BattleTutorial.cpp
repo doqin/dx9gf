@@ -290,8 +290,8 @@ namespace Demo {
 		if (skipBtn) return;
 		uiTransformManager = std::make_shared<DX9GF::TransformManager>();
 		skipBtn = std::make_shared<TextIconButton>(uiTransformManager, 0.f, 0.f,
-			static_cast<int>(SKIP_W), static_cast<int>(SKIP_H), uiTex, uiFont, L"Skip>>", 3);
-		skipBtn->SetSpriteCoords(16, 0, 32, 16, 0, true);
+			static_cast<int>(SKIP_W), static_cast<int>(SKIP_H), uiTex, uiFont, L"Skip>>", 4);
+		skipBtn->SetSpriteRects({ { 16, 0, 48, 16 }, { 16, 16, 48, 32 }, { 16, 32, 48, 48 }, { 304, 48, 336, 64 } });
 		skipBtn->SetSpriteScale(SKIP_SCALE, SKIP_SCALE);
 		skipBtn->SetTextScale(1.f, 1.f);
 		skipBtn->SetTextColor(0xFF000000);

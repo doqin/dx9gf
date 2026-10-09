@@ -267,8 +267,8 @@ void Demo::IShopScene::BuildUI()
 	// --- Page arrows ------------------------------------------------------------
 	auto makePageButton = [&](const std::wstring& label, const std::function<void(DX9GF::ITrigger*)>& action) {
 		auto btn = std::make_shared<Demo::TextIconButton>(
-			transformManager, 0.0f, 0.0f, 32, 32, uiSheetTex, myFont.get(), label, 3);
-		btn->SetSpriteRects({ { 0, 0, 16, 16 }, { 0, 16, 16, 32 }, { 0, 32, 16, 48 } });
+			transformManager, 0.0f, 0.0f, 32, 32, uiSheetTex, myFont.get(), label, 4);
+		btn->SetSpriteRects({ { 0, 0, 16, 16 }, { 0, 16, 16, 32 }, { 0, 32, 16, 48 }, { 288, 48, 304, 64 } });
 		btn->SetSpriteScale(2.0f, 2.0f);
 		btn->SetTextColor(0xFF111111);
 		btn->SetOnReleaseLeft(action);

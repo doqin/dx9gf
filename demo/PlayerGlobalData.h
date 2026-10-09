@@ -17,6 +17,13 @@ namespace Demo {
 		float health = 50.f;
 		int gold = 100;
 		std::vector<std::string> deck;
+		struct SavedDeck {
+			std::string name;
+			std::vector<std::string> cards;
+		};
+		std::vector<SavedDeck> decks;
+		int activeDeckIndex = 0;
+		void SyncActiveDeck();
 		std::vector<std::string> inventoryCards;
 		ItemInventory inventoryItems;
 		std::vector<int> inventoryGears;
@@ -78,6 +85,18 @@ namespace Demo {
 		const std::vector<std::string>& GetDeck() const { return deck; }
 		void AddCardToDeck(const std::string& card) { deck.push_back(card); }
 		void ClearDeck() { deck.clear(); }
+		// Replaces the active deck's contents; used by the inventory when committing edits.
+		void SetDeck(const std::vector<std::string>& cards) { deck = cards; }
+
+		// Multiple named decks. `deck` is the working copy of decks[activeDeckIndex] and is what
+		// combat reads; the others are stored dormant until switched to.
+		int GetDeckCount() const { return (int)decks.size(); }
+		int GetActiveDeckIndex() const { return activeDeckIndex; }
+		const std::string& GetDeckName(int index) const { return decks[index].name; }
+		void SwitchDeck(int index);
+		void CreateDeck();
+		// Cards of the deleted deck return to the card inventory. The last deck can't be deleted.
+		bool DeleteDeck(int index);
 
 		const std::vector<std::string>& GetInventoryCards() const { return inventoryCards; }
 		void AddCardToInventory(const std::string& card) { inventoryCards.push_back(card); }
