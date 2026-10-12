@@ -12,6 +12,24 @@ static void ApplyPixelArtSamplerState(IDirect3DDevice9* device)
 	device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
 }
 
+void DX9GF::FontSprite::BuildTextRect(RECT& rect, DWORD& format, bool measure) const
+{
+	rect = RECT{};
+	format = measure ? DT_CALCRECT : 0;
+	if (p_src != nullptr) {
+		rect = *p_src;
+		format |= DT_TOP | DT_LEFT;
+	}
+	else {
+		format |= DT_NOCLIP;
+	}
+	if (maxWidth > 0.f) {
+		// DT_NOCLIP stays set: the rect has no height, so clipping would hide everything.
+		rect.right = rect.left + static_cast<LONG>(maxWidth);
+		format |= DT_WORDBREAK;
+	}
+}
+
 DX9GF::StaticSprite::StaticSprite(Texture* texture) : ISprite(texture->GetGraphicsDevice()), texture(texture)
 {
 	HRESULT result = D3DXCreateSprite(graphicsDevice->GetDevice(), &p_sprite);
@@ -201,30 +219,18 @@ void DX9GF::FontSprite::SetOutline(bool outline, D3DCOLOR color, float thickness
 
 LONG DX9GF::FontSprite::GetWidth() const
 {
-	RECT rect{};
-	DWORD format = DT_CALCRECT;
-	if (p_src != nullptr) {
-		rect = *p_src;
-		format |= DT_TOP | DT_LEFT;
-	}
-	else {
-		format |= DT_NOCLIP;
-	}
+	RECT rect;
+	DWORD format;
+	BuildTextRect(rect, format, true);
 	font->GetRawFont()->DrawText(nullptr, text.c_str(), -1, &rect, format, color);
 	return rect.right - rect.left;
 }
 
 LONG DX9GF::FontSprite::GetHeight() const
 {
-	RECT rect{};
-	DWORD format = DT_CALCRECT;
-	if (p_src != nullptr) {
-		rect = *p_src;
-		format |= DT_TOP | DT_LEFT;
-	}
-	else {
-		format |= DT_NOCLIP;
-	}
+	RECT rect;
+	DWORD format;
+	BuildTextRect(rect, format, true);
 	font->GetRawFont()->DrawText(nullptr, text.c_str(), -1, &rect, format, color);
 	return rect.bottom - rect.top;
 }
@@ -248,19 +254,9 @@ void DX9GF::FontSprite::Draw(const Camera& camera, unsigned long long deltaTime)
 	auto matWorld = GetTransformMatrix();
 	auto matCamera = camera.GetTransformMatrix();
 	auto matFinal = matWorld * matCamera;
-	RECT rect{};
-	DWORD format = 0;
-	if (p_src == nullptr) {
-		rect.left = 0;
-		rect.top = 0;
-		rect.right = 0;
-		rect.bottom = 0;
-		format = DT_NOCLIP;
-	}
-	else {
-		rect = *p_src;
-		format = DT_TOP | DT_LEFT;
-	}
+	RECT rect;
+	DWORD format;
+	BuildTextRect(rect, format, false);
 
 	if (isOutline) {
 		for (float x = -outlineThickness; x <= outlineThickness; x += 1.0f) {

@@ -54,6 +54,8 @@ namespace DX9GF {
 		bool isOutline = false;
 		D3DCOLOR outlineColor = 0xFF000000;
 		float outlineThickness = 1.0f;
+		float maxWidth = 0.f;
+		void BuildTextRect(RECT& rect, DWORD& format, bool measure) const;
 	public:
 		FontSprite(Font* font);
 		~FontSprite();
@@ -62,11 +64,14 @@ namespace DX9GF {
 		void SetColor(D3DCOLOR color);
 		void SetBold(bool bold);
 		void SetOutline(bool outline, D3DCOLOR color = 0xFF000000, float thickness = 1.0f);
-	  LONG GetWidth() const;
+		LONG GetWidth() const;
 		LONG GetHeight() const;
 		void Begin() override;
 		void Draw(const Camera& camera, unsigned long long deltaTime) override;
 		void End() override;
+		// 0 disables wrapping. Otherwise text wraps at word boundaries to fit this width,
+		// in unscaled font pixels (the same units GetWidth reports).
+		void SetMaxWidth(float width) { maxWidth = width; }
 	};
 
 	class NineSliceSprite : public ISprite {

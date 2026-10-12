@@ -176,6 +176,7 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		}
 
 		descFontSprite->Begin();
+		descFontSprite->SetMaxWidth(0.f);
 		descFontSprite->SetColor(0xFFff4444);
 		descFontSprite->SetOutline(true, 0xFF000000, 2.f);
 		descFontSprite->SetPosition(thisX + trigger->GetWidth() / 2 - 35, thisY + trigger->GetHeight() / 2 - 10);
@@ -197,6 +198,7 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		}
 
 		descFontSprite->Begin();
+		descFontSprite->SetMaxWidth(0.f);
 		descFontSprite->SetColor(0xFFffd700);
 		descFontSprite->SetOutline(true, 0xFF000000, 2.f);
 		descFontSprite->SetPosition(thisX + trigger->GetWidth() / 2 - 35, thisY + trigger->GetHeight() / 2 - 10);
@@ -214,6 +216,9 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		// re-apply the tooltip's styling every frame instead of only on first creation.
 		descFontSprite->SetColor(0xFF000000);
 		descFontSprite->SetOutline(false);
+		// Long descriptions wrap instead of running off the screen.
+		constexpr float TOOLTIP_MAX_WIDTH = 280.f;
+		descFontSprite->SetMaxWidth(TOOLTIP_MAX_WIDTH);
 		std::wstring desc = GetDescription();
 		size_t cost = GetCost();
 		std::wstring inputs = GetInputsDescription();
