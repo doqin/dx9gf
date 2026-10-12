@@ -66,6 +66,11 @@ void Demo::QuestManager::InitQuestDatabase() {
 		Tr(L"Hack a terminal, then report back"),
 		Tr(L"Memory Locker")
 	};
+
+	// These quests are paid out by talking to the NPC instead of completing automatically
+	questDatabase["Quest_Tutorial"].turnInNpc = Tr(L"Kako");
+	questDatabase["Quest_KakosLab"].turnInNpc = Tr(L"Kako");
+
 }
 
 std::vector<Demo::QuestInfo> Demo::QuestManager::GetActiveQuests() const {
@@ -351,32 +356,11 @@ Demo::QuestEventResult Demo::QuestManager::HandleEvent(const std::string& eventT
 	}
 
 	if (eventType == "FIRST_ENCOUNTER_DEFEATED") {
-		if (GetQuestState("Quest_Tutorial") == QuestState::Active) {
-			questStates["Quest_Tutorial"] = QuestState::Completed;
-
-			if (questDatabase.count("Quest_Tutorial")) {
-				questDatabase["Quest_Tutorial"].currentObjective = Tr(L"First Encounter - Completed!");
-				SetQuest(Tr(L"Quest: ") + questDatabase["Quest_Tutorial"].currentObjective);
-			}
-			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
-			player->AddGold(26);
-			return { true, Tr(L"26 Gold - Quest Completed: First Encounter") };
-		}
+		if (GetQuestState("Quest_Tutorial") == QuestState::Active) return MarkReadyToTurnIn("Quest_Tutorial");
 	}
 
 	if (eventType == "KAKOS_LAB_CLEARED") {
-		if (questStates["Quest_KakosLab"] == QuestState::Active) {
-			questStates["Quest_KakosLab"] = QuestState::Completed;
-
-			if (questDatabase.count("Quest_KakosLab")) {
-				questDatabase["Quest_KakosLab"].currentObjective = Tr(L"Lab Cleared!");
-				SetQuest(Tr(L"Quest: ") + questDatabase["Quest_KakosLab"].currentObjective);
-			}
-			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
-			player->AddGold(100);
-			player->AddGear(5);
-			return { true, Tr(L"100 Gold & Aegis Plating - Quest Completed: Kako's Lab") };
-		}
+		if (GetQuestState("Quest_KakosLab") == QuestState::Active) return MarkReadyToTurnIn("Quest_KakosLab");
 	}
 
 	if (eventType == "ADMIN_LOG_VERIFIED") {
@@ -404,12 +388,24 @@ void Demo::QuestManager::GenerateSaveData(nlohmann::json& outData) {
 	outData["questStates"] = questsJson;
 	outData["earlyQuestEvents"] = earlyEvents;
 	outData["trackedQuest"] = currentTrackedQuest;
+	outData["readyQuests"] = readyQuests;
 }
 
 void Demo::QuestManager::RestoreSaveData(const nlohmann::json& inData) {
 	if (inData.contains("questStates")) {
 		for (auto& item : inData["questStates"].items()) {
 			questStates[item.key()] = static_cast<QuestState>(item.value().get<int>());
+		}
+	}
+	readyQuests.clear();
+	if (inData.contains("readyQuests")) {
+		readyQuests = inData["readyQuests"].get<std::set<std::string>>();
+	}
+
+	// Rebuild objective text for quests waiting to be turned in
+	for (const auto& id : readyQuests) {
+		if (questDatabase.count(id)) {
+			questDatabase[id].currentObjective = Tr(L"Return to ") + questDatabase[id].turnInNpc;
 		}
 	}
 	earlyEvents.clear();
@@ -462,4 +458,41 @@ void Demo::QuestManager::SyncTrackedQuest() {
 	if (trackedIsActive && questDatabase.count(currentTrackedQuest)) {
 		SetQuest(Tr(L"Quest: ") + questDatabase[currentTrackedQuest].currentObjective);
 	}
+}
+
+Demo::QuestEventResult Demo::QuestManager::MarkReadyToTurnIn(const std::string& questId) {
+	auto it = questDatabase.find(questId);
+	if (it == questDatabase.end() || readyQuests.count(questId)) return { false, L"" };
+
+	readyQuests.insert(questId);
+	it->second.currentObjective = Tr(L"Return to ") + it->second.turnInNpc;
+	DX9GF::AudioManager::GetInstance()->Play("quest_active", false, 0.05f); // placeholder sound
+
+	QuestEventResult result;
+	result.hintMessage = Tr(L"Objective complete! Return to ") + it->second.turnInNpc;
+	return result;
+}
+
+Demo::QuestEventResult Demo::QuestManager::TurnInQuest(const std::string& questId, Player* player) {
+	if (!IsReadyToTurnIn(questId) || GetQuestState(questId) != QuestState::Active) return { false, L"" };
+
+	readyQuests.erase(questId);
+	questStates[questId] = QuestState::Completed;
+
+	std::wstring msg;
+	if (questId == "Quest_Tutorial") {
+		questDatabase[questId].currentObjective = Tr(L"First Encounter - Completed!");
+		player->AddGold(26);
+		msg = Tr(L"26 Gold - Quest Completed: First Encounter");
+	}
+	else if (questId == "Quest_KakosLab") {
+		questDatabase[questId].currentObjective = Tr(L"Lab Cleared!");
+		player->AddGold(100);
+		player->AddGear(5);
+		msg = Tr(L"100 Gold & Aegis Plating - Quest Completed: Kako's Lab");
+	}
+
+	DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
+	SyncTrackedQuest();
+	return { true, msg };
 }

@@ -17,6 +17,8 @@ namespace Demo {
 	struct QuestEventResult {
 		bool hasReward = false;
 		std::wstring rewardMessage = L"";
+		// Shown without the "(+)" prefix, e.g. "Return to Kako"
+		std::wstring hintMessage = L"";
 	};
 
 	struct QuestInfo {
@@ -25,6 +27,7 @@ namespace Demo {
 		std::wstring description;
 		std::wstring currentObjective;
 		std::wstring rewardText;
+		std::wstring turnInNpc; // empty = completes automatically
 	};
 
 	class QuestManager {
@@ -70,6 +73,10 @@ namespace Demo {
 		// Keeps the panel on an unfinished quest and switches to another active one when needed.
 		void SyncTrackedQuest();
 
+		// Quests whose goal is reached but whose reward is not claimed yet. They stay Active.
+		std::set<std::string> readyQuests;
+		QuestEventResult MarkReadyToTurnIn(const std::string& questId);
+
 	public:
 		static QuestManager* GetInstance() {
 			static QuestManager instance;
@@ -78,6 +85,7 @@ namespace Demo {
 
 		void Reset() {
 			questStates.clear();
+			readyQuests.clear();
 			currentTrackedQuest = "";
 			earlyEvents.clear();
 			questText = Tr(L"Quest: ???");
@@ -135,5 +143,7 @@ namespace Demo {
 			questMenuRequested = false;
 			return requested;
 		}
+		bool IsReadyToTurnIn(const std::string& questId) const { return readyQuests.count(questId) > 0; }
+		QuestEventResult TurnInQuest(const std::string& questId, Player* player);
 	};
 }
