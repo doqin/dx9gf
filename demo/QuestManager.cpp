@@ -148,7 +148,8 @@ void Demo::QuestManager::Update(unsigned long long deltaTime)
 	}
 
 	//marquee when questText's too long
-	if (animProgress == 1.0f && !questText.empty()) {
+	if (animProgress == 1.0f && !questText.empty() && IsPanelVisible()) 
+	{
 		fontSprite->SetText(questText);
 		float textW = fontSprite->GetWidth();
 		if (textW > MAX_PANEL_W - PANEL_PADDING_X) {
@@ -183,7 +184,7 @@ void Demo::QuestManager::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamera
 	if (!isVisible) return;
 	if (btnToggle) btnToggle->Draw(gd, deltaTime);
 
-	if (animProgress <= 0.0f || questText.empty()) return;
+	if (animProgress <= 0.0f || questText.empty() || !IsPanelVisible()) return;
 
 	float panelX = -virtualWidth / 2.0f + MARGIN_X;
 	float panelY = -virtualHeight / 2.0f + MARGIN_Y;
@@ -269,7 +270,7 @@ Demo::QuestEventResult Demo::QuestManager::ResolveDeferredEvents(Player* player)
 	return { false, L"" };
 }
 
-Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventType, const std::string& targetId, Player* player) {
+Demo::QuestEventResult Demo::QuestManager::HandleEvent(const std::string& eventType, const std::string& targetId, Player* player) {
 	for (const auto& ev : kDeferrableEvents) {
 		if (eventType == ev.eventType && targetId == ev.targetId && GetQuestState(ev.questId) == QuestState::Locked) {
 			earlyEvents.insert(eventType + "|" + targetId);
@@ -431,5 +432,34 @@ void Demo::QuestManager::RestoreSaveData(const nlohmann::json& inData) {
 
 			SetQuest(Tr(L"Quest: ") + questDatabase[currentTrackedQuest].currentObjective);
 		}
+	}
+	SyncTrackedQuest();
+}
+
+Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventType, const std::string& targetId, Player* player) {
+	QuestEventResult result = HandleEvent(eventType, targetId, player);
+	SyncTrackedQuest();
+	return result;
+}
+
+void Demo::QuestManager::SyncTrackedQuest() {
+	auto it = questStates.find(currentTrackedQuest);
+	bool trackedIsActive = (it != questStates.end() && it->second == QuestState::Active);
+
+	// Tracked quest is finished: fall back to any other active quest
+	if (!trackedIsActive) {
+		for (const auto& [id, state] : questStates) {
+			if (state == QuestState::Active && questDatabase.count(id)) {
+				currentTrackedQuest = id;
+				trackedIsActive = true;
+				break;
+			}
+		}
+	}
+
+	// Rewrite the text so a completion branch of another quest cannot leave its text on the panel.
+	// If no active quest remains, the text is left alone and IsPanelVisible() hides the panel.
+	if (trackedIsActive && questDatabase.count(currentTrackedQuest)) {
+		SetQuest(Tr(L"Quest: ") + questDatabase[currentTrackedQuest].currentObjective);
 	}
 }

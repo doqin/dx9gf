@@ -60,6 +60,15 @@ namespace Demo {
 		QuestManager() { InitQuestDatabase(); }
 		void SetQuest(const std::wstring& text) { questText = text; }
 		void InitQuestDatabase();
+		// The panel is hidden once the tracked quest is completed, until a new quest is accepted.
+		// An empty tracked id still shows the "Quest: ???" placeholder.
+		bool IsPanelVisible() const {
+			return currentTrackedQuest.empty() || GetQuestState(currentTrackedQuest) != QuestState::Completed;
+		}
+		// Original event logic. The public NotifyEvent wraps it and re-syncs the tracked quest.
+		QuestEventResult HandleEvent(const std::string& eventType, const std::string& targetId, Player* player);
+		// Keeps the panel on an unfinished quest and switches to another active one when needed.
+		void SyncTrackedQuest();
 
 	public:
 		static QuestManager* GetInstance() {
