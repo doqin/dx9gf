@@ -4047,12 +4047,14 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 			}
 
 			if (showTooltip) {
+				// Keep the box clear of the cursor sprite, which is drawn over the mouse position.
+				constexpr float CURSOR_CLEARANCE = 28.f;
 				fontSprite->SetText(std::move(tooltipText));
 				float ttW = fontSprite->GetWidth() + 8.f;
 				float ttH = fontSprite->GetHeight() + 8.f;
 
 				float targetScX = mouseXSc;
-				float targetScY = mouseYSc - ttH;
+				float targetScY = mouseYSc - ttH - CURSOR_CLEARANCE;
 				if (targetScX + ttW > screenW) targetScX = screenW - ttW;
 				if (targetScY < 0) targetScY = mouseYSc + 32.f;
 
