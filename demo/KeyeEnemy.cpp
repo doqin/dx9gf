@@ -112,8 +112,8 @@ void Demo::KeyeEnemy::PatternSightline(float projDamage) {
 	// the current one still burns and the player is reading two beams at once.
 	constexpr float SHOT_GAP = 1.1f;
 	// Keye's own cold blue gaze, so its beams do not read as Kernel's.
-	constexpr D3DCOLOR WARN_COLOR = D3DCOLOR_ARGB(150, 120, 190, 255);
-	constexpr D3DCOLOR GLOW_COLOR = D3DCOLOR_ARGB(120, 60, 130, 255);
+	constexpr D3DCOLOR WARN_COLOR = D3DCOLOR_ARGB(210, 40, 150, 255);
+	constexpr D3DCOLOR GLOW_COLOR = D3DCOLOR_ARGB(140, 0, 90, 255);
 	constexpr D3DCOLOR CORE_COLOR = 0xFFFFFFFF;
 
 	const int shots = RNG::Range(10, 13);
