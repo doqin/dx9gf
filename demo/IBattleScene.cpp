@@ -331,12 +331,14 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 				}
 				});
 			draggable->DetachParent();
-			draggable->SetHidden(false);
+			// Hidden cards skip IDraggable::Update, so a card in flight cannot be grabbed and
+			// dropped into a block for free. DrawWorld still draws queuedToDraw directly.
+			draggable->SetHidden(true);
 		}
 		y += 30;
 		std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
 			std::make_shared<DX9GF::SetPositionCommand>(card, -static_cast<float>(screenWidth), y),
-			std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
+			std::make_shared<DX9GF::CustomCommand>([](std::function<void(void)> markFinished) {
 				DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.3f);
 				markFinished();
 			}),
@@ -345,20 +347,13 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 			std::make_shared<DX9GF::DelayCommand>(midTurn ? 0.f : 0.75f),
 			std::make_shared<DX9GF::GoToCommand>(card, x, screenHeight, 0.75f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}),
 			std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
-				this->queuedToDraw.erase(std::find(queuedToDraw.begin(), queuedToDraw.end(), card));
-				cardHand.push_back(card);
-				if (handContainer) {
-					handContainer->StoreCard(card);
-				}
+				this->LandDrawnCard(card);
 				markFinished();
 			})
 		};
-		commandBuffer.StackCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+		cardAnimCommands.push_back(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
 	}
 
-	// The draw pile plus the discard pile could not supply a full draw - cards are parked in the
-	// program (playedPile) or nullified. Drawing short is allowed, but say so rather than failing
-	// silently.
 	if (drawn < count) {
 		if (popUpMessage) {
 			popUpMessage->ShowMessage(Tr(L"Deck empty - drew ") + std::to_wstring(drawn) + L" of " + std::to_wstring(count));
@@ -366,6 +361,7 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 		OutputDebugStringA(("DrawCards: requested " + std::to_string(count) + ", drew " + std::to_string(drawn) + " (draw + discard pool exhausted)\n").c_str());
 	}
 }
+
 
 void Demo::IBattleScene::ShuffleDiscardIntoDrawPile()
 {
@@ -439,6 +435,10 @@ void Demo::IBattleScene::MoveDepletedCardsToNullifiedPile()
 bool Demo::IBattleScene::CanPlaceCardInBlock(const std::shared_ptr<ICard>& card) const
 {
 	if (!card) {
+		return false;
+	}
+	// Still flying in: it is not in the hand yet, so it must not take the free "already queued" path.
+	if (std::find(queuedToDraw.begin(), queuedToDraw.end(), card) != queuedToDraw.end()) {
 		return false;
 	}
 	// Not in hand at all - queued from an earlier turn, so it was paid for when it landed and
@@ -1927,7 +1927,8 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 					return; // wait
 				}
 			}
-
+			// A card still in flight would otherwise miss the hand discard below and survive the turn.
+			this->SettleCardAnimations();
 			this->MoveInitBlockCardsToDiscardPile();
 			this->MoveExecutedHandCardsToPlayedPile();
 			this->MoveDepletedCardsToNullifiedPile();
@@ -3154,9 +3155,8 @@ void Demo::IBattleScene::Init()
 		if (isBattleEnding || isFleeing) {
 			return;
 		}
-		// Executing clears the command buffer, which is also what carries the deal animation of
-		// a mid-turn draw. Clearing it mid-flight would strand those cards in queuedToDraw -
-		// never reaching the hand, never discarded - so refuse until they have landed.
+		// Hold Execute until cards in flight have landed, so they are in the hand before the
+		// program runs.
 		if (!queuedToDraw.empty()) {
 			popUpMessage->ShowMessage(Tr(L"Still drawing"));
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
@@ -3203,9 +3203,8 @@ void Demo::IBattleScene::Init()
 		if (!initBlockCard || initBlockCard->GetStatementCards().empty()) {
 			return;
 		}
-		// Running init does not clear the command buffer the way executing does, so a draw it
-		// kicks off survives - but a draw already in flight still has to land first, because the
-		// next Execute would clear the buffer out from under it.
+		// Hold Execute until cards in flight have landed, so they are in the hand before the
+		// program runs.
 		if (!queuedToDraw.empty()) {
 			popUpMessage->ShowMessage(Tr(L"Still drawing"));
 			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
@@ -3710,6 +3709,9 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 
 	DamageTextManager::GetInstance()->Update(deltaTime);
 	transformManager->UpdateAll();
+	UpdateCardAnimations(deltaTime);
+	// Must stay last: a queued command can remove this scene (victory, successful flee), after
+	// which no member may be touched.
 	commandBuffer.Update(deltaTime);
 }
 
@@ -4229,4 +4231,43 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 		enemies[i]->Update(deltaTime);
 	}
 	FlushPendingEnemies();
+}
+
+void Demo::IBattleScene::UpdateCardAnimations(unsigned long long deltaTime)
+{
+	// Indexed with a strong reference: a command may append to the list while it runs.
+	for (size_t i = 0; i < cardAnimCommands.size(); ++i) {
+		auto command = cardAnimCommands[i];
+		command->Execute(deltaTime);
+	}
+	cardAnimCommands.erase(
+		std::remove_if(cardAnimCommands.begin(), cardAnimCommands.end(),
+			[](const std::shared_ptr<DX9GF::ICommand>& command) { return command->IsFinished(); }),
+		cardAnimCommands.end());
+}
+
+void Demo::IBattleScene::LandDrawnCard(const std::shared_ptr<ICard>& card)
+{
+	auto it = std::find(queuedToDraw.begin(), queuedToDraw.end(), card);
+	if (it == queuedToDraw.end()) {
+		return;
+	}
+	queuedToDraw.erase(it);
+	if (auto draggable = std::dynamic_pointer_cast<IDraggable>(card)) {
+		draggable->SetHidden(false);
+	}
+	cardHand.push_back(card);
+	if (handContainer) {
+		handContainer->StoreCard(card);
+	}
+}
+
+void Demo::IBattleScene::SettleCardAnimations()
+{
+	cardAnimCommands.clear();
+	// Copy: LandDrawnCard erases from queuedToDraw.
+	const auto inFlight = queuedToDraw;
+	for (const auto& card : inFlight) {
+		LandDrawnCard(card);
+	}
 }
