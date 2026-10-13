@@ -17,6 +17,8 @@ namespace Demo {
 	struct QuestEventResult {
 		bool hasReward = false;
 		std::wstring rewardMessage = L"";
+		// Shown without the "(+)" prefix, e.g. "Return to Kako"
+		std::wstring hintMessage = L"";
 	};
 
 	struct QuestInfo {
@@ -25,6 +27,7 @@ namespace Demo {
 		std::wstring description;
 		std::wstring currentObjective;
 		std::wstring rewardText;
+		std::wstring turnInNpc; // empty = completes automatically
 	};
 
 	class QuestManager {
@@ -60,6 +63,19 @@ namespace Demo {
 		QuestManager() { InitQuestDatabase(); }
 		void SetQuest(const std::wstring& text) { questText = text; }
 		void InitQuestDatabase();
+		// The panel is hidden once the tracked quest is completed, until a new quest is accepted.
+		// An empty tracked id still shows the "Quest: ???" placeholder.
+		bool IsPanelVisible() const {
+			return currentTrackedQuest.empty() || GetQuestState(currentTrackedQuest) != QuestState::Completed;
+		}
+		// Original event logic. The public NotifyEvent wraps it and re-syncs the tracked quest.
+		QuestEventResult HandleEvent(const std::string& eventType, const std::string& targetId, Player* player);
+		// Keeps the panel on an unfinished quest and switches to another active one when needed.
+		void SyncTrackedQuest();
+
+		// Quests whose goal is reached but whose reward is not claimed yet. They stay Active.
+		std::set<std::string> readyQuests;
+		QuestEventResult MarkReadyToTurnIn(const std::string& questId);
 
 	public:
 		static QuestManager* GetInstance() {
@@ -69,6 +85,7 @@ namespace Demo {
 
 		void Reset() {
 			questStates.clear();
+			readyQuests.clear();
 			currentTrackedQuest = "";
 			earlyEvents.clear();
 			questText = Tr(L"Quest: ???");
@@ -126,5 +143,7 @@ namespace Demo {
 			questMenuRequested = false;
 			return requested;
 		}
+		bool IsReadyToTurnIn(const std::string& questId) const { return readyQuests.count(questId) > 0; }
+		QuestEventResult TurnInQuest(const std::string& questId, Player* player);
 	};
 }

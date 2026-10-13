@@ -486,7 +486,11 @@ void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()
 void Demo::ThreadAlleyScene::DrawCheckerBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	auto [screenWidth, screenHeight] = uiCamera.GetScreenResolution();
-	gd->DrawRectangle(0.0f, 0.0f, static_cast<float>(screenWidth), static_cast<float>(screenHeight), 0xFF403353, true);
+	const float w = static_cast<float>(screenWidth);
+	const float h = static_cast<float>(screenHeight);
+	// Same camera as the tiles so both always share one coordinate space; oversized so no edge
+	// can expose the clear colour.
+	gd->DrawRectangle(uiCamera, -w, -h, w * 2.f, h * 2.f, 0xFF403353, true);
 
 	const float SQUARE_SIZE = 128.0f;
 	const float BASE_SCROLL_SPEED = 30.0f;

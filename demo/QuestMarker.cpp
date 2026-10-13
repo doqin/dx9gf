@@ -34,14 +34,13 @@ namespace Demo {
         QuestState state = QuestManager::GetInstance()->GetQuestState(questId);
         std::shared_ptr<DX9GF::AnimatedSprite> activeSprite = nullptr;
 
-        if (role == QuestMarkerRole::Giver) {
-            if (state == QuestState::Locked) {
-                activeSprite = sprExclGold;
-            }
-            else if (state == QuestState::Active) {
-                activeSprite = sprExclGray;
-            }
-            //completed quests dont need markers
+        if (QuestManager::GetInstance()->IsReadyToTurnIn(questId)) {
+            // Goal reached, waiting to be turned in: show the cyan "?"
+            activeSprite = sprQuesCyan;
+        }
+        else if (role == QuestMarkerRole::Giver) {
+            if (state == QuestState::Locked) activeSprite = sprExclGold;
+            else if (state == QuestState::Active) activeSprite = sprExclGray;
         }
         else if (role == QuestMarkerRole::Receiver) {
             if (state == QuestState::Active) {

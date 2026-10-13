@@ -45,7 +45,7 @@ void Demo::TutorialWorldScene::OnInit()
 	npcIntroduction->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	npcIntroduction->RegisterVoice(L"Kako", "bleep28");
 	npcIntroduction->RegisterVoice(L"???", "bleep28");
-	npcIntroduction->SetInteractLogic([](NPC* self) -> std::function<void()> {
+	npcIntroduction->SetInteractLogic([this](NPC* self) -> std::function<void()> {
 		auto qState = QuestManager::GetInstance()->GetQuestState("Quest_Tutorial");
 		if (qState == Demo::QuestState::Locked) {
 			self->AddLine(Tr(L"???"), Tr(L"Hello! Welcome."));
@@ -68,6 +68,13 @@ void Demo::TutorialWorldScene::OnInit()
 			};
 		}
 		else if (qState == Demo::QuestState::Active) {
+			if (QuestManager::GetInstance()->IsReadyToTurnIn("Quest_Tutorial")) {
+				self->AddLine(Tr(L"Kako"), Tr(L"You took down your first enemy. Not bad at all!"));
+				return [this]() {
+					auto result = QuestManager::GetInstance()->TurnInQuest("Quest_Tutorial", player.get());
+					if (result.hasReward && popUpMessage) popUpMessage->ShowMessage(L"(+) " + result.rewardMessage, 5.0f);
+					};
+			}
 			self->AddLine(Tr(L"Kako"), Tr(L"Explore around a bit!"));
 		}
 		else {
@@ -81,7 +88,7 @@ void Demo::TutorialWorldScene::OnInit()
 	npcKako->AttachQuestMarker("Quest_KakosLab", Demo::QuestMarkerRole::Giver);
 	npcKako->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	npcKako->RegisterVoice(L"Kako", "bleep28");
-	npcKako->SetInteractLogic([](NPC* self) -> std::function<void()> {
+	npcKako->SetInteractLogic([this](NPC* self) -> std::function<void()> {
 		auto prevQuestState = QuestManager::GetInstance()->GetQuestState("Quest_Tutorial");
 		auto questState = QuestManager::GetInstance()->GetQuestState("Quest_KakosLab");
 		if (questState == Demo::QuestState::Locked) {
@@ -106,6 +113,13 @@ void Demo::TutorialWorldScene::OnInit()
 			};
 		}
 		else if (questState == Demo::QuestState::Active) {
+			if (QuestManager::GetInstance()->IsReadyToTurnIn("Quest_KakosLab")) {
+				self->AddLine(Tr(L"Kako"), Tr(L"You actually saved my life in the lab back there! As a tiny thank you... ta-da! This is for you."));
+				return [this]() {
+					auto result = QuestManager::GetInstance()->TurnInQuest("Quest_KakosLab", player.get());
+					if (result.hasReward && popUpMessage) popUpMessage->ShowMessage(L"(+) " + result.rewardMessage, 5.0f);
+					};
+			}
 			self->AddLine(Tr(L"Kako"), Tr(L"I'll be waiting for you to clear the lab!"));
 		}
 		else {

@@ -260,6 +260,14 @@ namespace Demo {
 		std::shared_ptr<DX9GF::Texture> goldTex;
 		int currentEnergyPieces = 0;
 	private:
+		// Deal animations run here instead of in commandBuffer, so they never hold up button handlers.
+		// Each card gets its own command and all of them advance every frame.
+		std::vector<std::shared_ptr<DX9GF::ICommand>> cardAnimCommands;
+		void UpdateCardAnimations(unsigned long long deltaTime);
+		// Moves a card from queuedToDraw into the hand. Safe to call for a card that already landed.
+		void LandDrawnCard(const std::shared_ptr<ICard>& card);
+		// Lands every card still in flight right now and drops their animations.
+		void SettleCardAnimations();
 		// midTurn drops the hold and stagger from the deal animation - a mid-turn draw blocks the
 		// Execute/Run buttons until it lands, so it should not linger.
 		void DrawCards(size_t count, bool midTurn = false);
@@ -410,8 +418,7 @@ namespace Demo {
 		// block executes as the turn ends, so anything gained there is never spent.
 		void GainEnergyNow(int amount) { energy += amount; }
 		void DrawCardsNow(int amount);
-		// Feedback for something the player just did, so it shows up now instead of queueing
-		// behind whatever animation the command buffer is running.
+		// Shows a message immediately instead of queueing it behind other queued commands.
 		void QueuePopUpMessage(const std::wstring& msg) { if (popUpMessage) popUpMessage->ShowMessage(msg); }
 		void AddPendingGoldTokenReward(int amount) { pendingGoldTokenReward += amount; }
 		void SpawnRandomToken(float x, float y);

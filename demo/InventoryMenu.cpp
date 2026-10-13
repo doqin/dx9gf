@@ -1311,9 +1311,11 @@ namespace Demo {
 					drawY += 30.0f;
 
 					fontSprite->SetScale(1.0f, 1.0f);
-					fontSprite->SetColor(state == QuestState::Completed ? 0xFF00FF00 : 0xFFFFFFFF);
+					const bool ready = QuestManager::GetInstance()->IsReadyToTurnIn(selectedQuestId);
+					fontSprite->SetColor(state == QuestState::Completed ? 0xFF00FF00 : (ready ? 0xFF00FFFF : 0xFFFFFFFF));
 					fontSprite->SetPosition(rightContainerX + padX, drawY);
-					fontSprite->SetText(state == QuestState::Completed ? Tr(L"Status: Completed") : Tr(L"Status: Active"));
+					fontSprite->SetText(state == QuestState::Completed ? Tr(L"Status: Completed")
+						: (ready ? Tr(L"Status: Ready to turn in") : Tr(L"Status: Active")));
 					fontSprite->Draw(*uiCamera, deltaTime);
 					drawY += 25.0f;
 
@@ -1491,7 +1493,8 @@ namespace Demo {
 			};
 
 		auto addQuest = [&](const Demo::QuestInfo& q, bool isActive) {
-			std::string prefix = isActive ? "(+) " : "(-) ";
+			bool ready = isActive && QuestManager::GetInstance()->IsReadyToTurnIn(q.id);
+			std::string prefix = ready ? "(!) " : (isActive ? "(+) " : "(-) ");
 			std::string titleStr = DX9GF::Utils::WideToUtf8(q.title);
 
 			float questPadX = 15.0f;
@@ -1504,15 +1507,15 @@ namespace Demo {
 			btn->Init(uiCamera);
 			btn->SetPadding(questPadX, 6.0f);
 
-			if (isActive) btn->SetTextColors(0xFFFFFFFF, 0xFFFFD700, 0xFFFFAA00, 0xFF888888);
-			else btn->SetTextColors(0xFFAAAAAA, 0xFFCCCCCC, 0xFFFFFFFF, 0xFF888888);
-
 			btn->SetBackgroundColors(D3DXCOLOR(0, 0, 0, 0), D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.1f), D3DXCOLOR(1.0f, 0.84f, 0.0f, 0.2f), D3DXCOLOR(0, 0, 0, 0));
 
 			questButtons.push_back({ btn, currentY, q.id });
 			currentY += buttonH + paddingY;
 
 			if (selectedQuestId.empty()) selectedQuestId = q.id;
+			if (ready) btn->SetTextColors(0xFF00FFFF, 0xFF80FFFF, 0xFFFFFFFF, 0xFF888888);
+			else if (isActive) btn->SetTextColors(0xFFFFFFFF, 0xFFFFD700, 0xFFFFAA00, 0xFF888888);
+			else btn->SetTextColors(0xFFAAAAAA, 0xFFCCCCCC, 0xFFFFFFFF, 0xFF888888);
 			};
 
 		if (!activeQuests.empty()) {

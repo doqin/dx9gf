@@ -16,6 +16,14 @@
 #include "backends/imgui_impl_dx9.h"
 #include "backends/imgui_impl_win32.h"
 
+namespace {
+	void ShowQuestResult(Demo::PopUpMessage* popup, const Demo::QuestEventResult& r) {
+		if (!popup) return;
+		if (r.hasReward) popup->ShowMessage(L"(+) " + r.rewardMessage, 5.0f);
+		if (!r.hintMessage.empty()) popup->ShowMessage(r.hintMessage, 5.0f);
+	}
+}
+
 Demo::WorldSceneBase::WorldSceneBase(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh)
 	: IScene(sw, sh), game(game), saveManager(sm) {
 }
@@ -167,9 +175,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	// Pay out quests whose goal was already done before the player accepted them.
 	if (!isTransitioning && !currentConversation && !PopupManager::GetInstance()->IsActive()) {
 		auto deferred = QuestManager::GetInstance()->ResolveDeferredEvents(player.get());
-		if (deferred.hasReward && popUpMessage) {
-			popUpMessage->ShowMessage(L"(+) " + deferred.rewardMessage, 5.0f);
-		}
+		ShowQuestResult(popUpMessage.get(), deferred);
 	}
 
 	// Announce freshly obtained gears one at a time, once any dialogue / other popup is out of the way.
@@ -707,19 +713,14 @@ void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 			battleScene->SetOnVictoryCallback([e, questEvent, questId, this]() {
 				e->SetDefeatedState(true, 180.f);
 
-				// Complete the tutorial quest the first time the player defeats an enemy.
 				auto firstEncounter = QuestManager::GetInstance()->NotifyEvent("FIRST_ENCOUNTER_DEFEATED", "", this->player.get());
-				if (firstEncounter.hasReward && this->popUpMessage) {
-					this->popUpMessage->ShowMessage(L"(+) " + firstEncounter.rewardMessage, 5.0f);
-				}
+				ShowQuestResult(this->popUpMessage.get(), firstEncounter);
 
 				if (!questEvent.empty()) {
 					auto result = QuestManager::GetInstance()->NotifyEvent(questEvent, questId, this->player.get());
-					if (result.hasReward && this->popUpMessage) {
-						this->popUpMessage->ShowMessage(L"(+) " + result.rewardMessage, 5.0f);
-					}
+					ShowQuestResult(this->popUpMessage.get(), result);
 				}
-			});
+				});
 
 			sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 			sceMan->GoToNext();
