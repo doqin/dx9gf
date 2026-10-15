@@ -32,6 +32,8 @@ namespace Demo {
 		// States
 		State state = State::Down;
 		bool isWalking = false;
+		bool isBattling = false;
+		bool isFocused = false; // moving at normal speed (not sprinting); shows the hitbox in battle
 		float cameraDeltaTime = 0;
 		bool followCamera = true;
 		bool isInvincible = false;
@@ -81,6 +83,8 @@ namespace Demo {
 		float surfaceTimeout = 0.0f;
 	public:
 		static bool ignoreCollisions; // For debugging purposes
+		// In battle, projectiles and beams hit a circle of this radius centred on the collider
+		static constexpr float BATTLE_HITBOX_RADIUS = 3.f;
 		Player(std::weak_ptr<DX9GF::TransformManager> tm) : ICombatant(tm, 50.0) {}
 		Player(std::weak_ptr<DX9GF::TransformManager> tm,
 			float x, float y, float rot = 0, float sx = 1, float sy = 1)

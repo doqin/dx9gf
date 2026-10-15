@@ -224,6 +224,10 @@ namespace Demo
 		btnLangEN->SetLocalPosition(SLIDER_COLUMN_X, langRowY + btnOffsetY);
 		btnLangVI->SetLocalPosition(SLIDER_COLUMN_X + 130.f, langRowY + btnOffsetY);
 
+		float moveRowY = startY + rowSpacing * 6.0f;
+		btnMoveSprint->SetLocalPosition(SLIDER_COLUMN_X, moveRowY + btnOffsetY);
+		btnMoveSlow->SetLocalPosition(SLIDER_COLUMN_X, moveRowY + rowSpacing + btnOffsetY);
+
 		for (size_t i = 0; i < keybindRows.size(); ++i) {
 			if (keybindRows[i].button) {
 				const auto pos = GetKeybindRowPos(i, startY, rowSpacing);
@@ -337,6 +341,29 @@ namespace Demo
 			}
 			});
 
+		// Init 2 Movement Style checkboxes (Shift to sprint / Shift to slow)
+		btnMoveSprint = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
+		btnMoveSprint->SetSpriteCoords(sm->GetMovementStyle() == MovementStyle::ShiftToSprint ? 272 : 256, 352, 16, 16, 0, true);
+		btnMoveSprint->SetSpriteScale(2.f, 2.f);
+		btnMoveSprint->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+			auto sm = SettingsManager::GetInstance();
+			if (sm->GetMovementStyle() != MovementStyle::ShiftToSprint) {
+				sm->SetMovementStyle(MovementStyle::ShiftToSprint);
+				sm->SaveSettings();
+			}
+			});
+
+		btnMoveSlow = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
+		btnMoveSlow->SetSpriteCoords(sm->GetMovementStyle() == MovementStyle::ShiftToSlow ? 272 : 256, 352, 16, 16, 0, true);
+		btnMoveSlow->SetSpriteScale(2.f, 2.f);
+		btnMoveSlow->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+			auto sm = SettingsManager::GetInstance();
+			if (sm->GetMovementStyle() != MovementStyle::ShiftToSlow) {
+				sm->SetMovementStyle(MovementStyle::ShiftToSlow);
+				sm->SaveSettings();
+			}
+			});
+
 		btnResPrev = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
 		btnResPrev->SetSpriteCoords(240, 96, 16, 16, 0);
 		btnResPrev->SetSpriteScale(2.f, 2.f);
@@ -414,7 +441,7 @@ namespace Demo
 		SetupKeybindBtn("OPEN_MAP", L"Open map");
 
 		// Active Buttons
-		std::vector<std::shared_ptr<Demo::IButton>> buttons = { backButton, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck, btnLangEN, btnLangVI };
+		std::vector<std::shared_ptr<Demo::IButton>> buttons = { backButton, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck, btnLangEN, btnLangVI, btnMoveSprint, btnMoveSlow };
 		for (auto& row : keybindRows) buttons.push_back(row.button);
 		for (auto& btn : buttons)
 		{
@@ -455,6 +482,10 @@ namespace Demo
 			btnLangEN->SetSpriteCoords(272, 352, 16, 16, 0, true);
 			btnLangVI->SetSpriteCoords(256, 352, 16, 16, 0, true);
 		}
+
+		const bool slowStyle = sm->GetMovementStyle() == MovementStyle::ShiftToSlow;
+		btnMoveSprint->SetSpriteCoords(slowStyle ? 256 : 272, 352, 16, 16, 0, true);
+		btnMoveSlow->SetSpriteCoords(slowStyle ? 272 : 256, 352, 16, 16, 0, true);
 
 		for (auto& button : uiButtons) button->Update(deltaTime);
 
@@ -582,9 +613,23 @@ namespace Demo
 			fontSprite->SetText(L"Tiếng Việt");
 			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
 
+			float moveRowY = startY + rowSpacing * 6.0f;
+			DrawString(Tr(L"Movement Style"), LABEL_COLUMN_X, moveRowY, 0xFFFFFFFF);
+
+			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, moveRowY);
+			fontSprite->SetColor(0xFFFFFFFF);
+			fontSprite->SetText(Tr(L"Hold to sprint"));
+			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+
+			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, moveRowY + rowSpacing);
+			fontSprite->SetText(Tr(L"Hold to slow"));
+			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+
 			for (size_t i = 0; i < keybindRows.size(); ++i) {
 				const auto pos = GetKeybindRowPos(i, startY, rowSpacing);
-				DrawString(Tr(keybindRows[i].label), pos.labelX, pos.y, 0xFFFFFFFF);
+				const wchar_t* label = keybindRows[i].label;
+				if (keybindRows[i].action == "SPRINT" && sm->GetMovementStyle() == MovementStyle::ShiftToSlow) label = L"Focus";
+				DrawString(Tr(label), pos.labelX, pos.y, 0xFFFFFFFF);
 			}
 
 			//draw tracks

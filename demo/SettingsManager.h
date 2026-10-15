@@ -15,6 +15,11 @@ namespace Demo
 		VI
 	};
 
+	enum class MovementStyle {
+		ShiftToSprint,
+		ShiftToSlow
+	};
+
 	class SettingsManager
 	{
 	private:
@@ -34,6 +39,7 @@ namespace Demo
 		int currentResIndex;
 
 		Language currentLanguage;
+		MovementStyle movementStyle = MovementStyle::ShiftToSprint;
 	public:
 		static SettingsManager* GetInstance()
 		{
@@ -76,5 +82,8 @@ namespace Demo
 
 		void SetLanguage(Language lang) { this->currentLanguage = lang; }
 		Language GetLanguage() const { return this->currentLanguage; }
+
+		void SetMovementStyle(MovementStyle style) { this->movementStyle = style; }
+		MovementStyle GetMovementStyle() const { return this->movementStyle; }
 	};
 }

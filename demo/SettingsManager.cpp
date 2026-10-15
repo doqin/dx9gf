@@ -25,6 +25,7 @@ namespace Demo
 		this->SetMasterVolume(1.0f);
 		this->SetFullscreen(false);
 		this->currentLanguage = Language::EN;
+		this->movementStyle = MovementStyle::ShiftToSprint;
 
 		keybinds["MOVE_LEFT"] = DIK_A;
 		keybinds["MOVE_UP"] = DIK_W;
@@ -75,6 +76,7 @@ namespace Demo
 			else if (key == "FULLSCREEN") this->SetFullscreen(std::stoi(value));
 			else if (key == "RESOLUTION_INDEX") this->SetResolutionIndex(std::stoi(value));
 			else if (key == "LANGUAGE") this->currentLanguage = (value == "VI") ? Language::VI : Language::EN;
+			else if (key == "MOVEMENT_STYLE") this->movementStyle = (value == "SHIFT_TO_SLOW") ? MovementStyle::ShiftToSlow : MovementStyle::ShiftToSprint;
 			else this->keybinds[key] = std::stoi(value);
 		}
 
@@ -93,6 +95,7 @@ namespace Demo
 		file << "FULLSCREEN=" << isFullscreen << "\n";
 		file << "RESOLUTION_INDEX=" << currentResIndex << "\n";
 		file << "LANGUAGE=" << (currentLanguage == Language::VI ? "VI" : "EN") << "\n";
+		file << "MOVEMENT_STYLE=" << (movementStyle == MovementStyle::ShiftToSlow ? "SHIFT_TO_SLOW" : "SHIFT_TO_SPRINT") << "\n";
 		for (const auto& pair : keybinds)
 		{
 			file << pair.first << "=" << pair.second << "\n";
