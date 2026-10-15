@@ -92,6 +92,7 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 	walkingUpRight->SetFrameRate(12);
 	walkingDownLeft->SetFrameRate(12);
 	walkingUpLeft->SetFrameRate(12);
+	this->isBattling = isBattling;
 	// Create collider
 	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 8, 4, 0, isBattling ? 6 : 14);
 	collider->SetOriginCenter();
@@ -135,7 +136,11 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 	D3DXVec2Normalize(&dirNorm, &dir);
 	D3DXVECTOR2 moveDir = dirNorm; // unscaled direction, used for footprint placement
 	bool isRunning = false;
-	if (inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("SPRINT"))) {
+	// "Shift to sprint": holding the key speeds up. "Shift to slow": sprint speed is the default and holding the key slows to normal.
+	const bool shiftHeld = inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("SPRINT"));
+	const bool fast = (SettingsManager::GetInstance()->GetMovementStyle() == MovementStyle::ShiftToSlow) ? !shiftHeld : shiftHeld;
+	isFocused = !fast;
+	if (fast) {
 		isRunning = true;
 		dirNorm.x *= SPRINT_MULTIPLIER;
 		dirNorm.y *= SPRINT_MULTIPLIER;
@@ -467,6 +472,20 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 	}
 
 	collider->Draw(graphicsDevice, *camera);
+
+	if (isBattling && isFocused && !IsDead()) {
+		auto [hx, hy] = collider->GetWorldPosition();
+		const float d = BATTLE_HITBOX_RADIUS * 2.f;
+		const float haloD = d + 8.f;
+		graphicsDevice->SetAlphaBlending(true);
+		// soft red halo and a bright ring around the exact hitbox so it reads against the sprite
+		graphicsDevice->DrawEllipse(*camera, hx, hy, haloD, haloD, D3DCOLOR_ARGB(110, 255, 40, 40), true);
+		graphicsDevice->DrawEllipse(*camera, hx, hy, haloD, haloD, D3DCOLOR_ARGB(255, 255, 255, 255), false);
+		// the hitbox itself: solid white core with a red edge
+		graphicsDevice->DrawEllipse(*camera, hx, hy, d, d, D3DCOLOR_ARGB(255, 255, 255, 255), true);
+		graphicsDevice->DrawEllipse(*camera, hx, hy, d + 1.f, d + 1.f, D3DCOLOR_ARGB(255, 255, 0, 0), false);
+		graphicsDevice->SetAlphaBlending(false);
+	}
 }
 
 void Demo::Player::SetFollowCamera(bool followCamera)

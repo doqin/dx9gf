@@ -9,7 +9,6 @@
 namespace {
 	constexpr float floatEpsilon = 0.000001f;
 	constexpr float pi = 3.14159265358979323846f;
-	constexpr int overlapSamples = 48;
 
 	struct Vec2 {
 		float x;
@@ -36,20 +35,6 @@ namespace {
 		float s = std::sin(radians);
 		return { v.x * c - v.y * s, v.x * s + v.y * c };
 	}
-
-	// Unit-circle samples shared by every ellipse test; computed once
-	// instead of 96 trig calls per projectile per frame like the old
-	// EllipseCollider path.
-	struct UnitCircleTable {
-		Vec2 samples[overlapSamples];
-		UnitCircleTable() {
-			for (int i = 0; i < overlapSamples; i++) {
-				float theta = static_cast<float>(i) / static_cast<float>(overlapSamples) * 2.0f * pi;
-				samples[i] = { std::cos(theta), std::sin(theta) };
-			}
-		}
-	};
-	const UnitCircleTable unitCircle;
 
 	// The player's rectangle collider, resolved to world space once per
 	// frame instead of once per projectile.
@@ -96,19 +81,12 @@ namespace {
 		return true;
 	}
 
-	bool PointInRect(const RectShape& rect, const Vec2& p)
-	{
-		Vec2 d = p - rect.center;
-		float px = std::abs(Dot(d, rect.axisX));
-		float py = std::abs(Dot(d, rect.axisY));
-		return px <= (rect.halfX + floatEpsilon) && py <= (rect.halfY + floatEpsilon);
-	}
-
-	// Same overlap test the old EllipseCollider/RectangleCollider pair ran
-	// (corners-in-ellipse + sampled-ellipse-boundary-in-rect), on plain
-	// floats with a cheap distance broad-phase in front.
-	bool EllipseOverlapsRect(
-		const RectShape& rect,
+	// The player's battle hitbox is a circle. Testing it against an ellipse is done
+	// by growing the ellipse's radii by the circle's radius and checking the circle's
+	// centre - exact on the axes, a slight over-estimate on the diagonals.
+	bool EllipseOverlapsCircle(
+		const Vec2& circleCenter,
+		float circleRadius,
 		float centerX,
 		float centerY,
 		float rotation,
@@ -120,46 +98,22 @@ namespace {
 			return false;
 		}
 
-		const float maxRadius = (std::max)(radiusX, radiusY);
-		const float reach = maxRadius + rect.halfDiagonal;
-		const Vec2 center{ centerX, centerY };
-		if (LengthSq(center - rect.center) > reach * reach) {
-			return false;
-		}
-
 		const float c = std::cos(rotation);
 		const float s = std::sin(rotation);
-
-		for (const auto& corner : rect.corners) {
-			Vec2 d = corner - center;
-			// rotate by -rotation into the ellipse's local space
-			float lx = d.x * c + d.y * s;
-			float ly = -d.x * s + d.y * c;
-			float nx = lx / radiusX;
-			float ny = ly / radiusY;
-			if (nx * nx + ny * ny <= 1.0f + floatEpsilon) {
-				return true;
-			}
-		}
-
-		for (const auto& sample : unitCircle.samples) {
-			Vec2 local{ sample.x * radiusX, sample.y * radiusY };
-			Vec2 world{
-				centerX + local.x * c - local.y * s,
-				centerY + local.x * s + local.y * c
-			};
-			if (PointInRect(rect, world)) {
-				return true;
-			}
-		}
-
-		return false;
+		const Vec2 d = circleCenter - Vec2{ centerX, centerY };
+		// rotate by -rotation into the ellipse's local space
+		const float lx = d.x * c + d.y * s;
+		const float ly = -d.x * s + d.y * c;
+		const float nx = lx / (radiusX + circleRadius);
+		const float ny = ly / (radiusY + circleRadius);
+		return nx * nx + ny * ny <= 1.0f + floatEpsilon;
 	}
 
-	// Separating-axis test between the player's box and a beam's oriented box.
-	// Both boxes' axes are unit length, so the projections need no normalizing.
-	bool ObbOverlapsRect(
-		const RectShape& rect,
+	// Circle against a beam's oriented box: clamp the circle's centre into the box
+	// (in the beam's local space) and compare the leftover distance to the radius.
+	bool ObbOverlapsCircle(
+		const Vec2& circleCenter,
+		float circleRadius,
 		float centerX,
 		float centerY,
 		float rotation,
@@ -173,21 +127,12 @@ namespace {
 
 		const float c = std::cos(rotation);
 		const float s = std::sin(rotation);
-		const Vec2 beamX{ c, s };
-		const Vec2 beamY{ -s, c };
-		const Vec2 delta = Vec2{ centerX, centerY } - rect.center;
-
-		const Vec2 axes[4] = { rect.axisX, rect.axisY, beamX, beamY };
-		for (const auto& axis : axes) {
-			const float rectExtent = std::abs(Dot(rect.axisX, axis)) * rect.halfX
-				+ std::abs(Dot(rect.axisY, axis)) * rect.halfY;
-			const float beamExtent = std::abs(Dot(beamX, axis)) * halfLength
-				+ std::abs(Dot(beamY, axis)) * halfThickness;
-			if (std::abs(Dot(delta, axis)) > rectExtent + beamExtent + floatEpsilon) {
-				return false;
-			}
-		}
-		return true;
+		const Vec2 d = circleCenter - Vec2{ centerX, centerY };
+		const float lx = d.x * c + d.y * s;
+		const float ly = -d.x * s + d.y * c;
+		const float dx = (std::max)(0.f, std::abs(lx) - halfLength);
+		const float dy = (std::max)(0.f, std::abs(ly) - halfThickness);
+		return dx * dx + dy * dy <= circleRadius * circleRadius + floatEpsilon;
 	}
 
 	D3DCOLOR ScaleAlpha(D3DCOLOR color, float multiplier)
@@ -1038,8 +983,8 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 		}
 
 		auto& combat = combats[i];
-		if (hasPlayerRect && EllipseOverlapsRect(
-			playerRect, tr.x, tr.y, tr.rotation,
+		if (hasPlayerRect && EllipseOverlapsCircle(
+			playerRect.center, Player::BATTLE_HITBOX_RADIUS, tr.x, tr.y, tr.rotation,
 			combat.colliderWidth * 0.5f, combat.colliderHeight * 0.5f)) {
 			ApplyHit(*player, combat);
 
@@ -1084,8 +1029,8 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 			continue;
 		}
 
-		if (laser.elapsed >= laser.delay + laser.warnTime && hasPlayerRect && ObbOverlapsRect(
-			playerRect, laser.x, laser.y, laser.angle,
+		if (laser.elapsed >= laser.delay + laser.warnTime && hasPlayerRect && ObbOverlapsCircle(
+			playerRect.center, Player::BATTLE_HITBOX_RADIUS, laser.x, laser.y, laser.angle,
 			laser.length * 0.5f, laser.thickness * 0.5f)) {
 			ApplyHit(*player, laserCombats[i]);
 		}

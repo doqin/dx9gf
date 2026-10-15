@@ -19,7 +19,7 @@ namespace Demo
     constexpr float ALIGN_OFFSET_Y = 10.0f;
 
     // Shift Keybind rows start value so Display Mode, Resolution, and Language rows fit cleanly
-    constexpr float KEYBIND_ROW_START = 6.0f;
+    constexpr float KEYBIND_ROW_START = 8.0f;
     constexpr float KEYBIND_ROW_STEP = 1.1f;
 
     // Keybinds flow into two columns so the list never runs off the bottom of the screen
@@ -54,6 +54,10 @@ namespace Demo
         // Language Checkboxes
         std::shared_ptr<Demo::IconButton> btnLangEN;
         std::shared_ptr<Demo::IconButton> btnLangVI;
+
+        // Movement Style Checkboxes
+        std::shared_ptr<Demo::IconButton> btnMoveSprint;
+        std::shared_ptr<Demo::IconButton> btnMoveSlow;
 
         bool isGoingBack = false;
 
