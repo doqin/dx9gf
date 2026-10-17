@@ -30,10 +30,12 @@ namespace Demo {
 		int currentCycle = -1;
 		int skillTurnThisCycle = -1;
 
-		void PatternDefrag(float projDamage);
-		void PatternPing999(float projDamage);
-		void PatternZigzag(float projDamage);
-		void PatternBadSector(float projDamage);
+		// isAlone is false when other enemies share the fight, and the patterns thin out to
+		// leave room for their bullets.
+		void PatternDefrag(float projDamage, bool isAlone);
+		void PatternPing999(float projDamage, bool isAlone);
+		void PatternZigzag(float projDamage, bool isAlone);
+		void PatternBadSector(float projDamage, bool isAlone);
 
 	public:
 		using EnemyBase<KernelEnemy>::EnemyBase;

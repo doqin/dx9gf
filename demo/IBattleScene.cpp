@@ -2304,13 +2304,19 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 
 void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
 {
-	fleeButton->Draw(game->GetGraphicsDevice(), deltaTime);
-	itemsButton->Draw(game->GetGraphicsDevice(), deltaTime);
-	attackButton->Draw(game->GetGraphicsDevice(), deltaTime);
-
 	auto gd = game->GetGraphicsDevice();
-	const float y = game->GetVirtualHeight() / 2.f - 128;
-	DrawHealthAndDefenseBar(y, gd);
+
+	// The buttons sit inside the HP panel, so it goes down first. Its content bottom lines up with
+	// the buttons' bottom edge from PlayerStandByUpdate (virtual height / 2 - 50); the panel's
+	// own border + padding (14) and the bar's 20px offset turn that into y.
+	const float buttonsBottom = game->GetVirtualHeight() / 2.f - 50.f;
+	const float y = buttonsBottom + 14.f - 20.f;
+	const float buttonsW = attackButton->GetWidth() + itemsButton->GetWidth() + fleeButton->GetWidth() + 2 * 20.f;
+	DrawHealthAndDefenseBar(y, gd, 10.f + attackButton->GetHeight(), buttonsW);
+
+	fleeButton->Draw(gd, deltaTime);
+	itemsButton->Draw(gd, deltaTime);
+	attackButton->Draw(gd, deltaTime);
 }
 
 void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
@@ -2749,24 +2755,94 @@ void Demo::IBattleScene::DrawProjectedDamage(unsigned long long deltaTime)
 	fontSprite->End();
 }
 
-void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsDevice* gd)
+void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsDevice* gd, const float extraH, const float minContentW)
 {
-	const float spacing = 5.f;
-	const float w = battlePlayer->GetMaxHealth() * spacing;
-	const float defenseW = (std::max)(0.f, battlePlayer->GetTemporaryDefense()) * spacing;
-	const float w_ = battlePlayer->GetHealth() * spacing;
-	const float x = -w / 2;
-	const float defenseY = y - 24.f;
+	// Same look as the overworld PlayerHUD panel, trimmed to an HP row. The panel keeps the old
+	// bar's bottom edge (y + 20) so the layout around it does not move. extraH / minContentW
+	// reserve room under the HP row (e.g. for the standby buttons, which the caller positions).
+	constexpr float OUTLINE_T = 2.f, FRAME_T = 4.f, INNER_T = 2.f, PADDING = 6.f; // dark lines match the buttons' 2px sprite outline
+	constexpr float BORDER_T = OUTLINE_T + FRAME_T + INNER_T;
+	constexpr float CHECKER_SIZE = 8.f;
+	constexpr float CELL_W = 18.f, CELL_H = 24.f, CELL_BORDER = 2.f;
+	constexpr float ROW_H = CELL_H + 2.f * CELL_BORDER;
+	constexpr float GAP = 8.f;
+	constexpr D3DCOLOR PANEL_OUTLINE = 0xFF262620, PANEL_FRAME = 0xFFd8d5a8;
+	constexpr D3DCOLOR PANEL_BG = 0xFF7e7ec6, PANEL_BG_ALT = 0xFF8d8dd4;
+	constexpr D3DCOLOR CELL_BG = 0xFF141410, DIGIT_COLOR = 0xFFf0eeda, DIGIT_COLOR_LOW = 0xFFff5a3c;
 
-	gd->DrawRectangle(this->uiCamera, x, defenseY, w, 16, 0xFF808080, true);
-	gd->DrawRectangle(this->uiCamera, x, defenseY, defenseW, 16, 0xFFD0D0D0, true);
-	gd->DrawRectangle(this->uiCamera, x, defenseY, w, 16, 0xFF000000, false);
+	const float hp = battlePlayer->GetHealth();
+	const std::wstring hpValue = std::to_wstring(static_cast<int>(hp));
+	const int cellCount = static_cast<int>((std::max)({ static_cast<size_t>(2), hpValue.size(),
+		std::to_wstring(static_cast<int>(battlePlayer->GetMaxHealth())).size() }));
+	const float groupW = cellCount * CELL_W + (cellCount + 1) * CELL_BORDER;
 
-	gd->DrawRectangle(this->uiCamera, x, y, w, 20, 0xFFb4202a, true);
-	gd->DrawRectangle(this->uiCamera, x, y, w, 10, 0xFFdf3e23, true);
-	gd->DrawRectangle(this->uiCamera, x, y, w_, 20, 0xFF59c135, true);
-	gd->DrawRectangle(this->uiCamera, x, y, w_, 10, 0xFF9cdb43, true);
-	gd->DrawRectangle(this->uiCamera, x, y, w, 20, 0xFF000000, false);
+	fontSprite->SetText(Tr(L"HP"));
+	const float labelW = static_cast<float>(fontSprite->GetWidth());
+	const float labelH = static_cast<float>(fontSprite->GetHeight());
+
+	const float hpRowW = labelW + GAP + groupW;
+	const float contentW = (std::max)(hpRowW, minContentW);
+	const float contentH = ROW_H + extraH;
+	const float panelW = contentW + 2.f * (BORDER_T + PADDING);
+	const float panelH = contentH + 2.f * (BORDER_T + PADDING);
+	const float panelX = -panelW / 2.f;
+	const float panelY = y + 20.f - panelH;
+	const float x = panelX + panelW; // right edge, where the active item row starts (was the bar's)
+
+	gd->SetAlphaBlending(true);
+	gd->DrawRectangle(this->uiCamera, panelX, panelY, panelW, panelH, PANEL_OUTLINE, true);
+	gd->DrawRectangle(this->uiCamera, panelX + OUTLINE_T, panelY + OUTLINE_T, panelW - 2.f * OUTLINE_T, panelH - 2.f * OUTLINE_T, PANEL_FRAME, true);
+	const float innerX = panelX + OUTLINE_T + FRAME_T;
+	const float innerY = panelY + OUTLINE_T + FRAME_T;
+	const float innerW = panelW - 2.f * (OUTLINE_T + FRAME_T);
+	const float innerH = panelH - 2.f * (OUTLINE_T + FRAME_T);
+	gd->DrawRectangle(this->uiCamera, innerX, innerY, innerW, innerH, PANEL_OUTLINE, true);
+	const float bgX = innerX + INNER_T, bgY = innerY + INNER_T;
+	const float bgW = innerW - 2.f * INNER_T, bgH = innerH - 2.f * INNER_T;
+	gd->DrawRectangle(this->uiCamera, bgX, bgY, bgW, bgH, PANEL_BG, true);
+	const int cols = static_cast<int>(std::ceil(bgW / CHECKER_SIZE));
+	const int rows = static_cast<int>(std::ceil(bgH / CHECKER_SIZE));
+	for (int row = 0; row < rows; ++row) {
+		for (int col = (row % 2 == 0) ? 1 : 0; col < cols; col += 2) {
+			const float cx = bgX + col * CHECKER_SIZE;
+			const float cy = bgY + row * CHECKER_SIZE;
+			const float cw = (std::min)(CHECKER_SIZE, bgX + bgW - cx);
+			const float ch = (std::min)(CHECKER_SIZE, bgY + bgH - cy);
+			if (cw > 0.f && ch > 0.f) gd->DrawRectangle(this->uiCamera, cx, cy, cw, ch, PANEL_BG_ALT, true);
+		}
+	}
+
+	const float contentX = panelX + BORDER_T + PADDING;
+	const float contentY = panelY + BORDER_T + PADDING;
+	const float rowY = contentY;
+	const float rowX = contentX + (contentW - hpRowW) / 2.f;
+	const float groupX = rowX + hpRowW - groupW;
+	gd->DrawRectangle(this->uiCamera, groupX - INNER_T, rowY - INNER_T, groupW + 2.f * INNER_T, ROW_H + 2.f * INNER_T, PANEL_OUTLINE, true);
+	gd->DrawRectangle(this->uiCamera, groupX, rowY, groupW, ROW_H, PANEL_FRAME, true);
+	for (int i = 0; i < cellCount; ++i) {
+		gd->DrawRectangle(this->uiCamera, groupX + CELL_BORDER + i * (CELL_W + CELL_BORDER), rowY + CELL_BORDER, CELL_W, CELL_H, CELL_BG, true);
+	}
+
+	fontSprite->Begin();
+	fontSprite->SetOutline(true, 0xFF54317c, 2.f);
+	fontSprite->SetColor(0xFFFFFFFF);
+	fontSprite->SetText(Tr(L"HP"));
+	fontSprite->SetPosition(rowX, rowY + (ROW_H - labelH) / 2.f);
+	fontSprite->Draw(this->uiCamera, 0);
+	fontSprite->SetOutline(false);
+
+	// Digits fill the cells from the right, leading cells stay blank
+	fontSprite->SetColor(hp <= battlePlayer->GetMaxHealth() * 0.25f ? DIGIT_COLOR_LOW : DIGIT_COLOR);
+	const int blanks = cellCount - static_cast<int>(hpValue.size());
+	for (size_t j = 0; j < hpValue.size(); ++j) {
+		const float cellX = groupX + CELL_BORDER + static_cast<float>(blanks + j) * (CELL_W + CELL_BORDER);
+		fontSprite->SetText(std::wstring(1, hpValue[j]));
+		fontSprite->SetPosition(cellX + (CELL_W - fontSprite->GetWidth()) / 2.f,
+			rowY + CELL_BORDER + (CELL_H - fontSprite->GetHeight()) / 2.f);
+		fontSprite->Draw(this->uiCamera, 0);
+	}
+	fontSprite->End();
+	gd->SetAlphaBlending(false);
 
 	auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
 	auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(this->uiCamera, screenX, screenY);
@@ -2776,7 +2852,7 @@ void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsD
 
 	// The items that put those buffs there, listed beside the bars. A modifier icon the mouse is
 	// already on wins the tooltip - the two never overlap, so at most one of them is hovered.
-	std::wstring itemTooltip = DrawActiveItems(x + w, y);
+	std::wstring itemTooltip = DrawActiveItems(x, y);
 	if (!isTooltipActive && !itemTooltip.empty()) {
 		isTooltipActive = true;
 		activeTooltipText = std::move(itemTooltip);

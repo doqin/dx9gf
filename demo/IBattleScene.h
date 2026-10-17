@@ -372,7 +372,7 @@ namespace Demo {
 		void ComputeProjectedDamage(std::unordered_map<IEnemy*, float>& out);
 		// That total, drawn at each enemy's bottom-left through the attack phase.
 		void DrawProjectedDamage(unsigned long long deltaTime);
-		void DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsDevice* gd);
+		void DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsDevice* gd, const float extraH = 0.f, const float minContentW = 0.f);
 		void DrawTooltip(std::wstring& activeTooltipText, float screenX, float screenY, DX9GF::GraphicsDevice* gd);
 		void DrawModifierIcons(const float x, const float y, DX9GF::GraphicsDevice* gd);
 		// The row of used-item icons beside the health bar. Returns the tooltip text for whichever

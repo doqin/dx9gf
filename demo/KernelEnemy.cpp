@@ -160,25 +160,26 @@ namespace Demo {
 	}
 
 	void KernelEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
-		(void)enemies; (void)popUpMessage; (void)graphicsDevice; (void)camera; (void)currentTurn;
+		(void)popUpMessage; (void)graphicsDevice; (void)camera; (void)currentTurn;
 
 		this->player = player;
 		float baseDamage = 5.f;
+		bool isAlone = !enemies || enemies->size() <= 1;
 
 		int patternId = GetSmartRandomPattern(1, 4);
-		if (patternId == 1) PatternDefrag(baseDamage);
-		else if (patternId == 2) PatternPing999(baseDamage);
-		else if (patternId == 3) PatternZigzag(baseDamage);
-		else PatternBadSector(baseDamage);
+		if (patternId == 1) PatternDefrag(baseDamage, isAlone);
+		else if (patternId == 2) PatternPing999(baseDamage, isAlone);
+		else if (patternId == 3) PatternZigzag(baseDamage, isAlone);
+		else PatternBadSector(baseDamage, isAlone);
 	}
 
-	void KernelEnemy::PatternDefrag(float baseDamage) {
+	void KernelEnemy::PatternDefrag(float baseDamage, bool isAlone) {
 		struct MineData { float x, y; bool isCross; };
 		std::vector<MineData> mines;
-		constexpr int WAVE_COUNT = 5;
+		const int WAVE_COUNT = isAlone ? 5 : 3;
 
 		for (int wave = 0; wave < WAVE_COUNT; ++wave) {
-			const int MINE_COUNT = RNG::Range(3, 5);
+			const int MINE_COUNT = isAlone ? RNG::Range(3, 5) : RNG::Range(2, 3);
 
 			for (int i = 0; i < MINE_COUNT; ++i) {
 				mines.push_back({ RNG::Range(-100.f, 100.f), RNG::Range(-100.f, 100.f), RNG::Range(0, 1) == 0 });
@@ -217,22 +218,25 @@ namespace Demo {
 		}
 	}
 
-	void KernelEnemy::PatternPing999(float baseDamage) {
-		const int WAVE_COUNT = 20;
+	void KernelEnemy::PatternPing999(float baseDamage, bool isAlone) {
+		const int WAVE_COUNT = isAlone ? 20 : 10;
+		const float WAVE_DELAY = isAlone ? 0.5f : 0.7f;
+		// Gap left in each row, in bullet slots
+		const int HOLE_WIDTH = isAlone ? 3 : 5;
 
 		for (int w = 0; w < WAVE_COUNT; ++w) {
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage](auto markFinished) {
+			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, HOLE_WIDTH](auto markFinished) {
 				if (auto p = this->player.lock()) {
 					float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
 					const int BULLET_COUNT = 15;
-					int safeHole = RNG::Range(1, BULLET_COUNT - 4);
+					int safeHole = RNG::Range(1, BULLET_COUNT - HOLE_WIDTH - 1);
 					float totalWidth = 500.f;
 					float startX = -250.f;
 					float baseSpacing = totalWidth / (BULLET_COUNT - 1);
 
 					for (int i = 0; i < BULLET_COUNT; ++i) {
-						if (i >= safeHole && i <= safeHole + 2) continue;
+						if (i >= safeHole && i < safeHole + HOLE_WIDTH) continue;
 
 						float jitter = RNG::Range(-baseSpacing * 0.4f, baseSpacing * 0.4f);
 						float bx = startX + (i * baseSpacing) + jitter;
@@ -248,16 +252,17 @@ namespace Demo {
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(.5f));
+			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
 		}
 	}
 
 	// Glitch sweep sends rows of zigzagging shots from alternating sides.
 	//
-	void KernelEnemy::PatternZigzag(float baseDamage) {
-		const int WAVE_COUNT = 6;
-		const int BULLETS_PER_WAVE = 10;
-		const int STEP_Y = 64;
+	void KernelEnemy::PatternZigzag(float baseDamage, bool isAlone) {
+		const int WAVE_COUNT = isAlone ? 6 : 4;
+		const int BULLETS_PER_WAVE = isAlone ? 10 : 6;
+		// Wider spacing keeps the thinner row spanning roughly the same height
+		const int STEP_Y = isAlone ? 64 : 96;
 		const float START_Y = -(BULLETS_PER_WAVE - 1) * STEP_Y * 0.5f;
 		std::shared_ptr<int> offsetY = std::make_shared<int>(0);
 		const int OFFSET_STEP = 8;
@@ -307,13 +312,14 @@ namespace Demo {
 		return { (minX + maxX) * 0.5f, (minY + maxY) * 0.5f };
 	}
 
-	void KernelEnemy::PatternBadSector(float baseDamage) {
-		const int WAVES = RNG::Range(2, 4);
+	void KernelEnemy::PatternBadSector(float baseDamage, bool isAlone) {
+		const int WAVES = isAlone ? RNG::Range(2, 4) : RNG::Range(1, 2);
+		const int MAX_ARMS = isAlone ? 4 : 2;
 		const float WARN_TIME = 1.5f;
-		const float HOLD_TIME = 4.0f;
+		const float HOLD_TIME = isAlone ? 4.0f : 3.0f;
 
 		for (int w = 0; w < WAVES; ++w) {
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, WARN_TIME, HOLD_TIME](auto markFinished) {
+			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, WARN_TIME, HOLD_TIME, MAX_ARMS](auto markFinished) {
 				this->laserVerticals.clear();
 				this->laserHorizontals.clear();
 				this->badSectorArmAngles.clear();
@@ -322,7 +328,7 @@ namespace Demo {
 				this->laserHorizontals.push_back(RNG::Range(-80.f, 80.f));
 				this->telegraphingCell = true;
 
-				int numArms = RNG::Range(1, 4);
+				int numArms = RNG::Range(1, MAX_ARMS);
 				for (int arm = 0; arm < numArms; ++arm) {
 					this->badSectorArmAngles.push_back(arm * (2.0f * PI / numArms));
 				}
