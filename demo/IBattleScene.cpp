@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "CardRegistry.h"
 #include "IBattleScene.h"
 #include "MainFont.h"
 #include "StatusDisplay.h"
@@ -659,7 +660,7 @@ void Demo::IBattleScene::RefreshPileView()
 	// bound to the world camera), so the view shows fresh copies bound to the UI camera.
 	for (int i = startIndex; i < endIndex; ++i) {
 		const int slot = i - startIndex;
-		auto copy = ICard::CreateCard(pile[i]->GetSaveID(), transformManager, draggableManager, game->GetGraphicsDevice(), &uiCamera);
+		auto copy = CardRegistry::Get().Create(pile[i]->GetSaveID(), transformManager, draggableManager, game->GetGraphicsDevice(), &uiCamera);
 		if (!copy) {
 			continue;
 		}
@@ -3407,12 +3408,12 @@ void Demo::IBattleScene::Init()
 	// Fetch Deck
 	const auto& deckCards = player->GetDeck();
 	for (const auto& cardId : deckCards) {
-		auto newCard = ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), &camera);
+		auto newCard = CardRegistry::Get().Create(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), &camera);
 		if (newCard) {
 			drawPile.push_back(newCard);
 		}
 		else {
-			// ICard::CreateCard returns null for an id it does not recognise (renamed/removed card,
+			// CardRegistry::Create returns null for an id it does not recognise (renamed/removed card,
 			// typo, stale save). Dropping it silently makes the deck - and every draw - short.
 			OutputDebugStringA(("IBattleScene::Init: unknown deck card id '" + cardId + "' skipped\n").c_str());
 		}

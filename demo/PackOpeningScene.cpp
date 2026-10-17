@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "CardRegistry.h"
 #include "PackOpeningScene.h"
 #include "MainFont.h"
 #include "LocalizationManager.h"
@@ -56,7 +57,7 @@ namespace Demo {
 		DX9GF::ConfigureExplosionEmitter(*explosionEmitter);
 
 		for (const auto& id : cardIds) {
-			auto card = ICard::CreateCard(id, transformManager);
+			auto card = CardRegistry::Get().Create(id, transformManager);
 			faces.push_back(card ? CardFace{ true, card->GetCardTemplate(), card->GetDisplayName(), CardInputSignature(card->GetInputSlotCount(), 0), card->GetCost() } : CardFace{});
 			rarities.push_back(CardCatalog::GetRarity(id));
 		}

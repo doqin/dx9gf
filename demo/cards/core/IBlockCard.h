@@ -12,9 +12,17 @@ namespace Demo {
 		bool isExecuting = false;
 		std::weak_ptr<IStatementCard> currentExecutingCard;
 		float timeSinceLastExecution = 0;
-		const float timePerExecution = .5f;
+		static constexpr float timePerExecution = .5f;
 		float timeSinceLastEnergyPopUp = 999.f;
-		const float energyPopUpCooldown = 3.f;
+		static constexpr float energyPopUpCooldown = 3.f;
+
+		// Checks the card can be paid for. When it cannot, warns the player (rate limited) and
+		// puts the card back in the hand: dragging detached it, so rejecting the drop would leave
+		// it parented to nothing - floating, not executing, yet still swept into the played pile.
+		bool AffordOrReturnToHand(const std::shared_ptr<IStatementCard>& card);
+		// Drops the card from the execution queue and the container's child list, keeping the
+		// execution pointer on the same card. Does not touch the card's parent.
+		void RemoveFromQueue(const IStatementCard* card);
 	protected:
 		std::vector<std::weak_ptr<IStatementCard>> statementCards;
 		std::shared_ptr<DX9GF::Font> nameFont;

@@ -1,16 +1,25 @@
 #include "pch.h"
 #include "CardShop.h"
-#include "StrikeCard.h"
-#include "EnergyCard.h"
-#include "AdvancedCards.h"
-#include "UtilityCards.h"
-#include "FinisherCards.h"
-#include "SynergyCards.h"
+#include "CardRegistry.h"
 #include "ICard.h"
 #include <cctype>
 #include <map>
 
 namespace {
+	// "HeavyStrikeCard" -> "Heavy Strike Card". The buy row's label, which is also its translation key.
+	std::string ShopLabel(const std::string& saveId)
+	{
+		std::string label;
+		for (size_t i = 0; i < saveId.size(); ++i) {
+			const unsigned char c = static_cast<unsigned char>(saveId[i]);
+			if (i > 0 && std::isupper(c) && !std::isupper(static_cast<unsigned char>(saveId[i - 1]))) {
+				label += ' ';
+			}
+			label += saveId[i];
+		}
+		return label;
+	}
+
 	// "HeavyStrikeCard" -> "Heavy Strike". Only used for the sell row's status message; the row
 	// itself shows the card's face art, same as the buy rows.
 	std::wstring PrettyCardName(const std::string& saveId)
@@ -41,73 +50,40 @@ Demo::CardShop::CardShop(Game* game, Player* player, int sw, int sh, ShopTier ti
 {
 }
 
+void Demo::CardShop::AddShopCard(const CardDef& def)
+{
+	auto prototype = def.create(this->transformManager);
+	itemsForSale.push_back({
+		Tr(DX9GF::Utils::Utf8ToWide(ShopLabel(def.id))),
+		CardCatalog::GetPrice(def.id),
+		prototype->GetDescription(),
+		[this, id = def.id]() { this->player->AddCardToInventory(id); },
+		RECT{ 0, 0, 0, 0 },
+		ShopIconSheet::CardFaces,
+		prototype->IsPersistent(),
+		prototype->HasLimitedUses(),
+		prototype->HasLimitedUses() ? prototype->GetMaxUses() : 0
+		});
+	ApplyCardFace(itemsForSale.back(), *prototype);
+	itemsForSale.back().ownedCount = [this, id = def.id]() {
+		const auto& inv = this->player->GetInventoryCards();
+		const auto& deck = this->player->GetDeck();
+		return static_cast<int>(std::count(inv.begin(), inv.end(), id) +
+			std::count(deck.begin(), deck.end(), id));
+		};
+}
+
 void Demo::CardShop::LoadItems()
 {
-	// Prices live in CardCatalog now; each row just names the card class and its label.
+	CardShopTier stockedTier = ShopNone;
 	switch (currentTier) {
-	case ShopTier::BASIC:
-		AddShopCard<StrikeCard>("Strike Card");
-		AddShopCard<HeavyStrikeCard>("Heavy Strike Card");
-		AddShopCard<PoisonCard>("Poison Card");
-		AddShopCard<EnergyCard>("Energy Card");
-		AddShopCard<JabCard>("Jab Card");
-		AddShopCard<BraceCard>("Brace Card");
-		AddShopCard<MarkCard>("Mark Card");
-		AddShopCard<RagingStrikeCard>("Raging Strike Card");
-		AddShopCard<ArmorPiercerCard>("Armor Piercer Card");
-		AddShopCard<LethalHarvestCard>("Lethal Harvest Card");
-		AddShopCard<ImmunityCard>("Immunity Card");
-		break;
-
-	case ShopTier::HYBRID:
-		AddShopCard<TwinStrikeCard>("Twin Strike Card");
-		AddShopCard<CleaveCard>("Cleave Card");
-		AddShopCard<VulnerableCard>("Vulnerable Card");
-		AddShopCard<WeaknessCard>("Weakness Card");
-		AddShopCard<PrefetchCard>("Prefetch Card");
-		AddShopCard<OverclockCard>("Overclock Card");
-		AddShopCard<JumpstartCard>("Jumpstart Card");
-		AddShopCard<ForesightCard>("Foresight Card");
-		// Ignite is the only source of Spark, so it and its detonator have to share a tier -
-		// selling the payoff without the setup would put a dead card in the player's deck.
-		AddShopCard<IgniteCard>("Ignite Card");
-		AddShopCard<FireDetonationCard>("Fire Detonation Card");
-		AddShopCard<ShortCircuitCard>("Short Circuit Card");
-		AddShopCard<StaticChargeCard>("Static Charge Card");
-		AddShopCard<ChainDetonationCard>("Chain Detonation Card");
-		// Poison, Burn and Marked build-arounds. Inferno, the only Burn source in this shop before Kindle,
-		// is sold in the Premium tier, so Meltdown sits next to it there.
-		AddShopCard<ToxicCloudCard>("Toxic Cloud Card");
-		AddShopCard<ContagionCard>("Contagion Card");
-		AddShopCard<SepticStrikeCard>("Septic Strike Card");
-		AddShopCard<KindleCard>("Kindle Card");
-		AddShopCard<FanTheFlamesCard>("Fan The Flames Card");
-		AddShopCard<DragnetCard>("Dragnet Card");
-		AddShopCard<BarrageCard>("Barrage Card");
-		// Cruel Strike doubles off Weak, which this tier already sells.
-		AddShopCard<CruelStrikeCard>("Cruel Strike Card");
-		AddShopCard<ShieldBashCard>("Shield Bash Card");
-		break;
-
-	case ShopTier::PREMIUM:
-		AddShopCard<CleaveCard>("Cleave Card");
-		AddShopCard<ChainLightningCard>("Chain Lightning Card");
-		AddShopCard<InfernoCard>("Inferno Card");
-		AddShopCard<TerminateCard>("Terminate Card");
-		AddShopCard<OverdriveCard>("Overdrive Card");
-		AddShopCard<SystemPurgeCard>("System Purge Card");
-		AddShopCard<SystemRestartCard>("System Restart Card");
-		// These three only pay off against a built-out block - Overload scales with the
-		// persistent cards installed in it, Chain Reaction with what resolved just before it,
-		// and Execute wants the energy to spend in the first place.
-		AddShopCard<ChainReactionCard>("Chain Reaction Card");
-		AddShopCard<ExecuteCard>("Execute Card");
-		AddShopCard<OverloadCard>("Overload Card");
-		AddShopCard<FesteringCard>("Festering Card");
-		AddShopCard<MeltdownCard>("Meltdown Card");
-		AddShopCard<HunterCard>("Hunter Card");
-		// AddShopCard<StunCard>("Stun Card");
-		break;
+	case ShopTier::BASIC: stockedTier = ShopBasic; break;
+	case ShopTier::HYBRID: stockedTier = ShopHybrid; break;
+	case ShopTier::PREMIUM: stockedTier = ShopPremium; break;
+	default: break;
+	}
+	for (const CardDef* def : CardRegistry::Get().ShopStock(stockedTier)) {
+		AddShopCard(*def);
 	}
 }
 
@@ -126,7 +102,7 @@ void Demo::CardShop::LoadSellItems()
 		const int sellValue = CardCatalog::GetSellValue(id);
 		if (sellValue <= 0) continue; // starter cards and anything with no shop price
 
-		auto proto = ICard::CreateCard(id, transformManager);
+		auto proto = CardRegistry::Get().Create(id, transformManager);
 		if (!proto) continue;
 
 		const std::string sellId = id;

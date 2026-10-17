@@ -7,12 +7,10 @@
 #include "IconButton.h"
 #include "MainBlockCard.h"
 #include "InitBlockCard.h"
-#include "StrikeCard.h"
 #include "EnemyCard.h"
 #include "CardContainer.h"
 #include "TestEnemy.h"
 #include "PopUpMessage.h"
-#include "AdvancedCards.h"
 #include "TextIconButton.h"
 #include "KeyboardNavigator.h"
 #include "BattleMenu.h"
@@ -86,7 +84,7 @@ namespace Demo {
 		bool pendingDefeatReloadSave = false;
 		// Keyboard navigation
 		// A destination a picked-up card can be placed at (a slot in the block's execution queue,
-		// or an eligible MultiTargetCard to lock an EnemyCard onto).
+		// or an eligible TargetedCard to lock an EnemyCard onto).
 		struct PlacementSlot {
 			float x;
 			float y;

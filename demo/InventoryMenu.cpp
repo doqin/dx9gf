@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "CardRegistry.h"
 #include "InventoryMenu.h"
 #include "SettingsScene.h"
 #include "DX9GFAudioManager.h"
@@ -482,7 +483,7 @@ namespace Demo {
 			return card;
 		}
 
-		auto card = ICard::CreateCard(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), uiCamera);
+		auto card = CardRegistry::Get().Create(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), uiCamera);
 		auto draggable = std::dynamic_pointer_cast<IDraggable>(card);
 		if (draggable) {
 			// Cards are moved between Deck / Available by clicking, not dragging.
