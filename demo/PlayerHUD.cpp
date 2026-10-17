@@ -11,7 +11,7 @@ namespace {
 	// Border layers, outermost first
 	constexpr float OUTLINE_T = 2.0f;
 	constexpr float FRAME_T = 6.0f;
-	constexpr float INNER_T = 1.0f;
+	constexpr float INNER_T = 2.0f; // dark lines match the buttons' 2px sprite outline
 	constexpr float CHECKER_SIZE = 16.0f;
 
 	constexpr float ICON_SCALE = 2.0f;
@@ -169,8 +169,8 @@ void Demo::PlayerHUD::DrawStatRow(DX9GF::GraphicsDevice* gd, unsigned long long 
 	float groupX = contentX + contentW - groupW;
 
 	// Cream backing with one black field per digit, odometer style
+	gd->DrawRectangle(*uiCamera, groupX - INNER_T, rowY - INNER_T, groupW + 2.0f * INNER_T, ROW_H + 2.0f * INNER_T, ApplyOpacity(PANEL_OUTLINE), true);
 	gd->DrawRectangle(*uiCamera, groupX, rowY, groupW, ROW_H, ApplyOpacity(CELL_FRAME), true);
-	gd->DrawRectangle(*uiCamera, groupX, rowY, groupW, ROW_H, ApplyOpacity(PANEL_OUTLINE), false);
 	for (int i = 0; i < cellCount; ++i) {
 		float cellX = groupX + CELL_BORDER + i * (CELL_W + CELL_BORDER);
 		gd->DrawRectangle(*uiCamera, cellX, rowY + CELL_BORDER, CELL_W, CELL_H, ApplyOpacity(CELL_BG), true);

@@ -250,7 +250,7 @@ void Demo::ThreadAlleyScene::OnInit()
 	spawnThreadAlley(920.f, -950.f, "th_dark_05", { "WarlockEnemy", "WarlockEnemy" }, false, false);
 	spawnThreadAlley(-552.f, -1024.f, "th_dark_06", {}, false, true);
 	spawnThreadAlley(-10.f, -1055.f, "th_deep_01", { "KeyeEnemy", "KernelEnemy" }, true, false);
-	spawnThreadAlley(280.f, -1080.f, "th_deep_02", { "DemonEyeEnemy", "MimicEnemy" }, true, false);
+	spawnThreadAlley(358.f, -1043.f, "th_deep_02", { "DemonEyeEnemy", "MimicEnemy" }, true, false);
 	spawnThreadAlley(-480.f, -1110.f, "th_deep_03", { "VampireBatEnemy" }, false, false);
 	spawnThreadAlley(-10.f, -1200.f, "th_deep_04", { "MimicEnemy" }, false, false);
 	spawnThreadAlley(590.f, -1250.f, "th_deep_05", { "WarlockEnemy", "MimicEnemy" }, true, false);
@@ -451,7 +451,10 @@ void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()
 		for (auto& line : sketchyGuy->GetDialogueLines()) {
 			currentConversation->AddLine(line);
 		}
-		onConversationEnd = [npcData]() { npcData->SetMet(true); };
+		onConversationEnd = [this, npcData]() {
+			npcData->SetMet(true);
+			StartSketchyGuyInteraction();
+		};
 		return;
 	}
 
