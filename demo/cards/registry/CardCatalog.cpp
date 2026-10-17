@@ -1,76 +1,22 @@
 #include "pch.h"
 #include "CardCatalog.h"
+#include "CardRegistry.h"
 #include "RNG.h"
 #include "LocalizationManager.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <unordered_map>
 
 namespace Demo::CardCatalog {
 
 	namespace {
-		// Prices mirror CardShop::LoadItems. Only cards CardShop actually sells appear here
-		// (StunCard's price is defined there but its row is commented out, so it is left out).
-		const std::unordered_map<std::string, int>& PriceMap() {
-			static const std::unordered_map<std::string, int> prices = {
-				{ "StrikeCard",         30 },
-				{ "TwinStrikeCard",     40 },
-				{ "CleaveCard",         40 },
-				{ "JabCard",            20 },
-				{ "MarkCard",           30 },
-				{ "BraceCard",          25 },
-				{ "PrefetchCard",       35 },
-				{ "OverclockCard",      35 },
-				{ "HeavyStrikeCard",    70 },
-				{ "PoisonCard",         50 },
-				{ "VulnerableCard",     65 },
-				{ "EnergyCard",         45 },
-				{ "JumpstartCard",      55 },
-				{ "ForesightCard",      70 },
-				{ "RagingStrikeCard",   45 },
-				{ "LethalHarvestCard",  55 },
-				{ "ArmorPiercerCard",   50 },
-				{ "IgniteCard",         60 },
-				{ "ToxicCloudCard", 70 },
-				{ "FesteringCard", 130 },
-				{ "ContagionCard", 55 },
-				{ "SepticStrikeCard", 60 },
-				{ "KindleCard", 40 },
-				{ "FanTheFlamesCard", 65 },
-				{ "MeltdownCard", 120 },
-				{ "BarrageCard", 85 },
-				{ "DragnetCard", 70 },
-				{ "HunterCard", 110 },
-				{ "ShortCircuitCard",   55 },
-				{ "StaticChargeCard",   95 },
-				{ "ChainDetonationCard", 110 },
-				{ "ShieldBashCard",     70 },
-				{ "WeaknessCard",       85 },
-				{ "ChainLightningCard", 100 },
-				{ "CruelStrikeCard",    75 },
-				{ "FireDetonationCard", 90 },
-				{ "ChainReactionCard",  120 },
-				{ "TerminateCard",      150 },
-				{ "InfernoCard",        140 },
-				{ "SystemPurgeCard",    200 },
-				{ "OverdriveCard",      180 },
-				{ "ExecuteCard",        160 },
-				{ "OverloadCard",       170 },
-				{ "ImmunityCard",		50},
-				{ "SystemRestartCard",	175},
-			};
-			return prices;
-		}
-
 		// Relative odds per pull, indexed by Rarity. Sum is arbitrary.
 		constexpr std::array<int, 4> kRarityWeights = { 60, 30, 9, 1 };
 	}
 
 	int GetPrice(const std::string& cardSaveID) {
-		const auto& prices = PriceMap();
-		auto it = prices.find(cardSaveID);
-		return it != prices.end() ? it->second : 0;
+		const CardDef* def = CardRegistry::Get().Find(cardSaveID);
+		return def ? def->price : 0;
 	}
 
 	int GetSellValue(const std::string& cardSaveID) {
@@ -113,7 +59,9 @@ namespace Demo::CardCatalog {
 	const std::vector<std::string>& AllCards() {
 		static const std::vector<std::string> all = []() {
 			std::vector<std::string> v;
-			for (const auto& [id, price] : PriceMap()) v.push_back(id);
+			for (const auto& def : CardRegistry::Get().All()) {
+				if (def.price > 0) v.push_back(def.id);
+			}
 			std::sort(v.begin(), v.end());
 			return v;
 			}();

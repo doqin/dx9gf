@@ -1,7 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="AdvancedCards.cpp" />
+    <ClCompile Include="cards\core\StatementEffects.cpp" />
+    <ClCompile Include="cards\registry\CardRegistry.cpp" />
+    <ClCompile Include="cards\defs\AttackCards.cpp" />
+    <ClCompile Include="cards\defs\PoisonCards.cpp" />
+    <ClCompile Include="cards\defs\SparkCards.cpp" />
+    <ClCompile Include="cards\defs\BurnCards.cpp" />
+    <ClCompile Include="cards\defs\UtilityCards.cpp" />
     <ClCompile Include="backends\imgui_impl_dx9.cpp" />
     <ClCompile Include="backends\imgui_impl_win32.cpp" />
     <ClCompile Include="BossWorldScene.cpp" />
@@ -17,7 +23,7 @@
     <ClCompile Include="DemonEyeEnemy.cpp" />
     <ClCompile Include="DrawUtils.cpp" />
     <ClCompile Include="EnemyFactory.cpp" />
-    <ClCompile Include="ICard.cpp" />
+    <ClCompile Include="cards\core\ICard.cpp" />
     <ClCompile Include="EnergyToken.cpp" />
     <ClCompile Include="GoldToken.cpp" />
     <ClCompile Include="ICombatant.cpp" />
@@ -39,11 +45,11 @@
     <ClCompile Include="KeyeproNPC.cpp" />
     <ClCompile Include="CupidNPC.cpp" />
     <ClCompile Include="SketchyGuyNPC.cpp" />
-    <ClCompile Include="CardCatalog.cpp" />
+    <ClCompile Include="cards\registry\CardCatalog.cpp" />
     <ClCompile Include="ItemCatalog.cpp" />
     <ClCompile Include="PackOpeningScene.cpp" />
     <ClCompile Include="IntroScene.cpp" />
-    <ClCompile Include="CardContainer.cpp" />
+    <ClCompile Include="cards\core\CardContainer.cpp" />
     <ClCompile Include="HealingPoint.cpp" />
     <ClCompile Include="IBattleScene.cpp" />
     <ClCompile Include="IButton.cpp" />
@@ -55,7 +61,7 @@
     <ClCompile Include="BattleMenu.cpp" />
     <ClCompile Include="BattleTutorial.cpp" />
     <ClCompile Include="InventoryMenu.cpp" />
-    <ClCompile Include="IStatementCard.cpp" />
+    <ClCompile Include="cards\core\IStatementCard.cpp" />
     <ClCompile Include="MapBattleScene.cpp" />
     <ClCompile Include="MapEnemy.cpp" />
     <ClCompile Include="MapView.cpp" />
@@ -71,7 +77,7 @@
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="LocalizationManager.cpp" />
     <ClCompile Include="MimicEnemy.cpp" />
-    <ClCompile Include="MultiTargetCard.cpp" />
+    <ClCompile Include="cards\targeting\TargetedCard.cpp" />
     <ClCompile Include="NPC1.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -105,17 +111,12 @@
     <ClCompile Include="LabInsideScene.cpp" />
     <ClCompile Include="WorldSceneBase.cpp" />
     <ClCompile Include="TextButton.cpp" />
-    <ClCompile Include="EnemyCard.cpp" />
-    <ClCompile Include="IBlockCard.cpp" />
+    <ClCompile Include="cards\core\EnemyCard.cpp" />
+    <ClCompile Include="cards\core\IBlockCard.cpp" />
     <ClCompile Include="IEnemy.cpp" />
-    <ClCompile Include="MainBlockCard.cpp" />
-    <ClCompile Include="CardFrame.cpp" />
+    <ClCompile Include="cards\core\MainBlockCard.cpp" />
+    <ClCompile Include="cards\core\CardFrame.cpp" />
     <ClCompile Include="StatusDisplay.cpp" />
-    <ClCompile Include="SynergyCards.cpp" />
-    <ClCompile Include="StrikeCard.cpp" />
-    <ClCompile Include="EnergyCard.cpp" />
-    <ClCompile Include="UtilityCards.cpp" />
-    <ClCompile Include="FinisherCards.cpp" />
     <ClCompile Include="TestEnemy.cpp" />
     <ClCompile Include="TuitionFeeEnemy.cpp" />
     <ClCompile Include="GearSlotUI.cpp" />
@@ -124,7 +125,17 @@
     <ClCompile Include="PendingAutoContinue.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AdvancedCards.h" />
+    <ClInclude Include="cards\core\CardEffect.h" />
+    <ClInclude Include="cards\core\CardSpec.h" />
+    <ClInclude Include="cards\core\CardState.h" />
+    <ClInclude Include="cards\registry\CardRegistry.h" />
+    <ClInclude Include="cards\defs\AttackCards.h" />
+    <ClInclude Include="cards\defs\DebuffCards.h" />
+    <ClInclude Include="cards\defs\PoisonCards.h" />
+    <ClInclude Include="cards\defs\MarkedCards.h" />
+    <ClInclude Include="cards\defs\SparkCards.h" />
+    <ClInclude Include="cards\defs\BurnCards.h" />
+    <ClInclude Include="cards\defs\UtilityCards.h" />
     <ClInclude Include="backends\imgui_impl_dx9.h" />
     <ClInclude Include="backends\imgui_impl_win32.h" />
     <ClInclude Include="BattleEncounter.h" />
@@ -154,7 +165,7 @@
     <ClInclude Include="IToken.h" />
     <ClInclude Include="KernelEnemy.h" />
     <ClInclude Include="KeyboardNavigator.h" />
-    <ClInclude Include="EnemyCard.h" />
+    <ClInclude Include="cards\core\EnemyCard.h" />
     <ClInclude Include="EnemyFactory.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameItems.h" />
@@ -168,16 +179,16 @@
     <ClInclude Include="CupidNPC.h" />
     <ClInclude Include="SketchyGuyNPC.h" />
     <ClInclude Include="SketchyGuyGlobalData.h" />
-    <ClInclude Include="CardCatalog.h" />
+    <ClInclude Include="cards\registry\CardCatalog.h" />
     <ClInclude Include="ItemCatalog.h" />
     <ClInclude Include="PackOpeningScene.h" />
     <ClInclude Include="IntroScene.h" />
-    <ClInclude Include="CardContainer.h" />
+    <ClInclude Include="cards\core\CardContainer.h" />
     <ClInclude Include="HealingPoint.h" />
     <ClInclude Include="IBattleScene.h" />
-    <ClInclude Include="IBlockCard.h" />
+    <ClInclude Include="cards\core\IBlockCard.h" />
     <ClInclude Include="IButton.h" />
-    <ClInclude Include="ICard.h" />
+    <ClInclude Include="cards\core\ICard.h" />
     <ClInclude Include="IconButton.h" />
     <ClInclude Include="IContainer.h" />
     <ClInclude Include="IConversation.h" />
@@ -201,11 +212,11 @@
     <ClInclude Include="LocalizationManager.h" />
     <ClInclude Include="MainFont.h" />
     <ClInclude Include="IEnemy.h" />
-    <ClInclude Include="IExpressionCard.h" />
-    <ClInclude Include="IStatementCard.h" />
-    <ClInclude Include="MainBlockCard.h" />
+    <ClInclude Include="cards\core\IExpressionCard.h" />
+    <ClInclude Include="cards\core\IStatementCard.h" />
+    <ClInclude Include="cards\core\MainBlockCard.h" />
     <ClInclude Include="MimicEnemy.h" />
-    <ClInclude Include="MultiTargetCard.h" />
+    <ClInclude Include="cards\targeting\TargetedCard.h" />
     <ClInclude Include="NPC1.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerGlobalData.h" />
@@ -227,15 +238,10 @@
     <ClInclude Include="SplashScene.h" />
     <ClInclude Include="TextIconButton.h" />
     <ClInclude Include="TextInputManager.h" />
-    <ClInclude Include="CardFrame.h" />
+    <ClInclude Include="cards\core\CardFrame.h" />
     <ClInclude Include="StatusDisplay.h" />
-    <ClInclude Include="SynergyCards.h" />
-    <ClInclude Include="StrikeCard.h" />
-    <ClInclude Include="EnergyCard.h" />
     <ClInclude Include="TrojanEnemy.h" />
-    <ClInclude Include="UtilityCards.h" />
-    <ClInclude Include="InitBlockCard.h" />
-    <ClInclude Include="FinisherCards.h" />
+    <ClInclude Include="cards\core\InitBlockCard.h" />
     <ClInclude Include="TestBattleScene.h" />
     <ClInclude Include="TestEnemy.h" />
     <ClInclude Include="ThreadAlleyScene.h" />

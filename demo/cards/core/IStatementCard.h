@@ -11,42 +11,20 @@ namespace Demo {
 	class IBlockCard;
 	class IStatementCard : public ICard, public IDraggable {
 	public:
-		// One step of the queued program, in the order it would resolve. Only what changes how
-		// much damage lands on an enemy is modelled - a hit, or a modifier the program applies
-		// partway through that makes the hits after it land differently.
+		// Stands in for the drag area until Init measures the real face width.
+		static constexpr size_t PLACEHOLDER_WIDTH = 160;
+		static constexpr size_t FACE_HEIGHT = 32;
 
-		inline IStatementCard(std::weak_ptr<DX9GF::TransformManager> transformManager)
-			: IGameObject(transformManager), ICard(transformManager), IDraggable(transformManager) {
+		inline IStatementCard(std::weak_ptr<DX9GF::TransformManager> transformManager, CardSpec cardSpec)
+			: IGameObject(transformManager), ICard(transformManager),
+			IDraggable(transformManager, PLACEHOLDER_WIDTH, FACE_HEIGHT) {
+			Configure(std::move(cardSpec));
 		}
-		inline IStatementCard(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
-			size_t dragAreaWidth,
-			size_t dragAreaHeight,
-			float x = 0,
-			float y = 0,
-			float rotation = 0,
-			float scaleX = 1,
-			float scaleY = 1
-		) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY),
-			ICard(transformManager, x, y, rotation, scaleX, scaleY),
-			IDraggable(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {
-		}
-		inline IStatementCard(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
-			std::weak_ptr<DX9GF::IGameObject> parent,
-			size_t dragAreaWidth,
-			size_t dragAreaHeight,
-			float x = 0,
-			float y = 0,
-			float rotation = 0,
-			float scaleX = 1,
-			float scaleY = 1
-		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY),
-			ICard(transformManager, parent, x, y, rotation, scaleX, scaleY),
-			IDraggable(transformManager, parent, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {
-		}
-		virtual bool Execute() = 0;
-		virtual void ResetExecution() {}
+
+		// Runs one step of the card. Returns true once it has finished; false asks the block to
+		// call again (multi-step cards such as Twin Strike).
+		virtual bool Execute();
+		virtual void ResetExecution();
 
 		virtual std::wstring GetInputsDescription() const { return Tr(L"None"); }
 		virtual bool HasRequiredTargets() const { return true; }
@@ -54,13 +32,13 @@ namespace Demo {
 		// Appends what this card would do, in the order Execute would do it, for the damage readout
 		// drawn on the enemies. Cards that neither deal damage nor change how much damage lands
 		// leave the list alone - damage-over-time is not counted, only what resolves as the program
-		// runs. This exists purely for the readout; the real numbers still come from Execute().
+		// runs. The default replays the card's effects; the real numbers still come from Execute().
 		//
 		// Not const: reading a target means locking its EnemyCard and calling GetValue().
-		virtual void CollectProjectedSteps(VirtualBattleState& state) {}
+		virtual void CollectProjectedSteps(VirtualBattleState& state);
 
-		// EnemyCard targeting - overridden by cards that consume enemy targets (StrikeCard,
-		// MultiTargetCard) so keyboard navigation can treat them uniformly as destinations.
+		// EnemyCard targeting - overridden by cards that consume enemy targets (TargetedCard) so
+		// keyboard navigation can treat them uniformly as destinations.
 		virtual bool CanAcceptEnemyCard() const { return false; }
 		// Attaches without the position hit-test used by OnDrop. Returns false if full.
 		virtual bool AttachEnemyCard(std::shared_ptr<EnemyCard> card) { return false; }
@@ -75,18 +53,32 @@ namespace Demo {
 		// draggable dropped onto it by position, which - reached via DraggableManager::AttachDroppable
 		// on a mouse release - would nest one card inside another. The nested card stays in the hand
 		// list, is billed for its energy every frame, and renders stacked on its host: the card looks
-		// duplicated and its cost is counted twice. Targeting cards (StrikeCard, MultiTargetCard)
-		// override this again with their own EnemyCard-only logic.
+		// duplicated and its cost is counted twice. TargetedCard overrides this again with its own
+		// EnemyCard-only logic.
 		bool OnDrop(std::shared_ptr<IDraggable> other) override { return false; }
 
 		bool TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent) override;
 	protected:
-		// Currently placed within any IBlockCard, rather than in the hand container or floating freely. 
+		bool isDone = false;
+		int stepsDone = 0;
+
+		// What a single execution step does. Defaults to applying the card's effects; cards with
+		// logic effects cannot express override this instead of Execute.
+		virtual void Resolve();
+		// Enemies the Targets scope refers to. Empty for cards without target slots.
+		virtual std::vector<std::shared_ptr<IEnemy>> GetTargetEnemies() const { return {}; }
+		// Whether another step of a repeating card still has someone to act on.
+		virtual bool HasEffectTarget() const { return true; }
+		void ApplyEffects();
+		void ProjectEffects(VirtualBattleState& state);
+
+		// Currently placed within any IBlockCard, rather than in the hand container or floating freely.
 		// Used to determine if this statement card can accept an EnemyCard (CanAcceptEnemyCard/AttachEnemyCard).
-		// This is 1 of 3 places enforcing the "EnemyCards only live in blocks" rule. If this rule 
-		// changes, also review: IDraggable::CanBeStoredInContainer (EnemyCard override) and 
+		// This is 1 of 3 places enforcing the "EnemyCards only live in blocks" rule. If this rule
+		// changes, also review: IDraggable::CanBeStoredInContainer (EnemyCard override) and
 		// EnemyCard::OnDropMissed (handling for being rejected everywhere).
 		bool IsQueuedInBlock() const;
+		std::shared_ptr<IBlockCard> GetParentBlock() const;
 		std::shared_ptr<DX9GF::Font> descFont;
 		std::shared_ptr<DX9GF::FontSprite> descFontSprite;
 

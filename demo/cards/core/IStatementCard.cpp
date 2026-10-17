@@ -297,12 +297,15 @@ bool Demo::IStatementCard::TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParen
 	return true;
 }
 
-bool Demo::IStatementCard::IsQueuedInBlock() const
+std::shared_ptr<Demo::IBlockCard> Demo::IStatementCard::GetParentBlock() const
 {
 	if (auto parent = GetParent(); parent.has_value()) {
-		if (auto lock = parent.value().lock()) {
-			return std::dynamic_pointer_cast<IBlockCard>(lock) != nullptr;
-		}
+		return std::dynamic_pointer_cast<IBlockCard>(parent.value().lock());
 	}
-	return false;
+	return nullptr;
+}
+
+bool Demo::IStatementCard::IsQueuedInBlock() const
+{
+	return GetParentBlock() != nullptr;
 }

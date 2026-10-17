@@ -6,29 +6,46 @@
 #include "DrawUtils.h"
 #include <algorithm>
 
+bool Demo::IBlockCard::AffordOrReturnToHand(const std::shared_ptr<IStatementCard>& card)
+{
+	if (!battleScene || battleScene->CanPlaceCardInBlock(card)) {
+		return true;
+	}
+	if (timeSinceLastEnergyPopUp >= energyPopUpCooldown) {
+		battleScene->QueuePopUpMessage(Tr(L"Not enough energy"));
+		timeSinceLastEnergyPopUp = 0.f;
+	}
+	battleScene->ReturnCardToHand(card);
+	return false;
+}
+
+void Demo::IBlockCard::RemoveFromQueue(const IStatementCard* card)
+{
+	for (size_t i = 0; i < statementCards.size(); ++i) {
+		if (statementCards[i].lock().get() == card) {
+			statementCards.erase(statementCards.begin() + i);
+			if (executeIndex > i) {
+				--executeIndex;
+			}
+			break;
+		}
+	}
+	children.erase(std::remove_if(children.begin(), children.end(),
+		[&](const std::weak_ptr<IDraggable>& weak) { return weak.lock().get() == card; }),
+		children.end());
+}
+
 bool Demo::IBlockCard::OnDrop(std::shared_ptr<IDraggable> other)
 {
 	auto statementCard = std::dynamic_pointer_cast<IStatementCard>(other);
-	if (!statementCard) {
-		return false;
-	}
-
-	if (battleScene && !battleScene->CanPlaceCardInBlock(statementCard)) {
-		if (timeSinceLastEnergyPopUp >= energyPopUpCooldown) {
-			battleScene->QueuePopUpMessage(Tr(L"Not enough energy"));
-			timeSinceLastEnergyPopUp = 0.f;
-		}
-		// Dragging detached it from the hand, and rejecting the drop leaves it parented to
-		// nothing - floating in space, not executing, yet still swept into the played pile at
-		// end of turn. Put it back where it came from.
-		battleScene->ReturnCardToHand(statementCard);
+	if (!statementCard || !AffordOrReturnToHand(statementCard)) {
 		return false;
 	}
 
 	if (IContainer::OnDrop(other)) {
 		// IContainer::OnDrop de-dupes `children`; keep `statementCards` in step so a re-drop or
 		// reorder of an already-queued card does not leave two entries (double execution, double
-		// energy commit, double discard). Mirrors InsertStatementCardAt's reorder handling.
+		// energy commit, double discard).
 		statementCards.erase(std::remove_if(statementCards.begin(), statementCards.end(),
 			[&](const std::weak_ptr<IStatementCard>& weak) { return weak.lock() == statementCard; }),
 			statementCards.end());
@@ -44,20 +61,19 @@ void Demo::IBlockCard::Update(unsigned long long deltaTime)
 
 	timeSinceLastEnergyPopUp += deltaTime / 1000.f;
 
-	// Removes invalid cards
-	for (size_t i = 0; i < statementCards.size(); ++i) {
-		auto lock = statementCards[i].lock();
-		if (!lock) {
-			statementCards.erase(statementCards.begin() + i);
-			--i;
-			continue;
-		}
-		if (auto parent = lock->GetParent(); !parent.has_value() || parent.value().lock().get() != this) {
-			statementCards.erase(statementCards.begin() + i);
-			if (executeIndex > i && executeIndex != 0) {
-				--executeIndex;
+	// Drop cards that expired or were moved to another parent.
+	for (size_t i = 0; i < statementCards.size();) {
+		auto card = statementCards[i].lock();
+		if (card) {
+			auto parent = card->GetParent();
+			if (parent.has_value() && parent.value().lock().get() == this) {
+				++i;
+				continue;
 			}
-			--i;
+		}
+		statementCards.erase(statementCards.begin() + i);
+		if (executeIndex > i) {
+			--executeIndex;
 		}
 	}
 	if (isExecuting) {
@@ -151,18 +167,7 @@ void Demo::IBlockCard::ForgetStatementCard(const std::shared_ptr<IStatementCard>
 	if (!card) {
 		return;
 	}
-	for (size_t i = 0; i < statementCards.size(); ++i) {
-		if (statementCards[i].lock() == card) {
-			statementCards.erase(statementCards.begin() + i);
-			if (executeIndex > i && executeIndex != 0) {
-				--executeIndex;
-			}
-			--i;
-		}
-	}
-	children.erase(std::remove_if(children.begin(), children.end(),
-		[&](const std::weak_ptr<IDraggable>& weak) { return weak.lock() == card; }),
-		children.end());
+	RemoveFromQueue(card.get());
 	if (auto parent = card->GetParent(); parent.has_value() && parent.value().lock().get() == this) {
 		card->DetachParent();
 	}
@@ -220,36 +225,14 @@ bool Demo::IBlockCard::InsertStatementCardAt(std::shared_ptr<IStatementCard> car
 		return false;
 	}
 
-	bool alreadyAttached = false;
-	for (auto& weak : statementCards) {
-		if (weak.lock() == card) {
-			alreadyAttached = true;
-			break;
-		}
-	}
-
-	if (!alreadyAttached && battleScene && !battleScene->CanPlaceCardInBlock(card)) {
-		if (timeSinceLastEnergyPopUp >= energyPopUpCooldown) {
-			battleScene->QueuePopUpMessage(Tr(L"Not enough energy"));
-			timeSinceLastEnergyPopUp = 0.f;
-		}
-		battleScene->ReturnCardToHand(card);
+	const bool alreadyAttached = std::any_of(statementCards.begin(), statementCards.end(),
+		[&](const std::weak_ptr<IStatementCard>& weak) { return weak.lock() == card; });
+	if (!alreadyAttached && !AffordOrReturnToHand(card)) {
 		return false;
 	}
 
-	// Remove any existing bookkeeping for this card first (reordering case).
-	for (size_t i = 0; i < statementCards.size(); ++i) {
-		if (statementCards[i].lock() == card) {
-			statementCards.erase(statementCards.begin() + i);
-			break;
-		}
-	}
-	for (size_t i = 0; i < children.size(); ++i) {
-		if (children[i].lock() == card) {
-			children.erase(children.begin() + i);
-			break;
-		}
-	}
+	// Reordering: take the card out first so the index below counts only the other cards.
+	RemoveFromQueue(card.get());
 
 	index = (std::min)(index, statementCards.size());
 	card->SetParent(shared_from_this());
