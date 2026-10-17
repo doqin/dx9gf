@@ -176,9 +176,6 @@ void DX9GF::Application::Run()
 	MSG msg;
 	int done = 0;
 	unsigned long long start = GetTickCount64();
-	// TEMP: FPS readout for performance measurement
-	unsigned long long fpsElapsed = 0;
-	unsigned int fpsFrames = 0;
 	while (!done) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -195,24 +192,13 @@ void DX9GF::Application::Run()
 				// Clamp the delta fed to Update/Draw so a stall (e.g. a heavy scene load)
 				// doesn't get replayed as one giant time jump - that skips timer-driven
 				// animations (fades, transitions) straight to their end instead of playing
-				// them smoothly. The raw, unclamped value still feeds the FPS readout below.
+				// them smoothly
 				const unsigned long long MAX_DELTA_TIME_MS = 100;
 				unsigned long long deltaTime = (rawDeltaTime > MAX_DELTA_TIME_MS) ? MAX_DELTA_TIME_MS : rawDeltaTime;
 
 				p_game->Update(deltaTime);
 				audioManager->Update(deltaTime);
 				p_game->Draw(deltaTime);
-
-				fpsElapsed += rawDeltaTime;
-				fpsFrames++;
-				if (fpsElapsed >= 1000) {
-					char title[128];
-					sprintf_s(title, "FPS: %u | %.2f ms/frame", fpsFrames,
-						static_cast<float>(fpsElapsed) / static_cast<float>(fpsFrames));
-					SetWindowTextA(p_game->GetHwnd(), title);
-					fpsElapsed = 0;
-					fpsFrames = 0;
-				}
 			}
 		}
 	}

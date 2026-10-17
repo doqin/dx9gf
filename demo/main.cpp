@@ -25,7 +25,7 @@ int WINAPI WinMain(
 			ImGui_ImplDX9_InvalidateDeviceObjects();
 			ImGui_ImplDX9_CreateDeviceObjects();
 		});
-        app->Init(hInstance, L"Demo", 960, 720, false);
+		app->Init(hInstance, Demo::GAME_TITLE, 960, 720, false);
 		// Create your game that interfaces with IGame
 		Demo::Game game(app->GetHWnd(), app->GetScreenWidth(), app->GetScreenHeight());
 		game.Init();
