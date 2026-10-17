@@ -187,16 +187,18 @@ void Demo::Game::Update(unsigned long long deltaTime)
 {
 	IGame::Update(deltaTime);
 
+#ifdef _DEBUG
 	fpsAccumulator += deltaTime;
 	fpsFrames++;
 
 	if (fpsAccumulator >= 1000) {
 		float msPerFrame = (float)fpsAccumulator / fpsFrames;
-		char buf[128];
-		sprintf_s(buf, "Demo - FPS: %d (%.2f ms/frame)", fpsFrames, msPerFrame);
-		SetWindowTextA(GetHwnd(), buf);
+		wchar_t buf[256];
+		swprintf_s(buf, L"%s - FPS: %d (%.2f ms/frame)", GAME_TITLE, fpsFrames, msPerFrame);
+		SetWindowTextW(GetHwnd(), buf);
 
 		fpsAccumulator = 0;
 		fpsFrames = 0;
 	}
+#endif
 }
