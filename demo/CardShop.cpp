@@ -122,7 +122,7 @@ void Demo::CardShop::LoadSellItems()
 
 	for (const auto& [id, count] : counts) {
 		// GetSellValue is a small fraction of the card's shop price, deliberately low so a card
-		// pack (75G for 5) can never be milked for gold by dumping its contents here.
+		// pack (100G for 5) can never be milked for gold by dumping its contents here.
 		const int sellValue = CardCatalog::GetSellValue(id);
 		if (sellValue <= 0) continue; // starter cards and anything with no shop price
 

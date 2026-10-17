@@ -30,7 +30,7 @@ namespace Demo {
 		void SetBoughtPack(bool bought) { hasBoughtPack = bought; }
 
 		// Gold price of a pack: the first one is on the house.
-		int PackCost() const { return hasBoughtPack ? 75 : 0; }
+		int PackCost() const { return hasBoughtPack ? 100 : 0; }
 
 		std::string GetSaveID() const override { return "SketchyGuyGlobalData"; }
 		void GenerateSaveData(nlohmann::json& outData) override {

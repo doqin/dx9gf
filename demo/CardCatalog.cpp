@@ -64,7 +64,7 @@ namespace Demo::CardCatalog {
 		}
 
 		// Relative odds per pull, indexed by Rarity. Sum is arbitrary.
-		constexpr std::array<int, 4> kRarityWeights = { 55, 30, 12, 3 };
+		constexpr std::array<int, 4> kRarityWeights = { 60, 30, 9, 1 };
 	}
 
 	int GetPrice(const std::string& cardSaveID) {
