@@ -27,7 +27,7 @@ namespace {
 	constexpr float CONTENT_GAP = 10.0f;
 
 	constexpr float BUTTON_SCALE = 1.5f;
-	constexpr float BUTTON_W = 48.0f * BUTTON_SCALE;
+	constexpr float BUTTON_W = 32.0f * BUTTON_SCALE;
 	constexpr float BUTTON_H = 32.0f * BUTTON_SCALE;
 
 	constexpr D3DCOLOR PANEL_OUTLINE = 0xFF262620;
@@ -66,7 +66,7 @@ void Demo::PlayerHUD::Init()
 	uiTex->LoadTexture(L"assets/ui.png");
 
 	btnInventory = std::make_shared<IconButton>(transformManager, 0.0f, 0.0f, static_cast<int>(BUTTON_W), static_cast<int>(BUTTON_H), uiTex);
-	btnInventory->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 144, 48, 32, 3));
+	btnInventory->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(288, 64, 32, 32, 3));
 	btnInventory->SetSpriteScale(BUTTON_SCALE, BUTTON_SCALE);
 	btnInventory->SetOnReleaseLeft([this](DX9GF::ITrigger*) {
 		if (onInventoryOpen) onInventoryOpen();
