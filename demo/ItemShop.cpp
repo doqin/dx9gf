@@ -3,7 +3,7 @@
 #include "GameItems.h"
 #include "ItemCatalog.h"
 
-void Demo::ItemShop::AddShopItem(int itemID, int price)
+void Demo::ItemShop::AddShopItem(int itemID, int price, bool limited)
 {
 	const auto* blueprint = ItemData::GetInstance()->GetItemBlueprint(itemID);
 
@@ -24,31 +24,54 @@ void Demo::ItemShop::AddShopItem(int itemID, int price)
 			}
 			return 0;
 			};
+		if (limited) {
+			const int row = rowsPerItem[itemID]++;
+			itemsForSale.back().limitKey = shopKey + "/" + std::to_string(itemID) + "#" + std::to_string(row);
+			itemsForSale.back().purchaseLimit = ItemPurchaseLimit(location);
+		}
 	}
 }
 
-Demo::ItemShop::ItemShop(Game* game, Player* player, int sw, int sh, ShopTier tier)
+Demo::ItemShop::ItemShop(Game* game, Player* player, int sw, int sh, ShopTier tier, ShopLocation location)
 	: IShopScene(game, player, sw, sh,
 		tier == ShopTier::BASIC ? "BASIC SHOP" :
 		tier == ShopTier::HYBRID || tier == ShopTier::RK_HYBRID ? "HYBRID SHOP" : "PREMIUM SHOP"),
-	currentTier(tier)
+	currentTier(tier),
+	location(location)
 {
+	shopKey = MakeShopKey(location, "Item", tier);
 }
 
 void Demo::ItemShop::LoadItems()
 {
+	rowsPerItem.clear();
 	//i set 100G to test, remember to balance them later
 	switch (currentTier) {
 	case ShopTier::BASIC:
 		AddShopItem(0, 30);
 		AddShopItem(1, 30);
 		AddShopItem(2, 40);
+		// Tutorial stocks 2 two-effect potions here. Thread Alley has two regular item shops,
+		// so its 5 extra two-effect potions are split: 2 here, 3 in its hybrid shop.
+		if (location == ShopLocation::Tutorial || location == ShopLocation::ThreadAlley) {
+			AddShopItem(3, 50);
+			AddShopItem(4, 50);
+		}
 		break;
 
 	case ShopTier::HYBRID:
 		AddShopItem(3, 50);
 		AddShopItem(4, 50);
 		AddShopItem(5, 50);
+		// 5 extra two-effect potions. Secret Puzzle has only this item shop, so it gets all 5;
+		// Thread Alley gets 3 here and the other 2 in its basic shop.
+		AddShopItem(3, 50);
+		AddShopItem(4, 50);
+		AddShopItem(9, 150);
+		if (location != ShopLocation::ThreadAlley) {
+			AddShopItem(3, 50);
+			AddShopItem(4, 50);
+		}
 		break;
 
 	case ShopTier::PREMIUM:
@@ -56,6 +79,15 @@ void Demo::ItemShop::LoadItems()
 		AddShopItem(7, 100);
 		AddShopItem(8, 200);
 		AddShopItem(9, 150);
+		// 7 extra two- and three-effect potions. Boss World's other item shop (RK_HYBRID) is
+		// the special Rusty Key shop, so all 7 go here. Three-effect potions are only sold here.
+		AddShopItem(3, 50);
+		AddShopItem(4, 50);
+		AddShopItem(9, 150);
+		AddShopItem(8, 200);
+		AddShopItem(3, 50);
+		AddShopItem(4, 50);
+		AddShopItem(8, 200);
 		break;
 	case ShopTier::RK_HYBRID:
 		//load hybrid items just like HYBRID shop
@@ -63,7 +95,7 @@ void Demo::ItemShop::LoadItems()
 		AddShopItem(4, 50);
 		AddShopItem(5, 50);
 		//add that rusty key with high cost - balance this later
-		AddShopItem(10, 100);
+		AddShopItem(10, 100, false);
 		break;
 	}
 }

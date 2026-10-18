@@ -423,6 +423,7 @@
     <ClInclude Include="PasswordMenu.h" />
     <ClInclude Include="PendingAutoContinue.h" />
     <ClInclude Include="QuestMarker.h" />
+    <ClInclude Include="ShopPurchaseGlobalData.h" />
     <ClInclude Include="TrojanNPC.h" />
     <ClInclude Include="KeyeproNPC.h" />
     <ClInclude Include="CupidNPC.h" />
