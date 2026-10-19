@@ -50,6 +50,9 @@ namespace Demo {
         bool isActive = false;
         std::wstring currentTitle;
         std::wstring currentMessage;
+        // Set only when the message was too wide for one line; Draw then renders these instead.
+        std::vector<std::wstring> messageLines;
+        float messageLineH = 0.0f;
         std::vector<std::shared_ptr<PopupDynamicButton>> activeButtons;
 
         std::vector<RECT> btnRectsSmall;

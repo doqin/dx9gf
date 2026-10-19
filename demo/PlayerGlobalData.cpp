@@ -64,6 +64,7 @@ void Demo::PlayerGlobalData::Reset() {
 	equippedPassiveGearID = -1;
 	showGearOnMap = true;
 	seenBattleTutorial = false;
+	seenGearTutorial = false;
 	unlockedSavePoints.clear();
 }
 
@@ -125,6 +126,7 @@ void Demo::PlayerGlobalData::GenerateSaveData(nlohmann::json& outData) {
 	outData["equippedPassiveGearID"] = equippedPassiveGearID;
 	outData["showGearOnMap"] = showGearOnMap;
 	outData["seenBattleTutorial"] = seenBattleTutorial;
+	outData["seenGearTutorial"] = seenGearTutorial;
 	outData["unlockedSavePoints"] = unlockedSavePoints;
 
 	outData["inventoryGears"] = nlohmann::json::array();
@@ -158,6 +160,9 @@ void Demo::PlayerGlobalData::RestoreSaveData(const nlohmann::json& inData) {
 	if (inData.contains("gold")) gold = inData["gold"];
 	if (inData.contains("showGearOnMap")) showGearOnMap = inData["showGearOnMap"];
 	if (inData.contains("seenBattleTutorial")) seenBattleTutorial = inData["seenBattleTutorial"];
+	// Saves from before the gear tutorial that already own a gear have effectively learned it.
+	if (inData.contains("seenGearTutorial")) seenGearTutorial = inData["seenGearTutorial"];
+	else seenGearTutorial = inData.contains("inventoryGears") && !inData["inventoryGears"].empty();
 	unlockedSavePoints.clear();
 	if (inData.contains("unlockedSavePoints")) {
 		unlockedSavePoints = inData["unlockedSavePoints"].get<std::vector<std::string>>();

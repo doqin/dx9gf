@@ -57,6 +57,8 @@ namespace Demo {
 		std::vector<std::shared_ptr<HealingPoint>> healingPoints;
 		std::shared_ptr<DX9GF::Font> font;
 		std::shared_ptr<DX9GF::Texture> gearTex;
+		// Next page of the first-gear tutorial to show (-1 = none pending); see WorldSceneBase::Update.
+		int gearTutorialPage = -1;
 		std::shared_ptr<Player> player;
 		std::shared_ptr<DX9GF::Map> map;
 		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
