@@ -58,7 +58,7 @@ void Demo::MimicEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_p
 		}
 		else {
 			CastAbility([this]() {
-				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Poison, 2, 2.0f, false);
+				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Poison, 2, 2.0f, false, 0, this);
 				}, popUpMessage, Tr(L"Mimic installs malicious adware!"));
 		}
 	}

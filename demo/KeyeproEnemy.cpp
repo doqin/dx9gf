@@ -106,10 +106,10 @@ void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 	if (currentTurn % 2 == 1 || desperato > 0.6f) {
 		auto abilityRoll = RNG::Range(1, 3);
 		if (abilityRoll == 1) {
-			CastAbility([this]() { this->player.lock()->AddModifier(ModifierType::Vulnerable, 1, 5.0f, false); }, popUpMessage, Tr(L"Boss lowers your defenses!"));
+			CastAbility([this]() { this->player.lock()->AddModifier(ModifierType::Vulnerable, 1, 5.0f, false, 0, this); }, popUpMessage, Tr(L"Boss lowers your defenses!"));
 		}
 		else if (abilityRoll == 2) {
-			CastAbility([this]() { this->player.lock()->AddModifier(ModifierType::Weak, 2, 5.0f, false); }, popUpMessage, Tr(L"Boss weakens your attacks!"));
+			CastAbility([this]() { this->player.lock()->AddModifier(ModifierType::Weak, 2, 5.0f, false, 0, this); }, popUpMessage, Tr(L"Boss weakens your attacks!"));
 		}
 		else {
 			CastAbility([this]() { this->AddModifier(ModifierType::BuffDamage, 2, 3.0f, true); }, popUpMessage, Tr(L"Boss enters a frenzy!"));

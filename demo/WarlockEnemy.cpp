@@ -55,7 +55,7 @@ void Demo::WarlockEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 	if (turnInCycle == skillTurnThisCycle) {
 		if (RNG::Range(1, 2) == 1) {
 			CastAbility([this]() {
-				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false);
+				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false, 0, this);
 				}, popUpMessage, Tr(L"Crawler slows your connection!"));
 		}
 		else {

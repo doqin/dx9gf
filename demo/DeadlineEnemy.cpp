@@ -40,7 +40,7 @@ void Demo::DeadlineEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 	}
 
 	if (auto lock = this->player.lock()) {
-		lock->AddModifier(ModifierType::EnergyDrain, 2, 1.0f, false, 0);
+		lock->AddModifier(ModifierType::EnergyDrain, 2, 1.0f, false, 0, this);
 	}
 
 	if (popUpMessage) {

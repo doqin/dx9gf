@@ -42,7 +42,7 @@ void Demo::HomeworkEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 	}
 
 	if (auto lock = this->player.lock()) {
-		lock->AddModifier(ModifierType::InvertedControls, CONTROL_INVERT_DURATION, 0.f, false);
+		lock->AddModifier(ModifierType::InvertedControls, CONTROL_INVERT_DURATION, 0.f, false, 0, this);
 	}
 
 	if (popUpMessage) {

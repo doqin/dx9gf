@@ -48,8 +48,9 @@ namespace Demo {
 			HasModifier(ModifierType::Weak));
 	}
 
-	void ICombatant::AddModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns) {
+	void ICombatant::AddModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns, ICombatant* source) {
 		if (!isBuff && TryBlockWithImmunity()) return;
+		if (!isBuff && source) source->OnDebuffInflicted(*this, type);
 		for (auto& mod : modifiers) {
 			if (mod.type == type) {
 				mod.duration += duration;
@@ -66,8 +67,9 @@ namespace Demo {
 		}
 	}
 
-	void ICombatant::AddStackingModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns) {
+	void ICombatant::AddStackingModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns, ICombatant* source) {
 		if (!isBuff && TryBlockWithImmunity()) return;
+		if (!isBuff && source) source->OnDebuffInflicted(*this, type);
 		for (auto& mod : modifiers) {
 			if (mod.type == type) {
 				mod.value += value;

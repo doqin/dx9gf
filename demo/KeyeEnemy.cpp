@@ -58,7 +58,7 @@ void Demo::KeyeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 		}
 		else {
 			CastAbility([this]() {
-				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false);
+				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false, 0, this);
 				}, popUpMessage, Tr(L"Keye finds your blind spot!"));
 		}
 	}

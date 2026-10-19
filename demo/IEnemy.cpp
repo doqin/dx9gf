@@ -47,6 +47,7 @@ void Demo::IEnemy::Update(unsigned long long deltaTime)
 	commandBuffer.Update(deltaTime);
 	animationBuffer.Update(deltaTime);
 	UpdateDeath(deltaTime);
+	UpdateDebuffEffects(deltaTime);
 }
 
 void Demo::IEnemy::BeginDeath()
@@ -321,12 +322,155 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 
 	fontSprite->End();
 	projectiles.Draw(graphicsDevice, *camera, deltaTime);
+	DrawDebuffEffects(camera, deltaTime);
 
 	if (deathParticles) {
 		graphicsDevice->SetAlphaBlending(true);
 		deathParticles->Draw(*camera, deltaTime);
 		graphicsDevice->SetAlphaBlending(false);
 	}
+}
+
+namespace {
+	// Phase boundaries of a debuff effect, in ms since it was spawned.
+	constexpr float DEBUFF_FLASH_MS = 300.f;
+	constexpr float DEBUFF_ORB_START_MS = 250.f;
+	constexpr float DEBUFF_ORB_END_MS = 750.f;
+	constexpr float DEBUFF_TOTAL_MS = 1050.f;
+	constexpr float DEBUFF_ICON_MS = 1000.f;
+	constexpr size_t DEBUFF_MAX_EFFECTS = 6;
+
+	D3DCOLOR WithAlpha(D3DCOLOR color, float alpha01)
+	{
+		const int a = static_cast<int>(255.f * std::clamp(alpha01, 0.f, 1.f));
+		return (color & 0x00FFFFFF) | (static_cast<D3DCOLOR>(a) << 24);
+	}
+
+	void DrawRing(DX9GF::GraphicsDevice* gd, const DX9GF::Camera& camera, float cx, float cy, float r, D3DCOLOR color, float thickness)
+	{
+		constexpr int SEGMENTS = 28;
+		constexpr float TWO_PI = 6.2831853f;
+		for (int i = 0; i < SEGMENTS; ++i) {
+			const float a0 = TWO_PI * i / SEGMENTS;
+			const float a1 = TWO_PI * (i + 1) / SEGMENTS;
+			gd->DrawLine(camera, cx + std::cos(a0) * r, cy + std::sin(a0) * r,
+				cx + std::cos(a1) * r, cy + std::sin(a1) * r, color, thickness);
+		}
+	}
+
+	void DrawSquare(DX9GF::GraphicsDevice* gd, const DX9GF::Camera& camera, float cx, float cy, float size, D3DCOLOR color)
+	{
+		gd->DrawRectangle(camera, cx - size / 2.f, cy - size / 2.f, size, size, color, true);
+	}
+}
+
+void Demo::IEnemy::OnDebuffInflicted(ICombatant& target, ModifierType type)
+{
+	if (isDying) return;
+	// Only statuses the player can actually see get an effect (an instant heal has no icon).
+	auto status = DescribeStatus(CombatModifier{ type, 1, 1.f, false, 0 });
+	if (!status) return;
+
+	if (debuffEffects.size() >= DEBUFF_MAX_EFFECTS) debuffEffects.erase(debuffEffects.begin());
+	DebuffEffect effect;
+	effect.iconRect = status->iconRect;
+	effect.name = status->name;
+	effect.color = status->color | 0xFF000000;
+	effect.target = target.weak_from_this();
+	effect.targetX = target.GetWorldX();
+	effect.targetY = target.GetWorldY();
+	debuffEffects.push_back(std::move(effect));
+}
+
+void Demo::IEnemy::UpdateDebuffEffects(unsigned long long deltaTime)
+{
+	for (auto& effect : debuffEffects) {
+		effect.elapsed += static_cast<float>(deltaTime);
+		// Follow the target while it is alive so the orb still lands if the player moved.
+		if (auto t = effect.target.lock()) {
+			effect.targetX = t->GetWorldX();
+			effect.targetY = t->GetWorldY();
+		}
+	}
+	debuffEffects.erase(std::remove_if(debuffEffects.begin(), debuffEffects.end(),
+		[](const DebuffEffect& e) { return e.elapsed >= DEBUFF_TOTAL_MS; }), debuffEffects.end());
+}
+
+void Demo::IEnemy::DrawDebuffEffects(DX9GF::Camera* camera, unsigned long long deltaTime)
+{
+	if (debuffEffects.empty() || isDying || !graphicsDevice || !camera) return;
+
+	const float ex = GetWorldX();
+	const float ey = GetWorldY();
+	const float halfW = GetBodyWidth() / 2.f;
+	const float halfH = GetBodyHeight() / 2.f;
+	auto* gd = graphicsDevice;
+
+	gd->SetAlphaBlending(true);
+	for (const auto& e : debuffEffects) {
+		const float t = e.elapsed;
+
+		// 1) Wind-up: the source pulses in the debuff's colour and a ring blooms off it.
+		if (t < DEBUFF_FLASH_MS) {
+			const float p = t / DEBUFF_FLASH_MS;
+			gd->DrawRectangle(*camera, ex - halfW, ey - halfH, halfW * 2.f, halfH * 2.f, WithAlpha(e.color, 0.55f * (1.f - p)), true);
+			DrawRing(gd, *camera, ex, ey, halfW * (0.6f + 0.9f * p), WithAlpha(e.color, 1.f - p), 3.f);
+		}
+
+		// 2) The debuff itself, flung from the enemy to the player.
+		if (t >= DEBUFF_ORB_START_MS && t < DEBUFF_ORB_END_MS) {
+			const float p = (t - DEBUFF_ORB_START_MS) / (DEBUFF_ORB_END_MS - DEBUFF_ORB_START_MS);
+			for (int k = 5; k >= 0; --k) {
+				const float pk = (std::max)(0.f, p - 0.04f * k);
+				const float s = pk * pk * (3.f - 2.f * pk);
+				const float x = ex + (e.targetX - ex) * s;
+				const float y = ey + (e.targetY - ey) * s;
+				DrawSquare(gd, *camera, x, y, 22.f - 3.f * k, WithAlpha(e.color, 0.8f - 0.13f * k));
+			}
+			const float s = p * p * (3.f - 2.f * p);
+			DrawSquare(gd, *camera, ex + (e.targetX - ex) * s, ey + (e.targetY - ey) * s, 9.f, 0xFFFFFFFF);
+		}
+
+		// 3) Landing: rings burst on the player.
+		if (t >= DEBUFF_ORB_END_MS) {
+			const float p = (t - DEBUFF_ORB_END_MS) / (DEBUFF_TOTAL_MS - DEBUFF_ORB_END_MS);
+			DrawRing(gd, *camera, e.targetX, e.targetY, 12.f + 56.f * p, WithAlpha(e.color, 1.f - p), 4.f);
+			DrawRing(gd, *camera, e.targetX, e.targetY, 6.f + 30.f * p, WithAlpha(0xFFFFFFFF, 1.f - p), 2.f);
+		}
+	}
+
+	// The debuff's icon and name rise above the enemy so it is clear who dealt it.
+	if (uiSprite && fontSprite) {
+		for (const auto& e : debuffEffects) {
+			if (e.elapsed >= DEBUFF_ICON_MS) continue;
+			const float p = e.elapsed / DEBUFF_ICON_MS;
+			const float alpha = p < 0.7f ? 1.f : 1.f - (p - 0.7f) / 0.3f;
+			const float rise = 30.f * p;
+			const float baseY = ey - 150.f - rise;
+
+			const float iconW = static_cast<float>(e.iconRect.right - e.iconRect.left) * 2.f;
+			if (iconW > 0.f) {
+				uiSprite->SetSrcRect(e.iconRect);
+				uiSprite->SetColor(WithAlpha(0xFFFFFFFF, alpha));
+				uiSprite->SetPosition(ex - iconW / 2.f, baseY - 36.f);
+				uiSprite->Begin();
+				uiSprite->Draw(*camera, deltaTime);
+				uiSprite->End();
+				uiSprite->SetColor(0xFFFFFFFF);
+			}
+
+			fontSprite->Begin();
+			fontSprite->SetOutline(true, WithAlpha(0xFF000000, alpha), 2.f);
+			fontSprite->SetColor(WithAlpha(e.color, alpha));
+			fontSprite->SetText(e.name);
+			fontSprite->SetPosition(ex - fontSprite->GetWidth() / 2.f, baseY);
+			fontSprite->Draw(*camera, deltaTime);
+			fontSprite->SetOutline(false);
+			fontSprite->SetColor(0xFFFFFFFF);
+			fontSprite->End();
+		}
+	}
+	gd->SetAlphaBlending(false);
 }
 
 bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)

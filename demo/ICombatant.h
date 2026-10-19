@@ -59,11 +59,15 @@ namespace Demo {
 		static float ScaleOutgoingDamage(float baseDamage, float buffDamage, bool weak);
 		static float ScaleIncomingDamage(float damage, float marked, bool vulnerable);
 
-		void AddModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns = 0);
+		// `source` is whoever inflicted a debuff (null for self-applied or untracked ones); when set,
+		// it is told via OnDebuffInflicted once the debuff has actually landed.
+		void AddModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns = 0, ICombatant* source = nullptr);
 		// Like AddModifier, but accumulates value and refreshes duration to the longer of the two
 		// rather than taking max(value) and summing durations. Used by effects that are meant to
 		// stack up (Burn, Marked, block from cards) instead of just being refreshed.
-		void AddStackingModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns = 0);
+		void AddStackingModifier(ModifierType type, int duration, float value, bool isBuff, int delayTurns = 0, ICombatant* source = nullptr);
+		// Called on the source of a debuff after it was applied to `target` (not when immunity blocked it).
+		virtual void OnDebuffInflicted(ICombatant& target, ModifierType type) {}
 		bool HasModifier(ModifierType type) const;
 		float GetModifierValue(ModifierType type) const;
 		// Turns left on a modifier type, 0 if it is not active.

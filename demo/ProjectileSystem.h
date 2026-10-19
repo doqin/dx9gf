@@ -352,6 +352,7 @@ namespace Demo {
 
 		std::vector<SpriteBatch> batches;
 		std::weak_ptr<Player> target;
+		ICombatant* owner = nullptr; // who fired these; credited as the source of any status they apply
 		std::shared_ptr<DX9GF::Texture> trailTexture; // shared 4x4 white square
 
 		// Create a new batch if no existing batch matches the projectile's texture, frames, frame rate and origin.
@@ -363,6 +364,7 @@ namespace Demo {
 		void QueueBurst(size_t index);
 		void EmitBurst(const PendingBurst& burst);
 	public:
+		void SetOwner(ICombatant* newOwner) { owner = newOwner; }
 		void Spawn(const std::shared_ptr<Player>& player, const ProjectileDesc& desc);
 		void Spawn(const std::shared_ptr<Player>& player, const LaserDesc& desc);
 		void Update(unsigned long long deltaTime);

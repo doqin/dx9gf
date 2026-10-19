@@ -45,7 +45,7 @@ void Demo::TrojanEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_
 		if (ability == 1) {
 			// Apply Weak to player
 			CastAbility([this]() {
-				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 1, 0.f, false);
+				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 1, 0.f, false, 0, this);
 				}, popUpMessage, Tr(L"Trojan corrupts your systems!"));
 		}
 		else {
