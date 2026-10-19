@@ -26,6 +26,20 @@ namespace Demo {
 			D3DCOLOR textColor = 0xFFFF4444;
 		};
 		bool isOnStandby = true;
+		// "This enemy just debuffed you": a flash + ring on the enemy, an orb flying to the player,
+		// an impact ring there, and the debuff's icon and name floating up above the enemy.
+		struct DebuffEffect {
+			RECT iconRect{ 0, 0, 0, 0 };
+			std::wstring name;
+			D3DCOLOR color = 0xFFFFFFFF;
+			std::weak_ptr<DX9GF::IGameObject> target;
+			float targetX = 0.f;
+			float targetY = 0.f;
+			float elapsed = 0.f;
+		};
+		std::vector<DebuffEffect> debuffEffects;
+		void UpdateDebuffEffects(unsigned long long deltaTime);
+		void DrawDebuffEffects(DX9GF::Camera* camera, unsigned long long deltaTime);
 		std::function<void(int)> onRequestLockCard = nullptr;
 		// Hands a newly created enemy to the battle scene instead of touching its enemy list
 		// directly. Spawns run from deferred commands inside the scene's enemy update loop, so
@@ -73,11 +87,11 @@ namespace Demo {
 		void BeginDeath();
 		void UpdateDeath(unsigned long long deltaTime);
 	public:
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth) : ICombatant(tm, maxHealth) {}
+		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth) : ICombatant(tm, maxHealth) { projectiles.SetOwner(this); }
 
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, maxHealth, x, y, rot, sx, sy) {}
+		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, maxHealth, x, y, rot, sx, sy) { projectiles.SetOwner(this); }
 
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, std::weak_ptr<DX9GF::IGameObject> parent, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, parent, maxHealth, x, y, rot, sx, sy) {}
+		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, std::weak_ptr<DX9GF::IGameObject> parent, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, parent, maxHealth, x, y, rot, sx, sy) { projectiles.SetOwner(this); }
 		void InitCardSpawnTrigger(DX9GF::Camera* camera, float width, float height);
 		void SetOnRequestEnemyCard(std::function<void(std::shared_ptr<IEnemy>)> callback);
 		virtual void Update(unsigned long long deltaTime);
@@ -104,6 +118,7 @@ namespace Demo {
 			OnTurnBegin(player, popUpMessage, currentTurn);
 		}
 
+		void OnDebuffInflicted(ICombatant& target, ModifierType type) override;
 		bool TakeIndirectDamage(float damage, DamageType type) override;
 		void SpawnHealText(int actualHeal) override;
 		void CastAbility(std::function<void()> effect, std::shared_ptr<PopUpMessage> popUpMessage, const std::wstring& message);

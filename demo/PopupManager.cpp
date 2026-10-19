@@ -11,6 +11,41 @@ namespace Demo {
     // size the button settles at.
     static constexpr float BTN_TEXT_PAD_X = 16.0f;
 
+    // Widest a message line may get before it is wrapped, and the gap between wrapped lines.
+    static constexpr float MAX_MSG_WIDTH = 800.0f;
+    static constexpr float MSG_LINE_SPACING = 6.0f;
+
+    // Greedy word-wrap of `text` (honouring newlines) to `maxWidth` using the sprite's metrics.
+    static std::vector<std::wstring> WrapMessage(DX9GF::FontSprite* fs, const std::wstring& text, float maxWidth) {
+        std::vector<std::wstring> lines;
+        size_t pos = 0;
+        while (pos <= text.size()) {
+            size_t nl = text.find(L'\n', pos);
+            std::wstring para = text.substr(pos, nl == std::wstring::npos ? std::wstring::npos : nl - pos);
+            std::wstring line;
+            size_t p = 0;
+            while (p < para.size()) {
+                size_t sp = para.find(L' ', p);
+                std::wstring word = para.substr(p, sp == std::wstring::npos ? std::wstring::npos : sp - p);
+                std::wstring cand = line.empty() ? word : line + L" " + word;
+                fs->SetText(cand);
+                if (!line.empty() && fs->GetWidth() > maxWidth) {
+                    lines.push_back(line);
+                    line = word;
+                }
+                else {
+                    line = cand;
+                }
+                if (sp == std::wstring::npos) break;
+                p = sp + 1;
+            }
+            lines.push_back(line);
+            if (nl == std::wstring::npos) break;
+            pos = nl + 1;
+        }
+        return lines;
+    }
+
     PopupManager* PopupManager::instance = nullptr;
 
     PopupManager::PopupManager() {}
@@ -77,6 +112,18 @@ namespace Demo {
         fontSprite->SetText(std::wstring(currentMessage));
         float msgW = static_cast<float>(fontSprite->GetWidth());
         float msgH = static_cast<float>(fontSprite->GetHeight());
+        this->messageLines.clear();
+        const float maxMsgW = std::min(MAX_MSG_WIDTH, static_cast<float>(game->GetVirtualWidth()) - 160.0f);
+        if (msgW > maxMsgW) {
+            this->messageLines = WrapMessage(fontSprite.get(), currentMessage, maxMsgW);
+            msgW = 0.0f;
+            for (const auto& line : messageLines) {
+                fontSprite->SetText(line);
+                msgW = std::max(msgW, static_cast<float>(fontSprite->GetWidth()));
+            }
+            this->messageLineH = msgH;
+            msgH = (msgH + MSG_LINE_SPACING) * messageLines.size() - MSG_LINE_SPACING;
+        }
 
         float scale = 2.0f; //Change this value to adjust the button size
         float baseBtnH = static_cast<float>(btnRectsMed[0].bottom - btnRectsMed[0].top);
@@ -275,10 +322,21 @@ namespace Demo {
         fontSprite->SetText(std::wstring(currentMessage));
         fontSprite->SetColor(style.msgColor);
 
-        float msgW = fontSprite->GetWidth();
         float iconBlock = iconSprite ? iconSize + 20.0f : 0.0f;
-        fontSprite->SetPosition(popupX + (popupWidth - msgW) / 2.0f, popupY + 25.0f + titleH + 20.0f + iconBlock);
-        fontSprite->Draw(*uiCamera, deltaTime);
+        if (messageLines.empty()) {
+            float msgW = fontSprite->GetWidth();
+            fontSprite->SetPosition(popupX + (popupWidth - msgW) / 2.0f, popupY + 25.0f + titleH + 20.0f + iconBlock);
+            fontSprite->Draw(*uiCamera, deltaTime);
+        }
+        else {
+            float y = popupY + 25.0f + titleH + 20.0f + iconBlock;
+            for (const auto& line : messageLines) {
+                fontSprite->SetText(line);
+                fontSprite->SetPosition(popupX + (popupWidth - fontSprite->GetWidth()) / 2.0f, y);
+                fontSprite->Draw(*uiCamera, deltaTime);
+                y += messageLineH + MSG_LINE_SPACING;
+            }
+        }
         fontSprite->End();
 
         if (iconSprite) {

@@ -63,7 +63,7 @@ void Demo::DemonEyeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 		}
 		else {
 			CastAbility([this]() {
-				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Vulnerable, 1, 0.f, false);
+				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Vulnerable, 1, 0.f, false, 0, this);
 				}, popUpMessage, Tr(L"Bug injects a vulnerability!"));
 		}
 	}

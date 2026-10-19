@@ -56,7 +56,7 @@ void Demo::SpamEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 		}
 		else {
 			CastAbility([this]() {
-				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false);
+				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Weak, 2, 0.f, false, 0, this);
 				}, popUpMessage, Tr(L"Your best shots get buried in junk!"));
 		}
 	}

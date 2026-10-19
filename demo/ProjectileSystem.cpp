@@ -668,10 +668,10 @@ void Demo::ProjectileSystem::ApplyHit(Player& player, CombatComponent& combat)
 	case ModifierType::Burn:
 	case ModifierType::Marked:
 	case ModifierType::Freeze:
-		player.AddStackingModifier(type, duration, value, false);
+		player.AddStackingModifier(type, duration, value, false, 0, owner);
 		break;
 	default:
-		player.AddModifier(type, duration, value, false);
+		player.AddModifier(type, duration, value, false, 0, owner);
 	}
 }
 

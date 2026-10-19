@@ -1264,15 +1264,21 @@ namespace Demo {
 					}
 				}
 				else if (qb.btn) {
-					if (!qb.questId.empty() && qb.questId == selectedQuestId) {
+					// Gold marks the quest on the HUD; a hovered/selected one is only a neutral tint, and
+					// completed quests never light up gold.
+					const bool isTracked = !qb.questId.empty() && QuestManager::GetInstance()->IsTracked(qb.questId);
+					const bool isSelected = !qb.questId.empty() && qb.questId == selectedQuestId;
+					if (isTracked || isSelected) {
 						float btnDrawY = containerY + qb.originalY - questScrollY;
 						float fullBtnH = qb.btn->GetHeight() + 11.0f;
+						const D3DCOLOR bg = isTracked ? D3DCOLOR_ARGB(50, 255, 170, 0) : D3DCOLOR_ARGB(28, 255, 255, 255);
+						const D3DCOLOR bar = isTracked ? 0xFFFFAA00 : 0xFF777788;
 
 						gd->SetAlphaBlending(true);
-						gd->DrawRectangle(*uiCamera, leftContainerX + 2.0f, btnDrawY, containerW - 4.0f, fullBtnH, D3DCOLOR_ARGB(50, 255, 170, 0), true);
+						gd->DrawRectangle(*uiCamera, leftContainerX + 2.0f, btnDrawY, containerW - 4.0f, fullBtnH, bg, true);
 						gd->SetAlphaBlending(false);
 
-						gd->DrawRectangle(*uiCamera, leftContainerX + 2.0f, btnDrawY, 4.0f, fullBtnH, 0xFFFFAA00, true);
+						gd->DrawRectangle(*uiCamera, leftContainerX + 2.0f, btnDrawY, 4.0f, fullBtnH, bar, true);
 					}
 					qb.btn->Draw(gd, deltaTime);
 				}
@@ -1315,8 +1321,11 @@ namespace Demo {
 					const bool ready = QuestManager::GetInstance()->IsReadyToTurnIn(selectedQuestId);
 					fontSprite->SetColor(state == QuestState::Completed ? 0xFF00FF00 : (ready ? 0xFF00FFFF : 0xFFFFFFFF));
 					fontSprite->SetPosition(rightContainerX + padX, drawY);
-					fontSprite->SetText(state == QuestState::Completed ? Tr(L"Status: Completed")
-						: (ready ? Tr(L"Status: Ready to turn in") : Tr(L"Status: Active")));
+					std::wstring statusText = state == QuestState::Completed ? Tr(L"Status: Completed")
+						: (ready ? Tr(L"Status: Ready to turn in") : Tr(L"Status: Active"));
+					if (QuestManager::GetInstance()->IsTracked(selectedQuestId)) statusText += Tr(L" (Tracked)");
+					else if (state == QuestState::Active) statusText += Tr(L" (Click to track)");
+					fontSprite->SetText(statusText);
 					fontSprite->Draw(*uiCamera, deltaTime);
 					drawY += 25.0f;
 
@@ -1469,7 +1478,6 @@ namespace Demo {
 		questButtons.clear();
 
 		questListTotalHeight = 0.0f;
-		questScrollY = 0.0f;
 
 		float sw = static_cast<float>(game->GetVirtualWidth());
 		float containerGap = 40.0f;
@@ -1495,7 +1503,8 @@ namespace Demo {
 
 		auto addQuest = [&](const Demo::QuestInfo& q, bool isActive) {
 			bool ready = isActive && QuestManager::GetInstance()->IsReadyToTurnIn(q.id);
-			std::string prefix = ready ? "(!) " : (isActive ? "(+) " : "(-) ");
+			const bool tracked = isActive && QuestManager::GetInstance()->IsTracked(q.id);
+			std::string prefix = ready ? "(!) " : (tracked ? "(*) " : (isActive ? "(+) " : "(-) "));
 			std::string titleStr = DX9GF::Utils::WideToUtf8(q.title);
 
 			float questPadX = 15.0f;
@@ -1504,6 +1513,8 @@ namespace Demo {
 			auto btn = std::make_shared<TextButton>(transformManager, 0, 0, btnInnerW, buttonH, prefix + titleStr, font,
 				[this, qId = q.id](DX9GF::ITrigger*) {
 					this->selectedQuestId = qId;
+					// Rebuilt next frame (not here: this runs inside the loop over questButtons).
+					if (QuestManager::GetInstance()->SetTrackedQuest(qId)) isQuestsDirty = true;
 				});
 			btn->Init(uiCamera);
 			btn->SetPadding(questPadX, 6.0f);
@@ -1515,8 +1526,9 @@ namespace Demo {
 
 			if (selectedQuestId.empty()) selectedQuestId = q.id;
 			if (ready) btn->SetTextColors(0xFF00FFFF, 0xFF80FFFF, 0xFFFFFFFF, 0xFF888888);
+			else if (tracked) btn->SetTextColors(0xFFFFD700, 0xFFFFE680, 0xFFFFAA00, 0xFF888888);
 			else if (isActive) btn->SetTextColors(0xFFFFFFFF, 0xFFFFD700, 0xFFFFAA00, 0xFF888888);
-			else btn->SetTextColors(0xFFAAAAAA, 0xFFCCCCCC, 0xFFFFFFFF, 0xFF888888);
+			else btn->SetTextColors(0xFF777777, 0xFF999999, 0xFFBBBBBB, 0xFF555555); // completed: dimmed
 			};
 
 		if (!activeQuests.empty()) {

@@ -34,6 +34,7 @@ namespace Demo {
 		// Set once the player has been walked through the first battle, so the walkthrough
 		// never replays. Persisted with the save.
 		bool seenBattleTutorial = false;
+		bool seenGearTutorial = false;
 		std::vector<std::string> unlockedSavePoints;
 		PlayerGlobalData() { Reset(); }
 	public:
@@ -58,6 +59,8 @@ namespace Demo {
 
 		bool HasSeenBattleTutorial() const { return seenBattleTutorial; }
 		void SetSeenBattleTutorial(bool seen) { seenBattleTutorial = seen; }
+		bool HasSeenGearTutorial() const { return seenGearTutorial; }
+		void SetSeenGearTutorial(bool seen) { seenGearTutorial = seen; }
 		// Save points double as fast travel points; ids look like "<SceneSaveID>#<index>".
 		bool IsSavePointUnlocked(const std::string& id) const {
 			return std::find(unlockedSavePoints.begin(), unlockedSavePoints.end(), id) != unlockedSavePoints.end();

@@ -438,6 +438,13 @@ Demo::QuestEventResult Demo::QuestManager::NotifyEvent(const std::string& eventT
 	return result;
 }
 
+bool Demo::QuestManager::SetTrackedQuest(const std::string& questId) {
+	if (GetQuestState(questId) != QuestState::Active || !questDatabase.count(questId)) return false;
+	currentTrackedQuest = questId;
+	SetQuest(Tr(L"Quest: ") + questDatabase[questId].currentObjective);
+	return true;
+}
+
 void Demo::QuestManager::SyncTrackedQuest() {
 	auto it = questStates.find(currentTrackedQuest);
 	bool trackedIsActive = (it != questStates.end() && it->second == QuestState::Active);

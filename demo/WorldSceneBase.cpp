@@ -178,6 +178,26 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 		ShowQuestResult(popUpMessage.get(), deferred);
 	}
 
+	// First-gear walkthrough: one popup page at a time, after the "Gear Obtained!" popup has been dismissed.
+	if (gearTutorialPage >= 0 && PlayerGlobalData::GetInstance()->GetPendingGearPopups().empty()
+		&& !isTransitioning && !currentConversation && !IsSubsceneModalActive()
+		&& !PopupManager::GetInstance()->IsActive()) {
+		const std::wstring toggleKey = SettingsManager::GetInstance()->GetKeybindDisplayName("TOGGLE_GEAR");
+		const std::wstring pages[] = {
+			Tr(L"Gears come in two kinds. Passive gears give a permanent bonus while equipped. Active gears can be triggered during battle."),
+			Tr(L"Open the inventory to equip gears. You can have one Active and one Passive gear equipped at a time."),
+			Tr(L"In battle, click the gear button to use your Active gear. After use, it needs a few turns to cool down."),
+			Tr(L"Equipped gears are shown around your character. Press <") + toggleKey + Tr(L"> outside the inventory to hide or show them."),
+		};
+		const int pageCount = static_cast<int>(sizeof(pages) / sizeof(pages[0]));
+		const bool last = gearTutorialPage == pageCount - 1;
+		std::vector<std::pair<std::wstring, std::function<void()>>> buttons = { { last ? Tr(L"Got it!") : Tr(L"Next"), nullptr } };
+		PopupManager::GetInstance()->Show("stepped_gold",
+			Tr(L"Gear Tutorial") + L" (" + std::to_wstring(gearTutorialPage + 1) + L"/" + std::to_wstring(pageCount) + L")",
+			pages[gearTutorialPage], buttons);
+		gearTutorialPage = last ? -1 : gearTutorialPage + 1;
+	}
+
 	// Announce freshly obtained gears one at a time, once any dialogue / other popup is out of the way.
 	auto& pendingGears = PlayerGlobalData::GetInstance()->GetPendingGearPopups();
 	if (!pendingGears.empty() && !isTransitioning && !currentConversation && !IsSubsceneModalActive()
@@ -187,6 +207,10 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 		auto bp = ItemData::GetInstance()->GetGearBlueprint(gearID);
 		if (bp) {
 			std::vector<std::pair<std::wstring, std::function<void()>>> buttons = { { Tr(L"OK"), nullptr } };
+			if (!PlayerGlobalData::GetInstance()->HasSeenGearTutorial()) {
+				PlayerGlobalData::GetInstance()->SetSeenGearTutorial(true);
+				gearTutorialPage = 0;
+			}
 			PopupManager::GetInstance()->ShowWithIcon("stepped_gold", Tr(L"Gear Obtained!"), Tr(bp->name),
 				buttons, gearTex, bp->frames);
 		}

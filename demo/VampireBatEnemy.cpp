@@ -57,7 +57,7 @@ void Demo::VampireBatEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::sha
 		}
 		else {
 			CastAbility([this]() {
-				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Vulnerable, 2, 0.f, false);
+				if (auto lock = this->player.lock()) lock->AddModifier(ModifierType::Vulnerable, 2, 0.f, false, 0, this);
 				}, popUpMessage, Tr(L"Shrimp emits a piercing screech!"));
 		}
 	}
