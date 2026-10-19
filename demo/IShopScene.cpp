@@ -6,6 +6,7 @@
 #include "DX9GFUtils.h"
 #include <algorithm>
 #include <cmath>
+#include "ShopPurchaseGlobalData.h"
 
 namespace {
 	// Panel geometry as a fraction of the virtual resolution, so the shop keeps its
@@ -31,6 +32,12 @@ namespace {
 
 	constexpr float BUY_BTN_SIZE = 64.0f;
 	constexpr float ICON_SCALE = 1.4f;
+	// The count line under a row's name or card face. 2/3 of the 3x font lands on the 2x cell, so
+	// the pixel font stays crisp.
+	constexpr float COUNT_SCALE = 2.0f / 3.0f;
+	constexpr float COUNT_H = static_cast<float>(Demo::kMainFontSize);
+	// The 3x font's descent (3 of its 13 rows) is empty space, so the count line may tuck into it.
+	constexpr float NAME_DESCENT = static_cast<float>(Demo::kLargeFontSize) * 3.0f / Demo::kMainFontCell;
 	// Card faces are authored for 2x, same as IStatementCard::DrawCardFace uses in battle.
 	constexpr float CARD_FACE_SCALE = 2.0f;
 	// Kept modest so the widest title ("--- PREMIUM CARD SHOP ---") still clears the
@@ -339,9 +346,15 @@ void Demo::IShopScene::HandleRow(int index)
 	const ShopItem item = items[index];
 
 	if (shopMode == ShopMode::Buy) {
+		if (IsSoldOut(item)) {
+			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.3f);
+			ShowMessage(Tr(L"Sold out!"));
+			return;
+		}
 		if (player->GetGold() >= item.cost) {
 			player->AddGold(-item.cost);
 			if (item.onBuyAction) item.onBuyAction();
+			if (item.purchaseLimit > 0) ShopPurchaseGlobalData::GetInstance()->AddPurchase(item.limitKey);
 			DX9GF::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
 			ShowMessage(Tr(L"Bought ") + item.name + Tr(L"!"));
 		}
@@ -409,6 +422,34 @@ void Demo::IShopScene::RefreshPage()
 	transformManager->UpdateAll();
 }
 
+int Demo::IShopScene::PurchasesLeft(const ShopItem& item) const
+{
+	if (item.purchaseLimit <= 0) return -1;
+	const int bought = ShopPurchaseGlobalData::GetInstance()->GetCount(item.limitKey);
+	return (std::max)(0, item.purchaseLimit - bought);
+}
+
+std::wstring Demo::IShopScene::GetCountLabel(const ShopItem& item, D3DCOLOR& color) const
+{
+	std::wstring text;
+	color = COLOR_TEXT_DIM;
+	if (item.ownedCount) {
+		const int owned = item.ownedCount();
+		if (owned > 0) {
+			text = Tr(L"Owned: ") + std::to_wstring(owned);
+			color = COLOR_OWNED;
+		}
+	}
+	else if (item.stackCount > 1) {
+		text = Tr(L"x") + std::to_wstring(item.stackCount);
+	}
+	if (shopMode == ShopMode::Buy && item.purchaseLimit > 0) {
+		if (!text.empty()) text += L"  ";
+		text += Tr(L"Left: ") + std::to_wstring(PurchasesLeft(item)) + L"/" + std::to_wstring(item.purchaseLimit);
+	}
+	return text;
+}
+
 void Demo::IShopScene::RefreshAffordability()
 {
 	const auto& items = ActiveItems();
@@ -419,7 +460,7 @@ void Demo::IShopScene::RefreshAffordability()
 	for (int i = startIndex; i < endIndex; ++i) {
 		auto& btn = buyButtons[i];
 		// A sale never costs the player gold, so every sell row is always actionable.
-		const bool affordable = shopMode == ShopMode::Sell || gold >= items[i].cost;
+		const bool affordable = shopMode == ShopMode::Sell || (gold >= items[i].cost && !IsSoldOut(items[i]));
 
 		btn->SetSpriteColor(affordable ? 0xFFFFFFFF : COLOR_BTN_DISABLED);
 
@@ -699,9 +740,13 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 
 			const float rowY = l.listTop + (i - startIndex) * (ROW_H + ROW_GAP);
 			const float faceX = l.rowX + ROW_INNER_PAD;
-			const float faceY = rowY + (ROW_H - faceH * CARD_FACE_SCALE) / 2.0f;
+			// With a count line under it, the face moves up so face + count stay centred in the row.
+			D3DCOLOR countColor;
+			const bool hasCount = !GetCountLabel(item, countColor).empty();
+			const float blockH = faceH * CARD_FACE_SCALE + (hasCount ? COUNT_H : 0.0f);
+			const float faceY = rowY + (ROW_H - blockH) / 2.0f;
 			// Unaffordable cards get the same grey wash as their buy button.
-			const bool affordable = sellMode || player->GetGold() >= item.cost;
+			const bool affordable = sellMode || (player->GetGold() >= item.cost && !IsSoldOut(item));
 			// The cover goes down first: it is pulled back over the face's right edge, and the face drawn
 			// second keeps that edge on top - same order as IStatementCard::Draw in battle.
 			DrawCardCover(item, faceX, faceY, faceW * CARD_FACE_SCALE, affordable, deltaTime);
@@ -750,53 +795,55 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 			const int gold = player->GetGold();
 			for (int i = startIndex; i < endIndex; ++i) {
 				const auto& item = items[i];
-				const bool affordable = sellMode || gold >= item.cost;
+				const bool affordable = sellMode || (gold >= item.cost && !IsSoldOut(item));
 				const float rowY = l.listTop + (i - startIndex) * (ROW_H + ROW_GAP);
+
+				D3DCOLOR countColor;
+				const std::wstring countText = GetCountLabel(item, countColor);
+				const float textX = l.rowX + ROW_INNER_PAD;
+				float countX = textX;
+				float countY = 0.0f;
 
 				// A card face already spells out the card's name and energy cost, so drawing
 				// the name next to it would just repeat it; item icons are wordless and still
 				// need the label.
 				if (item.iconSheet != ShopIconSheet::CardFaces) {
 					const float iconW = static_cast<float>(item.iconRect.right - item.iconRect.left);
-					const float textX = l.rowX + ROW_INNER_PAD + (iconW > 0.0f ? iconW * ICON_SCALE + 12.0f : 0.0f);
+					const float nameX = textX + (iconW > 0.0f ? iconW * ICON_SCALE + 12.0f : 0.0f);
 
 					myFontSprite->SetColor(affordable ? COLOR_TEXT : COLOR_TEXT_DIM);
 					myFontSprite->SetText(std::wstring(item.name));
 					const float nameH = static_cast<float>(myFontSprite->GetHeight());
-					myFontSprite->SetPosition(textX, rowY + (ROW_H - nameH) / 2.0f);
+					const float blockH = countText.empty() ? nameH : nameH + COUNT_H - NAME_DESCENT;
+					const float nameY = rowY + (ROW_H - blockH) / 2.0f;
+					myFontSprite->SetPosition(nameX, nameY);
 					myFontSprite->Draw(uiCamera, deltaTime);
+
+					countX = nameX;
+					countY = nameY + nameH - NAME_DESCENT;
+				}
+				else {
+					// Same block the face loop above centred: face on top, count line under it.
+					const float faceH = static_cast<float>(CardFrame::SHEET_HEIGHT) * CARD_FACE_SCALE;
+					countY = rowY + (ROW_H - (faceH + COUNT_H)) / 2.0f + faceH;
+				}
+
+				if (!countText.empty()) {
+					myFontSprite->SetScale(COUNT_SCALE, COUNT_SCALE);
+					myFontSprite->SetColor(countColor);
+					myFontSprite->SetText(countText);
+					myFontSprite->SetPosition(countX, countY);
+					myFontSprite->Draw(uiCamera, deltaTime);
+					myFontSprite->SetScale(1.0f, 1.0f);
 				}
 
 				myFontSprite->SetColor(affordable ? COLOR_GOLD : COLOR_PRICE_BAD);
-				myFontSprite->SetText(std::to_wstring(item.cost) + L"G");
+				myFontSprite->SetText(IsSoldOut(item) ? Tr(L"SOLD OUT") : std::to_wstring(item.cost) + L"G");
 				const float priceW = static_cast<float>(myFontSprite->GetWidth());
 				const float priceH = static_cast<float>(myFontSprite->GetHeight());
 				const float priceX = l.rowX + l.rowW - ROW_INNER_PAD - BUY_BTN_SIZE - 16.0f - priceW;
 				myFontSprite->SetPosition(priceX, rowY + (ROW_H - priceH) / 2.0f);
 				myFontSprite->Draw(uiCamera, deltaTime);
-
-				// Owned count, just left of the price: "xN" on Sell rows (stack size), "Owned: N"
-				// on Buy rows so the player can see what they already carry before buying more.
-				std::wstring countText;
-				D3DCOLOR countColor = COLOR_TEXT_DIM;
-				if (item.ownedCount) {
-					const int owned = item.ownedCount();
-					if (owned > 0) {
-						countText = Tr(L"Owned: ") + std::to_wstring(owned);
-						countColor = COLOR_OWNED;
-					}
-				}
-				else if (item.stackCount > 1) {
-					countText = Tr(L"x") + std::to_wstring(item.stackCount);
-				}
-				if (!countText.empty()) {
-					myFontSprite->SetColor(countColor);
-					myFontSprite->SetText(countText);
-					const float countW = static_cast<float>(myFontSprite->GetWidth());
-					const float countH = static_cast<float>(myFontSprite->GetHeight());
-					myFontSprite->SetPosition(priceX - 16.0f - countW, rowY + (ROW_H - countH) / 2.0f);
-					myFontSprite->Draw(uiCamera, deltaTime);
-				}
 			}
 
 			// Empty sell list: tell the player why the panel is bare.

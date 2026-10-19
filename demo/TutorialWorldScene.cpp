@@ -179,14 +179,14 @@ void Demo::TutorialWorldScene::OnInit()
 
 	auto shopCard = std::make_shared<ShopPoint>(transformManager, 183.0f, -460.0f);
 	shopCard->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		ShopConfig{ ShopType::Card, ShopTier::BASIC, [](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::BASIC); } }
+		ShopConfig{ ShopType::Card, ShopTier::BASIC, [](Game* g, Player* p, int w, int h) { return new CardShop(g, p, w, h, ShopTier::BASIC, ShopLocation::Tutorial); } }
 	);
 	shopCard->SetVisible(true);
 	shopPoints.push_back(shopCard);
 
 	auto shopItem = std::make_shared<ShopPoint>(transformManager, 320.0f, -660.0f);
 	shopItem->Init(game, game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer,
-		ShopConfig{ ShopType::Item, ShopTier::BASIC, [](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::BASIC); } }
+		ShopConfig{ ShopType::Item, ShopTier::BASIC, [](Game* g, Player* p, int w, int h) { return new ItemShop(g, p, w, h, ShopTier::BASIC, ShopLocation::Tutorial); } }
 	);
 	shopItem->SetVisible(true);
 	shopPoints.push_back(shopItem);

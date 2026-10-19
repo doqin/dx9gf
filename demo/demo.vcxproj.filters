@@ -260,6 +260,7 @@
     <ClInclude Include="DeadlineEnemy.h" />
     <ClInclude Include="HomeworkEnemy.h" />
     <ClInclude Include="PendingAutoContinue.h" />
+    <ClInclude Include="ShopPurchaseGlobalData.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc" />

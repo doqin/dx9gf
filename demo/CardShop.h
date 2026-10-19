@@ -7,7 +7,7 @@
 
 namespace Demo {
 	class CardShop : public IShopScene {
- private:
+	private:
 		ShopTier currentTier;
 		// Builds the listing from the card itself, so its description, face artwork and the card
 		// the player actually receives can never drift apart. The price comes from CardCatalog,
@@ -20,7 +20,8 @@ namespace Demo {
 		}
 		void AddShopCard(const CardDef& def);
 	public:
-        CardShop(Game* game, Player* player, int screenWidth, int screenHeight, ShopTier tier);
+		CardShop(Game* game, Player* player, int screenWidth, int screenHeight, ShopTier tier,
+			ShopLocation location = ShopLocation::Tutorial);
 
 
 		void LoadItems() override;

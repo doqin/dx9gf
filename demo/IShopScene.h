@@ -16,6 +16,31 @@
 namespace Demo {
 	enum class ShopTier { BASIC, HYBRID, PREMIUM, RK_HYBRID };
 
+	// Which map a shop stands in. Shops of the same tier appear in more than one map, and the
+	// purchase limits (#296) depend on the map, not the tier.
+	enum class ShopLocation { Tutorial, SecretPuzzle, ThreadAlley, BossWorld };
+
+	// Every card row can be bought this many times per shop.
+	constexpr int CARD_PURCHASE_LIMIT = 3;
+
+	// Every item row except the Rusty Key can be bought this many times, depending on the map.
+	inline int ItemPurchaseLimit(ShopLocation location) {
+		switch (location) {
+		case ShopLocation::Tutorial:     return 2;
+		case ShopLocation::SecretPuzzle:
+		case ShopLocation::ThreadAlley:  return 3;
+		case ShopLocation::BossWorld:    return 5;
+		}
+		return 0;
+	}
+
+	// Prefix of ShopItem::limitKey, so the same ware in two different shops has its own counter.
+	inline std::string MakeShopKey(ShopLocation location, const char* shopKind, ShopTier tier) {
+		static const char* locations[] = { "Tutorial", "SecretPuzzle", "ThreadAlley", "BossWorld" };
+		static const char* tiers[] = { "BASIC", "HYBRID", "PREMIUM", "RK_HYBRID" };
+		return std::string(locations[static_cast<int>(location)]) + "/" + shopKind + "/" + tiers[static_cast<int>(tier)];
+	}
+
 	// A shop shows one of two lists: the wares it sells (Buy) or the player's own goods it will
 	// buy back (Sell). The header toggle flips between them.
 	enum class ShopMode { Buy, Sell };
@@ -52,12 +77,19 @@ namespace Demo {
 		// Buy rows only: how many of this ware the player already owns, re-read every frame so the
 		// "Owned: N" label stays correct right after a purchase. Empty on Sell rows.
 		std::function<int()> ownedCount;
+		// Buy rows only: save key of this row's purchase counter (ShopPurchaseGlobalData) and how
+		// many times it can be bought. purchaseLimit 0 means unlimited.
+		std::string limitKey;
+		int purchaseLimit = 0;
 	};
 
 	class IShopScene : public DX9GF::IScene {
 	protected:
 		Game* game;
 		Player* player;
+
+		// Set by the subclass constructor with MakeShopKey; prefixes every row's limitKey.
+		std::string shopKey;
 
 		std::shared_ptr<DX9GF::TransformManager> transformManager;
 
@@ -150,7 +182,12 @@ namespace Demo {
 		// Greys out and disables the buy buttons the player cannot currently afford. No-op in Sell
 		// mode, where every row is always actionable.
 		void RefreshAffordability();
-
+		// Purchases left on a limited Buy row, or -1 when the row has no limit.
+		int PurchasesLeft(const ShopItem& item) const;
+		bool IsSoldOut(const ShopItem& item) const { return PurchasesLeft(item) == 0; }
+		// "Owned: N" (Buy) or "xN" (Sell), plus "Left: x/y" on a limited row. Drawn on its own line
+		// under the row's name or card face; empty when there is nothing to show.
+		std::wstring GetCountLabel(const ShopItem& item, D3DCOLOR& color) const;
 	public:
 		IShopScene(Game* game, Player* player, int screenWidth, int screenHeight, std::string title);
 		virtual ~IShopScene() = default;

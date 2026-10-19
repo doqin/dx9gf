@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "PlayerGlobalData.h"
 #include "SketchyGuyGlobalData.h"
+#include "ShopPurchaseGlobalData.h"
 #include "IntroScene.h"
 #include "TutorialWorldScene.h"
 #include "LabInsideScene.h"
@@ -132,10 +133,12 @@ namespace Demo {
 		saveManager->Clear();
 		PlayerGlobalData::GetInstance()->Reset();
 		SketchyGuyGlobalData::GetInstance()->Reset();
+		ShopPurchaseGlobalData::GetInstance()->Reset();
 		auto saveState = std::make_shared<SaveGameState>(game, saveManager);
 		saveManager->Register(saveState.get());
 		saveManager->Register(PlayerGlobalData::GetInstance());
 		saveManager->Register(SketchyGuyGlobalData::GetInstance());
+		saveManager->Register(ShopPurchaseGlobalData::GetInstance());
 		saveState->ClearScenes();
 		saveState->BuildScenes();
 		QuestManager::GetInstance()->Reset();
@@ -157,6 +160,8 @@ namespace Demo {
 		saveManager->Register(this);
 		saveManager->Register(PlayerGlobalData::GetInstance());
 		saveManager->Register(SketchyGuyGlobalData::GetInstance());
+		ShopPurchaseGlobalData::GetInstance()->Reset();
+		saveManager->Register(ShopPurchaseGlobalData::GetInstance());
 		ClearScenes();
 		BuildScenes();
 		QuestManager::GetInstance()->Reset();

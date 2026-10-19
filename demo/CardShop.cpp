@@ -42,12 +42,13 @@ namespace {
 	}
 }
 
-Demo::CardShop::CardShop(Game* game, Player* player, int sw, int sh, ShopTier tier)
+Demo::CardShop::CardShop(Game* game, Player* player, int sw, int sh, ShopTier tier, ShopLocation location)
 	: IShopScene(game, player, sw, sh,
 		tier == ShopTier::BASIC ? "BASIC CARD SHOP" :
 		tier == ShopTier::HYBRID ? "HYBRID CARD SHOP" : "PREMIUM CARD SHOP"),
 	currentTier(tier)
 {
+	shopKey = MakeShopKey(location, "Card", tier);
 }
 
 void Demo::CardShop::AddShopCard(const CardDef& def)
@@ -65,6 +66,8 @@ void Demo::CardShop::AddShopCard(const CardDef& def)
 		prototype->HasLimitedUses() ? prototype->GetMaxUses() : 0
 		});
 	ApplyCardFace(itemsForSale.back(), *prototype);
+	itemsForSale.back().limitKey = shopKey + "/" + def.id;
+	itemsForSale.back().purchaseLimit = CARD_PURCHASE_LIMIT;
 	itemsForSale.back().ownedCount = [this, id = def.id]() {
 		const auto& inv = this->player->GetInventoryCards();
 		const auto& deck = this->player->GetDeck();
