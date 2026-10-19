@@ -212,6 +212,9 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 			descFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
 		}
+		if (!statusFontSprite) {
+			statusFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
+		}
 		// The lock overlay shares this sprite and leaves its own colour and outline behind, so
 		// re-apply the tooltip's styling every frame instead of only on first creation.
 		descFontSprite->SetColor(0xFF000000);
@@ -230,19 +233,29 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		if (!IsPersistent()) {
 			text += L"\n" + Tr(L"Non-persistent: leaves the program at end of turn.");
 		}
+		descFontSprite->SetText(std::move(text));
+
+		// Status effects get their own tab under the description, so the card's text stays
+		// short and the explanations read as a separate glossary.
+		std::wstring statusText;
 		for (const auto& effect : GetAppliedStatusEffects()) {
 			ModifierInfo info = GetModifierInfo(effect.type);
-			text += L"\n" + info.name + L": " + info.description + L"\n" + GetModifierStackingInfo(effect.stacksValue);
+			statusText += L"\n" + info.name + L": " + info.description + L"\n" + GetModifierStackingInfo(effect.stacksValue);
 		}
-
-		descFontSprite->SetText(std::move(text));
+		const bool hasStatusTab = !statusText.empty();
+		if (hasStatusTab) {
+			statusFontSprite->SetColor(0xFF000000);
+			statusFontSprite->SetOutline(false);
+			statusFontSprite->SetMaxWidth(TOOLTIP_MAX_WIDTH);
+			statusFontSprite->SetText(Tr(L"STATUS EFFECTS") + statusText);
+		}
 
 		if (auto manager = GetDraggableManager().lock()) {
 			// The command is queued now and executed when the manager flushes its draw buffer.
 			// If the card dies in between - pile-view cards are destroyed when that menu closes -
 			// a captured raw 'this' would dangle, so gate the body on a weak reference.
 			std::weak_ptr<DX9GF::IGameObject> self = weak_from_this();
-			auto cmd = std::make_shared<DX9GF::CustomCommand>([this, self, deltaTime](std::function<void()> markFinished) {
+			auto cmd = std::make_shared<DX9GF::CustomCommand>([this, self, deltaTime, hasStatusTab](std::function<void()> markFinished) {
 				if (self.expired()) {
 					markFinished();
 					return;
@@ -254,30 +267,33 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 				float textY = GetWorldY() + static_cast<float>(GetHeight()) + 4.f;
 				float padding = 4.f;
 
-				graphicsDevice->DrawRectangle(
-					*camera,
-					textX - padding,
-					textY - padding,
-					textWidth + padding * 2,
-					textHeight + padding * 2,
-					0xFFE0E0E0,
-					true
-				);
-
-				graphicsDevice->DrawRectangle(
-					*camera,
-					textX - padding,
-					textY - padding,
-					textWidth + padding * 2,
-					textHeight + padding * 2,
-					0xFF000000,
-					false
-				);
+				graphicsDevice->DrawRectangle(*camera, textX - padding, textY - padding,
+					textWidth + padding * 2, textHeight + padding * 2, 0xFFE0E0E0, true);
+				graphicsDevice->DrawRectangle(*camera, textX - padding, textY - padding,
+					textWidth + padding * 2, textHeight + padding * 2, 0xFF000000, false);
 
 				descFontSprite->Begin();
 				descFontSprite->SetPosition(textX, textY);
 				descFontSprite->Draw(*camera, deltaTime);
 				descFontSprite->End();
+
+				// The status tab sits to the right of the description box, top-aligned with it and
+				// tinted so it reads as its own panel.
+				if (hasStatusTab) {
+					const float statusW = static_cast<float>(statusFontSprite->GetWidth());
+					const float statusH = static_cast<float>(statusFontSprite->GetHeight());
+					const float statusX = textX + textWidth + padding * 2 + 4.f;
+
+					graphicsDevice->DrawRectangle(*camera, statusX - padding, textY - padding,
+						statusW + padding * 2, statusH + padding * 2, 0xFFC9DAF0, true);
+					graphicsDevice->DrawRectangle(*camera, statusX - padding, textY - padding,
+						statusW + padding * 2, statusH + padding * 2, 0xFF000000, false);
+
+					statusFontSprite->Begin();
+					statusFontSprite->SetPosition(statusX, textY);
+					statusFontSprite->Draw(*camera, deltaTime);
+					statusFontSprite->End();
+				}
 				markFinished();
 				});
 			manager->QueueDraw(cmd);
