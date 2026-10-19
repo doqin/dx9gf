@@ -144,6 +144,12 @@ namespace Demo {
 			return requested;
 		}
 		bool IsReadyToTurnIn(const std::string& questId) const { return readyQuests.count(questId) > 0; }
+		// The quest shown on the HUD panel. Only an active quest can be tracked; returns false otherwise.
+		bool SetTrackedQuest(const std::string& questId);
+		const std::string& GetTrackedQuest() const { return currentTrackedQuest; }
+		bool IsTracked(const std::string& questId) const {
+			return currentTrackedQuest == questId && GetQuestState(questId) == QuestState::Active;
+		}
 		QuestEventResult TurnInQuest(const std::string& questId, Player* player);
 	};
 }
