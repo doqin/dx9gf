@@ -23,6 +23,11 @@ namespace Demo {
 		// Drops the card from the execution queue and the container's child list, keeping the
 		// execution pointer on the same card. Does not touch the card's parent.
 		void RemoveFromQueue(const IStatementCard* card);
+		// Queue index a statement card dropped with its centre at dropY would take: after every other
+		// queued card whose middle is above that point. Uses the cards' on-screen positions, so a
+		// scrolled block still lands right. If slotTopY is given, it receives the top edge of the
+		// card currently at that index, or stays untouched when the index is the end of the queue.
+		size_t DropIndexAt(float dropY, const std::shared_ptr<IStatementCard>& dropped, float* slotTopY = nullptr);
 	protected:
 		std::vector<std::weak_ptr<IStatementCard>> statementCards;
 		std::shared_ptr<DX9GF::Font> nameFont;
