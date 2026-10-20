@@ -68,6 +68,7 @@ void Demo::CardShop::AddShopCard(const CardDef& def)
 	ApplyCardFace(itemsForSale.back(), *prototype);
 	itemsForSale.back().limitKey = shopKey + "/" + def.id;
 	itemsForSale.back().purchaseLimit = CARD_PURCHASE_LIMIT;
+	itemsForSale.back().statusEffects = prototype->GetAppliedStatusEffects();
 	itemsForSale.back().ownedCount = [this, id = def.id]() {
 		const auto& inv = this->player->GetInventoryCards();
 		const auto& deck = this->player->GetDeck();
@@ -118,6 +119,7 @@ void Demo::CardShop::LoadSellItems()
 		row.isPersistent = proto->IsPersistent();
 		row.hasLimitedUses = proto->HasLimitedUses();
 		row.maxUses = proto->HasLimitedUses() ? proto->GetMaxUses() : 0;
+		row.statusEffects = proto->GetAppliedStatusEffects();
 		row.stackCount = count;
 		row.onBuyAction = [this, sellId]() { this->player->RemoveCardFromInventory(sellId); };
 		itemsToSell.push_back(std::move(row));

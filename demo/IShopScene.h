@@ -10,6 +10,7 @@
 #include <functional>
 #include "IconButton.h"
 #include "CardFrame.h"
+#include "GameItems.h"
 #include "TextIconButton.h"
 #include "KeyboardNavigator.h"
 
@@ -81,6 +82,9 @@ namespace Demo {
 		// many times it can be bought. purchaseLimit 0 means unlimited.
 		std::string limitKey;
 		int purchaseLimit = 0;
+		// Card rows only: the status effects the card applies, explained in the status tab
+		// attached to the description box. Empty for everything else.
+		std::vector<AppliedStatusEffect> statusEffects;
 	};
 
 	class IShopScene : public DX9GF::IScene {
@@ -146,6 +150,7 @@ namespace Demo {
 		std::shared_ptr<DX9GF::NineSliceSprite> rowSprite;
 		std::shared_ptr<DX9GF::NineSliceSprite> rowHoverSprite;
 		std::shared_ptr<DX9GF::NineSliceSprite> descSprite;
+		std::shared_ptr<DX9GF::NineSliceSprite> statusTabSprite;
 		std::shared_ptr<DX9GF::StaticSprite> itemIconSprite;
 		std::shared_ptr<CardFrame> cardFrame;
 		std::shared_ptr<DX9GF::StaticSprite> goldIconSprite;
@@ -188,6 +193,10 @@ namespace Demo {
 		// "Owned: N" (Buy) or "xN" (Sell), plus "Left: x/y" on a limited row. Drawn on its own line
 		// under the row's name or card face; empty when there is nothing to show.
 		std::wstring GetCountLabel(const ShopItem& item, D3DCOLOR& color) const;
+		// Draws the "STATUS EFFECTS" tab for a card row that applies any. It drops down from under the
+		// hovered row (rowY), or opens above it when there is no room before maxY; never above minY.
+		void DrawStatusTab(const ShopItem& item, float rowY, float boxX, float boxW, float minY, float maxY,
+			unsigned long long deltaTime);
 	public:
 		IShopScene(Game* game, Player* player, int screenWidth, int screenHeight, std::string title);
 		virtual ~IShopScene() = default;

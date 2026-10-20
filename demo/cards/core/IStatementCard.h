@@ -82,6 +82,9 @@ namespace Demo {
 		std::shared_ptr<DX9GF::Font> descFont;
 		std::shared_ptr<DX9GF::FontSprite> descFontSprite;
 
+		// The status-effect tab drawn under the description tooltip.
+		std::shared_ptr<DX9GF::FontSprite> statusFontSprite;
+
 		// Cover panel drawn off the card's right edge, holding the non-persistent badge and one
 		// pip per use. Geometry below is in ui.png pixels; cards render at USES_COVER_SCALE.
 		static constexpr int USES_COVER_SCALE = 2;

@@ -81,6 +81,7 @@ namespace {
 	constexpr D3DCOLOR TINT_PANEL_FILL = 0xFF232331;
 	constexpr D3DCOLOR TINT_ROW_HOVER = 0xFF4E6FA8;
 	constexpr D3DCOLOR TINT_DESC = 0xFF15151F;
+	constexpr D3DCOLOR TINT_STATUS_TAB = 0xFF1E2A40;
 	// How much of the gold frame stays visible around the panel fill.
 	constexpr float PANEL_FRAME_INSET = 10.0f;
 
@@ -219,6 +220,10 @@ void Demo::IShopScene::BuildUI()
 	descSprite->SetScale(CARD_BORDER_SCALE);
 	descSprite->SetColor(TINT_DESC);
 	descSprite->SetTargetSize(l.rowW, DESC_BOX_H);
+
+	statusTabSprite = std::make_shared<DX9GF::NineSliceSprite>(borderTex.get(), DESC_SRC, 2, 2, 2, 2);
+	statusTabSprite->SetScale(CARD_BORDER_SCALE);
+	statusTabSprite->SetColor(TINT_STATUS_TAB);
 
 	itemIconSprite = std::make_shared<DX9GF::StaticSprite>(itemsTex.get());
 	itemIconSprite->SetScale(ICON_SCALE, ICON_SCALE);
@@ -448,6 +453,63 @@ std::wstring Demo::IShopScene::GetCountLabel(const ShopItem& item, D3DCOLOR& col
 		text += Tr(L"Left: ") + std::to_wstring(PurchasesLeft(item)) + L"/" + std::to_wstring(item.purchaseLimit);
 	}
 	return text;
+}
+
+void Demo::IShopScene::DrawStatusTab(const ShopItem& item, float rowY, float boxX, float boxW, float minY, float maxY,
+	unsigned long long deltaTime)
+{
+	if (item.statusEffects.empty()) return;
+
+	struct TabLine { std::wstring text; D3DCOLOR color; };
+	std::vector<TabLine> lines;
+	const float innerW = boxW - ROW_INNER_PAD * 2.0f;
+
+	// WrapText measures unscaled widths, so wrap against the width the text gets at COUNT_SCALE.
+	// GetModifierInfo descriptions can hold their own line breaks, so wrap each paragraph.
+	auto addWrapped = [&](const std::wstring& text, D3DCOLOR color) {
+		size_t start = 0;
+		while (true) {
+			const size_t nl = text.find(L'\n', start);
+			const std::wstring para = text.substr(start, nl == std::wstring::npos ? std::wstring::npos : nl - start);
+			for (const auto& line : WrapText(myFontSprite.get(), para, innerW / COUNT_SCALE, 6)) {
+				lines.push_back({ line, color });
+			}
+			if (nl == std::wstring::npos) break;
+			start = nl + 1;
+		}
+		};
+
+	lines.push_back({ Tr(L"STATUS EFFECTS"), COLOR_GOLD });
+	for (const auto& effect : item.statusEffects) {
+		const ModifierInfo info = GetModifierInfo(effect.type);
+		addWrapped(info.name + L": " + info.description, COLOR_TEXT);
+		addWrapped(GetModifierStackingInfo(effect.stacksValue), COLOR_TEXT_DIM);
+	}
+
+	const float lineH = COUNT_H + 2.0f;
+	const float boxH = static_cast<float>(lines.size()) * lineH + 12.0f;
+	float boxY = rowY + ROW_H + 4.0f;
+	if (boxY + boxH > maxY) boxY = rowY - 4.0f - boxH;
+	boxY = (std::max)(boxY, minY);
+
+	statusTabSprite->SetTargetSize(boxW, boxH);
+	statusTabSprite->Begin();
+	statusTabSprite->SetPosition(boxX, boxY);
+	statusTabSprite->Draw(uiCamera, deltaTime);
+	statusTabSprite->End();
+
+	myFontSprite->Begin();
+	myFontSprite->SetScale(COUNT_SCALE, COUNT_SCALE);
+	float lineY = boxY + 6.0f;
+	for (const auto& line : lines) {
+		myFontSprite->SetColor(line.color);
+		myFontSprite->SetText(std::wstring(line.text));
+		myFontSprite->SetPosition(boxX + ROW_INNER_PAD, lineY);
+		myFontSprite->Draw(uiCamera, deltaTime);
+		lineY += lineH;
+	}
+	myFontSprite->SetScale(1.0f, 1.0f);
+	myFontSprite->End();
 }
 
 void Demo::IShopScene::RefreshAffordability()
@@ -891,6 +953,18 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 			}
 
 			myFontSprite->End();
+		}
+
+
+		// --- Status tab ----------------------------------------------------------
+// Drawn after the row text batch is flushed, so its box covers the rows it overlaps.
+// Hidden while a purchase message holds the description box, same as the description.
+		if (statusMessage.empty() && hoveredIndex >= 0) {
+			const float hoveredRowY = l.listTop + (hoveredIndex - startIndex) * (ROW_H + ROW_GAP);
+			// Starts under the card face and stops short of the price column.
+			const float tabX = l.rowX + ROW_INNER_PAD;
+			const float tabW = l.rowW * 0.6f;
+			DrawStatusTab(items[hoveredIndex], hoveredRowY, tabX, tabW, l.panelY + PANEL_PAD, l.footerTop - 4.0f, deltaTime);
 		}
 
 		keyboardNavigator.Draw(gd, uiCamera, CollectKeyboardCandidates());
