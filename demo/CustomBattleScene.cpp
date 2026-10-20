@@ -12,9 +12,15 @@
 #include "RNG.h"
 #include "TrojanEnemy.h"
 #include "SpamEnemy.h"
+#include "BossDeathGlobalData.h"
 namespace Demo {
     void CustomBattleScene::Init() {
         IBattleScene::Init(); // Initialize hand etc. using base class base init
+
+        // A forced boss fight is tagged so a defeat counts toward that boss's hint (#315).
+        for (const char* boss : { "SpamEnemy", "TrojanEnemy", "CupidEnemy", "KeyeproEnemy" }) {
+            if (possibleEnemies.count(boss)) bossId = boss;
+        }
 
         bool enemySpawned = false;
 
