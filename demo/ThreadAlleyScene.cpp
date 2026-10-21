@@ -412,8 +412,8 @@ void Demo::ThreadAlleyScene::ShowTerminalDirectionHint()
 {
 	if (authTerminalSolved) return;
 	std::vector<std::pair<std::wstring, std::function<void()>>> buttons = { { Tr(L"OK"), nullptr } };
-	PopupManager::GetInstance()->Show("stepped_blue", Tr(L"HINT"),
-		Tr(L"Head down to the bottom-right corner of the alley to find the terminal\nthat hands out auth tokens. It stands right next to the shady guy selling card packs."),
+	PopupManager::GetInstance()->ShowNarration("stepped_blue",
+		Tr(L"Head down to the bottom-right corner of the alley to find the terminal that hands out auth tokens. It stands right next to the shady guy selling card packs."),
 		buttons);
 }
 
