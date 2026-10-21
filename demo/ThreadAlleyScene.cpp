@@ -388,7 +388,6 @@ void Demo::ThreadAlleyScene::StartTrojanConversation()
 	case TrojanNPC::Phase::Friendly:
 		onConversationEnd = [this]() {
 			trojanNPC->SetPhase(TrojanNPC::Phase::AwaitingToken);
-			ShowTerminalDirectionHint();
 			};
 		QuestManager::GetInstance()->NotifyEvent("TROJAN_TALKED", "", player.get());
 		break;
