@@ -31,6 +31,7 @@
 #include "backends/imgui_impl_win32.h"
 #include "SaveGameState.h"
 #include "MainMenu.h"
+#include "BossDeathGlobalData.h"
 
 namespace {
 	constexpr float HiddenPileX = -10000.f;
@@ -2138,13 +2139,41 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		if (defeatElapsedMs >= 2500.f) {
 			if (!defeatPopupShown) {
 				defeatPopupShown = true;
+				// Dodging with the move keys leaves the navigator in keyboard mode, which hides the
+				// cursor; the defeat popup is answered with the mouse (or Y/N), so bring it back.
+				keyboardNavigator.Reset();
+
+				// Losing to the same boss again and again earns a hint on this popup.
+				std::wstring hint;
+				if (!bossId.empty()) {
+					auto* bossDeaths = BossDeathGlobalData::GetInstance();
+					bossDeaths->AddDeath(bossId);
+					if (bossDeaths->GetDeaths(bossId) >= BossHintDeaths(bossId)) {
+						hint = GetBossHint(bossId);
+					}
+				}
 
 				if (SaveGameState::HasSaveFile()) {
 					std::vector<std::pair<std::wstring, std::function<void()>>> popupBtns = {
 						{ L"Yes(Y)", [this]() { pendingDefeatReloadSave = true; } },
 						{ L"No(N)", [this]() { pendingDefeatMainMenuTransition = true; } }
 					};
-					PopupManager::GetInstance()->Show("basic_ghost", L"DEFEATED", L"Load your last savepoint?", popupBtns);
+					const std::wstring question = Tr(L"Load your last savepoint?");
+
+					// With a hint, reuse the stepped icon popup with the boss that just won animating
+					// beside the hint, so the long text doesn't push the popup off a small window.
+					const BossPortrait portrait = GetBossPortrait(bossId);
+					if (!hint.empty() && portrait.sheet) {
+						auto portraitTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+						portraitTex->LoadTexture(portrait.sheet);
+						PopupManager::GetInstance()->ShowWithSideIcon("stepped_red", L"DEFEATED",
+							Tr(L"Hint: ") + hint + L"\n\n" + question, popupBtns, portraitTex,
+							DX9GF::Utils::CreateRectsHorizontal(0, 0, portrait.frameSize, portrait.frameSize, portrait.frameCount),
+							(std::min)(128.0f, static_cast<float>(game->GetVirtualHeight()) * 0.18f));
+					}
+					else {
+						PopupManager::GetInstance()->Show("basic_ghost", L"DEFEATED", question, popupBtns);
+					}
 				}
 				else {
 					pendingDefeatMainMenuTransition = true;
@@ -3713,6 +3742,8 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	}
 
 	if (isDefeatSequence) {
+		// Still track mouse vs. keyboard here, or the cursor stays hidden for the whole defeat popup.
+		keyboardNavigator.UpdateMode();
 		if (!EnemyAttackUpdate(deltaTime)) {
 			DamageTextManager::GetInstance()->Update(deltaTime);
 			transformManager->UpdateAll();
