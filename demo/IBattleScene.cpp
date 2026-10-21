@@ -115,6 +115,7 @@ void Demo::IBattleScene::StartBattle()
 	isDefeatSequence = false;
 	defeatElapsedMs = 0.f;
 	defeatFadeAlpha = 0.f;
+	pendingReturnToPreviousScene = false;
 	static std::random_device rd;
 	static std::mt19937 gen(rd());
 	std::shuffle(drawPile.begin(), drawPile.end(), gen);
@@ -285,16 +286,10 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 		if (!transitionInCommand->IsFinished()) {
 			return;
 		}
-		auto sceMan = game->GetSceneManager();
-		auto prevScene = sceMan->GetScene(sceMan->GetIndex() - 1);
-		auto audio = DX9GF::AudioManager::GetInstance();
-
-		if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
-		else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene)) audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
-		else if (dynamic_cast<Demo::ThreadAlleyScene*>(prevScene)) audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.0f);
-		else if (dynamic_cast<Demo::BossWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.0f);
-		sceMan->RemoveScene(sceMan->GetIndex());
-		sceMan->GoToPrevious();
+		// Do not remove this scene from inside its command callback. The command buffer
+		// owns the currently executing CustomCommand through this scene, so deleting the
+		// scene here would destroy the command before CustomCommand::Execute returns.
+		pendingReturnToPreviousScene = true;
 		markFinished();
 		}));
 }
@@ -3703,6 +3698,22 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 		}
 		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 1.0f);
 		sceMan->GoToScene(0);
+		return;
+	}
+
+	if (pendingReturnToPreviousScene) {
+		pendingReturnToPreviousScene = false;
+		auto sceMan = game->GetSceneManager();
+		auto prevScene = sceMan->GetScene(sceMan->GetIndex() - 1);
+		auto audio = DX9GF::AudioManager::GetInstance();
+
+		if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
+		else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene)) audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
+		else if (dynamic_cast<Demo::ThreadAlleyScene*>(prevScene)) audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.0f);
+		else if (dynamic_cast<Demo::BossWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.0f);
+
+		sceMan->RemoveScene(sceMan->GetIndex());
+		sceMan->GoToPrevious();
 		return;
 	}
 

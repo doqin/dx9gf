@@ -82,6 +82,7 @@ namespace Demo {
 		bool defeatPopupShown = false;
 		bool pendingDefeatMainMenuTransition = false;
 		bool pendingDefeatReloadSave = false;
+		bool pendingReturnToPreviousScene = false;
 		// Set for a boss fight: the boss enemy's id, used to count defeats and pick its hint.
 		// Empty for regular battles.
 		std::string bossId;
