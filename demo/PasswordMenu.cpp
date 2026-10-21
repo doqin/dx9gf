@@ -18,6 +18,11 @@ namespace {
 	constexpr float ROW_H = 26.0f;
 	constexpr float DIGIT_SPACING = 34.0f;
 	constexpr float CARET_PERIOD = 1000.0f;
+	constexpr float HINT_ROW_H = 22.0f;
+	constexpr float LEGEND_GAP = 12.0f;
+	constexpr float LEGEND_PAD = 10.0f;
+	constexpr float LEGEND_SWATCH = 12.0f;
+	constexpr float LEGEND_SCALE = 0.8f;
 }
 
 namespace Demo {
@@ -94,6 +99,47 @@ namespace Demo {
 
 		statusMessage = Tr(L"ACCESS DENIED");
 		DX9GF::AudioManager::GetInstance()->PlayRandom("dialog_voice", 0.3f);
+		wrongGuesses++;
+		UpdateHints();
+	}
+
+
+	void PasswordMenu::UpdateHints()
+	{
+		size_t wanted = 0;
+		for (int threshold : HINT_DIGIT_AFTER) {
+			if (wrongGuesses >= threshold) wanted++;
+		}
+
+		auto isRevealed = [&](int pos) {
+			return std::find(revealedPositions.begin(), revealedPositions.end(), pos) != revealedPositions.end();
+			};
+
+		while (revealedPositions.size() < wanted) {
+			// Prefer a position the latest guess still has wrong, so the hint is never wasted.
+			int pick = -1;
+			if (!history.empty()) {
+				const auto& last = history.back();
+				for (int i = 0; i < CODE_LENGTH && pick < 0; i++) {
+					if (last.states[i] != DigitState::Correct && !isRevealed(i)) pick = i;
+				}
+			}
+			for (int i = 0; i < CODE_LENGTH && pick < 0; i++) {
+				if (!isRevealed(i)) pick = i;
+			}
+			if (pick < 0) break;
+			revealedPositions.push_back(pick);
+		}
+	}
+
+	std::vector<std::pair<std::wstring, D3DCOLOR>> PasswordMenu::GetHintLines() const
+	{
+		std::vector<std::pair<std::wstring, D3DCOLOR>> lines;
+		for (int pos : revealedPositions) {
+			lines.push_back({ Tr(L"HINT: digit ") + std::to_wstring(pos + 1) + Tr(L" is ") + std::wstring(1, password[pos]),
+				COLOR_PENDING });
+		}
+		return lines;
 	}
 
 	void PasswordMenu::Update(unsigned long long deltaTime)
@@ -142,8 +188,11 @@ namespace Demo {
 		size_t visibleRows = (std::min)(history.size(), MAX_VISIBLE_ROWS);
 		size_t firstRow = history.size() - visibleRows;
 
-		// title + input row + status + footer, plus one row per visible guess
-		float panelH = 150.0f + static_cast<float>(visibleRows) * ROW_H;
+		const auto hintLines = GetHintLines();
+
+		// title + input row + status + footer, plus one row per visible guess and per hint
+		float panelH = 150.0f + static_cast<float>(visibleRows) * ROW_H
+			+ static_cast<float>(hintLines.size()) * HINT_ROW_H + (hintLines.empty() ? 0.0f : 8.0f);
 		float panelX = -PANEL_W / 2.0f;
 		float panelY = -panelH / 2.0f;
 
@@ -152,6 +201,38 @@ namespace Demo {
 		gd->DrawRectangle(*uiCamera, panelX, panelY, PANEL_W, panelH, PANEL_BG, true);
 		gd->DrawRectangle(*uiCamera, panelX, panelY, PANEL_W, panelH, PANEL_BORDER, false);
 		gd->SetAlphaBlending(false);
+
+
+		// Colour legend, in its own panel to the right of the code panel: a title, then one row per
+		// colour with a swatch. Sized to its longest line.
+		const bool showLegend = wrongGuesses >= HINT_LEGEND_AFTER;
+		const std::wstring legendText[] = {
+			Tr(L"COLOURS"),
+			Tr(L"GREEN: right place"),
+			Tr(L"YELLOW: wrong place"),
+			Tr(L"GREY: not in the code"),
+		};
+		const D3DCOLOR legendColor[] = { COLOR_PENDING, COLOR_CORRECT, COLOR_MISPLACED, COLOR_ABSENT };
+		const float legendX = panelX + PANEL_W + LEGEND_GAP;
+		const float legendY = panelY;
+		float legendW = 0.0f;
+		for (const auto& text : legendText) {
+			fontSprite->SetText(text);
+			legendW = (std::max)(legendW, static_cast<float>(fontSprite->GetWidth()) * LEGEND_SCALE);
+		}
+		legendW += LEGEND_PAD * 2.0f + LEGEND_SWATCH + 8.0f;
+		const float legendH = LEGEND_PAD * 2.0f + HINT_ROW_H * 4.0f;
+		if (showLegend) {
+			gd->SetAlphaBlending(true);
+			gd->DrawRectangle(*uiCamera, legendX, legendY, legendW, legendH, PANEL_BG, true);
+			gd->DrawRectangle(*uiCamera, legendX, legendY, legendW, legendH, PANEL_BORDER, false);
+			for (int i = 1; i < 4; i++) {
+				const float rowY = legendY + LEGEND_PAD + HINT_ROW_H * i;
+				gd->DrawRectangle(*uiCamera, legendX + LEGEND_PAD, rowY + (HINT_ROW_H - LEGEND_SWATCH) / 2.0f - 2.0f,
+					LEGEND_SWATCH, LEGEND_SWATCH, legendColor[i], true);
+			}
+			gd->SetAlphaBlending(false);
+		}
 
 		fontSprite->Begin();
 		fontSprite->SetOutline(true, 0xFF000000, 2.f);
@@ -212,10 +293,31 @@ namespace Demo {
 		}
 		y += 24.0f;
 
+
+		// Hints, between the status line and the footer.
+		for (const auto& [text, color] : hintLines) {
+			drawCentered(text, y, color, 0.8f);
+			y += HINT_ROW_H;
+		}
+		if (!hintLines.empty()) y += 8.0f;
+
 		auto settings = SettingsManager::GetInstance();
 		std::wstring footer = settings->GetKeybindDisplayName("ACCEPT") + L" submit   "
 			+ settings->GetKeybindDisplayName("OPEN_INVENTORY") + L" exit";
 		drawCentered(footer, y, COLOR_ABSENT, 0.8f);
+
+
+		if (showLegend) {
+			fontSprite->SetScale(LEGEND_SCALE, LEGEND_SCALE);
+			for (int i = 0; i < 4; i++) {
+				// The title starts at the panel's edge; colour rows start after their swatch.
+				const float textX = legendX + LEGEND_PAD + (i == 0 ? 0.0f : LEGEND_SWATCH + 8.0f);
+				fontSprite->SetColor(legendColor[i]);
+				fontSprite->SetText(legendText[i]);
+				fontSprite->SetPosition(textX, legendY + LEGEND_PAD + HINT_ROW_H * i);
+				fontSprite->Draw(*uiCamera, deltaTime);
+			}
+		}
 
 		fontSprite->SetOutline(false);
 		fontSprite->End();

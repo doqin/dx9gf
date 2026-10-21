@@ -38,6 +38,20 @@ namespace Demo {
 
 		std::function<void()> onSolved;
 
+
+		// Hints. Wrong guesses are counted across openings - unlike the history, which Open
+		// clears - so walking away from the terminal never takes hints back. Revealed positions are
+		// picked once and stay fixed.
+		// Wrong guesses before the colour legend appears beside the panel (0 = from the start).
+		static constexpr int HINT_LEGEND_AFTER = 0;
+		static constexpr int HINT_DIGIT_AFTER[] = { 4, 6 };
+		int wrongGuesses = 0;
+		std::vector<int> revealedPositions;
+		// Reveals another digit when wrongGuesses reaches the next HINT_DIGIT_AFTER step.
+		void UpdateHints();
+		// The hint rows to draw (text and colour), in order.
+		std::vector<std::pair<std::wstring, D3DCOLOR>> GetHintLines() const;
+
 		ScoredGuess Score(const std::wstring& guess) const;
 		void Submit();
 

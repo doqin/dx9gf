@@ -15,6 +15,9 @@ namespace Demo {
     static constexpr float MAX_MSG_WIDTH = 800.0f;
     static constexpr float MSG_LINE_SPACING = 6.0f;
 
+    // Narration wraps narrower than other popups, so justified lines read as a paragraph.
+    static constexpr float NARRATION_MSG_WIDTH = 560.0f;
+
     // Greedy word-wrap of `text` (honouring newlines) to `maxWidth` using the sprite's metrics.
     static std::vector<std::wstring> WrapMessage(DX9GF::FontSprite* fs, const std::wstring& text, float maxWidth) {
         std::vector<std::wstring> lines;
@@ -91,11 +94,15 @@ namespace Demo {
     void PopupManager::Show(const std::string& styleName, const std::wstring& title, const std::wstring& message,
         const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons)
     {
-        // Only ShowWithSideIcon asks for an icon column; every other popup gets none.
+        // Only ShowWithSideIcon asks for an icon column, and only ShowNarration for justified text;
+        // every other popup gets neither.
         const float requestedSideIcon = pendingSideIconSize;
         pendingSideIconSize = 0.0f;
+        const bool requestedJustify = pendingJustify;
+        pendingJustify = false;
         if (styles.find(styleName) == styles.end() || !this->uiCamera) return;
         this->sideIconSize = requestedSideIcon;
+        this->justifyMessage = requestedJustify;
         const float sideW = sideIconSize > 0.0f ? sideIconSize + 20.0f : 0.0f;
 
         this->currentStyle = styleName;
@@ -112,14 +119,17 @@ namespace Demo {
 
         fontSprite->SetText(std::wstring(currentTitle));
         float titleW = static_cast<float>(fontSprite->GetWidth());
-        float titleH = static_cast<float>(fontSprite->GetHeight());
+        // A popup without a title (e.g. narration) gives that space to the message.
+        float titleH = currentTitle.empty() ? 0.0f : static_cast<float>(fontSprite->GetHeight());
 
         fontSprite->SetText(std::wstring(currentMessage));
         float msgW = static_cast<float>(fontSprite->GetWidth());
         float msgH = static_cast<float>(fontSprite->GetHeight());
         this->messageLines.clear();
-        const float maxMsgW = std::min(MAX_MSG_WIDTH, static_cast<float>(game->GetVirtualWidth()) - 160.0f) - sideW;
-        if (msgW > maxMsgW) {
+        float maxMsgW = std::min(MAX_MSG_WIDTH, static_cast<float>(game->GetVirtualWidth()) - 160.0f) - sideW;
+        if (justifyMessage) maxMsgW = std::min(maxMsgW, NARRATION_MSG_WIDTH);
+        // Justifying works line by line, so a justified message is always split into lines.
+        if (msgW > maxMsgW || justifyMessage) {
             this->messageLines = WrapMessage(fontSprite.get(), currentMessage, maxMsgW);
             msgW = 0.0f;
             for (const auto& line : messageLines) {
@@ -162,7 +172,8 @@ namespace Demo {
         float paddingMid = 20.0f;
         float paddingBot = 25.0f;
 
-        this->popupHeight = paddingTop + titleH + paddingMid + std::max(msgH, sideIconSize) + paddingMid + btnH + paddingBot;
+        const float titleBlock = currentTitle.empty() ? 0.0f : titleH + paddingMid;
+        this->popupHeight = paddingTop + titleBlock + std::max(msgH, sideIconSize) + paddingMid + btnH + paddingBot;
 
         this->backgroundSprite = std::make_shared<DX9GF::NineSliceSprite>(
             borderSheetTex.get(), style.bgSrcRect,
@@ -237,6 +248,45 @@ namespace Demo {
         float frameH = static_cast<float>(iconFrames[0].bottom - iconFrames[0].top);
         float s = frameH > 0.0f ? sideIconSize / frameH : 1.0f;
         this->iconSprite->SetScale(s, s);
+    }
+
+
+    void PopupManager::ShowNarration(const std::string& styleName, const std::wstring& message,
+        const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons)
+    {
+        pendingJustify = true;
+        Show(styleName, L"", message, buttons);
+    }
+
+    void PopupManager::DrawJustifiedLine(const std::wstring& line, float x, float y, float width, unsigned long long deltaTime)
+    {
+        std::vector<std::wstring> words;
+        size_t pos = 0;
+        while (pos <= line.size()) {
+            const size_t sp = line.find(L' ', pos);
+            std::wstring word = line.substr(pos, sp == std::wstring::npos ? std::wstring::npos : sp - pos);
+            if (!word.empty()) words.push_back(std::move(word));
+            if (sp == std::wstring::npos) break;
+            pos = sp + 1;
+        }
+
+        std::vector<float> widths;
+        float wordsW = 0.0f;
+        for (const auto& word : words) {
+            fontSprite->SetText(word);
+            widths.push_back(static_cast<float>(fontSprite->GetWidth()));
+            wordsW += widths.back();
+        }
+
+        // The spare width is shared out between the gaps, so the line ends exactly at the right edge.
+        const float gap = words.size() > 1 ? (width - wordsW) / static_cast<float>(words.size() - 1) : 0.0f;
+        float cx = x;
+        for (size_t i = 0; i < words.size(); ++i) {
+            fontSprite->SetText(words[i]);
+            fontSprite->SetPosition(cx, y);
+            fontSprite->Draw(*uiCamera, deltaTime);
+            cx += widths[i] + gap;
+        }
     }
 
     std::vector<KeyboardNavigator::Candidate> PopupManager::CollectKeyboardCandidates() {
@@ -345,14 +395,14 @@ namespace Demo {
         fontSprite->SetOutline(style.hasOutline, style.outlineColor, 2.0f);
 
         float titleW = fontSprite->GetWidth();
-        float titleH = fontSprite->GetHeight();
+        float titleH = currentTitle.empty() ? 0.0f : fontSprite->GetHeight();
         fontSprite->SetPosition(popupX + (popupWidth - titleW) / 2.0f, popupY + 25.0f);
         fontSprite->Draw(*uiCamera, deltaTime);
 
         fontSprite->SetText(std::wstring(currentMessage));
         fontSprite->SetColor(style.msgColor);
 
-        const float contentTop = popupY + 25.0f + titleH + 20.0f;
+        const float contentTop = popupY + 25.0f + (currentTitle.empty() ? 0.0f : titleH + 20.0f);
         // Side icon: the icon and the message form one centred row, each centred vertically in it.
         // Otherwise the icon (if any) sits above the message, as before.
         const float sideW = sideIconSize > 0.0f ? sideIconSize + 20.0f : 0.0f;
@@ -371,10 +421,26 @@ namespace Demo {
         }
         else {
             float y = msgTop;
-            for (const auto& line : messageLines) {
-                fontSprite->SetText(line);
-                fontSprite->SetPosition(lineX(static_cast<float>(fontSprite->GetWidth())), y);
-                fontSprite->Draw(*uiCamera, deltaTime);
+            // Justified text starts every line at the block's left edge; all but the last line are
+            // stretched to the full block width.
+            const float blockX = popupX + (popupWidth - messageW) / 2.0f;
+            for (size_t i = 0; i < messageLines.size(); ++i) {
+                const auto& line = messageLines[i];
+                if (justifyMessage && sideW <= 0.0f) {
+                    if (i + 1 < messageLines.size()) {
+                        DrawJustifiedLine(line, blockX, y, messageW, deltaTime);
+                    }
+                    else {
+                        fontSprite->SetText(line);
+                        fontSprite->SetPosition(blockX, y);
+                        fontSprite->Draw(*uiCamera, deltaTime);
+                    }
+                }
+                else {
+                    fontSprite->SetText(line);
+                    fontSprite->SetPosition(lineX(static_cast<float>(fontSprite->GetWidth())), y);
+                    fontSprite->Draw(*uiCamera, deltaTime);
+                }
                 y += messageLineH + MSG_LINE_SPACING;
             }
         }

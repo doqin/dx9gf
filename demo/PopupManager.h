@@ -72,6 +72,12 @@ namespace Demo {
         float messageW = 0.0f;
         float messageH = 0.0f;
 
+        // Narration popups (ShowNarration): no title, and the message is justified - every line but
+        // the last is stretched to the block's width. Show() consumes pendingJustify.
+        bool pendingJustify = false;
+        bool justifyMessage = false;
+        void DrawJustifiedLine(const std::wstring& line, float x, float y, float width, unsigned long long deltaTime);
+
         float popupWidth = 400.0f;
         float popupHeight = 200.0f;
         float popupX = 0.0f;
@@ -110,6 +116,10 @@ namespace Demo {
         void ShowWithSideIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
             const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
             std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize = 96.0f);
+
+        // A narrator's note: no title, justified message, centred on screen like any popup.
+        void ShowNarration(const std::string& styleName, const std::wstring& message,
+            const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons);
 
         void Close();
         bool IsActive() const { return isActive; }
