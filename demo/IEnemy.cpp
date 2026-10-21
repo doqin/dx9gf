@@ -9,6 +9,7 @@
 #include "DX9GFInputManager.h"
 #include "PopUpMessage.h"
 #include "StatusDisplay.h"
+#include <typeinfo>
 void Demo::IEnemy::InitCardSpawnTrigger(DX9GF::Camera* camera, float width, float height)
 {
 	cardSpawnTrigger = std::make_shared<DX9GF::RectangleTrigger>(transformManager, shared_from_this(), width, height);
@@ -33,6 +34,7 @@ void Demo::IEnemy::Update(unsigned long long deltaTime)
 	}
 
 	timeSinceStart += deltaTime;
+	UpdateSpeech(deltaTime);
 
 	for (auto& indicator : damageIndicators) {
 		indicator.elapsed += deltaTime;
@@ -479,6 +481,7 @@ bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 	const int actualDamage = static_cast<int>(std::round(CalculateActualDamage(damage, ignoreArmor)));
 	health -= actualDamage;
 	if (health < 0) health = 0;
+	CheckHurtLine();
 
 	if (actualDamage > 0) DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.8f);
 
@@ -521,6 +524,7 @@ bool Demo::IEnemy::TakeIndirectDamage(float damage, DamageType type) {
 	const int dealt = static_cast<int>(std::round(damage));
 	health -= dealt;
 	if (health < 0) health = 0;
+	CheckHurtLine();
 
 	D3DCOLOR textColor = 0xFFFFFFFF;
 
@@ -612,12 +616,19 @@ void Demo::IEnemy::CastAbility(std::function<void()> effect, std::shared_ptr<Pop
 		}));
 
 
-	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([popUpMessage, message](std::function<void(void)> markFinished) {
-		if (popUpMessage && !message.empty()) {
+	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, popUpMessage, message](std::function<void(void)> markFinished) {
+		// An ability with a line in EnemyDialogue is said in the speech bubble instead of popping up;
+		// its popup text still goes to the battle log.
+		const std::wstring speech = FindAbilitySpeech(message);
+		if (!speech.empty()) {
+			if (pendingAbilityLines.size() < MAX_ABILITY_LINES_PER_TURN) pendingAbilityLines.push_back(speech);
+			if (popUpMessage) popUpMessage->LogMessage(message);
+		}
+		else if (popUpMessage && !message.empty()) {
 			popUpMessage->ShowMessage(message, 3.f);
 		}
 		markFinished();
-	}));
+		}));
 	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
 }
 
@@ -631,4 +642,133 @@ std::vector<std::string> Demo::IEnemy::RollCardDrops() const
 		drops.push_back(cardDropPool[RNG::Range(0, static_cast<int>(cardDropPool.size()) - 1)]);
 	}
 	return drops;
+}
+
+
+std::string Demo::IEnemy::GetTypeName() const
+{
+	// MSVC names the class "class Demo::SpamEnemy"; keep what follows the last "::".
+	std::string name = typeid(*this).name();
+	const size_t colon = name.rfind("::");
+	if (colon != std::string::npos) return name.substr(colon + 2);
+	if (name.rfind("class ", 0) == 0) return name.substr(6);
+	return name;
+}
+
+const Demo::EnemyDialogue::Lines* Demo::IEnemy::GetDialogue() const
+{
+	return EnemyDialogue::Get(GetTypeName());
+}
+
+std::wstring Demo::IEnemy::FindAbilitySpeech(const std::wstring& message) const
+{
+	const auto* lines = GetDialogue();
+	if (!lines || message.empty()) return L"";
+	// Compared after translation, since the enemy hands CastAbility its popup text already through Tr().
+	for (const auto& [popup, speech] : lines->abilities) {
+		if (Tr(popup) == message) return Tr(speech);
+	}
+	return L"";
+}
+
+void Demo::IEnemy::Say(const std::wstring& text, float delayMs)
+{
+	if (text.empty() || isDying || IsDead() || speechQueue.size() >= MAX_QUEUED_SPEECH) return;
+	speechQueue.push_back({ text, delayMs });
+}
+
+void Demo::IEnemy::SayIntro(float delayMs)
+{
+	const auto* lines = GetDialogue();
+	if (!lines || lines->intro.empty()) return;
+	Say(Tr(lines->intro[RNG::Range(0, static_cast<int>(lines->intro.size()) - 1)]), delayMs);
+}
+
+void Demo::IEnemy::SayTaunt()
+{
+	const auto* lines = GetDialogue();
+	if (lines && !lines->taunt.empty()) Say(Tr(lines->taunt));
+}
+
+void Demo::IEnemy::CheckHurtLine()
+{
+	if (saidHurtLine || health <= 0 || health > GetMaxHealth() / 2.f) return;
+	saidHurtLine = true;
+	const auto* lines = GetDialogue();
+	if (lines && !lines->hurt.empty()) Say(Tr(lines->hurt));
+}
+
+void Demo::IEnemy::UpdateSpeech(unsigned long long deltaTime)
+{
+	if (speechQueue.empty()) return;
+	auto& line = speechQueue.front();
+	if (line.delayMs > 0.f) {
+		line.delayMs -= static_cast<float>(deltaTime);
+		return;
+	}
+	speechElapsed += static_cast<float>(deltaTime);
+	if (speechElapsed >= SPEECH_SHOW_MS) {
+		speechQueue.pop_front();
+		speechElapsed = 0.f;
+	}
+}
+
+void Demo::IEnemy::DrawSpeech(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, unsigned long long deltaTime)
+{
+	if (speechQueue.empty() || speechQueue.front().delayMs > 0.f || isDying || IsDead() || !gd || !camera || !font) return;
+	if (!speechFontSprite) speechFontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+
+	constexpr float PAD = 10.f, BORDER = 2.f, TAIL_LEN = 16.f, TAIL_HALF = 8.f;
+
+	// Pops in and fades out rather than blinking on and off.
+	const float fadeIn = (std::min)(1.f, speechElapsed / SPEECH_FADE_MS);
+	const float fadeOut = (std::min)(1.f, (SPEECH_SHOW_MS - speechElapsed) / SPEECH_FADE_MS);
+	const int alpha = static_cast<int>(255.f * (std::max)(0.f, (std::min)(fadeIn, fadeOut)));
+	const D3DCOLOR fill = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+	const D3DCOLOR ink = D3DCOLOR_ARGB(alpha, 0, 0, 0);
+
+	speechFontSprite->SetMaxWidth(SPEECH_MAX_TEXT_W);
+	speechFontSprite->SetText(std::wstring(speechQueue.front().text));
+	const float textW = static_cast<float>(speechFontSprite->GetWidth());
+	const float textH = static_cast<float>(speechFontSprite->GetHeight());
+	const float bubbleW = textW + PAD * 2.f;
+	const float bubbleH = textH + PAD * 2.f;
+
+	// Enemies stand at the right edge of the screen, so the bubble opens to their left with its
+	// tail pointing back at the upper part of the body. It never rises above the top of the screen.
+	const float anchorX = GetWorldX() - GetBodyWidth() * 0.35f;
+	const float anchorY = GetWorldY() - GetBodyHeight() * 0.25f;
+	const float bubbleX = anchorX - TAIL_LEN - bubbleW;
+	const float screenTop = camera->GetPosition().y - static_cast<float>(DX9GF::Application::GetInstance()->GetScreenHeight()) / 2.f;
+	const float bubbleY = (std::max)(screenTop + 8.f, anchorY - bubbleH * 0.6f);
+	const float tailY = std::clamp(anchorY, bubbleY + TAIL_HALF + BORDER, bubbleY + bubbleH - TAIL_HALF - BORDER);
+	const float tailBaseX = bubbleX + bubbleW;
+
+	gd->SetAlphaBlending(true);
+	gd->DrawRectangle(*camera, bubbleX - BORDER, bubbleY - BORDER, bubbleW + BORDER * 2.f, bubbleH + BORDER * 2.f, ink, true);
+	gd->DrawRectangle(*camera, bubbleX, bubbleY, bubbleW, bubbleH, fill, true);
+	// Tail: a filled triangle made of vertical strokes (it also opens the bubble's right border
+	// where it joins), then outlined along its two slanted edges.
+	for (float dx = 0.f; dx <= TAIL_LEN; dx += 1.f) {
+		const float half = TAIL_HALF * (1.f - dx / TAIL_LEN);
+		gd->DrawLine(*camera, tailBaseX + dx, tailY - half, tailBaseX + dx, tailY + half, fill, 1.f);
+	}
+	gd->DrawLine(*camera, tailBaseX, tailY - TAIL_HALF - BORDER, tailBaseX + TAIL_LEN + BORDER, tailY, ink, BORDER);
+	gd->DrawLine(*camera, tailBaseX, tailY + TAIL_HALF + BORDER, tailBaseX + TAIL_LEN + BORDER, tailY, ink, BORDER);
+	gd->SetAlphaBlending(false);
+
+	speechFontSprite->Begin();
+	speechFontSprite->SetColor(ink);
+	speechFontSprite->SetPosition(bubbleX + PAD, bubbleY + PAD);
+	speechFontSprite->Draw(*camera, deltaTime);
+	speechFontSprite->End();
+}
+
+
+bool Demo::IEnemy::SayPendingAbilityLines()
+{
+	const bool hadLines = !pendingAbilityLines.empty();
+	for (const auto& line : pendingAbilityLines) Say(line);
+	pendingAbilityLines.clear();
+	return hadLines;
 }

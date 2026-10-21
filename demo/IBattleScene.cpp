@@ -32,6 +32,7 @@
 #include "SaveGameState.h"
 #include "MainMenu.h"
 #include "BossDeathGlobalData.h"
+#include "QuestManager.h"
 
 namespace {
 	constexpr float HiddenPileX = -10000.f;
@@ -135,6 +136,9 @@ void Demo::IBattleScene::StartBattle()
 		enemy->OnTurnBegin(this->battlePlayer, this->popUpMessage, this->currentTurn, &this->enemies, game->GetGraphicsDevice(), &this->camera);
 	}
 	FlushPendingEnemies();
+	// One enemy opens the fight with a line, after the transition-in so it isn't missed.
+	playerTauntSaid = false;
+	if (auto speaker = PickSpeaker(false)) speaker->SayIntro(1000.f);
 	energy = (std::max)(0, energy - static_cast<int>(battlePlayer->GetModifierValue(ModifierType::EnergyDrain)));
 	if (!customBGMName.empty()) {
 		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(customBGMName, 0.3f, 1.5f);
@@ -726,6 +730,11 @@ void Demo::IBattleScene::BeginNextTurn()
 		enemy->OnTurnBegin(this->battlePlayer, this->popUpMessage, this->currentTurn, &this->enemies, game->GetGraphicsDevice(), &this->camera);
 	}
 	FlushPendingEnemies();
+	// The turn after the player drops to half health, an enemy rubs it in (once per battle).
+	if (!playerTauntSaid && battlePlayer->GetHealth() <= battlePlayer->GetMaxHealth() / 2.f) {
+		playerTauntSaid = true;
+		if (auto speaker = PickSpeaker(true)) speaker->SayTaunt();
+	}
 	energy = (std::max)(0, energy - static_cast<int>(battlePlayer->GetModifierValue(ModifierType::EnergyDrain)));
 }
 
@@ -1978,6 +1987,32 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 			markFinished();
 			}),
 		std::make_shared<DX9GF::DelayCommand>(0.5f),
+			// Enemies say the ability lines they cast at the start of the turn while they are still on
+			// screen - the next command slides them off to the attack queue.
+		std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+			this->abilityLinesSaid = false;
+			for (auto& enemy : this->enemies) {
+				if (enemy && enemy->SayPendingAbilityLines()) this->abilityLinesSaid = true;
+			}
+			this->abilitySpeechStartMs = GetTickCount64();
+			this->abilitySpeechQuietSinceMs = this->abilitySpeechStartMs;
+			markFinished();
+			}),
+			// ...and the turn waits until every enemy has finished talking, plus a short beat.
+			std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+				if (!this->abilityLinesSaid) {
+					markFinished();
+					return;
+				}
+				const unsigned long long now = GetTickCount64();
+				const bool anySpeaking = std::any_of(this->enemies.begin(), this->enemies.end(),
+					[](const std::shared_ptr<IEnemy>& enemy) { return enemy && !enemy->IsDead() && enemy->IsSpeaking(); });
+				if (anySpeaking) this->abilitySpeechQuietSinceMs = now;
+				const bool quietLongEnough = !anySpeaking && now - this->abilitySpeechQuietSinceMs >= ABILITY_SPEECH_PAUSE_MS;
+				if (quietLongEnough || now - this->abilitySpeechStartMs >= ABILITY_SPEECH_TIMEOUT_MS) {
+					markFinished();
+				}
+				}),
 		std::make_shared<DX9GF::CustomCommand>([this, deltaTime, attackingEnemies](std::function<void(void)> markFinished) {
 			// Wait for enemies that died from statuses to finish animations
 			for (auto& enemy : this->enemies) {
@@ -2143,13 +2178,19 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 				// cursor; the defeat popup is answered with the mouse (or Y/N), so bring it back.
 				keyboardNavigator.Reset();
 
-				// Losing to the same boss again and again earns a hint on this popup.
+				// Losing to the same boss again and again earns a hint on this popup. For the Trojan and
+				// the final boss the hint also points at the secret area while its hidden boss is still
+				// alive: its rewards (Midas Chip, rare cards, a free Rusty Key) help with both fights.
 				std::wstring hint;
 				if (!bossId.empty()) {
 					auto* bossDeaths = BossDeathGlobalData::GetInstance();
 					bossDeaths->AddDeath(bossId);
 					if (bossDeaths->GetDeaths(bossId) >= BossHintDeaths(bossId)) {
-						hint = GetBossHint(bossId);
+						hint = Tr(L"Hint: ") + GetBossHint(bossId);
+						if ((bossId == "TrojanEnemy" || bossId == "KeyeproEnemy")
+							&& QuestManager::GetInstance()->GetQuestState("SecretBoss_Pacman") != QuestState::Completed) {
+							hint += L"\n" + Tr(L"Tip: a secret area hides west of Cloud Canopy. Its boss drops gear that helps here.");
+						}
 					}
 				}
 
@@ -2167,7 +2208,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 						auto portraitTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
 						portraitTex->LoadTexture(portrait.sheet);
 						PopupManager::GetInstance()->ShowWithSideIcon("stepped_red", L"DEFEATED",
-							Tr(L"Hint: ") + hint + L"\n\n" + question, popupBtns, portraitTex,
+							hint + L"\n\n" + question, popupBtns, portraitTex,
 							DX9GF::Utils::CreateRectsHorizontal(0, 0, portrait.frameSize, portrait.frameSize, portrait.frameCount),
 							(std::min)(128.0f, static_cast<float>(game->GetVirtualHeight()) * 0.18f));
 					}
@@ -4012,6 +4053,11 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 			break;
 		}
 
+		// Enemy speech bubbles go over everything in the battle area, in every state.
+		for (auto& enemy : enemies) {
+			enemy->DrawSpeech(gd, &camera, deltaTime);
+		}
+
 		for (auto& card : queuedToDraw) {
 			dynamic_pointer_cast<IDraggable>(card)->Draw(deltaTime);
 		}
@@ -4380,4 +4426,18 @@ void Demo::IBattleScene::SettleCardAnimations()
 	for (const auto& card : inFlight) {
 		LandDrawnCard(card);
 	}
+}
+
+
+std::shared_ptr<Demo::IEnemy> Demo::IBattleScene::PickSpeaker(bool forTaunt)
+{
+	std::vector<std::shared_ptr<IEnemy>> candidates;
+	for (auto& enemy : enemies) {
+		if (!enemy || enemy->IsDead()) continue;
+		const auto* lines = enemy->GetDialogue();
+		if (!lines) continue;
+		if (forTaunt ? !lines->taunt.empty() : !lines->intro.empty()) candidates.push_back(enemy);
+	}
+	if (candidates.empty()) return nullptr;
+	return candidates[RNG::Range(0, static_cast<int>(candidates.size()) - 1)];
 }

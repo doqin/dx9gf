@@ -89,6 +89,18 @@ void Demo::PopUpMessage::ShowMessage(const std::wstring& message, float duration
 	RelayoutLines();
 }
 
+
+void Demo::PopUpMessage::LogMessage(const std::wstring& message)
+{
+	if (message.empty()) return;
+	history.push_back(HistoryEntry{ elapsedMs, currentTurn, message, 1 });
+	while (history.size() > MAX_HISTORY_ENTRIES) {
+		history.pop_front();
+		if (scrollOffset > 0) --scrollOffset;
+	}
+	if (stickToLatest) ScrollToLatest();
+}
+
 void Demo::PopUpMessage::QueueMessage(DX9GF::CommandBuffer* commandBuffer, std::wstring message, float duration)
 {
 	if (commandBuffer == nullptr) {
