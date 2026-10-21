@@ -64,6 +64,14 @@ namespace Demo {
         std::shared_ptr<DX9GF::AnimatedSprite> iconSprite;
         float iconSize = 0.0f;
 
+        // Set by ShowWithSideIcon: the icon then sits left of the message instead of above it, so a
+        // long message doesn't grow taller. Show() consumes pendingSideIconSize, so plain popups get 0.
+        float pendingSideIconSize = 0.0f;
+        float sideIconSize = 0.0f;
+        // Size of the laid-out message block (all wrapped lines), used to centre it next to the icon.
+        float messageW = 0.0f;
+        float messageH = 0.0f;
+
         float popupWidth = 400.0f;
         float popupHeight = 200.0f;
         float popupX = 0.0f;
@@ -94,6 +102,12 @@ namespace Demo {
         // Same as Show, with an animated icon (frames cut from iconTex) shown under the title,
         // scaled so its first frame is iconSize pixels tall.
         void ShowWithIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
+            const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
+            std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize = 96.0f);
+
+        // Same as ShowWithIcon, but the icon sits left of the message, vertically centred with it.
+        // Used for long messages, where an icon above them would push the popup off a small screen.
+        void ShowWithSideIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
             const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
             std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize = 96.0f);
 

@@ -82,6 +82,9 @@ namespace Demo {
 		bool defeatPopupShown = false;
 		bool pendingDefeatMainMenuTransition = false;
 		bool pendingDefeatReloadSave = false;
+		// Set for a boss fight: the boss enemy's id, used to count defeats and pick its hint.
+		// Empty for regular battles.
+		std::string bossId;
 		// Keyboard navigation
 		// A destination a picked-up card can be placed at (a slot in the block's execution queue,
 		// or an eligible TargetedCard to lock an EnemyCard onto).

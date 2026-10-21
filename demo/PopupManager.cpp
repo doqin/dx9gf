@@ -91,7 +91,12 @@ namespace Demo {
     void PopupManager::Show(const std::string& styleName, const std::wstring& title, const std::wstring& message,
         const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons)
     {
+        // Only ShowWithSideIcon asks for an icon column; every other popup gets none.
+        const float requestedSideIcon = pendingSideIconSize;
+        pendingSideIconSize = 0.0f;
         if (styles.find(styleName) == styles.end() || !this->uiCamera) return;
+        this->sideIconSize = requestedSideIcon;
+        const float sideW = sideIconSize > 0.0f ? sideIconSize + 20.0f : 0.0f;
 
         this->currentStyle = styleName;
         this->currentTitle = title;
@@ -113,7 +118,7 @@ namespace Demo {
         float msgW = static_cast<float>(fontSprite->GetWidth());
         float msgH = static_cast<float>(fontSprite->GetHeight());
         this->messageLines.clear();
-        const float maxMsgW = std::min(MAX_MSG_WIDTH, static_cast<float>(game->GetVirtualWidth()) - 160.0f);
+        const float maxMsgW = std::min(MAX_MSG_WIDTH, static_cast<float>(game->GetVirtualWidth()) - 160.0f) - sideW;
         if (msgW > maxMsgW) {
             this->messageLines = WrapMessage(fontSprite.get(), currentMessage, maxMsgW);
             msgW = 0.0f;
@@ -124,6 +129,9 @@ namespace Demo {
             this->messageLineH = msgH;
             msgH = (msgH + MSG_LINE_SPACING) * messageLines.size() - MSG_LINE_SPACING;
         }
+
+        this->messageW = msgW;
+        this->messageH = msgH;
 
         float scale = 2.0f; //Change this value to adjust the button size
         float baseBtnH = static_cast<float>(btnRectsMed[0].bottom - btnRectsMed[0].top);
@@ -144,14 +152,14 @@ namespace Demo {
         totalBtnW += std::max(0, (int)buttons.size() - 1) * spacing;
 
         float paddingX = 80.0f;
-        float maxContentW = std::max({ titleW, msgW, totalBtnW });
+        float maxContentW = std::max({ titleW, msgW + sideW, totalBtnW });
         this->popupWidth = std::max(maxContentW + paddingX, 300.0f);
 
         float paddingTop = 25.0f;
         float paddingMid = 20.0f;
         float paddingBot = 25.0f;
 
-        this->popupHeight = paddingTop + titleH + paddingMid + msgH + paddingMid + btnH + paddingBot;
+        this->popupHeight = paddingTop + titleH + paddingMid + std::max(msgH, sideIconSize) + paddingMid + btnH + paddingBot;
 
         this->backgroundSprite = std::make_shared<DX9GF::NineSliceSprite>(
             borderSheetTex.get(), style.bgSrcRect,
@@ -207,6 +215,25 @@ namespace Demo {
         popupHeight += iconSize + 20.0f;
         backgroundSprite->SetTargetSize(popupWidth, popupHeight);
         LayoutButtons();
+    }
+
+
+    void PopupManager::ShowWithSideIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
+        const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
+        std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize)
+    {
+        // Show lays the popup out with the icon column already reserved, so no resize is needed here.
+        if (iconTex && !iconFrames.empty()) pendingSideIconSize = iconSize;
+        Show(styleName, title, message, buttons);
+        if (!isActive || sideIconSize <= 0.0f) return;
+
+        this->iconTexture = iconTex;
+        this->iconSprite = std::make_shared<DX9GF::AnimatedSprite>(iconTex.get(), iconFrames);
+        this->iconSprite->SetFrameRate(12);
+        this->iconSize = sideIconSize;
+        float frameH = static_cast<float>(iconFrames[0].bottom - iconFrames[0].top);
+        float s = frameH > 0.0f ? sideIconSize / frameH : 1.0f;
+        this->iconSprite->SetScale(s, s);
     }
 
     std::vector<KeyboardNavigator::Candidate> PopupManager::CollectKeyboardCandidates() {
@@ -322,17 +349,28 @@ namespace Demo {
         fontSprite->SetText(std::wstring(currentMessage));
         fontSprite->SetColor(style.msgColor);
 
-        float iconBlock = iconSprite ? iconSize + 20.0f : 0.0f;
+        const float contentTop = popupY + 25.0f + titleH + 20.0f;
+        // Side icon: the icon and the message form one centred row, each centred vertically in it.
+        // Otherwise the icon (if any) sits above the message, as before.
+        const float sideW = sideIconSize > 0.0f ? sideIconSize + 20.0f : 0.0f;
+        const float rowH = std::max(messageH, sideIconSize);
+        const float rowX = popupX + (popupWidth - (sideW + messageW)) / 2.0f;
+        const float iconBlock = (iconSprite && sideW <= 0.0f) ? iconSize + 20.0f : 0.0f;
+        const float msgTop = sideW > 0.0f ? contentTop + (rowH - messageH) / 2.0f : contentTop + iconBlock;
+        auto lineX = [&](float w) {
+            return sideW > 0.0f ? rowX + sideW + (messageW - w) / 2.0f : popupX + (popupWidth - w) / 2.0f;
+            };
+
         if (messageLines.empty()) {
             float msgW = fontSprite->GetWidth();
-            fontSprite->SetPosition(popupX + (popupWidth - msgW) / 2.0f, popupY + 25.0f + titleH + 20.0f + iconBlock);
+            fontSprite->SetPosition(lineX(msgW), msgTop);
             fontSprite->Draw(*uiCamera, deltaTime);
         }
         else {
-            float y = popupY + 25.0f + titleH + 20.0f + iconBlock;
+            float y = msgTop;
             for (const auto& line : messageLines) {
                 fontSprite->SetText(line);
-                fontSprite->SetPosition(popupX + (popupWidth - fontSprite->GetWidth()) / 2.0f, y);
+                fontSprite->SetPosition(lineX(static_cast<float>(fontSprite->GetWidth())), y);
                 fontSprite->Draw(*uiCamera, deltaTime);
                 y += messageLineH + MSG_LINE_SPACING;
             }
@@ -340,9 +378,11 @@ namespace Demo {
         fontSprite->End();
 
         if (iconSprite) {
+            const float iconX = sideW > 0.0f ? rowX : popupX + (popupWidth - iconSize) / 2.0f;
+            const float iconY = sideW > 0.0f ? contentTop + (rowH - iconSize) / 2.0f : contentTop;
             gd->SetAlphaBlending(true);
             iconSprite->Begin();
-            iconSprite->SetPosition(popupX + (popupWidth - iconSize) / 2.0f, popupY + 25.0f + titleH + 20.0f);
+            iconSprite->SetPosition(iconX, iconY);
             iconSprite->Draw(*uiCamera, deltaTime);
             iconSprite->End();
         }

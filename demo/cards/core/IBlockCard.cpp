@@ -35,6 +35,24 @@ void Demo::IBlockCard::RemoveFromQueue(const IStatementCard* card)
 		children.end());
 }
 
+size_t Demo::IBlockCard::DropIndexAt(float dropY, const std::shared_ptr<IStatementCard>& dropped, float* slotTopY)
+{
+	size_t index = 0;
+	for (const auto& weak : statementCards) {
+		auto card = weak.lock();
+		if (!card || card == dropped) {
+			continue;
+		}
+		const float top = card->GetWorldY();
+		if (top + static_cast<float>(card->GetHeight()) / 2.0f >= dropY) {
+			if (slotTopY) *slotTopY = top;
+			break;
+		}
+		++index;
+	}
+	return index;
+}
+
 bool Demo::IBlockCard::OnDrop(std::shared_ptr<IDraggable> other)
 {
 	auto statementCard = std::dynamic_pointer_cast<IStatementCard>(other);
@@ -42,14 +60,20 @@ bool Demo::IBlockCard::OnDrop(std::shared_ptr<IDraggable> other)
 		return false;
 	}
 
+	// Measured before IContainer::OnDrop, which snaps the card to the end of the list.
+	const float dropY = other->GetWorldY() + other->GetHeight() / 2.0f;
+
 	if (IContainer::OnDrop(other)) {
-		// IContainer::OnDrop de-dupes `children`; keep `statementCards` in step so a re-drop or
-		// reorder of an already-queued card does not leave two entries (double execution, double
-		// energy commit, double discard).
-		statementCards.erase(std::remove_if(statementCards.begin(), statementCards.end(),
-			[&](const std::weak_ptr<IStatementCard>& weak) { return weak.lock() == statementCard; }),
-			statementCards.end());
-		statementCards.push_back(statementCard);
+		// Queue the card at the slot it was dropped on rather than always last, so queued cards can
+		// be reordered by dragging them within the block. A running block keeps appending, so
+		// the execution pointer never shifts under it. RemoveFromQueue clears the entry
+		// IContainer::OnDrop just appended to `children` and any stale one in `statementCards`, so
+		// neither list holds the card twice (double execution, double energy commit, double discard).
+		size_t index = isExecuting ? statementCards.size() : DropIndexAt(dropY, statementCard);
+		RemoveFromQueue(statementCard.get());
+		index = (std::min)({ index, statementCards.size(), children.size() });
+		statementCards.insert(statementCards.begin() + index, statementCard);
+		children.insert(children.begin() + index, statementCard);
 		return true;
 	}
 	return false;
@@ -123,6 +147,27 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 			auto thisY = GetWorldY() + GetHeight() + GetHeightOfChildren();
 			auto width = (std::max)(this->GetMaxWidthOfChildren(), GetWidth());
 			auto height = 32.f;
+			// Over the queued cards: mark the gap OnDrop will insert into, instead of the end slot.
+			const float dragCenterX = draggedStatementCard->GetWorldX() + draggedStatementCard->GetWidth() / 2.0f;
+			const float dragCenterY = draggedStatementCard->GetWorldY() + draggedStatementCard->GetHeight() / 2.0f;
+			const bool overQueuedCards = !isExecuting
+				&& dragCenterX > thisX && dragCenterX < thisX + width
+				&& dragCenterY > GetWorldY() + static_cast<float>(dragAreaHeight) && dragCenterY < thisY;
+			if (overQueuedCards) {
+				constexpr float NO_SLOT = -1e9f;
+				float slotY = NO_SLOT;
+				DropIndexAt(dragCenterY, draggedStatementCard, &slotY);
+				// NO_SLOT means the card would land at the end, which the dashed slot below marks.
+				if (slotY != NO_SLOT) {
+					const float barX = thisX;
+					const float barW = static_cast<float>(width);
+					draggableManager->QueueDraw(std::make_shared<DX9GF::CustomCommand>([this, barX, slotY, barW](std::function<void(void)> markFinished) {
+						graphicsDevice->DrawRectangle(*camera, barX, slotY - 2.f, barW, 4.f, 0xFFFFD700, true);
+						markFinished();
+						}));
+					return;
+				}
+			}
 			draggableManager->QueueDraw(std::make_shared<DX9GF::CustomCommand>([&, width, height, thisX, thisY](std::function<void(void)> markFinished) {
 				graphicsDevice->SetAlphaBlending(true);
 				Demo::DrawAnimatedDashedRectangle(
