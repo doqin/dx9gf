@@ -36,6 +36,26 @@ void Demo::KeyeproEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Came
 	IEnemy::Draw(graphicsDevice, camera, deltaTime);
 }
 
+int Demo::KeyeproEnemy::ScaleCount(int count) const {
+	return (std::max)(1, static_cast<int>(std::round(count / patternPace)));
+}
+
+size_t Demo::KeyeproEnemy::BulletBudget() const {
+	constexpr float BASE_BUDGET = 100.f;
+	return static_cast<size_t>(BASE_BUDGET / patternPace);
+}
+
+void Demo::KeyeproEnemy::Update(unsigned long long deltaTime) {
+	IEnemy::Update(deltaTime);
+	// The minions serve the boss, so they go down with it.
+	if (IsDead() && !minions.empty()) {
+		for (const auto& weakMinion : minions) {
+			if (auto minion = weakMinion.lock(); minion && !minion->IsDead()) minion->TakeDamage(999999.f, true);
+		}
+		minions.clear();
+	}
+}
+
 int Demo::KeyeproEnemy::GetRandomPattern() {
 	return RNG::Range(1, 6);
 }
@@ -43,11 +63,13 @@ int Demo::KeyeproEnemy::GetRandomPattern() {
 void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn, std::vector<std::shared_ptr<IEnemy>>* enemies, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
 	this->player = player;
 
-	float desperato = 1.f - this->GetHealth() / this->GetMaxHealth(); // Desperation factor, ranges from 0 to 1 as health decreases
+	float desperato = 1.f - static_cast<float>(this->GetHealth()) / static_cast<float>(this->GetMaxHealth()); // Desperation factor, ranges from 0 to 1 as health decreases
 
 	if (enemies != nullptr && graphicsDevice != nullptr && camera != nullptr) {
-		constexpr float MINION_SPAWN_CHANCE = 0.5f;
-		if (RNG::Range(0.f, 1.f) <= std::max(MINION_SPAWN_CHANCE, desperato)) {
+		// The boss only calls for help once it is at half health or lower, and ever more
+		// readily as it gets closer to death.
+		constexpr float MINION_PHASE_DESPERATION = 0.5f;
+		if (desperato >= MINION_PHASE_DESPERATION && RNG::Range(0.f, 1.f) <= desperato) {
 			size_t keyeCount = 0;
 			for (const auto& enemy : *enemies) {
 				if (!enemy || enemy->IsDead())
@@ -77,6 +99,7 @@ void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 						auto minion = std::make_shared<KeyeEnemy>(this->transformManager, 40.0f, spawnX, spawnY);
 						minion->Init(graphicsDevice, camera);
 						minion->SetOnRequestEnemyCard(this->onRequestEnemyCard);
+						this->minions.push_back(minion);
 						this->onRequestSpawnEnemy(minion);
 					}
 				}, popUpMessage, Tr(L"The boss spawned a minion!"));
@@ -91,10 +114,11 @@ void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 			}, popUpMessage, Tr(L"Boss locks your mind!"));
 	}
 
-	if (RNG::Range(0.f, 1.f) <= desperato) {
+	// Squared so a high-HP boss almost never heals; it only becomes likely when close to death.
+	if (RNG::Range(0.f, 1.f) <= desperato * desperato) {
 		CastAbility([this]() {
-			this->Heal(45.f);
-			}, popUpMessage, Tr(L"Boss regenerates 45HP!"));
+			this->Heal(30.f);
+			}, popUpMessage, Tr(L"Boss regenerates 30HP!"));
 	}
 
 	if (RNG::Range(0.f, 1.f) <= desperato) {
@@ -122,8 +146,24 @@ void Demo::KeyeproEnemy::StartAttack(std::shared_ptr<Player> player, std::vector
 
 	float baseDamage = 5.f;
 
+	// Every living minion shares the player's attention, so the boss's own patterns thin out
+	// to compensate: slower spawns, and fewer of them so the phase lasts about as long.
+	size_t minionCount = 0;
+	if (enemies != nullptr) {
+		for (const auto& enemy : *enemies) {
+			if (enemy && !enemy->IsDead() && std::dynamic_pointer_cast<KeyeEnemy>(enemy)) ++minionCount;
+		}
+	}
+	constexpr float PACE_PER_MINION = 0.2f;
+	constexpr size_t MAX_EASED_MINIONS = 4;
+	patternPace = 1.f + PACE_PER_MINION * (std::min)(minionCount, MAX_EASED_MINIONS);
+
 	if (enemies != nullptr && graphicsDevice != nullptr && camera != nullptr) {
 		int patternId = GetSmartRandomPattern(1, 5);
+		// Patterns that fire a bullet every few frames would drone on if each one pinged,
+		// so they play their spawn sounds quietly or not at all.
+		constexpr float SFX_BY_PATTERN[] = { 0.f, 0.3f, 0.5f, 0.5f, 0.6f, 0.f };
+		projectiles.SetSfxScale(SFX_BY_PATTERN[patternId]);
 		if (patternId == 1) PatternTargetedSniping(baseDamage);
 		else if (patternId == 2) PatternEcholocation(baseDamage);
 		else if (patternId == 3) PatternSwoopBite(baseDamage);
@@ -135,9 +175,9 @@ void Demo::KeyeproEnemy::StartAttack(std::shared_ptr<Player> player, std::vector
 void Demo::KeyeproEnemy::PatternTargetedSniping(float baseDamage) {
 	auto currentPosition = std::make_shared<int>(0);
 
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < ScaleCount(100); i++) {
 		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, currentPosition](std::function<void(void)> markFinished) {
-			if (auto lock = this->player.lock()) {
+			if (auto lock = this->player.lock(); lock && this->HasBulletRoom(1)) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 				*currentPosition = *currentPosition % 4 + 1; // Cycle through positions 1 to 4
 				float x, y;
@@ -173,16 +213,17 @@ void Demo::KeyeproEnemy::PatternTargetedSniping(float baseDamage) {
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.1f));
+		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.1f * patternPace));
 	}
 }
 
 void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
-	const int BULLETS = 10;
+	const int BULLETS = (std::max)(5, ScaleCount(10));
 	const int VELOCITY = 180;
 	const int SPACING = 96;
 	std::shared_ptr<int> yOffset = std::make_shared<int>(0);
-	auto rightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, yOffset, SPACING](std::function<void(void)> markFinished) {
+	auto rightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, yOffset, SPACING, BULLETS](std::function<void(void)> markFinished) {
+		if (!this->HasBulletRoom(BULLETS)) { markFinished(); return; }
 		float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 		for (int i = 0; i < BULLETS; i++) {
 			if (auto lock = this->player.lock()) {
@@ -192,7 +233,7 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, 320, startY)
 					.SetTrajectory(D3DXVECTOR2(-1, 0))
 					.SetWave(50.f, 4.f)
-					.SetDelay(i * 0.1f)
+					.SetDelay(i * 0.1f * patternPace)
 					.SetDecayTime(4.f)
 					.SetVelocity(VELOCITY)
 					.SetDamage(finalDamage)
@@ -205,7 +246,8 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 		*yOffset %= SPACING;
 		markFinished();
 		});
-	auto leftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, yOffset](std::function<void(void)> markFinished) {
+	auto leftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, yOffset, BULLETS](std::function<void(void)> markFinished) {
+		if (!this->HasBulletRoom(BULLETS)) { markFinished(); return; }
 		float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 		for (int i = 0; i < BULLETS; i++) {
 			if (auto lock = this->player.lock()) {
@@ -215,7 +257,7 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, -320, startY)
 					.SetTrajectory(D3DXVECTOR2(1, 0))
 					.SetWave(50.f, 4.f)
-					.SetDelay(i * 0.1f)
+					.SetDelay(i * 0.1f * patternPace)
 					.SetDecayTime(4.f)
 					.SetVelocity(VELOCITY)
 					.SetDamage(finalDamage)
@@ -227,19 +269,19 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 		*yOffset %= SPACING;
 		markFinished();
 		});
-	for (int i = 0; i < 40; i++) {
+	for (int i = 0; i < ScaleCount(40); i++) {
 		if (RNG::Range(1, 2) == 1) commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*leftAttack));
 		else commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*rightAttack));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
+		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f * patternPace));
 	}
 }
 
 void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
-	const int BULLET_COUNT = 8;
-	const float ANGLE_STEP = 0.3f;
+	const int BULLET_COUNT = (std::max)(4, ScaleCount(8));
+	const float ANGLE_STEP = 0.3f * 8.f / BULLET_COUNT; // keep the fan as wide as the full one
 	const float INITIAL_VELOCITY = 370.f;
 	auto rightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP, INITIAL_VELOCITY](std::function<void(void)> markFinished) {
-		if (auto lock = this->player.lock()) {
+		if (auto lock = this->player.lock(); lock && this->HasBulletRoom(BULLET_COUNT)) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			auto [px, py] = lock->GetCollider().lock()->GetWorldPosition();
             float x = 320.f;
@@ -262,7 +304,7 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 					.SetTargetPosition(targetX, targetY)
 					.SetInitialVelocity(INITIAL_VELOCITY)
 					.SetReturnAcceleration(180.f)
-					.SetDelay(i * 0.05f)
+					.SetDelay(i * 0.05f * patternPace)
 					.SetDecayTime(8.f)
 					.SetDamage(finalDamage)
 				);
@@ -271,7 +313,7 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 		markFinished();
 		});
 	auto leftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP, INITIAL_VELOCITY](std::function<void(void)> markFinished) {
-		if (auto lock = this->player.lock()) {
+		if (auto lock = this->player.lock(); lock && this->HasBulletRoom(BULLET_COUNT)) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			auto [px, py] = lock->GetCollider().lock()->GetWorldPosition();
             float x = -320.f;
@@ -294,7 +336,7 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 					.SetTargetPosition(targetX, targetY)
 					.SetInitialVelocity(INITIAL_VELOCITY)
 					.SetReturnAcceleration(180.f)
-					.SetDelay(i * 0.05f)
+					.SetDelay(i * 0.05f * patternPace)
 					.SetDecayTime(8.f)
 					.SetDamage(finalDamage)
 				);
@@ -304,10 +346,10 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 		});
 
 	int dist = RNG::Range(30, 40);
-	for (int i = 0; i < dist; i++) {
+	for (int i = 0; i < ScaleCount(dist); i++) {
 		if (RNG::Range(1, 2) == 1) commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*leftAttack));
 		else commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*rightAttack));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
+		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f * patternPace));
 	}
 }
 
@@ -315,7 +357,7 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 // throwing a ring of shards outward. The burst point moves every wave, so no corner
 // stays safe and the player has to keep reading the incoming shell instead of settling.
 void Demo::KeyeproEnemy::PatternShatterVolley(float baseDamage) {
-	constexpr int SHELLS_PER_WAVE = 3;
+	const int SHELLS_PER_WAVE = (std::max)(2, ScaleCount(3));
 	// Wide enough that the three shells in a wave land as three separate pops the
 	// player can read one at a time, rather than one wall of shards.
 	constexpr float SHELL_STAGGER = 0.35f;
@@ -326,7 +368,7 @@ void Demo::KeyeproEnemy::PatternShatterVolley(float baseDamage) {
 	// The battle box is 256px square around the origin. Keeping burst points well
 	// inside it means the shards sweep across the arena rather than off its edge.
 	constexpr float BURST_RANGE = 90.f;
-	constexpr int SHARDS = 8;
+	const int SHARDS = (std::max)(5, ScaleCount(8));
 	constexpr float SHARD_VELOCITY = 100.f;
 	// Shards clear the 256px box roughly 0.7s after a centre burst; 1.6s carries them
 	// past the visible border without leaving dead sprites padding the phase out.
@@ -339,10 +381,11 @@ void Demo::KeyeproEnemy::PatternShatterVolley(float baseDamage) {
 	// play out: ~3.3s more, for 14-15s under fire. Enough that the player runs out of
 	// easy dodges, and short of the 20s Echolocation spends, which is the point where
 	// the pressure starts reading as a slog instead.
-	const int waves = RNG::Range(8, 9);
+	const int waves = ScaleCount(RNG::Range(8, 9));
 	for (int w = 0; w < waves; w++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage](std::function<void(void)> markFinished) {
-			if (auto lock = this->player.lock()) {
+		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, SHELLS_PER_WAVE, SHARDS](std::function<void(void)> markFinished) {
+			// A shell bursts into SHARDS more, so count them together against the budget.
+			if (auto lock = this->player.lock(); lock && this->HasBulletRoom(static_cast<size_t>(SHELLS_PER_WAVE) * (1 + SHARDS))) {
 				const float shellDamage = this->CalculateOutgoingDamage(baseDamage);
 				const float shardDamage = this->CalculateOutgoingDamage(baseDamage * SHARD_DAMAGE_SCALE);
 				for (int i = 0; i < SHELLS_PER_WAVE; i++) {
@@ -360,7 +403,7 @@ void Demo::KeyeproEnemy::PatternShatterVolley(float baseDamage) {
 						.SetSplitDamage(shardDamage)
 						.SetShardTexture(shardTexture.get(), shardFrames, 12, 8, 8, 4, 4)
 						.SetVelocity(SHELL_VELOCITY)
-						.SetDelay(i * SHELL_STAGGER)
+						.SetDelay(i * SHELL_STAGGER * patternPace)
 						.SetDecayTime(4.f)
 						.SetDamage(shellDamage)
 						.SetGhostSprite(projTexture.get(), projFrames.front(), 16, 16)
@@ -370,20 +413,20 @@ void Demo::KeyeproEnemy::PatternShatterVolley(float baseDamage) {
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_GAP));
+		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_GAP * patternPace));
 	}
 }
 
 void Demo::KeyeproEnemy::PatternFanning(float projDamage)
 {
-	const int WAVE_COUNT = 15;
-	const int BULLET_COUNT = 10;
+	const int WAVE_COUNT = ScaleCount(15);
+	const int BULLET_COUNT = (std::max)(5, ScaleCount(10));
 	const float SPAWN_DISTANCE = 400.f;
 	const float SPREAD_ANGLE = 60.f * (3.14159265f / 180.f); // Convert degrees to radians
 	const float BASE_ANGLE = RNG::Range(0.f, 360.f) * (3.14159265f / 180.f);
 	const float ANGLE_INCREMENT = SPREAD_ANGLE / (BULLET_COUNT - 1);
-	const float DELAY_BETWEEN_BULLETS = 0.01f;
-	const float DELAY_BETWEEN_WAVES = 0.03f;
+	const float DELAY_BETWEEN_BULLETS = 0.01f * patternPace;
+	const float DELAY_BETWEEN_WAVES = 0.03f * patternPace;
 	const float JITTER_RADIUS = 250.f;
 	for (int wave = 0; wave < WAVE_COUNT; wave++) {
 		for (int i = 0; i < BULLET_COUNT; i++) {
@@ -394,7 +437,7 @@ void Demo::KeyeproEnemy::PatternFanning(float projDamage)
 			float jitterX = std::cos(jitterAngle) * jitterDist;
 			float jitterY = std::sin(jitterAngle) * jitterDist;
 			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, dir, SPAWN_DISTANCE, jitterX, jitterY](std::function<void(void)> markFinished) {
-				if (auto lock = this->player.lock()) {
+				if (auto lock = this->player.lock(); lock && this->HasBulletRoom(1)) {
 					auto [px, py] = lock->GetWorldPosition();
 					float spawnX = px - dir.x * SPAWN_DISTANCE + jitterX;
 					float spawnY = py - dir.y * SPAWN_DISTANCE + jitterY;

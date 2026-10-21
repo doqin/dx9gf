@@ -96,6 +96,9 @@ namespace Demo {
 		/// something the player just did.
 		/// </summary>
 		void ShowMessage(const std::wstring& message, float duration = 1.0f);
+		// Adds a line to the battle log only, without the on-screen popup (e.g. an enemy ability
+		// that is already announced in the enemy's speech bubble).
+		void LogMessage(const std::wstring& message);
 		/// <summary>
 		/// Shows a message from a command buffer, keeping that buffer busy for the duration so
 		/// the surrounding sequence still paces around the message.

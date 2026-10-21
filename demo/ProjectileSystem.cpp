@@ -512,7 +512,7 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 	target = player;
 
 	if (spawnSfxCooldown <= 0.f) {
-		DX9GF::AudioManager::GetInstance()->Play("projectile_spawn", false, 0.35f);
+		if (sfxScale > 0.f) DX9GF::AudioManager::GetInstance()->Play("projectile_spawn", false, 0.35f * sfxScale);
 		spawnSfxCooldown = 0.05f;
 	}
 
@@ -860,7 +860,7 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 					life.launched = true;
 					// only projectiles that actually waited get a launch sound
 					if (life.delay > 0.f && launchSfxCooldown <= 0.f) {
-						DX9GF::AudioManager::GetInstance()->Play("projectile_launch", false, 0.4f);
+						if (sfxScale > 0.f) DX9GF::AudioManager::GetInstance()->Play("projectile_launch", false, 0.4f * sfxScale);
 						launchSfxCooldown = 0.05f;
 					}
 				}

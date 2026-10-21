@@ -126,8 +126,11 @@ namespace Demo {
                 fontSprite->SetText(line);
                 msgW = std::max(msgW, static_cast<float>(fontSprite->GetWidth()));
             }
-            this->messageLineH = msgH;
-            msgH = (msgH + MSG_LINE_SPACING) * messageLines.size() - MSG_LINE_SPACING;
+            // One line's height. msgH above measured the whole message, which spans several lines when
+            // it holds its own line breaks - using it here would space every wrapped line that far apart.
+            fontSprite->SetText(L"Ag");
+            this->messageLineH = static_cast<float>(fontSprite->GetHeight());
+            msgH = (messageLineH + MSG_LINE_SPACING) * messageLines.size() - MSG_LINE_SPACING;
         }
 
         this->messageW = msgW;

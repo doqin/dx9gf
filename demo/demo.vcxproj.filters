@@ -123,6 +123,7 @@
     <ClCompile Include="DeadlineEnemy.cpp" />
     <ClCompile Include="HomeworkEnemy.cpp" />
     <ClCompile Include="PendingAutoContinue.cpp" />
+    <ClCompile Include="EnemyDialogue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cards\core\CardEffect.h" />
@@ -261,6 +262,8 @@
     <ClInclude Include="HomeworkEnemy.h" />
     <ClInclude Include="PendingAutoContinue.h" />
     <ClInclude Include="ShopPurchaseGlobalData.h" />
+    <ClInclude Include="EnemyDialogue.h" />
+    <ClInclude Include="BossDeathGlobalData.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="demo.rc" />

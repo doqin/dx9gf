@@ -234,6 +234,7 @@
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="DemonEyeEnemy.cpp" />
     <ClCompile Include="DrawUtils.cpp" />
+    <ClCompile Include="EnemyDialogue.cpp" />
     <ClCompile Include="EnemyFactory.cpp" />
     <ClCompile Include="GearSlotUI.cpp" />
     <ClCompile Include="HomeworkEnemy.cpp" />
@@ -366,6 +367,7 @@
     <ClCompile Include="TestEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BossDeathGlobalData.h" />
     <ClInclude Include="cards\core\CardEffect.h" />
     <ClInclude Include="cards\core\CardSpec.h" />
     <ClInclude Include="cards\core\CardState.h" />
@@ -397,6 +399,7 @@
     <ClInclude Include="DialogueLine.h" />
     <ClInclude Include="DrawUtils.h" />
     <ClInclude Include="EncounterGenerator.h" />
+    <ClInclude Include="EnemyDialogue.h" />
     <ClInclude Include="EnergyToken.h" />
     <ClInclude Include="GearSlotUI.h" />
     <ClInclude Include="GoldToken.h">

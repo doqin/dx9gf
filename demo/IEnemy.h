@@ -5,6 +5,8 @@
 #include "ProjectileSystem.h"
 #include <functional>
 #include <vector>
+#include <deque>
+#include "EnemyDialogue.h"
 #include "ICombatant.h"
 #include "StatusDisplay.h"
 namespace Demo {
@@ -61,6 +63,30 @@ namespace Demo {
 		std::vector<std::shared_ptr<DX9GF::AnimatedSprite>> hitImpactSprites;
 		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
 		unsigned long long timeSinceStart = 0;
+		// Speech bubble: lines wait in a queue and are shown one at a time next to the enemy.
+		// What each enemy type says lives in EnemyDialogue.
+		struct SpeechLine {
+			std::wstring text;
+			float delayMs = 0.f; // wait before this line shows, e.g. for the battle's transition-in
+		};
+		static constexpr float SPEECH_SHOW_MS = 2600.f;
+		static constexpr float SPEECH_FADE_MS = 180.f;
+		static constexpr float SPEECH_MAX_TEXT_W = 230.f;
+		static constexpr size_t MAX_QUEUED_SPEECH = 3;
+		std::deque<SpeechLine> speechQueue;
+		float speechElapsed = 0.f; // how long the front line has been on screen
+		bool saidHurtLine = false;
+		std::shared_ptr<DX9GF::FontSprite> speechFontSprite;
+		void UpdateSpeech(unsigned long long deltaTime);
+		// Says the hurt line the first time this enemy drops to half health or below.
+		void CheckHurtLine();
+		// The speech line EnemyDialogue pairs with this ability popup text, or empty if none.
+		std::wstring FindAbilitySpeech(const std::wstring& message) const;
+		// Ability lines wait here from OnTurnBegin (where abilities are cast) until the battle scene
+		// starts the attack countdown, so the enemy says them right before it attacks. Extra abilities
+		// in the same turn only go to the battle log, so the lines fit the countdown.
+		static constexpr size_t MAX_ABILITY_LINES_PER_TURN = 1;
+		std::vector<std::wstring> pendingAbilityLines;
 		void SetGoldReward(int reward) { goldReward = reward; }
 		void SetCardDropPool(std::vector<std::string> pool, int minCount = 1, int maxCount = 1) {
 			cardDropPool = std::move(pool);
@@ -87,6 +113,23 @@ namespace Demo {
 		void BeginDeath();
 		void UpdateDeath(unsigned long long deltaTime);
 	public:
+		// Class name without namespace, e.g. "SpamEnemy" - the same names EnemyFactory uses.
+		std::string GetTypeName() const;
+		// This enemy's lines from EnemyDialogue, or null if it has none.
+		const EnemyDialogue::Lines* GetDialogue() const;
+		// Queues a line for the speech bubble.
+		void Say(const std::wstring& text, float delayMs = 0.f);
+		void SayIntro(float delayMs = 0.f);
+		void SayTaunt();
+		// Says the ability lines held since the start of the turn. Called when the attack countdown starts.
+		// Says the ability lines held since the start of the turn. Called when the attack countdown
+		// starts; returns true if there was anything to say.
+		bool SayPendingAbilityLines();
+		// A line is on screen or still waiting in the speech queue.
+		bool IsSpeaking() const { return !speechQueue.empty(); }
+		// Drawn by the battle scene after everything else in the battle area, so nothing covers it.
+		void DrawSpeech(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime);
+
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth) : ICombatant(tm, maxHealth) { projectiles.SetOwner(this); }
 
 		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, maxHealth, x, y, rot, sx, sy) { projectiles.SetOwner(this); }

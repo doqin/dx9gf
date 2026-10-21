@@ -82,9 +82,21 @@ namespace Demo {
 		bool defeatPopupShown = false;
 		bool pendingDefeatMainMenuTransition = false;
 		bool pendingDefeatReloadSave = false;
+		bool pendingReturnToPreviousScene = false;
 		// Set for a boss fight: the boss enemy's id, used to count defeats and pick its hint.
 		// Empty for regular battles.
 		std::string bossId;
+		// The "player is below half health" taunt has been said this battle.
+		bool playerTauntSaid = false;
+		// Enemies say their ability lines while still on screen; the turn waits until they finish
+		// (plus a short beat) before they slide off to the attack queue. Gives up after the timeout.
+		bool abilityLinesSaid = false;
+		unsigned long long abilitySpeechStartMs = 0;
+		unsigned long long abilitySpeechQuietSinceMs = 0;
+		static constexpr unsigned long long ABILITY_SPEECH_PAUSE_MS = 400;
+		static constexpr unsigned long long ABILITY_SPEECH_TIMEOUT_MS = 9000;
+		// A random living enemy that has a line for this moment: its intro, or its taunt.
+		std::shared_ptr<IEnemy> PickSpeaker(bool forTaunt);
 		// Keyboard navigation
 		// A destination a picked-up card can be placed at (a slot in the block's execution queue,
 		// or an eligible TargetedCard to lock an EnemyCard onto).

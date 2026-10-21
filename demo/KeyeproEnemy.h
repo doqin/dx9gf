@@ -14,9 +14,19 @@ namespace Demo {
         std::vector<RECT> batProjFrames;
         std::weak_ptr<Player> player;
 
+        // Minions this boss has summoned, so they can be dismissed when it falls.
+        std::vector<std::weak_ptr<IEnemy>> minions;
+
         //ability vars
         int currentCycle = -1;
         int skillTurnThisCycle = -1;
+
+        // 1 with no minions alive, growing with each one; patterns stretch their spawn timing by it.
+        float patternPace = 1.f;
+        int ScaleCount(int count) const;
+        // Most bullets allowed alive at once; shrinks as minions join so the screen never floods.
+        size_t BulletBudget() const;
+        bool HasBulletRoom(size_t incoming) const { return projectiles.Count() + incoming <= BulletBudget(); }
 
         int GetRandomPattern();
         void PatternTargetedSniping(float projDamage);
@@ -28,6 +38,7 @@ namespace Demo {
         using EnemyBase<KeyeproEnemy>::EnemyBase;
         void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera);
         void Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) override;
+        void Update(unsigned long long deltaTime) override;
         DX9GF::ISprite* GetBodySprite() override { return sprite.get(); }
 
         void OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn, std::vector<std::shared_ptr<IEnemy>>* enemies, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) override;

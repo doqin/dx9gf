@@ -349,6 +349,7 @@ namespace Demo {
 		// Patterns spawn many projectiles at once; cooldowns keep their sounds from stacking.
 		float spawnSfxCooldown = 0.f;
 		float launchSfxCooldown = 0.f;
+		float sfxScale = 1.f; // multiplies spawn/launch volume; 0 mutes them
 
 		std::vector<SpriteBatch> batches;
 		std::weak_ptr<Player> target;
@@ -365,6 +366,8 @@ namespace Demo {
 		void EmitBurst(const PendingBurst& burst);
 	public:
 		void SetOwner(ICombatant* newOwner) { owner = newOwner; }
+		// Patterns that fire hundreds of bullets turn their spawn sounds down so they do not drone.
+		void SetSfxScale(float scale) { sfxScale = scale; }
 		void Spawn(const std::shared_ptr<Player>& player, const ProjectileDesc& desc);
 		void Spawn(const std::shared_ptr<Player>& player, const LaserDesc& desc);
 		void Update(unsigned long long deltaTime);
