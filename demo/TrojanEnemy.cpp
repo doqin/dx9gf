@@ -38,7 +38,7 @@ int Demo::TrojanEnemy::GetRandomPattern() {
 
 void Demo::TrojanEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn) {
 	this->player = player;
-	auto desperato = 1.f - (GetHealth() / GetMaxHealth());
+	auto desperato = 1.f - (static_cast<float>(GetHealth()) / static_cast<float>(GetMaxHealth()));
 
 	if (currentTurn % 2 == 1 || desperato > 0.6f) {
 		auto ability = RNG::Range(1, 2);

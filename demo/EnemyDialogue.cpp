@@ -18,8 +18,8 @@ namespace Demo::EnemyDialogue {
 				L"Error... my mailing list... is shrinking!",
 				L"Your inbox is full! Want to upgrade your storage?",
 				{
-					{ L"Spam multiplies! (+12 HP)", L"Forward this to ten friends... or ten copies of me!" },
-					{ L"Your best shots get buried in junk!", L"Your best shots just got sorted into junk!" },
+					{ L"Spam multiplies! (+12 HP)", L"Forward this to ten friends... or ten copies of me! (I heal 12 HP)" },
+					{ L"Your best shots get buried in junk!", L"Your best shots just got sorted into junk! (You deal less damage)" },
 				},
 			} },
 			{ "TrojanEnemy", {
@@ -32,8 +32,8 @@ namespace Demo::EnemyDialogue {
 				L"Wait, wait! I can be a legitimate program, I swear!",
 				L"Your defences are full of holes. I'd know.",
 				{
-					{ L"Trojan corrupts your systems!", L"Let me just... rewrite a few of your files." },
-					{ L"Trojan fortifies its defenses!", L"Firewall? Oh, I brought my own." },
+					{ L"Trojan corrupts your systems!", L"Let me just... rewrite a few of your files. (You deal less damage)" },
+					{ L"Trojan fortifies its defenses!", L"Firewall? Oh, I brought my own. (My defense goes up)" },
 				},
 			} },
 			{ "CupidEnemy", {
@@ -46,8 +46,8 @@ namespace Demo::EnemyDialogue {
 				L"Hey! That's not how the game works!",
 				L"Running low? Just one more bite...",
 				{
-					{ L"Pacman heals 15 HP!", L"Nom nom nom... ahh, much better!" },
-					{ L"Pacman breaks your guard!", L"Chomp! There goes your guard!" },
+					{ L"Pacman heals 15 HP!", L"Nom nom nom... ahh, much better! (I heal 15 HP)" },
+					{ L"Pacman breaks your guard!", L"Chomp! There goes your guard! (You take more damage)" },
 				},
 			} },
 			{ "KeyeproEnemy", {
@@ -60,13 +60,13 @@ namespace Demo::EnemyDialogue {
 				L"Impossible... my keys are slipping!",
 				L"Your process is failing. Let it end.",
 				{
-					{ L"The boss spawned a minion!", L"Keye, deal with this intruder." },
-					{ L"Boss locks your mind!", L"Locked. You no longer have permission." },
-					{ L"Boss regenerates 45HP!", L"Restoring from backup." },
-					{ L"Boss fortifies itself with 30DEF!", L"Raising every firewall I own." },
-					{ L"Boss lowers your defenses!", L"Your guard? Revoked." },
-					{ L"Boss weakens your attacks!", L"Downgrading your privileges." },
-					{ L"Boss enters a frenzy!", L"Enough! Full system override!" },
+					{ L"The boss spawned a minion!", L"Keye, deal with this intruder. (A minion joins the fight)" },
+					{ L"Boss locks your mind!", L"Locked. You no longer have permission. (2 of your cards are locked)" },
+					{ L"Boss regenerates 30HP!", L"Restoring from backup. (I heal 30 HP)" },
+					{ L"Boss fortifies itself with 30DEF!", L"Raising every firewall I own. (My defense goes up)" },
+					{ L"Boss lowers your defenses!", L"Your guard? Revoked. (You take more damage)" },
+					{ L"Boss weakens your attacks!", L"Downgrading your privileges. (You deal less damage)" },
+					{ L"Boss enters a frenzy!", L"Enough! Full system override! (My attack goes up)" },
 				},
 			} },
 
@@ -81,8 +81,8 @@ namespace Demo::EnemyDialogue {
 				L"Wait... are you debugging me?!",
 				L"Your HP is leaking like bad memory!",
 				{
-					{ L"Bug powers up its attack!", L"Undefined behaviour, maximum damage!" },
-					{ L"Bug injects a vulnerability!", L"Let me just inject a tiny exploit..." },
+					{ L"Bug powers up its attack!", L"Undefined behaviour, maximum damage! (My attack goes up)" },
+					{ L"Bug injects a vulnerability!", L"Let me just inject a tiny exploit... (You take more damage)" },
 				},
 			} },
 			{ "VampireBatEnemy", { // Shrimp
@@ -95,8 +95,8 @@ namespace Demo::EnemyDialogue {
 				L"Ow! I'm getting cooked here!",
 				L"You're leaking data like a sieve!",
 				{
-					{ L"Shrimp siphons your data! (+15 HP)", L"Slurp! Your data tastes great." },
-					{ L"Shrimp emits a piercing screech!", L"SKREEEEEE!" },
+					{ L"Shrimp siphons your data! (+15 HP)", L"Slurp! Your data tastes great. (I heal 15 HP)" },
+					{ L"Shrimp emits a piercing screech!", L"SKREEEEEE! (You take more damage)" },
 				},
 			} },
 			{ "MimicEnemy", { // Not Responding
@@ -109,8 +109,8 @@ namespace Demo::EnemyDialogue {
 				L"Program has encountered a problem and needs to... no, wait!",
 				L"Your system is lagging. Have you tried restarting?",
 				{
-					{ L"A giant pop-up blocks the way!", L"SURPRISE! You've won a free pop-up!" },
-					{ L"Mimic installs malicious adware!", L"Installing 37 toolbars. Please don't turn off your PC." },
+					{ L"A giant pop-up blocks the way!", L"SURPRISE! You've won a free pop-up! (My defense goes up)" },
+					{ L"Mimic installs malicious adware!", L"Installing 37 toolbars. Please don't turn off your PC. (You get poisoned)" },
 				},
 			} },
 			{ "WarlockEnemy", { // Crawler
@@ -123,8 +123,8 @@ namespace Demo::EnemyDialogue {
 				L"Connection unstable... retrying...",
 				L"Your HP is buffering. Hope you're patient.",
 				{
-					{ L"Crawler slows your connection!", L"Enjoy your 56k modem experience." },
-					{ L"Crawler gathers corrupted data!", L"So much juicy corrupted data..." },
+					{ L"Crawler slows your connection!", L"Enjoy your 56k modem experience. (You deal less damage)" },
+					{ L"Crawler gathers corrupted data!", L"So much juicy corrupted data... (My attack goes up)" },
 				},
 			} },
 			{ "KernelEnemy", {
@@ -137,8 +137,8 @@ namespace Demo::EnemyDialogue {
 				L"Kernel panic! Kernel panic!",
 				L"Your process is unstable. Shutting it down.",
 				{
-					{ L"Kernel runs recovery protocol! (+20 HP)", L"Executing recovery protocol." },
-					{ L"Kernel elevates privileges!", L"sudo: permission granted." },
+					{ L"Kernel runs recovery protocol! (+20 HP)", L"Executing recovery protocol. (I heal 20 HP)" },
+					{ L"Kernel elevates privileges!", L"sudo: permission granted. (My attack goes up)" },
 				},
 			} },
 			{ "KeyeEnemy", { // Keyepro's minion
@@ -151,8 +151,8 @@ namespace Demo::EnemyDialogue {
 				L"Master... Keye needs backup!",
 				L"Keye sees weakness.",
 				{
-					{ L"Keye focuses its gaze!", L"Locking on..." },
-					{ L"Keye finds your blind spot!", L"There. Your blind spot." },
+					{ L"Keye focuses its gaze!", L"Locking on... (My attack goes up)" },
+					{ L"Keye finds your blind spot!", L"There. Your blind spot. (You deal less damage)" },
 				},
 			} },
 		};
