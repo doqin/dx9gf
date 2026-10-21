@@ -122,7 +122,7 @@ void Demo::ThreadAlleyScene::OnInit()
 
 	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"Oh thank the kernel, a live process!\nI was starting to think nobody came down this alley any more."));
 	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"I'm a maintenance job. Was, anyway.\nMy session expired halfway through a patch and now the gate won't read me."));
-	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"There's a terminal further down the alley that still hands out\nauthentication tokens. Four digits, old-style."));
+	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"There's a terminal down at the bottom of the alley, over on the east side.\nIt still hands out authentication tokens. Four digits, old-style."));
 	trojanNPC->AddFriendlyLine(Tr(L"???"), Tr(L"Bring one back to me and I'll be out of your way.\nYou'd be doing the whole sector a favour, honestly."));
 	trojanNPC->AddFriendlyLine(Tr(L"Player"), Tr(L"...Alright. I'll see what I can find."));
 
@@ -386,19 +386,35 @@ void Demo::ThreadAlleyScene::StartTrojanConversation()
 
 	switch (phase) {
 	case TrojanNPC::Phase::Friendly:
-		onConversationEnd = [this]() { trojanNPC->SetPhase(TrojanNPC::Phase::AwaitingToken); };
+		onConversationEnd = [this]() {
+			trojanNPC->SetPhase(TrojanNPC::Phase::AwaitingToken);
+			ShowTerminalDirectionHint();
+			};
 		QuestManager::GetInstance()->NotifyEvent("TROJAN_TALKED", "", player.get());
+		break;
+	case TrojanNPC::Phase::AwaitingToken:
+		onConversationEnd = [this]() { ShowTerminalDirectionHint(); };
 		break;
 	case TrojanNPC::Phase::Revealed:
 		onConversationEnd = [this]() {
 			StartTrojanBattle();
 			QuestManager::GetInstance()->NotifyEvent("TROJAN_REVEALED", "", player.get());
-		};
+			};
 		break;
 	default:
 		onConversationEnd = nullptr;
 		break;
 	}
+}
+
+
+void Demo::ThreadAlleyScene::ShowTerminalDirectionHint()
+{
+	if (authTerminalSolved) return;
+	std::vector<std::pair<std::wstring, std::function<void()>>> buttons = { { Tr(L"OK"), nullptr } };
+	PopupManager::GetInstance()->Show("stepped_blue", Tr(L"HINT"),
+		Tr(L"Head down to the bottom-right corner of the alley to find the terminal\nthat hands out auth tokens. It stands right next to the shady guy selling card packs."),
+		buttons);
 }
 
 void Demo::ThreadAlleyScene::StartTrojanBattle()

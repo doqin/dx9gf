@@ -27,6 +27,8 @@ namespace Demo {
 		void DrawCheckerBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
 		void StartTrojanConversation();
 		void StartTrojanBattle();
+		// After the Trojan's lines, points the player at the token terminal until it's cracked.
+		void ShowTerminalDirectionHint();
 		void StartSketchyGuyInteraction();
 
 	public:
