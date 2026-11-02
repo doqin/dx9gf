@@ -8,8 +8,8 @@
 
 void Demo::DeadlineEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
 	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/placeholder.png"); // TODO: change when real asset is available
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	texture->LoadTexture(L"assets/Deadline.png"); // TODO: change when real asset is available
+	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 82, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
