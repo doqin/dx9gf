@@ -1,0 +1,43 @@
+name: Portable build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022   # pinned image => pinned MSVC v143 toolchain
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install DirectX SDK (June 2010)
+        run: choco install directx-sdk -y --no-progress
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Stage tmxlite import lib where core.vcxproj expects it
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force external/release/tmxlite | Out-Null
+          Copy-Item external/tmxlite.lib external/release/tmxlite/
+
+      - name: Build demo (Release x64)
+        run: msbuild demo/demo.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:SolutionDir="${{ github.workspace }}\"
+
+      - name: Package portable folder
+        shell: pwsh
+        run: ./scripts/package-portable.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DX9GF-Demo-portable
+          path: dist/DX9GF-Demo.zip
+
+      - name: Attach to GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/DX9GF-Demo.zip
