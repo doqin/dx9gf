@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: windows-2022   # pinned image => pinned MSVC v143 toolchain
+    permissions:
+      contents: write       # softprops/action-gh-release needs this to attach the zip to the release
     steps:
       - uses: actions/checkout@v4
 
