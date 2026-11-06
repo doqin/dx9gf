@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 *.tiled-session
 /example/Resources/Map.tiled-session
+
+# Portable packaging output
+dist/
