@@ -135,6 +135,11 @@ DX9GF::ActiveVoice* DX9GF::AudioManager::PlayInternal(std::string name, bool loo
 	//can't find sound name from cache
 	if (!cache.count(name)) return nullptr;
 
+	// Init() can fail on machines with no audio device (VMs, RDP sessions,
+	// sandbox). pEngine stays null then - stay silent instead of crashing
+	// on the first Play call.
+	if (pEngine == nullptr) return nullptr;
+
 	SoundBuffer* data = cache[name];
 
 	//create a callback for this turn
@@ -405,7 +410,7 @@ void DX9GF::AudioManager::PlayStemSet(std::string setName, float volume)
 	//start every stem in one operation set so they are sample-aligned
 	const UINT32 opSet = 1;
 	for (auto av : started) av->pVoice->Start(0, opSet);
-	pEngine->CommitChanges(opSet);
+	if (pEngine) pEngine->CommitChanges(opSet);
 }
 
 void DX9GF::AudioManager::RegisterIntroLoop(std::string name, std::string introName, std::string loopName)

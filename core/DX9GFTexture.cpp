@@ -168,7 +168,12 @@ void DX9GF::Texture::LoadTexture(std::wstring filePath, UINT width, UINT height)
 		&texture
 	);
 	if (result != D3D_OK) {
-		throw MakeDxError(result);
+		// DXGetErrorDescription alone (e.g. "Access is denied") doesn't say WHICH
+		// asset died - with dozens of textures loading at startup that is not
+		// diagnosable, so name the file and give the raw HRESULT
+		std::wstring what = std::wstring(L"Could not load texture \"") + filePath + L"\" (HRESULT 0x"
+			+ std::to_wstring(static_cast<unsigned long>(result)) + L")";
+		throw std::runtime_error(std::string(what.begin(), what.end()));
 	}
 
 	if (width == D3DX_DEFAULT_NONPOW2 || width == D3DX_DEFAULT) {
