@@ -124,7 +124,7 @@ void DX9GF::IGame::Init()
 	graphicsDevice = new GraphicsDevice();
 	sceneManager = new SceneManager();
 	// Create Direct3D device
-	d3d->CreateDevice(
+	HRESULT createResult = d3d->CreateDevice(
 		D3DADAPTER_DEFAULT,
 		D3DDEVTYPE_HAL,
 		hwnd,
@@ -133,6 +133,17 @@ void DX9GF::IGame::Init()
 		&graphicsDevice->GetDevice()
 	);
 
+	if (FAILED(createResult)) {
+		// Name the adapter that refused the device - on machines without GPU
+		// acceleration (e.g. Windows Sandbox) this shows the real culprit
+		D3DADAPTER_IDENTIFIER9 adapterInfo{};
+		d3d->GetAdapterIdentifier(D3DADAPTER_DEFAULT, 0, &adapterInfo);
+		char message[1024];
+		wsprintfA(message,
+			"Error creating Direct3D device (HRESULT 0x%08X)\r\nAdapter: %s",
+			static_cast<UINT>(createResult), adapterInfo.Description);
+		throw std::runtime_error(message);
+	}
 	if (graphicsDevice->GetDevice() == NULL) throw std::runtime_error("Error creating Direct3D device");
 
 	// create pointer to the back buffer

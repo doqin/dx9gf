@@ -1,0 +1,23 @@
+﻿<Configuration>
+  <!-- Fast iteration: maps the extracted build and the sandbox runner script.
+       The runner (run-sandbox-test.cmd) copies the game to a local path inside
+       the sandbox before launching it, because D3DX texture loading gets
+       "Access is denied" when reading assets straight from a mapped folder,
+       and copies any demo.exe.crash.log back to the mapped folder (read-write)
+       so it appears on the host automatically. -->
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>D:\repos\doqin\dx9gf\dist\DX9GF-Demo</HostFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>D:\repos\doqin\dx9gf\scripts</HostFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <VGpu>Enable</VGpu>
+  <AudioOutput>Enable</AudioOutput>
+  <LogonCommand>
+    <Command>C:\Users\WDAGUtilityAccount\Desktop\scripts\run-sandbox-test.cmd</Command>
+  </LogonCommand>
+</Configuration>
