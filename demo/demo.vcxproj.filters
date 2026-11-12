@@ -477,6 +477,11 @@
     <Image Include="assets\qem-sheet.png" />
     <Image Include="assets\tutorial-dodge.png" />
     <Image Include="assets\tutorial-notext.png" />
+    <Image Include="assets\NotReponding_outside.png" />
+    <Image Include="assets\tuition.png" />
+    <Image Include="assets\Deadline.png" />
+    <Image Include="assets\Homework.png" />
+    <Image Include="assets\Crawler_inside.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\arcade-among-2-r46pv.ttf" />

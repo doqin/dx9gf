@@ -10,7 +10,7 @@ void Demo::TuitionFeeEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::C
 {
 	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/tuition.png"); //TODO: change to the real asset path
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 83, 64, 12), 12);
+	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 83, 64, 14), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 

@@ -33,7 +33,8 @@ namespace Demo {
 		this->texture = enemyTextureCache[encounterData.mapTexturePath];
 
 		sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(),
-			DX9GF::Utils::CreateRectsHorizontal(0, 0, encounterData.spriteWidth, encounterData.spriteHeight, encounterData.frameCount), encounterData.frameCount);
+          DX9GF::Utils::CreateRectsHorizontal(0, 0, encounterData.spriteWidth, encounterData.spriteHeight, encounterData.frameCount),
+			encounterData.animationFrameRate > 0 ? encounterData.animationFrameRate : encounterData.frameCount);
 
 		sprite->SetOrigin(encounterData.spriteWidth / 2.f, encounterData.spriteHeight / 2.f);
 

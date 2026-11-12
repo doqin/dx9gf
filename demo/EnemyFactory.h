@@ -15,6 +15,7 @@ namespace Demo {
 		int frameCount;
 		float hitBoxWidth;
 		float hitBoxHeight;
+      int animationFrameRate = 0;
 	};
 
 	class EnemyFactory {
