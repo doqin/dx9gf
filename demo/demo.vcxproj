@@ -614,7 +614,16 @@
     <Image Include="assets\buytab.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="assets\Crawler_inside.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\Deadline.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="assets\hkhang-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\Homework.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\lab.png">
@@ -624,6 +633,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\flame-slot-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\NotReponding_outside.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\qem-sheet.png">
@@ -798,6 +810,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\Trojan_outside.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\tuition.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\tutorial-dodge.png">
