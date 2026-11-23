@@ -9,14 +9,14 @@
 void Demo::TuitionFeeEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
 {
 	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/tuition.png"); //TODO: change to the real asset path
+	texture->LoadTexture(L"assets/tuition.png"); 
 	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 83, 64, 14), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
 	bulletTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
-	bulletTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); //TODO: change to the real asset path
-	bulletFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
+	bulletTexture->LoadTexture(L"assets/coin.png");
+	bulletFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 19, 19, 4);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
