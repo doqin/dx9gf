@@ -25,6 +25,7 @@ namespace Demo {
 		int spriteHeight;
 
 		int frameCount = 12;
+	int animationFrameRate = 0;
 
 		float hitBoxWidth;
 		float hitBoxHeight;

@@ -31,15 +31,15 @@ namespace Demo {
 	OverworldSpriteData EnemyFactory::GetOverworldSprite(const std::string& enemyType) {
 		if (enemyType == "KeyeEnemy")       return { L"assets/minion-Sheet.png", 64.f, 64.f, 12, 38.f, 45.f };
 		if (enemyType == "DemonEyeEnemy")   return { L"assets/computerbug-Sheet.png", 64.f, 64.f, 12, 38.f, 45.f };
-		if (enemyType == "MimicEnemy")      return { L"assets/notresponding-Sheet.png", 64.f, 64.f, 12, 38.f, 45.f };
+		if (enemyType == "MimicEnemy")      return { L"assets/NotResponding_outside.png", 64.f, 64.f, 25, 38.f, 45.f, 10 };
 		if (enemyType == "CupidEnemy")      return { L"assets/bubble-Sheet.png", 64.f, 64.f, 12, 38.f, 45.f };
 		if (enemyType == "VampireBatEnemy") return { L"assets/shrimp-Sheet.png", 64.f, 64.f, 12, 38.f, 45.f };
-		if (enemyType == "WarlockEnemy")    return { L"assets/crawler-Sheet.png", 64.f, 64.f, 12, 38.f, 45.f };
+		if (enemyType == "WarlockEnemy")    return { L"assets/Crawler_outside.png", 64.f, 82.f, 28, 38.f, 45.f, 14};
 		if (enemyType == "KernelEnemy")      return { L"assets/kernel_2.png", 64.f, 64.f, 12, 38.f, 45.f };
 		if (enemyType == "TrojanEnemy")     return { L"assets/Trojan_outside.png", 64.f, 64.f, 12, 38.f, 45.f };
-		if (enemyType == "TuitionFeeEnemy") return { L"assets/placeholder.png", 64.f, 64.f, 8, 38.f, 45.f }; // TODO: change to the real asset path
-		if (enemyType == "DeadlineEnemy") return { L"assets/placeholder.png", 64.f, 64.f, 8, 38.f, 45.f }; // TODO: change to the real asset path
-		if (enemyType == "HomeworkEnemy") return { L"assets/placeholder.png", 64.f, 64.f, 8, 38.f, 45.f }; // TODO: change to the real asset path
+		if (enemyType == "TuitionFeeEnemy") return { L"assets/tuition.png", 83.f, 64.f, 14, 38.f, 45.f };
+		if (enemyType == "DeadlineEnemy") return { L"assets/Deadline.png", 82.f, 64.f, 12, 38.f, 45.f };
+		if (enemyType == "HomeworkEnemy") return { L"assets/Homework.png", 64.f, 64.f, 51, 38.f, 45.f, 10 };
 		return { L"assets/random-Sheet.png", 64.f, 64.f,8, 38.f, 45.f };
 	}
 
@@ -129,6 +129,7 @@ namespace Demo {
 		enc.spriteWidth = static_cast<int>(sprite.width);
 		enc.spriteHeight = static_cast<int>(sprite.height);
 		enc.frameCount = sprite.frameCount;
+       enc.animationFrameRate = sprite.animationFrameRate > 0 ? sprite.animationFrameRate : sprite.frameCount;
 		enc.hitBoxWidth = sprite.hitBoxWidth;
 		enc.hitBoxHeight = sprite.hitBoxHeight;
 
