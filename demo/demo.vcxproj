@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿: <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -516,6 +516,9 @@
     <None Include="assets\bossmatrix.tsx">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="assets\Crawler_outside.aseprite">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="assets\First Asset pack.tsx">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -614,7 +617,22 @@
     <Image Include="assets\buytab.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="assets\coin.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\Crawler_inside.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\Crawler_outside.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\Deadline.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="assets\hkhang-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\Homework.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\lab.png">
@@ -624,6 +642,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\flame-slot-Sheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\NotResponding_outside.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\qem-sheet.png">
@@ -798,6 +819,9 @@
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\Trojan_outside.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="assets\tuition.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="assets\tutorial-dodge.png">
